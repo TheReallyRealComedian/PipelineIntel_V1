@@ -21,6 +21,8 @@ import backend.routes.indication_routes as indication_routes_mod
 import backend.routes.challenge_routes as challenge_routes_mod
 import backend.routes.technology_routes as technology_routes_mod
 import backend.routes.partner_routes as partner_routes_mod
+import backend.routes.data_management_routes as data_management_routes_mod
+
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
@@ -86,6 +88,8 @@ def create_app(init_session=True):
     app.register_blueprint(challenge_routes_mod.challenge_routes)
     app.register_blueprint(technology_routes_mod.technology_routes)
     app.register_blueprint(partner_routes_mod.partner_routes)
+    app.register_blueprint(data_management_routes_mod.data_management_bp)
+
 
     @app.route('/')
     def index():

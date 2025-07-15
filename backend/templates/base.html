@@ -37,6 +37,10 @@
                     <li class="{% if request.blueprint == 'partners' %}active{% endif %}">
                         <a href="{{ url_for('partners.list_partners') }}"><i class="fas fa-handshake"></i> Partners</a>
                     </li>
+                    <li class="sidebar-menu-header">DATA</li>
+                    <li class="{% if request.blueprint == 'data_management' %}active{% endif %}">
+                        <a href="{{ url_for('data_management.data_management_page') }}"><i class="fas fa-database"></i> Data Management</a>
+                    </li>
                     <li class="sidebar-menu-header">SYSTEM</li>
                     <li class="{% if request.blueprint == 'settings' %}active{% endif %}">
                         <a href="{{ url_for('settings.manage_settings') }}"><i class="fas fa-sliders-h"></i> Settings</a>

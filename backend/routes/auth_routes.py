@@ -12,12 +12,12 @@ auth_routes = Blueprint('auth', __name__,
 @auth_routes.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        # Redirect to the new homepage if already logged in
+        return redirect(url_for('products.list_products'))
 
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        # Use g.db_session instead of creating a new session
         new_user, message = auth_service.create_user(g.db_session, username, password)
         if new_user:
             flash(message, 'success')
@@ -30,20 +30,22 @@ def register():
 @auth_routes.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        # Redirect to the new homepage if already logged in
+        return redirect(url_for('products.list_products'))
 
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         remember = request.form.get('remember_me') is not None
-        # Use g.db_session
         user = auth_service.authenticate_user(g.db_session, username, password)
         if user:
             login_user(user, remember=remember)
             flash('Login successful!', 'success')
             next_page = request.args.get('next')
+            # If there's no safe next page, redirect to the products list
             if not next_page or urlparse(next_page).netloc != '':
-                next_page = url_for('main.index')
+                # --- THIS IS THE FIX ---
+                next_page = url_for('products.list_products')
             return redirect(next_page)
         else:
             flash('Invalid username or password.', 'danger')

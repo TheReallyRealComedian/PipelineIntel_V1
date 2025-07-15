@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+<p class="text-color-light mb-4">
+    Use the form below to upload a JSON file for a specific data type. You will be able to preview all changes before they are saved to the database.
+</p>
+
+<div class="card">
+    <div class="card-header"><h2 class="card-title mb-0">Interactive JSON Import</h2></div>
+    <div class="card-body">
+        <form action="{{ url_for('data_management.analyze_json_upload') }}" method="post" enctype="multipart/form-data">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="entity_type" class="form-label">Select Data Type:</label>
+                    <select name="entity_type" id="entity_type" class="form-select" required>
+                        <option value="">-- Choose data type --</option>
+                        <option value="products">Products</option>
+                        <option value="indications">Indications</option>
+                        <option value="challenges">Manufacturing Challenges</option>
+                        <option value="technologies">Manufacturing Technologies</option>
+                        <option value="partners">Partners</option>
+                        <option value="supply_chain">Product Supply Chain</option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label for="json_file" class="form-label">Select JSON File:</label>
+                    <input type="file" id="json_file" name="json_file" accept=".json" required class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Analyze File</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
