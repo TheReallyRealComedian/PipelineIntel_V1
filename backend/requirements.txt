@@ -1,0 +1,24 @@
+# backend/requirements.txt
+
+# Web Framework & Extensions
+Flask==2.3.3
+Flask-Assets
+Flask-Login>=0.6.3
+Flask-Migrate
+Flask-SQLAlchemy==3.1.1
+Flask-Session==0.8.0
+gunicorn==21.2.0
+
+# Database & ORM
+SQLAlchemy==2.0.25
+psycopg2-binary
+
+# Utilities & Helpers
+Pillow
+cssmin
+httpx
+jsmin
+markdown
+passlib==1.7.4
+python-dotenv==1.0.0
+requests==2.31.0

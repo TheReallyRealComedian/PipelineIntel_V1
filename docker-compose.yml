@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-usecase_explorer_db}
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    volumes:
+      - db_data:/var/lib/postgresql/data/
+    healthcheck:
+      test: [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-usecase_explorer_db}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      DATABASE_URL: ${DATABASE_URL}
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      FLASK_ENV: development
+      FLASK_APP: backend:create_app
+      APOLLO_CLIENT_ID: ${APOLLO_CLIENT_ID}
+      APOLLO_CLIENT_SECRET: ${APOLLO_CLIENT_SECRET}
+      APOLLO_TOKEN_URL: ${APOLLO_TOKEN_URL}
+      APOLLO_LLM_API_BASE_URL: ${APOLLO_LLM_API_BASE_URL}
+    volumes:
+      - ./backend:/app/backend
+      - ./migrations:/app/migrations
+      - ./alembic.ini:/app/alembic.ini
+      - ./backend/entrypoint.sh:/app/entrypoint.sh
+    ports:
+      - "5001:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:

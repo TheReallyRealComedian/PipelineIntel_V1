@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Usecase Explorer{% endblock %}
+
+{% block content %}
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h2 class="card-title">LLM API Keys & Settings</h2>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">These settings are optional and provide a way for users to override system-wide API keys for LLM providers. This might be useful for future integrations.</p>
+        <form method="POST">
+            {# OpenAI API Key #}
+            <div class="mb-3">
+                <label for="openai_api_key" class="form-label">OpenAI API Key:</label>
+                <input type="password" class="form-control" id="openai_api_key" name="openai_api_key"
+                       value="{{ settings.openai_api_key if settings else '' }}"
+                       placeholder="sk-xxxxxxxxxx...">
+            </div>
+
+            {# Anthropic API Key #}
+            <div class="mb-3">
+                <label for="anthropic_api_key" class="form-label">Anthropic API Key:</label>
+                <input type="password" class="form-control" id="anthropic_api_key" name="anthropic_api_key"
+                       value="{{ settings.anthropic_api_key if settings else '' }}"
+                       placeholder="sk-ant-xxxxxxxxxx...">
+            </div>
+
+            {# Google API Key #}
+            <div class="mb-3">
+                <label for="google_api_key" class="form-label">Google API Key:</label>
+                <input type="password" class="form-control" id="google_api_key" name="google_api_key"
+                       value="{{ settings.google_api_key if settings else '' }}"
+                       placeholder="AIzaSyAxxxxxxxxxx...">
+            </div>
+
+            <hr class="my-4">
+            <h4>Local & Internal APIs</h4>
+
+            {# Ollama Base URL #}
+            <div class="mb-3">
+                <label for="ollama_base_url" class="form-label">Ollama Base URL:</label>
+                <input type="text" class="form-control" id="ollama_base_url" name="ollama_base_url"
+                       value="{{ settings.ollama_base_url if settings else 'http://localhost:11434' }}"
+                       placeholder="http://localhost:11434">
+            </div>
+
+            {# Apollo Client ID #}
+            <div class="mb-3">
+                <label for="apollo_client_id" class="form-label">Apollo Client ID:</label>
+                <input type="password" class="form-control" id="apollo_client_id" name="apollo_client_id"
+                       value="{{ settings.apollo_client_id if settings else '' }}"
+                       placeholder="Your Apollo Client ID">
+            </div>
+
+            {# Apollo Client Secret #}
+            <div class="mb-3">
+                <label for="apollo_client_secret" class="form-label">Apollo Client Secret:</label>
+                <input type="password" class="form-control" id="apollo_client_secret" name="apollo_client_secret"
+                       value="{{ settings.apollo_client_secret if settings else '' }}"
+                       placeholder="Your Apollo Client Secret">
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">Save Settings</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

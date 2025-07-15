@@ -1,0 +1,50 @@
+# Dependency directories
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment variables file (contains sensitive info)
+.env
+venv/
+.venv/
+
+# Docker artifacts
+*.dockerignore # Often similar to .gitignore, but sometimes distinct
+docker-compose.override.yml # Often used for local overrides, keep out of main repo
+# Docker build cache
+.dockerignore # (if you create one later)
+
+# Flask specific
+instance/
+
+# Frontend specific (if build step generates files, e.g. webpack, npm)
+dist/
+build/
+node_modules/
+
+
+backend/static/webassets-cache/
+backend/static/.webassets-cache/
+backend/static/gen/
+
+# Operating System files
+.DS_Store # macOS
+Thumbs.db # Windows
+
+# Editor/IDE specific files
+.vscode/ # Visual Studio Code
+.idea/ # IntelliJ IDEA
+
+# Logs
+*.log
+/logs/
+
+# Uploaded files (if users can upload)
+/uploads/
+
+
+# Node.js and Vite
+/node_modules
+.vite
