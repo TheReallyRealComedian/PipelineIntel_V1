@@ -4,6 +4,7 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+.DS_Store
 
 # Environment variables file (contains sensitive info)
 .env

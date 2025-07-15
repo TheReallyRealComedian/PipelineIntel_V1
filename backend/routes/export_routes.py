@@ -15,7 +15,7 @@ def export_db_json():
     json_string = export_service.export_database_to_json_string()
     if json_string:
         timestamp = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-        filename = f"usecase_explorer_db_export_{timestamp}.json"
+        filename = f"asset_tracker_db_export_{timestamp}.json"
         return Response(
             json_string,
             mimetype="application/json",
