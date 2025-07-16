@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="data-export-page">
+    <div class="page-header">
+        <h1>{{ title }}</h1>
+        <p class="text-secondary">Select entities and fields to generate a custom JSON dataset.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title mb-0">Selection Criteria</h2>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {# --- ENTITY SELECTION --- #}
+                <div class="row g-3">
+                    {% for entity_name, items in {'products': products, 'indications': indications, 'challenges': challenges, 'technologies': technologies, 'partners': partners}.items() %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="selection-item p-3 border rounded">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label">{{ entity_name | title }}</label>
+                                <span class="badge bg-secondary" id="{{ entity_name }}_ids_selected_count">0 selected</span>
+                            </div>
+                            <input type="search" id="{{ entity_name }}_search" class="form-control form-control-sm mb-2" placeholder="Search...">
+                            <div class="btn-group btn-group-sm w-100 mb-2">
+                                <button type="button" class="btn btn-outline-secondary select-all" data-type="{{ entity_name }}">All</button>
+                                <button type="button" class="btn btn-outline-secondary clear-all" data-type="{{ entity_name }}">None</button>
+                            </div>
+                            <div class="custom-select-list border rounded p-1" id="{{ entity_name }}-select-container" style="height: 150px; overflow-y: auto;">
+                                {% for item in items %}
+                                    {% set item_id = item[entity_name[:-1] ~ '_id'] %}
+                                    {% set item_name = item[entity_name[:-1] ~ '_name'] %}
+                                    {% set is_selected = (entity_name ~ '_ids') in form_data and item_id|string in form_data.getlist(entity_name ~ '_ids') %}
+                                    <div class="select-option p-1 {% if is_selected %}selected{% endif %}" data-value="{{ item_id }}" data-name="{{ entity_name }}_ids">
+                                        {{ item_name }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div id="{{ entity_name }}_hidden_inputs"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <hr class="my-4">
+
+                {# --- FIELD SELECTION --- #}
+                <h3 class="mb-3">Select Fields to Export</h3>
+                <div class="row g-3">
+                    {% for entity_name, fields in selectable_fields.items() %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="field-group border rounded p-3">
+                            <div class="field-group-header d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold">{{ entity_name | title }} Fields</span>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary select-all-fields" data-type="{{ entity_name }}">All</button>
+                                    <button type="button" class="btn btn-outline-secondary clear-all-fields" data-type="{{ entity_name }}">None</button>
+                                </div>
+                            </div>
+                            <div class="field-group-content" style="height: 200px; overflow-y: auto;">
+                                {% for field in fields %}
+                                {% set is_checked = (entity_name ~ '_fields') in form_data and field in form_data.getlist(entity_name ~ '_fields') %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="{{ entity_name }}_fields" value="{{ field }}" id="field_{{ entity_name }}_{{ field }}" {% if is_checked %}checked{% endif %}>
+                                    <label class="form-check-label small" for="field_{{ entity_name }}_{{ field }}">{{ field.replace('_', ' ') | title }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %} {# <-- This correctly closes the outer loop #}
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-cogs"></i> Generate Preview
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# --- PREVIEW SECTION --- #}
+    {% if total_tokens > 0 %}
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-title mb-0">Data Preview</h2>
+            <div>
+                <span id="tokenCountDisplay" class="text-muted me-3"><strong>Token Count: {{ total_tokens }}</strong></span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="copyJsonButton"><i class="fas fa-copy me-1"></i>Copy JSON</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <pre id="jsonDataPreview" class="bg-light p-3 rounded" style="max-height: 500px; overflow-y: auto;">{{ prepared_json }}</pre>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/data_export_ui.js') }}"></script>
+{% endblock %}

@@ -22,29 +22,32 @@
             <nav class="sidebar-menu">
                 <ul>
                     <li class="sidebar-menu-header">CORE ENTITIES</li>
-                    <li class="{% if request.blueprint == 'products' %}active{% endif %}">
-                        <a href="{{ url_for('products.list_products') }}"><i class="fas fa-pills"></i> Products</a>
-                    </li>
-                    <li class="{% if request.blueprint == 'indications' %}active{% endif %}">
-                        <a href="{{ url_for('indications.list_indications') }}"><i class="fas fa-stethoscope"></i> Indications</a>
-                    </li>
-                    <li class="{% if request.blueprint == 'challenges' %}active{% endif %}">
-                        <a href="{{ url_for('challenges.list_challenges') }}"><i class="fas fa-exclamation-triangle"></i> Challenges</a>
-                    </li>
-                    <li class="{% if request.blueprint == 'technologies' %}active{% endif %}">
-                        <a href="{{ url_for('technologies.list_technologies') }}"><i class="fas fa-microchip"></i> Technologies</a>
-                    </li>
-                    <li class="{% if request.blueprint == 'partners' %}active{% endif %}">
-                        <a href="{{ url_for('partners.list_partners') }}"><i class="fas fa-handshake"></i> Partners</a>
-                    </li>
+                        <li class="{% if request.blueprint == 'products' %}active{% endif %}">
+                            <a href="{{ url_for('products.list_products') }}"><i class="fas fa-pills"></i> Products</a>
+                        </li>
+                        <li class="{% if request.blueprint == 'indications' %}active{% endif %}">
+                            <a href="{{ url_for('indications.list_indications') }}"><i class="fas fa-stethoscope"></i> Indications</a>
+                        </li>
+                        <li class="{% if request.blueprint == 'challenges' %}active{% endif %}">
+                            <a href="{{ url_for('challenges.list_challenges') }}"><i class="fas fa-exclamation-triangle"></i> Challenges</a>
+                        </li>
+                        <li class="{% if request.blueprint == 'technologies' %}active{% endif %}">
+                            <a href="{{ url_for('technologies.list_technologies') }}"><i class="fas fa-microchip"></i> Technologies</a>
+                        </li>
+                        <li class="{% if request.blueprint == 'partners' %}active{% endif %}">
+                            <a href="{{ url_for('partners.list_partners') }}"><i class="fas fa-handshake"></i> Partners</a>
+                        </li>
                     <li class="sidebar-menu-header">DATA</li>
-                    <li class="{% if request.blueprint == 'data_management' %}active{% endif %}">
-                        <a href="{{ url_for('data_management.data_management_page') }}"><i class="fas fa-database"></i> Data Management</a>
-                    </li>
+                        <li class="{% if request.blueprint == 'data_management' %}active{% endif %}">
+                            <a href="{{ url_for('data_management.data_management_page') }}"><i class="fas fa-database"></i> Data Management</a>
+                        </li>
+                        <li class="{% if request.blueprint == 'export' %}active{% endif %}">
+                            <a href="{{ url_for('export.data_export_page') }}"><i class="fas fa-file-export"></i> Data Export</a>
+                        </li>
                     <li class="sidebar-menu-header">SYSTEM</li>
-                    <li class="{% if request.blueprint == 'settings' %}active{% endif %}">
-                        <a href="{{ url_for('settings.manage_settings') }}"><i class="fas fa-sliders-h"></i> Settings</a>
-                    </li>
+                        <li class="{% if request.blueprint == 'settings' %}active{% endif %}">
+                            <a href="{{ url_for('settings.manage_settings') }}"><i class="fas fa-sliders-h"></i> Settings</a>
+                        </li>
                     {% if current_user.is_authenticated %}
                         <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout ({{ current_user.username }})</a></li>
                     {% endif %}

@@ -12,6 +12,7 @@ gunicorn==21.2.0
 # Database & ORM
 SQLAlchemy==2.0.25
 psycopg2-binary
+tiktoken
 
 # Utilities & Helpers
 Pillow

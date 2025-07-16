@@ -21,6 +21,7 @@ import backend.routes.challenge_routes as challenge_routes_mod
 import backend.routes.technology_routes as technology_routes_mod
 import backend.routes.partner_routes as partner_routes_mod
 import backend.routes.data_management_routes as data_management_routes_mod
+import backend.routes.export_routes as export_routes_mod
 
 
 login_manager = LoginManager()
@@ -58,7 +59,6 @@ def create_app(init_session=True):
     app.jinja_env.filters['markdown'] = markdown_to_html_filter
     app.jinja_env.filters['truncate'] = truncate_filter
 
-    # Use the parameter to decide whether to initialize Flask-Session
     if init_session:
         app.config['SESSION_TYPE'] = 'sqlalchemy'
         app.config['SESSION_SQLALCHEMY_TABLE'] = 'flask_sessions'
@@ -87,6 +87,7 @@ def create_app(init_session=True):
     app.register_blueprint(technology_routes_mod.technology_routes)
     app.register_blueprint(partner_routes_mod.partner_routes)
     app.register_blueprint(data_management_routes_mod.data_management_bp)
+    app.register_blueprint(export_routes_mod.export_bp)
 
 
     @app.route('/')

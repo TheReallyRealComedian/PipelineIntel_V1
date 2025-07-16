@@ -2,8 +2,10 @@
 FROM python:3.11-alpine
 WORKDIR /app
 
-# Install postgresql-client for psql and netcat-openbsd for the old wait method
-RUN apk add --no-cache postgresql-client netcat-openbsd
+# --- START OF FIX ---
+# Install build dependencies, including the Rust compiler, and then postgresql-client
+RUN apk add --no-cache cargo rust postgresql-client netcat-openbsd
+# --- END OF FIX ---
 
 ENV PYTHONPATH /app
 

@@ -1,46 +1,45 @@
 # backend/routes/export_routes.py
-from flask import Blueprint, Response, flash, redirect, url_for, g
+from flask import Blueprint, render_template, request, g
 from flask_login import login_required
-# CORRECTED IMPORT PATH
-from ..services import export_service
-from ..models import Area
-import datetime
+from ..services import export_service, product_service, indication_service, challenge_service, technology_service, partner_service
 
-export_routes = Blueprint('export', __name__, url_prefix='/export')
+export_bp = Blueprint('export', __name__, url_prefix='/export')
 
-@export_routes.route('/database/json')
+# Define the fields that users can select for each entity
+SELECTABLE_FIELDS = {
+    'products': [f.key for f in product_service.Product.__mapper__.attrs if not f.key.startswith('_')],
+    'indications': [f.key for f in indication_service.Indication.__mapper__.attrs if not f.key.startswith('_')],
+    'challenges': [f.key for f in challenge_service.ManufacturingChallenge.__mapper__.attrs if not f.key.startswith('_')],
+    'technologies': [f.key for f in technology_service.ManufacturingTechnology.__mapper__.attrs if not f.key.startswith('_')],
+    'partners': [f.key for f in partner_service.Partner.__mapper__.attrs if not f.key.startswith('_')]
+}
+
+@export_bp.route('/data-export', methods=['GET', 'POST'])
 @login_required
-def export_db_json():
-    # This function call remains the same
-    json_string = export_service.export_database_to_json_string()
-    if json_string:
-        timestamp = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-        filename = f"asset_tracker_db_export_{timestamp}.json"
-        return Response(
-            json_string,
-            mimetype="application/json",
-            headers={"Content-Disposition": f"attachment;filename={filename}"}
-        )
-    else:
-        flash("Failed to export database.", "danger")
-        return redirect(url_for('main.index'))
+def data_export_page():
+    # Data to pass to the template
+    context = {
+        'title': "Custom Data Export",
+        'prepared_json': "{}",
+        'total_tokens': 0,
+        'form_data': request.form if request.method == 'POST' else {}
+    }
 
-@export_routes.route('/area/<int:area_id>/markdown')
-@login_required
-def export_area_md(area_id):
-    # This function call remains the same
-    md_string = export_service.export_area_to_markdown(area_id)
-    if md_string:
-        area_obj = g.db_session.query(Area.name).filter_by(id=area_id).first()
-        area_name_slug = "unknown_area"
-        if area_obj:
-            area_name_slug = area_obj.name.lower().replace(" ", "_").replace("/", "_")
-        filename = f"area_export_{area_name_slug}_{area_id}.md"
-        return Response(
-            md_string,
-            mimetype="text/markdown",
-            headers={"Content-Disposition": f"attachment;filename={filename}"}
-        )
-    else:
-        flash(f"Failed to export area {area_id} to Markdown. Area may not exist or an error occurred.", "danger")
-        return redirect(url_for('areas.view_area', area_id=area_id))
+    # Fetch all items for the selection boxes
+    all_items = {
+        'products': product_service.get_all_products(g.db_session),
+        'indications': indication_service.get_all_indications(g.db_session),
+        'challenges': challenge_service.get_all_challenges(g.db_session),
+        'technologies': technology_service.get_all_technologies(g.db_session),
+        'partners': partner_service.get_all_partners(g.db_session),
+    }
+    context.update(all_items)
+    context['selectable_fields'] = SELECTABLE_FIELDS
+
+    if request.method == 'POST':
+        # If form is submitted, process it and update the context
+        prepared_json, total_tokens = export_service.prepare_json_export(g.db_session, request.form)
+        context['prepared_json'] = prepared_json
+        context['total_tokens'] = total_tokens
+
+    return render_template('data_export.html', **context)
