@@ -1,4 +1,3 @@
-# backend/app.py
 import os
 from flask import Flask, g, redirect, url_for
 from flask_login import LoginManager
@@ -40,8 +39,7 @@ def load_user(user_id):
         if 'db_session' not in g:
             SessionLocal.remove()
 
-# --- THIS IS THE KEY CORRECTION ---
-# The function now accepts the 'init_session' argument
+
 def create_app(init_session=True):
     app = Flask(__name__, instance_relative_config=True, static_folder='static', template_folder='templates')
 

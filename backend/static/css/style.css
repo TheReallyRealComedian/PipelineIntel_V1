@@ -1,33 +1,22 @@
 /*
- * Usecase Explorer - Main Stylesheet (style.css)
- *
- * This file contains all global, layout, UI component, and page-specific styles
- * for the Usecase Explorer application. It aims for a modern, clean dashboard design,
- * strictly following the Boehringer Ingelheim brand style guide.
- *
+ * Pipeline Intelligence - Main Stylesheet (style.css)
+ * A clean, component-based stylesheet for the core application.
  */
 
 /* ========================================================================== */
 /* --- 0. CSS Variables (Design Tokens) --- */
 /* ========================================================================== */
 :root {
-    /* --- Boehringer Ingelheim Color Palette (per Brand Style Guide) --- */
-    /* Primary Brand Colors */
+    /* --- Boehringer Ingelheim Color Palette --- */
     --bi-dark-green-900: #051D19;
     --bi-dark-green-800: #08312A;
     --bi-dark-green-600: #6B8375;
     --bi-dark-green-200: #B6CDBF;
-
     --bi-accent-green-600: #00B663;
     --bi-accent-green-500: #00E47C;
-    --bi-accent-green-200: #66EFB0;
     --bi-accent-green-100: #CCFAE5;
-
-    /* Functional Colors */
     --bi-white: #FFFFFF;
-    --bi-black: #191919; /* Adjusted from #000000 per style guide */
-
-    /* Neutral Color Scale */
+    --bi-black: #191919;
     --bi-neutral-050: #FAF9F8;
     --bi-neutral-100: #F6F5F3;
     --bi-neutral-200: #EFEEEB;
@@ -36,167 +25,86 @@
     --bi-neutral-600: #898885;
     --bi-neutral-700: #5C5B59;
     --bi-neutral-800: #2E2D2C;
-
-    /* Secondary Colors - Violet Spectrum (closest to original light-purple) */
-    --bi-violet-100: #E0E1F6;
-    --bi-violet-400: #C5C3EE; /* Original light-purple mapped here */
-    --bi-violet-500: #928BDE;
-    --bi-violet-700: #5D4495;
-    /* Other Secondary Colors from Style Guide (can be added if used) */
-    --bi-blue-100: #D2F2F7;
-    --bi-blue-400: #A3E5EE;
-    --bi-blue-500: #6AD2E2;
-    --bi-blue-700: #076D7E;
-
-    --bi-red-100: #F5CDB9;
-    --bi-red-400: #F58A68;
-    --bi-red-500: #EE6541;
-    --bi-red-700: #86251B;
-
-    --bi-yellow-100: #FBF9AA;
-    --bi-yellow-200: #FFE667;
-    --bi-yellow-500: #FFD03D;
-    --bi-yellow-700: #E18600;
-
-
-    /* Semantic Color System */
-    /* Positive/Success States (Light Backgrounds) */
-    --bi-positive-100: #CDEDCC;
-    --bi-positive-500: #168215;
-    --bi-positive-800: #0C490C;
-    /* Positive/Success States (Dark Backgrounds - as per guide, though current app is light theme) */
-    /* --bi-positive-dark-bg-500: #1DAC1C; */
-
-    /* Warning States (Universal) */
-    --bi-warning-100: #FEEDD2;
-    --bi-warning-500: #FF8413;
-    --bi-warning-800: #994100;
-
-    /* Negative/Error States (Light Backgrounds) */
-    --bi-negative-100: #FDD3D3;
-    --bi-negative-500: #F62B2B;
-    --bi-negative-800: #6D1313;
-    /* Negative/Error States (Dark Backgrounds - as per guide) */
-    /* --bi-negative-dark-bg-500: #FF5C5C; */
-
-    /* Information States (Light Backgrounds) */
     --bi-info-100: #C6E0FF;
     --bi-info-500: #0069E5;
     --bi-info-800: #003471;
-    /* Information States (Dark Backgrounds - as per guide) */
-    /* --bi-info-dark-bg-500: #3D96FF; */
+    --bi-warning-100: #FEEDD2;
+    --bi-warning-500: #FF8413;
+    --bi-warning-800: #994100;
+    --bi-negative-100: #FDD3D3;
+    --bi-negative-500: #F62B2B;
+    --bi-negative-800: #6D1313;
+    --bi-positive-100: #CDEDCC;
+    --bi-positive-500: #168215;
+    --bi-positive-800: #0C490C;
 
-    /* --- Semantic Color Assignments (using BI palette, for general UI elements) --- */
+    /* --- Semantic Color Assignments --- */
     --body-bg-color: var(--bi-white);
     --main-content-bg: var(--bi-white);
     --card-bg: var(--bi-white);
     --header-bg: var(--bi-white);
-    --element-bg-light: var(--bi-neutral-100); /* Light Gray for subtle backgrounds */
-
-    /* Core UI Colors - Mapped from original usage to BI brand palette */
-    --color-primary: var(--bi-dark-green-800);       /* Main brand dark green */
-    --color-primary-light: var(--bi-dark-green-600); /* Lighter variant for hovers/interactive states */
-    --color-primary-dark: var(--bi-dark-green-900);  /* Darkest variant */
-    --color-accent: var(--bi-accent-green-500);      /* Main brand bright green for CTAs */
-    --color-secondary: var(--bi-violet-400);         /* Soft accent purple (example secondary) */
-
-    /* Text Colors - Mapped based on style guide recommendations for contrast */
-    --text-primary: var(--bi-black);                 /* High contrast for main text on light backgrounds */
-    --text-secondary: var(--bi-neutral-700);         /* For secondary information */
-    --text-muted: var(--bi-neutral-600);             /* For muted text */
-    --text-color-sidebar-active: var(--bi-dark-green-800); /* Dark Green text on Accent Green background */
-    --text-color-on-primary: var(--bi-white);        /* For text on primary (dark green) backgrounds */
-    --text-color-on-accent: var(--bi-dark-green-800); /* For text on accent green backgrounds */
-    --text-color-on-dark: var(--bi-white);           /* General text on dark backgrounds */
-
-    /* Panel Specific Colors (e.g., sidebar) */
-    --color-panel-bg: var(--bi-dark-green-900);     /* Darkest green for sidebar background */
+    --element-bg-light: var(--bi-neutral-100);
+    --color-primary: var(--bi-dark-green-800);
+    --color-primary-light: var(--bi-dark-green-600);
+    --color-primary-dark: var(--bi-dark-green-900);
+    --color-accent: var(--bi-accent-green-500);
+    --text-primary: var(--bi-black);
+    --text-secondary: var(--bi-neutral-700);
+    --text-muted: var(--bi-neutral-600);
+    --text-color-sidebar-active: var(--bi-dark-green-800);
+    --text-color-on-primary: var(--bi-white);
+    --text-color-on-accent: var(--bi-dark-green-800);
+    --color-panel-bg: var(--bi-dark-green-900);
     --color-panel-text: var(--bi-white);
-    --color-panel-border-subtle: rgba(255, 255, 255, 0.1); /* Subtle border for dark panel */
-
-    /* Borders */
-    --border-color: var(--bi-neutral-200); /* General light grey border on light backgrounds */
-    --border-color-input: var(--bi-neutral-300); /* Specific for input borders as per guide */
-
+    --color-panel-border-subtle: rgba(255, 255, 255, 0.1);
+    --border-color: var(--bi-neutral-200);
+    --border-color-input: var(--bi-neutral-300);
 
     /* --- General Styling Variables --- */
-    /* Shadows (aligned with style guide for subtle depth) */
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1); /* Per guide's card example */
-    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15); /* Per guide's button hover example */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
     --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.18);
-    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.2);
+    --border-radius-xs: 4px;
+    --border-radius-sm: 8px;
+    --border-radius: var(--border-radius-sm);
 
-    /* Radii (aligned with style guide examples: 4px buttons, 8px cards) */
-    --border-radius-xs: 4px;    /* For buttons, small elements */
-    --border-radius-sm: 8px;    /* For cards, inputs */
-    --border-radius: var(--border-radius-sm); /* Default general radius */
-    --border-radius-md: 12px;   /* For larger groups, if needed */
-    --border-radius-lg: 16px;   /* For very large containers */
-
-    /* Typography (from Brand Style Guide) */
+    /* --- Typography --- */
     --font-family-head: "BoehringerForwardHead", "Space Grotesk Frontify", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --font-family-text: "BoehringerForwardText", "Space Grotesk Frontify", Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
-
     --font-family-primary: var(--font-family-head);
     --font-family-secondary: var(--font-family-text);
-    --font-family: var(--font-family-text); /* Global font-family for body text */
+    --font-family: var(--font-family-text);
+    --font-size-h1: 60px;
+    --font-size-h2: 48px;
+    --font-size-h3: 24px;
+    --font-size-h4: 20px;
+    --font-size-h5: 18px;
+    --font-size-h6: 16px;
+    --font-size-body: 16px;
+    --line-height-body: 1.5;
 
-    /* Headline sizes (aligned with Typography Scale System in guide) */
-    --font-size-h1: 60px; /* text-headline-large */
-    --font-size-h2: 48px; /* text-headline-medium */
-    --font-size-h3: 24px; /* text-subheadline */
-    --font-size-h4: 20px; /* Custom, between subheadline and body-large */
-    --font-size-h5: 18px; /* text-body-large equivalent */
-    --font-size-h6: 16px; /* text-body equivalent */
-
-    --font-size-body: 16px; /* text-body */
-    /* Line Heights from Style Guide */
-    --line-height-headline: 1.1;        /* For large headlines (H1, H2) */
-    --line-height-subheadline: 1.2;     /* For H3 */
-    --line-height-text-emphasis: 1.3;   /* For H4 */
-    --line-height-body-large: 1.4;      /* For H5, text-body-large */
-    --line-height-body: 1.5;            /* For 16px body text (yields 24px) */
-
-
-    /* Solid Color Replacements for Gradients (Vibrant Accents) */
-    --solid-primary-bg: var(--bi-dark-green-800); /* For secondary action buttons */
-    --solid-accent-bg: var(--bi-accent-green-500); /* For primary action buttons */
-    --solid-sidebar-active-bg: var(--bi-accent-green-500); /* Accent Green on Dark Green is allowed */
-
-    /* Alert Colors (Accessible Design) - Mapped to BI semantic colors */
+    /* --- Alert Colors --- */
     --color-alert-success-text: var(--bi-positive-800);
     --color-alert-success-bg: var(--bi-positive-100);
     --color-alert-success-border: var(--bi-positive-500);
-
     --color-alert-danger-text: var(--bi-negative-800);
     --color-alert-danger-bg: var(--bi-negative-100);
     --color-alert-danger-border: var(--bi-negative-500);
-
     --color-alert-warning-text: var(--bi-warning-800);
     --color-alert-warning-bg: var(--bi-warning-100);
     --color-alert-warning-border: var(--bi-warning-500);
-
     --color-alert-info-text: var(--bi-info-800);
     --color-alert-info-bg: var(--bi-info-100);
     --color-alert-info-border: var(--bi-info-500);
 
-    /* Spacing variables (based on 8px grid for consistency, Modern & Clean) */
-    --spacing-0: 0;
-    --spacing-xs: 4px;   /* 0.25rem */
-    --spacing-sm: 8px;   /* 0.5rem */
-    --spacing-md: 16px;  /* 1rem */
-    --spacing-lg: 24px;  /* 1.5rem */
-    --spacing-xl: 32px;  /* 2rem */
-    --spacing-xxl: 48px; /* 3rem */
-
-    /* Specific padding for header/breadcrumbs */
-    --spacing-header-vertical: 10px;
-    --spacing-header-horizontal: 40px;
-
-    /* Breadcrumb variables (accessible design, professional warmth) */
-    /* --breadcrumb-text-color: var(--text-secondary); /* Replaced by direct usage */
-    /* --breadcrumb-disabled-text-color: var(--text-muted); /* Replaced by direct usage */
+    /* --- Spacing --- */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-xxl: 48px;
 }
 
 /* ========================================================================== */
@@ -211,7 +119,7 @@
 html,
 body {
     height: 100%;
-    font-family: var(--font-family); /* Default to BoehringerForwardText */
+    font-family: var(--font-family);
     background-color: var(--body-bg-color);
     color: var(--text-primary);
     font-size: var(--font-size-body);
@@ -221,103 +129,41 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Typography Hierarchy - Global Headings (BoehringerForwardHead & Text) */
-/* Style Guide: Headlines: Sentence case only (never uppercase) */
-h1 {
+h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-family-primary);
-    font-size: var(--font-size-h1); /* 60px */
-    line-height: var(--line-height-headline); /* 1.1 */
-    font-weight: 700; /* Bold, max impact for hero */
-    margin-top: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
-    color: var(--text-primary); /* Dark Green or Black on light bg */
-}
-
-h2 {
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-h2); /* 48px */
-    line-height: var(--line-height-headline); /* 1.1 or 1.15 */
-    font-weight: 700; /* Bold */
-    margin-top: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
     color: var(--text-primary);
 }
 
-h3 {
-    font-family: var(--font-family-primary);
-    font-size: var(--font-size-h3); /* 24px */
-    line-height: var(--line-height-subheadline); /* 1.2 */
-    font-weight: 500; /* Medium */
-    margin-top: var(--spacing-md);
-    margin-bottom: var(--spacing-sm);
-    color: var(--text-primary);
-}
-
-h4 {
-    font-family: var(--font-family-primary); /* Still a headline font */
-    font-size: var(--font-size-h4); /* 20px */
-    line-height: var(--line-height-text-emphasis); /* 1.3 */
-    font-weight: 500; /* Medium (was 600, guide suggests 400,500,700 for Head) */
-    margin-top: var(--spacing-md);
-    margin-bottom: var(--spacing-sm);
-    color: var(--text-primary);
-}
-
-h5 {
-    font-family: var(--font-family-secondary); /* Switch to Text font */
-    font-size: var(--font-size-h5); /* 18px */
-    line-height: var(--line-height-body-large); /* 1.4 */
-    font-weight: 500; /* Medium for emphasis */
-    margin-top: var(--spacing-sm);
-    margin-bottom: var(--spacing-xs);
-    color: var(--text-primary);
-}
-
-h6 {
-    font-family: var(--font-family-secondary);
-    font-size: var(--font-size-h6); /* 16px */
-    line-height: var(--line-height-body-large); /* 1.4 */
-    font-weight: 500; /* Medium for emphasis */
-    margin-top: var(--spacing-sm);
-    margin-bottom: var(--spacing-xs);
-    color: var(--text-primary);
-}
+h1 { font-size: var(--font-size-h1); margin-bottom: var(--spacing-md); }
+h2 { font-size: var(--font-size-h2); margin-bottom: var(--spacing-md); }
+h3 { font-size: var(--font-size-h3); margin-bottom: var(--spacing-sm); }
+h4 { font-size: var(--font-size-h4); margin-bottom: var(--spacing-sm); }
+h5 { font-size: var(--font-size-h5); margin-bottom: var(--spacing-xs); }
+h6 { font-size: var(--font-size-h6); margin-bottom: var(--spacing-xs); }
 
 a {
+    color: var(--color-primary);
     text-decoration: none;
-    color: var(--color-primary); /* Dark Green */
     transition: all 0.2s ease;
 }
-
-a:hover {
-    color: var(--color-primary-dark); /* Darker Green */
-}
-
-ul {
-    list-style: none;
-}
-
-p {
-    margin-bottom: var(--spacing-md);
-}
-p:last-child {
-    margin-bottom: 0;
-}
+a:hover { color: var(--color-primary-dark); }
+ul { list-style: none; }
+p { margin-bottom: var(--spacing-md); }
+p:last-child { margin-bottom: 0; }
 
 /* ========================================================================== */
 /* --- 2. Layout Components --- */
 /* ========================================================================== */
-
 .app-container {
     display: flex;
     min-height: 100vh;
 }
 
-/* 2.1 Sidebar */
+/* Sidebar */
 .sidebar {
     width: 280px;
-    background-color: var(--color-panel-bg); /* Darkest Green */
-    color: var(--color-panel-text); /* White */
+    background-color: var(--color-panel-bg);
+    color: var(--color-panel-text);
     display: flex;
     flex-direction: column;
     padding: var(--spacing-xxl) 0;
@@ -325,22 +171,21 @@ p:last-child {
     height: 100vh;
     position: sticky;
     top: 0;
-    /* backdrop-filter: blur(10px); Removed as not in style guide for this element */
     border-right: 1px solid var(--color-panel-border-subtle);
     box-shadow: var(--shadow-md);
 }
 
 .sidebar-header {
-    padding: 0 var(--spacing-xl) var(--spacing-xl) var(--spacing-xl);
+    padding: 0 var(--spacing-xl) var(--spacing-xl);
     margin-bottom: var(--spacing-xl);
     border-bottom: 1px solid var(--color-panel-border-subtle);
 }
 
 .sidebar-header .logo {
-    font-family: var(--font-family-primary); /* Use headline font for logo */
-    font-size: 1.5rem; /* Keep a reasonable size */
-    font-weight: 700; /* Bold for impact */
-    color: var(--bi-accent-green-500); /* Accent Green on Dark Green background is allowed and recommended for highlights */
+    font-family: var(--font-family-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-accent);
 }
 
 .sidebar-menu {
@@ -348,241 +193,76 @@ p:last-child {
     padding: 0 var(--spacing-md);
 }
 
-.sidebar-menu li a,
-.sidebar-footer-menu li a {
+.sidebar-menu li a {
     display: flex;
     align-items: center;
     padding: var(--spacing-md) var(--spacing-xl);
-    color: var(--color-panel-text); /* White text */
+    color: var(--color-panel-text);
     transition: all 0.3s ease;
-    font-family: var(--font-family-secondary); /* Body text font for nav items */
+    font-family: var(--font-family-secondary);
     font-size: 0.95rem;
-    font-weight: 500; /* Medium weight */
-    border-radius: var(--border-radius-xs); /* 4px, subtle rounding */
+    font-weight: 500;
+    border-radius: var(--border-radius-xs);
     margin-bottom: var(--spacing-sm);
     position: relative;
-    overflow: hidden;
-    background-color: transparent;
-}
-
-.sidebar-menu li a::before { /* Interactive state background */
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background-color: var(--solid-sidebar-active-bg); /* Accent Green */
-    transition: width 0.3s ease;
-    z-index: -1;
-    width: 0;
-}
-
-.sidebar-menu li a > * {
-    position: relative;
-    z-index: 1;
-}
-.sidebar-menu li a:hover::before,
-.sidebar-menu li.active a::before {
-    width: 100%;
 }
 
 .sidebar-menu li a:hover,
 .sidebar-menu li.active a {
-    color: var(--text-color-sidebar-active); /* Dark Green text on Accent Green BG */
-    /* transform: translateX(4px); Kept for subtle interaction */
+    background-color: var(--color-accent);
+    color: var(--text-color-on-accent);
+    transform: translateX(4px);
 }
-
-.sidebar-menu li a:hover {
-     transform: translateX(4px);
-}
-
 
 .sidebar-menu li.active a {
-    font-weight: 700; /* Bold for active state, as per guide (medium or bold for emphasis) */
-    box-shadow: var(--shadow-sm); /* Subtle shadow for active item */
+    font-weight: 700;
+    box-shadow: var(--shadow-sm);
 }
 
-
-.sidebar-menu li a i,
-.sidebar-footer-menu li a i {
+.sidebar-menu li a i {
     margin-inline-end: var(--spacing-md);
     font-size: 1.2rem;
     width: 24px;
     text-align: center;
 }
 
-.sidebar-footer-menu {
-    margin-top: auto;
-    padding: var(--spacing-xl) var(--spacing-md);
-    border-top: 1px solid var(--color-panel-border-subtle);
-}
-
-/* 2.2 Main Content Area */
+/* Main Content */
 .main-content {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
     overflow-y: auto;
-    background-color: var(--main-content-bg); /* White */
+    background-color: var(--main-content-bg);
 }
 
-/* 2.3 Header */
 .main-header {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: var(--spacing-header-vertical) var(--spacing-header-horizontal);
-    background-color: var(--header-bg); /* Solid White */
-    /* backdrop-filter: blur(10px); Removed for alignment with style guide (no mention of glassmorphism for header) */
+    background-color: var(--header-bg);
     border-bottom: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
     position: sticky;
     width: 100%;
     top: 0;
     z-index: 1000;
-    gap: var(--spacing-xl);
-    min-height: 70px;
+    min-height: 60px;
 }
 
-/* 2.4 Page Content Wrapper */
 .page-content {
     padding: var(--spacing-xxl) 50px;
     flex-grow: 1;
 }
 
 /* ========================================================================== */
-/* --- 3. UI Components (General) --- */
+/* --- 3. UI Components --- */
 /* ========================================================================== */
 
-/* 3.1 Breadcrumbs */
-.breadcrumbs-fixed {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    padding: var(--spacing-header-vertical) var(--spacing-header-horizontal) var(--spacing-0);
-    font-family: var(--font-family-secondary);
-    font-size: 0.9rem;
-    color: var(--text-secondary); /* Neutral-700 */
-    flex-grow: 1;
-}
-
-.breadcrumbs-fixed .breadcrumb-item {
-    background: none;
-    color: var(--text-secondary);
-    padding: 5px 0;
-    text-decoration: none;
-    font-weight: 500; /* Medium weight */
-    transition: color 0.2s ease;
-    line-height: 1.4;
-    flex-shrink: 0;
-}
-
-.breadcrumbs-fixed .breadcrumb-item:hover {
-    color: var(--color-primary); /* Dark Green */
-    transform: none;
-    background: none;
-}
-
-.breadcrumbs-fixed .breadcrumb-item.active {
-    color: var(--color-primary); /* Dark Green */
-    font-weight: 700; /* Bold for active */
-    background: none;
-    box-shadow: none;
-}
-
-.breadcrumbs-fixed .breadcrumb-separator {
-    color: var(--text-muted); /* Neutral-600 */
-    margin: 0 var(--spacing-sm);
-    font-size: 0.8rem;
-}
-
-.breadcrumbs-fixed .breadcrumb-dropdown-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.breadcrumbs-fixed .breadcrumb-item.dropdown-toggle {
-    padding-inline-end: 1.5em;
-}
-.breadcrumbs-fixed .breadcrumb-item.dropdown-toggle::after {
-    vertical-align: 0.15em;
-}
-
-.breadcrumbs-fixed .dropdown-menu {
-    border-radius: var(--border-radius-sm); /* 8px */
-    box-shadow: var(--shadow-md);
-    padding: var(--spacing-sm) 0;
-    font-size: 0.85rem;
-    background-color: var(--card-bg); /* White */
-    border: 1px solid var(--border-color);
-    max-height: 300px;
-    overflow-y: auto;
-    z-index: 1050;
-}
-
-.breadcrumbs-fixed .dropdown-item {
-    padding: 0.75rem 1rem;
-    color: var(--text-primary); /* Black */
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.breadcrumbs-fixed .dropdown-item:hover,
-.breadcrumbs-fixed .dropdown-item:focus {
-    background-color: var(--element-bg-light); /* Neutral-100 */
-    color: var(--color-primary); /* Dark Green */
-}
-
-.breadcrumbs-fixed .dropdown-divider {
-    border-top: 1px solid var(--border-color); /* Use --border-color for consistency */
-    margin: var(--spacing-sm) 0;
-}
-
-
-/* 3.2 Header Action Buttons */
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xl);
-}
-
-.icon-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2rem;
-    color: var(--text-muted); /* Neutral-600 */
-    transition: all 0.3s ease;
-    padding: var(--spacing-sm);
-    border-radius: var(--border-radius-sm); /* 8px */
-    position: relative;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.icon-button:hover {
-    color: var(--color-primary); /* Dark Green */
-    background-color: var(--element-bg-light); /* Neutral-100 */
-    transform: translateY(-2px);
-}
-
-/* 3.3 Cards */
+/* Cards */
 .card {
-    background-color: var(--card-bg); /* White */
-    border: 1px solid var(--border-color); /* Neutral-200, as per guide example */
-    border-radius: var(--border-radius-sm); /* 8px, as per guide example */
-    box-shadow: var(--shadow-sm); /* 0 2px 4px rgba(0,0,0,0.1) */
-    transition: all 0.3s ease;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
-}
-
-.card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-4px);
 }
 
 .card-header {
@@ -590,124 +270,56 @@ p:last-child {
     justify-content: space-between;
     align-items: center;
     padding: var(--spacing-lg) var(--spacing-xl);
-    margin-bottom: 0;
     border-bottom: 1px solid var(--border-color);
-    background: var(--element-bg-light); /* Neutral-100 for slight differentiation */
-    position: relative;
+    background: var(--element-bg-light);
 }
 
 .card-title {
-    font-family: var(--font-family-primary); /* Headline font for card titles */
-    font-size: 1.4rem; /* Adjusted for card titles */
-    font-weight: 500; /* Medium, less than H3 */
-    color: var(--bi-dark-green-800); /* Dark Green on light backgrounds (Guide rule) */
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--bi-dark-green-800);
     margin-bottom: 0;
 }
 
 .card-body {
     padding: var(--spacing-xl);
-    color: var(--text-primary); /* Default text color for card content (Black) */
 }
 
-.card-link {
-    font-family: var(--font-family-secondary);
-    font-size: 0.9rem;
-    color: var(--color-primary); /* Dark Green, as per guide example "Action Link: Dark Green" */
-    font-weight: 600; /* Bold for links */
-    transition: all 0.3s ease;
-}
-
-.card-link:hover {
-    color: var(--color-primary-dark); /* Darker Green */
-    transform: translateX(4px);
-}
-
-/* 3.4 Forms */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-}
-
+/* Forms */
 .form-group {
-    display: flex;
-    flex-direction: column;
     margin-bottom: var(--spacing-md);
-}
-
-.form-row,
-.form-check,
-.checkbox-group {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--spacing-sm);
 }
 
 form label {
     margin-bottom: var(--spacing-xs);
     font-family: var(--font-family-secondary);
-    font-weight: 500; /* Medium weight for labels */
-    color: var(--color-primary); /* Dark Green, as per guide form example */
+    font-weight: 500;
+    color: var(--color-primary);
     font-size: 0.95rem;
 }
 
-.form-control,
-input[type="text"],
-input[type="password"],
-input[type="email"],
-input[type="number"],
-input[type="file"],
-select,
-textarea {
-    padding: var(--spacing-md) var(--spacing-lg);
-    border: 1px solid var(--border-color-input); /* Neutral-300, as per guide form example */
-    border-radius: var(--border-radius-sm); /* 8px for inputs */
+.form-control, input[type="text"], input[type="password"],
+input[type="email"], input[type="number"], input[type="file"],
+select, textarea {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-color-input);
+    border-radius: var(--border-radius);
     font-family: var(--font-family-secondary);
     font-size: 0.95rem;
     background-color: var(--bi-white);
-    color: var(--text-primary); /* Black */
+    color: var(--text-primary);
     transition: all 0.3s ease;
-    font-weight: 400; /* Normal weight for input text */
+    font-weight: 400;
 }
 
-.form-control:focus,
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="email"]:focus,
-input[type="number"]:focus,
-select:focus,
-textarea:focus {
-    /* Style guide: "Focus State: Accent Green border" & ".focusable:focus { outline: 2px solid var(--color-accent-green-500); outline-offset: 2px; }" */
-    outline: 2px solid var(--bi-accent-green-500);
+.form-control:focus, input[type="text"]:focus, input[type="password"]:focus,
+input[type="email"]:focus, input[type="number"]:focus,
+select:focus, textarea:focus {
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
-    border-color: var(--border-color-input); /* Keep original border or make it accent green */
-    /* border-color: var(--bi-accent-green-500); /* Option: change border color too */
-    box-shadow: none; /* Remove previous shadow focus */
+    border-color: var(--border-color-input);
+    box-shadow: none;
     background-color: var(--bi-neutral-050);
-}
-
-.form-control::placeholder,
-input[type="text"]::placeholder,
-input[type="password"]::placeholder,
-input[type="email"]::placeholder,
-input[type="number"]::placeholder,
-textarea::placeholder {
-    color: var(--text-muted); /* Neutral-600 */
-}
-
-form input[type="checkbox"] {
-    margin-inline-end: var(--spacing-sm);
-    align-self: flex-start;
-    vertical-align: middle;
-    width: 16px; /* Typical checkbox size */
-    height: 16px; /* Typical checkbox size */
-}
-
-.checkbox-group label {
-    margin-bottom: 0;
-    font-weight: 400; /* Normal weight for checkbox labels */
-    color: var(--text-primary); /* Match form label color for consistency if not overridden */
 }
 
 textarea.form-control {
@@ -715,2406 +327,270 @@ textarea.form-control {
     resize: vertical;
 }
 
-/* 3.5 Buttons */
-/* Base button style common to .btn and form button[type="submit"] */
-.btn-base, /* This can be a common class if needed for elements other than .btn */
-form button[type="submit"],
+/* Buttons */
 .btn {
-    border-radius: var(--border-radius-xs); /* 4px, as per guide example */
+    border-radius: var(--border-radius-xs);
     font-family: var(--font-family-secondary);
-    font-weight: 500; /* Medium weight (Guide: 500 for .btn-primary) */
-    transition: all 0.2s ease; /* Style guide: 0.2s */
+    font-weight: 500;
+    transition: all 0.2s ease;
     border: none;
-    padding: 12px 24px; /* Style guide: .btn-primary padding */
+    padding: 12px 24px;
     cursor: pointer;
     font-size: 0.95rem;
     text-align: center;
-    position: relative;
-    /* Default secondary action button style: Dark Green bg, White text */
-    background-color: var(--bi-dark-green-800);
-    color: var(--bi-white);
-    box-shadow: var(--shadow-xs); /* Subtle shadow */
-}
-
-form button[type="submit"]:hover,
-.btn:hover {
-    background-color: var(--bi-dark-green-600); /* Medium Dark Green for hover on secondary actions */
-    transform: translateY(-1px); /* Style guide .btn:hover example */
-    box-shadow: var(--shadow-md); /* Style guide .btn:hover example */
-}
-
-form button[type="submit"]:disabled,
-.btn:disabled {
-    background-color: var(--bi-dark-green-200);
-    color: var(--bi-neutral-600);
-    box-shadow: none;
-    transform: none;
-    cursor: not-allowed;
-}
-
-/* Primary Action Button: Accent Green bg, Dark Green text */
-form button[type="submit"].btn-primary, /* More specific for form primary buttons */
-.btn-primary {
-    background-color: var(--bi-accent-green-500);
-    color: var(--bi-dark-green-800); /* Dark Green text on Accent Green BG (Critical Rule) */
-    border: none; /* Guide example has no border */
-    /* font-weight: 500; Inherited or explicitly set */
-    /* padding: 12px 24px; Inherited or explicitly set */
-    /* border-radius: 4px; Inherited or explicitly set */
     box-shadow: var(--shadow-xs);
 }
-form button[type="submit"].btn-primary:hover,
-.btn-primary:hover {
-    background-color: var(--bi-accent-green-600); /* Darker Accent Green */
-    color: var(--bi-dark-green-800); /* Keep text color */
+
+.btn:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
 }
-form button[type="submit"].btn-primary:disabled,
-.btn-primary:disabled {
-    background-color: var(--bi-dark-green-200); /* Disabled state from guide */
-    color: var(--bi-neutral-600); /* Muted text color */
-    box-shadow: none;
-    transform: none;
+
+.btn-primary {
+    background-color: var(--color-accent);
+    color: var(--text-color-on-accent);
+}
+.btn-primary:hover {
+    background-color: var(--bi-accent-green-600);
+    color: var(--text-color-on-accent);
 }
 
-.actions-button-group {
-    display: flex;
-    flex-wrap: wrap; /* Allows buttons to wrap to the next line if needed */
-    gap: 6px;        /* Consistent spacing between all buttons */
-    align-items: center; /* Vertically align items */
-}
-
-
-.actions-button-group > form {
-    margin: 0;
-}
-
-
-.actions-button-group .btn {
-    min-width: 34px;  /* Set a minimum width */
-    min-height: 32px; /* Set a minimum height */
-    line-height: 1;   /* Helps center content vertically */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-
-/* .btn-secondary - For neutral/less prominent actions */
 .btn-secondary {
-    background: var(--bi-neutral-200); /* Light Neutral (e.g., for "Cancel") */
-    color: var(--bi-neutral-800); /* Dark Neutral text */
-    border: 1px solid var(--bi-neutral-300); /* Slightly darker border */
-    box-shadow: var(--shadow-xs);
+    background: var(--bi-neutral-200);
+    color: var(--bi-neutral-800);
+    border: 1px solid var(--bi-neutral-300);
 }
 .btn-secondary:hover {
-    background: var(--bi-neutral-300); /* Darker neutral on hover */
-    color: var(--bi-neutral-800);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
+    background: var(--bi-neutral-300);
 }
-
-/* .btn-info - For informational actions */
-.btn-info {
-    background: var(--bi-info-500); /* Info Blue */
-    color: var(--bi-white);
-    border: none;
-    box-shadow: var(--shadow-xs);
-}
-.btn-info:hover {
-    background: var(--bi-info-800); /* Darker Info Blue */
-    color: var(--bi-white);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
-/* .btn-success is often an alias for primary action button */
-.btn.btn-success { /* Ensure it uses primary action style */
-    background-color: var(--bi-accent-green-500);
-    color: var(--bi-dark-green-800);
-    border: none;
-    box-shadow: var(--shadow-xs);
-}
-.btn.btn-success:hover {
-    background-color: var(--bi-accent-green-600);
-    color: var(--bi-dark-green-800);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
-/* .btn-danger - For destructive actions */
-.btn.btn-danger {
-    background: var(--bi-negative-500); /* Error Red */
-    color: var(--bi-white);
-    border: none;
-    box-shadow: var(--shadow-xs);
-    /* padding, border-radius inherited from .btn */
-}
-.btn.btn-danger:hover {
-    background: var(--bi-negative-800); /* Darker Error Red */
-    color: var(--bi-white);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
 
 .btn-sm {
-    padding: var(--spacing-sm) var(--spacing-md); /* 8px 16px */
+    padding: var(--spacing-sm) var(--spacing-md);
     font-size: 0.8rem;
-    /* border-radius: var(--border-radius-xs); Inherited or ensure it's 4px */
     white-space: nowrap;
 }
 
-
-/* 3.6 Flash Messages (Alerts) */
-.flash-messages {
-    margin-bottom: var(--spacing-xl);
-}
-
-.alert { /* Base alert styling */
-    padding: var(--spacing-lg) var(--spacing-xl);
+/* Alerts (Flash Messages) */
+.alert {
+    padding: var(--spacing-lg);
     margin-bottom: var(--spacing-md);
-    border: none; /* Border is handled by border-left */
-    border-radius: var(--border-radius-sm); /* 8px, consistent with cards */
+    border-radius: var(--border-radius);
     font-family: var(--font-family-secondary);
     font-size: 0.95rem;
     box-shadow: var(--shadow-sm);
-    border-left-width: 4px; /* From style guide examples */
+    border-left-width: 4px;
     border-left-style: solid;
 }
-
 .alert-success {
     color: var(--color-alert-success-text);
     background: var(--color-alert-success-bg);
     border-left-color: var(--color-alert-success-border);
 }
-
 .alert-danger {
     color: var(--color-alert-danger-text);
     background: var(--color-alert-danger-bg);
     border-left-color: var(--color-alert-danger-border);
 }
-
 .alert-warning {
     color: var(--color-alert-warning-text);
     background: var(--color-alert-warning-bg);
     border-left-color: var(--color-alert-warning-border);
 }
-
 .alert-info {
     color: var(--color-alert-info-text);
     background: var(--color-alert-info-bg);
     border-left-color: var(--color-alert-info-border);
 }
 
-/* 3.7 Collapse Button Styling (e.g., for Card Headers) */
-.card-header button.btn-link {
-    padding: 0;
-    font-family: var(--font-family-secondary);
-    font-size: 1rem;
-    color: var(--text-secondary); /* Neutral-700 */
-    background: none;
-    border: none;
-    text-decoration: none;
-    position: relative;
-    z-index: 1;
-    font-weight: 500;
-}
-
-.card-header button.btn-link:hover {
-    color: var(--color-primary); /* Dark Green */
-    text-decoration: none;
-    background: none;
-}
-
-.card-header button.btn-link:focus {
-    box-shadow: none;
-    text-decoration: none;
-    background: none;
-    /* Style guide: .focusable:focus { outline: 2px solid var(--color-accent-green-500); outline-offset: 2px; } */
-    outline: 2px solid var(--bi-accent-green-500);
-    outline-offset: 2px;
-    border-radius: var(--border-radius-xs); /* Add a small radius for the outline to look better */
-}
-
-.card-header button.btn-link i {
-    transition: transform 0.3s ease;
-    display: inline-block;
-}
-
-/* 3.8 List Styles (e.g., info-list, item-list) */
-.card-body dl.info-list {
-    display: grid;
-    grid-template-columns: minmax(150px, max-content) auto; /* Adjusted minmax */
-    gap: var(--spacing-sm) var(--spacing-lg); /* Narrower row gap */
-    margin-bottom: 0;
-    font-family: var(--font-family-secondary);
-}
-
-.card-body dl.info-list dt {
-    font-weight: 500; /* Medium weight */
-    color: var(--text-secondary); /* Use secondary text for definition term */
-    font-size: 0.9rem; /* Slightly smaller */
-    padding-top: var(--spacing-xs);
-    text-align: right;
-    padding-inline-end: var(--spacing-lg); /* Reduced padding */
-}
-
-.card-body dl.info-list dd {
-    margin-inline-start: 0;
-    font-size: 0.95rem; /* Slightly smaller */
-    color: var(--text-primary); /* Black */
-    word-break: break-word;
-}
-
-.card-body dl.info-list dd a {
-    font-weight: 500; /* Medium weight */
-    color: var(--color-primary); /* Links in DD should be primary color */
-}
-.card-body dl.info-list dd a:hover {
-    color: var(--color-primary-dark);
-}
-
-
-.card-body dl.info-list dd pre,
-.relevance-section li.relevance-item pre {
-    background: var(--element-bg-light); /* Neutral-100 */
-    padding: var(--spacing-md); /* Uniform padding */
-    border: 1px solid var(--border-color); /* Neutral-200 */
-    border-radius: var(--border-radius-sm); /* 8px */
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace; /* Monospace for code */
-    font-size: 0.85rem; /* Smaller for code */
-    line-height: 1.5; /* Slightly tighter for code */
-    max-height: 300px;
-    overflow-y: auto;
-    color: var(--text-primary); /* Black */
-    margin-top: var(--spacing-sm);
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-/* Item Lists (ul.item-list) */
-.card-body ul.item-list {
-    list-style: none;
-    padding-inline-start: 0;
-    margin-bottom: 0;
-    font-family: var(--font-family-secondary);
-}
-.card-body ul.item-list > li {
-    padding: var(--spacing-md); /* Consistent padding */
-    border-bottom: 1px dashed var(--border-color); /* Neutral-200 */
-    transition: background-color 0.2s ease;
-    border-radius: var(--border-radius-sm); /* 8px */
-}
-.card-body ul.item-list > li:last-child {
-    border-bottom: none;
-}
-.card-body ul.item-list > li:hover {
-    background-color: var(--element-bg-light); /* Neutral-100 */
-}
-.card-body ul.item-list > li:hover a {
-    color: var(--color-primary-dark); /* Darker Green */
-}
-.card-body ul.item-list .item-title a,
-.card-body ul.item-list > li > a {
-    font-weight: 500; /* Medium weight */
-    color: var(--color-primary); /* Dark Green */
-    font-size: 1rem; /* Slightly adjusted */
-    display: block;
-    margin-bottom: var(--spacing-xs);
-}
-.card-body ul.item-list .item-title a:hover,
-.card-body ul.item-list > li > a:hover {
-    color: var(--color-primary-dark);
-    text-decoration: none;
-}
-.card-body ul.item-list .item-meta,
-.card-body ul.item-list small.text-muted {
-    font-size: 0.8rem;
-    color: var(--text-muted); /* Neutral-600 */
-    display: block;
-}
-
-/* Nested Use Case Lists */
-.card-body ul.item-list ul.usecase-list {
-    padding-inline-start: var(--spacing-lg);
-    margin-top: var(--spacing-sm);
-    list-style: disc; /* Use disc for visual hierarchy */
-    color: var(--text-secondary); /* Color for the disc */
-}
-.card-body ul.item-list ul.usecase-list li {
-    padding: var(--spacing-xs) 0; /* Tighter padding */
-    border: none;
-    font-size: 0.9rem;
-}
-.card-body ul.item-list ul.usecase-list li:hover {
-    background-color: transparent;
-}
-.card-body ul.item-list ul.usecase-list li a {
-    font-weight: 400; /* Normal weight for nested items */
-    font-size: 0.9rem; /* Consistent with li */
-    color: var(--color-primary);
-}
-.card-body ul.item-list ul.usecase-list li a:hover {
-    color: var(--color-primary-dark);
-}
-
-
-/* "No items found" messages */
-.card-body p.no-items-message,
-.card-body p em {
-    color: var(--text-muted); /* Neutral-600 */
-    font-style: italic;
-    display: block;
-    padding: var(--spacing-md) 0; /* Consistent padding */
-    text-align: center;
-    font-size: 0.95rem;
-}
-
-/* 3.9 General Utilities */
-.text-center { text-align: center !important; }
-.text-secondary { color: var(--text-secondary) !important; } /* Add important if needed to override */
-.mb-1 { margin-bottom: var(--spacing-xs) !important; }
-.mb-2 { margin-bottom: var(--spacing-sm) !important; }
-.mb-3 { margin-bottom: var(--spacing-md) !important; }
-.mt-1 { margin-top: var(--spacing-xs) !important; }
-.mt-2 { margin-top: var(--spacing-sm) !important; }
-.mt-3 { margin-top: var(--spacing-md) !important; }
-.me-1 { margin-inline-end: var(--spacing-xs) !important; }
-.me-2 { margin-inline-end: var(--spacing-sm) !important; }
-
-.solid-bg-primary {
-    background-color: var(--solid-primary-bg); /* Dark Green 800 */
-}
-
-.solid-bg-accent {
-    background-color: var(--solid-accent-bg); /* Accent Green 500 */
-}
-
-/* This is handled contextually based on background. If on dark, can be accent. If on light, should be dark green. */
-.solid-text-accent {
-    /* This generic class's usage should be reviewed to ensure it's only on dark backgrounds,
-       or replaced with a context-specific class that adheres to color rules.
-       Defaulting to accent green as per its name, assuming dark background context.
-       Style Guide: Accent Green text ONLY on Dark Green backgrounds. */
-    color: var(--bi-accent-green-500);
-}
-
-.glass-effect { /* This effect is not standard in the BI guide, use with caution or replace */
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--border-radius); /* Default 8px */
-}
-
-.hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    will-change: transform;
-}
-
-.hover-lift:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-xl);
-}
-
-/* ========================================================================== */
-/* --- 4. Page-Specific Styles --- */
-/* ========================================================================== */
-
-/* 4.1 Index Page */
-.welcome-message {
-    margin-bottom: var(--spacing-xl);
-}
-
-.welcome-message h1 { /* This is a main page title, uses global h1 style */
-    /* font-size: var(--font-size-h1); Already set globally */
-    /* font-weight: 700; Already set globally */
-    margin-bottom: var(--spacing-sm);
-    color: var(--bi-dark-green-800); /* Explicitly Dark Green for welcome title (Guide: DG or Black on light) */
-    /* line-height: 1.1; Already set globally */
-}
-
-.welcome-message p {
-    color: var(--text-muted); /* Neutral-600 */
-    font-size: 1.1rem;
-    font-family: var(--font-family-secondary);
-}
-
-.data-section {
-    margin-bottom: var(--spacing-xxl);
-}
-
-.data-section h2 { /* This is a section title, uses global h2 style */
-    /* font-size: var(--font-size-h2); Consider if it should be smaller than global H2 */
-    font-size: 1.8rem; /* Scaled down for section titles, but still prominent */
-    font-weight: 700;
-    margin-bottom: var(--spacing-lg);
-    color: var(--color-primary); /* Dark Green */
-}
-
-.area-card {
-    background-color: var(--card-bg); /* White */
-    border: 1px solid var(--border-color); /* Added base card border */
-    border-left: 5px solid var(--bi-dark-green-800); /* Maintained accent border with allowed color */
-    padding: var(--spacing-lg);
-    border-radius: var(--border-radius-sm); /* 8px */
-    box-shadow: var(--shadow-sm); /* Add base card shadow */
-    transition: all 0.3s ease; /* Add transition from base card */
-}
-
-.area-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-}
-
-.area-card h3 { /* Uses global H3 style, but contextually smaller */
-    font-family: var(--font-family-primary);
-    font-size: 1.2rem; /* Adjusted for area card titles */
-    line-height: 1.3;
-    font-weight: 500; /* Medium */
-    margin-top: 0; /* Reset margin for card context */
-    margin-bottom: var(--spacing-md);
-    color: var(--color-primary); /* Dark Green */
-}
-
-.area-card ul {
-    padding-inline-start: var(--spacing-lg);
-    list-style: disc;
-    color: var(--text-secondary); /* Color for discs */
-    font-family: var(--font-family-secondary);
-}
-
-.area-card li {
-    margin-bottom: var(--spacing-sm);
-    color: var(--text-primary); /* Text color for li content */
-}
-
-.area-card strong {
-    font-weight: 500; /* Medium weight */
-    color: var(--text-primary); /* Black or Dark Green */
-}
-
-.area-card .step-details {
-    font-size: 0.85rem;
-    color: var(--text-muted); /* Neutral-600 */
-    margin-inline-start: var(--spacing-sm);
-}
-
-.area-card .usecase-list {
-    padding-inline-start: var(--spacing-xl);
-    margin-top: var(--spacing-sm);
-    list-style: circle; /* Differentiated nested list */
-    color: var(--text-muted); /* Color for circles */
-}
-
-.area-card .usecase-list li a {
-    font-weight: 500; /* Medium weight for links */
-    color: var(--color-primary);
-}
-.area-card .usecase-list li a:hover {
-    color: var(--color-primary-dark);
-}
-
-
-.area-card .usecase-list .uc-details {
-    font-size: 0.8rem;
-    color: var(--text-muted); /* Neutral-600 */
-    margin-inline-start: var(--spacing-sm);
-}
-
-.area-card p em {
-    color: var(--text-muted); /* Neutral-600 */
-    font-style: italic;
-}
-
-/* 4.2 Detail Pages (Area, Step, Usecase) */
-.page-content > .d-flex > h1,
-.page-content > h1 { /* Main page title on detail pages, uses global H1 */
-    margin-bottom: var(--spacing-lg); /* Reduced margin from XL */
-    padding-bottom: var(--spacing-md); /* Reduced padding */
-    border-bottom: 2px solid var(--color-primary-light); /* DarkGreen-600 for a softer underline */
-    letter-spacing: -0.5px;
-}
-
-.page-content p.text-muted { /* Subtitle or descriptive text */
-    font-family: var(--font-family-secondary);
-    color: var(--text-secondary); /* Neutral-700 */
-    font-size: 1.05rem;
-    margin-top: calc(var(--spacing-xs) * -1); /* Pull up slightly if under H1 */
-    margin-bottom: var(--spacing-xl);
-}
-
-/* 4.3 Relevance Sections (on Detail Pages) */
-.relevance-section h2 { /* Section title within details, like a global H2 but might be smaller */
-    font-family: var(--font-family-primary);
-    font-size: 1.5rem; /* Smaller than global H2 */
-    line-height: 1.2;
-    font-weight: 500; /* Medium */
-    color: var(--color-primary); /* Dark Green */
-    margin-top: var(--spacing-xl); /* Add top margin */
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--border-color); /* Neutral-200 */
-}
-.relevance-section .card-title { /* Title within a relevance card */
-    font-family: var(--font-family-primary);
-    color: var(--text-primary); /* Black on light card bg */
-    font-size: 1.1rem;
-    font-weight: 500; /* Medium */
-    background: none;
-    -webkit-background-clip: unset; /* Remove gradient properties */
-    -webkit-text-fill-color: unset;
-    background-clip: unset;
-}
-.relevance-section ul {
-    list-style: none;
-    padding-inline-start: 0;
-}
-.relevance-section li.relevance-item { /* Styled like a small card */
-    background-color: var(--bi-white);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
-    border-radius: var(--border-radius-sm); /* 8px */
-    border: 1px solid var(--border-color); /* Neutral-200 */
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
-    font-family: var(--font-family-secondary);
-}
-.relevance-section li.relevance-item:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-.relevance-section li.relevance-item strong { /* Label for a data point */
-    min-width: 90px;
-    font-weight: 500; /* Medium weight */
-    color: var(--text-secondary); /* Neutral-700 */
-    display: inline-block;
-    margin-bottom: var(--spacing-xs);
-    font-size: 0.85rem;
-}
-.relevance-section li.relevance-item .badge {
-    font-family: var(--font-family-secondary);
-    font-size: 0.8rem; /* Slightly smaller */
-    padding: 4px 8px; /* Adjusted padding */
-    font-weight: 500; /* Medium */
-    border-radius: var(--border-radius-xs); /* 4px */
-}
-.relevance-section li.relevance-item > .mt-2, /* mt-2 is 8px, spacing-md is 16px. Using spacing-md. */
-.relevance-section li.relevance-item > div:last-child:not(:first-child) {
-    margin-top: var(--spacing-md);
-    padding-top: var(--spacing-md);
-    border-top: 1px dashed var(--border-color); /* Neutral-200 */
-}
-
-/* 4.4 Add Relevance Forms */
-.add-relevance-forms h3 { /* Section title for forms, like a global H3 but distinct */
-    font-family: var(--font-family-primary);
-    font-size: 1.5rem; /* Same as .relevance-section h2 */
-    line-height: 1.2;
-    font-weight: 500; /* Medium */
-    color: var(--color-primary); /* Dark Green */
-    margin-top: var(--spacing-xl);
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--border-color);
-}
-.add-relevance-form { /* Form container, styled like a card section */
-    background-color: var(--element-bg-light); /* Neutral-100 */
-    border: 1px solid var(--border-color); /* Neutral-200 */
-    border-radius: var(--border-radius-sm); /* 8px */
-    box-shadow: none; /* Flatter than a card */
-    padding: var(--spacing-lg);
-}
-.add-relevance-form h4 { /* Sub-title within the form section */
-    font-family: var(--font-family-primary);
-    color: var(--color-primary); /* Dark Green */
-    font-size: 1.1rem;
-    line-height: 1.3;
-    font-weight: 500; /* Medium */
-    margin-top: 0;
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--border-color); /* Neutral-200 */
-}
-
-/* 4.5 Login/Register Pages */
-.auth-card { /* Card styling for auth pages */
+/* Auth Pages */
+.auth-card {
     max-width: 400px;
     margin: var(--spacing-xxl) auto;
     padding: var(--spacing-xl);
-    /* Inherits .card styles: bg, border, radius, shadow */
 }
-.auth-card h1 { /* Title on auth card */
-    font-family: var(--font-family-primary);
+.auth-card h1 {
     text-align: center;
     margin-bottom: var(--spacing-lg);
-    font-size: 1.6rem; /* Custom size */
-    line-height: 1.2;
-    font-weight: 500; /* Medium */
-    color: var(--color-primary); /* Dark Green */
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--color-primary);
 }
-.auth-card form button[type="submit"] { /* Primary button full width */
+.auth-card form button[type="submit"] {
     width: 100%;
-    /* padding: 12px; Base button has 12px 24px, this can be adjusted if needed */
     margin-top: var(--spacing-sm);
-    /* Uses .btn-primary styles for Accent Green button */
 }
-.auth-card p { /* Helper text like "Don't have an account?" */
+.auth-card p {
     text-align: center;
     margin-top: var(--spacing-lg);
-    font-family: var(--font-family-secondary);
     font-size: 0.9rem;
-    color: var(--text-muted); /* Neutral-600 */
-}
-.auth-card p a {
-    color: var(--color-primary); /* Dark Green */
-    font-weight: 500; /* Medium */
-}
-.auth-card p a:hover {
-    color: var(--color-primary-dark);
+    color: var(--text-muted);
 }
 
+/* ========================================================================== */
+/* --- 4. Core Application Components --- */
+/* ========================================================================== */
 
-/* 4.6 Data Update (Injection) Page */
-.injection-form-section { /* A section, styled like a card */
-    background-color: var(--card-bg); /* White */
-    margin-bottom: var(--spacing-lg);
-    border-radius: var(--border-radius-sm); /* 8px */
-    border: 1px solid var(--border-color); /* Add border for consistency */
-    box-shadow: var(--shadow-sm);
-    padding: var(--spacing-lg); /* Increased padding from sm to lg */
-}
-.injection-form-section h2 {
-    font-family: var(--font-family-primary);
-    font-size: 1.3rem;
-    line-height: 1.3;
-    font-weight: 500; /* Medium */
-    margin-top: 0;
-    margin-bottom: var(--spacing-md); /* Increased from sm */
-    color: var(--color-primary); /* Dark Green */
-}
-.injection-form-section p {
-    font-family: var(--font-family-secondary);
-    font-size: 0.9rem;
-    color: var(--text-secondary); /* Neutral-700 */
-    margin-bottom: var(--spacing-md);
-    line-height: 1.6;
-}
-.injection-form-section code { /* Inline code snippets */
-    background-color: var(--element-bg-light); /* Neutral-100 */
-    padding: 3px 6px;
-    border-radius: var(--border-radius-xs); /* 4px */
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    font-size: 0.85rem;
-    color: var(--text-primary); /* Black */
-    border: 1px solid var(--border-color); /* Neutral-200 */
-}
-.export-section ul {
-    list-style: none;
-    padding-inline-start: 0;
-}
-.export-section li a {
-    font-family: var(--font-family-secondary);
-    display: inline-block;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background-color: var(--element-bg-light); /* Neutral-100 */
-    border-radius: var(--border-radius-xs); /* 4px */
-    color: var(--color-primary); /* Dark Green for links */
-    font-weight: 500; /* Medium */
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-.export-section li a:hover {
-    background-color: var(--bi-neutral-200); /* Darker Neutral */
-    color: var(--color-primary-dark);
-}
-.export-section li a i {
-    margin-inline-end: var(--spacing-sm);
-}
-
-/* 4.7 Markdown Content Rendering */
-.markdown-content {
-    font-family: var(--font-family-secondary);
-    line-height: var(--line-height-body); /* 1.5 */
-    color: var(--text-primary);
-}
-.markdown-content p:last-child {
-    margin-bottom: 0;
-}
-.markdown-content ul,
-.markdown-content ol {
-    margin-inline-start: var(--spacing-lg);
-    margin-bottom: 1em;
-    padding-inline-start: var(--spacing-md); /* Ensure padding for list markers */
-}
-.markdown-content ul { list-style: disc; }
-.markdown-content ol { list-style: decimal; }
-
-.markdown-content li {
-    margin-bottom: 0.5em;
-}
-.markdown-content table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1em;
-    margin-bottom: 1em;
-    font-size: 0.9rem; /* Slightly smaller for tables */
-}
-.markdown-content th,
-.markdown-content td {
-    border: 1px solid var(--border-color); /* Neutral-200 */
-    padding: var(--spacing-sm) var(--spacing-md); /* Adjusted padding */
-    text-align: left;
-    vertical-align: top;
-}
-.markdown-content th {
-    background-color: var(--element-bg-light); /* Neutral-100 */
-    font-weight: 500; /* Medium weight for table headers */
-    color: var(--text-primary);
-}
-
-/* Markdown headings should use specified fonts but be scaled down */
-.markdown-content h1 {
-    font-family: var(--font-family-primary);
-    font-size: 1.75rem; /* Smaller than global H1 */
-    line-height: 1.2;
-    font-weight: 500; /* Medium */
-    margin-top: var(--spacing-lg); /* Consistent margin */
-    margin-bottom: var(--spacing-sm);
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: var(--spacing-xs);
-}
-
-.markdown-content h2 {
-    font-family: var(--font-family-primary);
-    font-size: 1.5rem; /* Smaller than global H2 */
-    line-height: 1.2;
-    font-weight: 500; /* Medium */
-    margin-top: var(--spacing-md);
-    margin-bottom: var(--spacing-sm);
-    color: var(--text-primary);
-    border-bottom: none; /* No border for H2 in markdown */
-}
-
-.markdown-content h3 {
-    font-family: var(--font-family-primary);
-    font-size: 1.25rem; /* Smaller */
-    line-height: 1.3;
-    font-weight: 500; /* Medium */
-    margin-top: var(--spacing-md);
-    margin-bottom: var(--spacing-xs);
-    color: var(--text-primary);
-}
-/* Add for h4, h5, h6 if necessary, scaling down similarly */
-.markdown-content h4 {
-    font-family: var(--font-family-primary);
-    font-size: 1.1rem;
-    line-height: 1.3;
-    font-weight: 500; /* Medium */
-    margin-top: var(--spacing-md);
-    margin-bottom: var(--spacing-xs);
-    color: var(--text-primary);
-}
-.markdown-content code { /* Inline code in markdown */
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    background-color: var(--bi-neutral-100); /* Lighter than pre for inline */
-    color: var(--bi-neutral-800); /* Darker neutral text */
-    padding: 0.1em 0.3em;
-    border-radius: var(--border-radius-xs);
-    font-size: 0.85em; /* Slightly smaller */
-    border: 1px solid var(--bi-neutral-200);
-}
-.markdown-content pre { /* Code blocks in markdown */
-    background: var(--bi-neutral-050); /* Lightest Neutral */
-    border: 1px solid var(--bi-neutral-200);
-    border-radius: var(--border-radius-sm);
-    padding: var(--spacing-md);
-    overflow-x: auto;
-    margin-top: 1em;
-    margin-bottom: 1em;
-}
-.markdown-content pre code { /* Code inside pre */
-    background: none;
-    border: none;
-    padding: 0;
-    font-size: 1em; /* Reset to pre's font size */
-    color: var(--bi-neutral-800); /* Darker neutral text */
-}
-
-
-/* 4.8 LLM Data Preparation Page */
-.llm-data-prep-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    font-family: var(--font-family-secondary);
-}
-
-.llm-data-prep-page .page-header {
-    margin-bottom: var(--spacing-xl);
-}
-
-.llm-data-prep-page .page-title { /* Specific page title */
-    font-family: var(--font-family-primary);
-    font-size: 2rem;
-    line-height: 1.2;
-    font-weight: 500; /* Medium */
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
-}
-
-.llm-data-prep-page .page-subtitle {
-    color: var(--text-secondary); /* Neutral-700 */
-    font-size: 1.1rem;
-}
-
-.llm-data-prep-page .card { /* Uses global card styles */
-    margin-bottom: var(--spacing-xl);
-    /* transition, border, radius, shadow inherited */
-}
-
-.llm-data-prep-page .card-header { /* Uses global card-header styles */
-    padding: 1.5rem 2rem; /* Custom padding */
-}
-
-.llm-data-prep-page .card-title { /* Uses global card-title styles, ensure consistency */
-    font-size: 1.25rem;
-    font-weight: 500; /* Medium (global is 700, card-title is 500) */
-    color: var(--bi-dark-green-800); /* Dark Green on light BG */
-    margin: 0;
-}
-
-.llm-data-prep-page .selection-grid {
-    display: grid;
-    gap: 1.5rem;
-    margin-bottom: var(--spacing-xl);
-}
-
-@media (min-width: 768px) {
-    .llm-data-prep-page .selection-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-.llm-data-prep-page .selection-item { /* Small container for selection options */
-    background: var(--element-bg-light); /* Neutral-100 */
-    border: 1px solid var(--border-color); /* Neutral-200 */
-    border-radius: var(--border-radius-sm); /* 8px */
-    padding: 1.5rem;
-}
-
-.llm-data-prep-page .selection-label {
-    font-weight: 500; /* Medium */
-    color: var(--text-primary); /* Black */
-    margin-bottom: var(--spacing-md);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.95rem; /* Ensure font size for label */
-}
-
-.llm-data-prep-page .count-badge {
-    background: var(--color-primary); /* Dark Green */
-    color: var(--bi-white);
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 10px; /* Rounded badge */
-    font-weight: 400; /* Normal */
-}
-
-.llm-data-prep-page .search-button-row {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: var(--spacing-md);
-    align-items: center;
-}
-
-.llm-data-prep-page .search-input { /* Form control styling */
-    flex: 1;
-    padding: 0.5rem 0.75rem; /* Smaller padding for search */
-    border: 1px solid var(--border-color-input); /* Neutral-300 */
-    border-radius: var(--border-radius-sm); /* 8px */
-    font-size: 0.875rem;
-    font-family: var(--font-family-secondary);
-}
-.llm-data-prep-page .search-input:focus {
-    outline: 2px solid var(--bi-accent-green-500);
-    outline-offset: 2px;
-    border-color: var(--border-color-input);
-    box-shadow: none;
-}
-
-.llm-data-prep-page .button-group {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.llm-data-prep-page .button-group .btn { /* Uses global .btn styles */
-    padding: 0.5rem 1rem; /* Smaller button */
-    font-size: 0.875rem;
-    white-space: nowrap;
-}
-
-.llm-data-prep-page .custom-select { /* For multi-select list boxes */
-    border: 1px solid var(--border-color-input); /* Neutral-300 */
-    border-radius: var(--border-radius-sm); /* 8px */
-    min-height: 120px;
-    max-height: 200px;
-    overflow-y: auto;
-    background: var(--bi-white);
-    font-family: var(--font-family-secondary);
-}
-
-.llm-data-prep-page .select-option {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--border-color); /* Neutral-200 */
+/* Table Inline Editing */
+.editable-cell {
     cursor: pointer;
-    transition: background 0.2s;
-    font-size: 0.875rem;
-    color: var(--text-primary); /* Black */
+    position: relative;
+    min-height: 30px;
 }
-.llm-data-prep-page .select-option:hover {
-    background: var(--element-bg-light); /* Neutral-100 */
+.editable-cell:hover::after {
+    content: "✎";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9em;
+    color: var(--color-primary);
+    opacity: 0.7;
+    pointer-events: none;
 }
-.llm-data-prep-page .select-option:last-child {
-    border-bottom: none;
-}
-.llm-data-prep-page .select-option.selected {
-    background: var(--bi-info-100); /* Info Blue light */
-    /* border-left: 3px solid var(--color-primary); Dark Green indicator - or use info color */
-    border-left: 3px solid var(--bi-info-500); /* Info Blue darker indicator */
-    font-weight: 500; /* Medium */
-    color: var(--bi-info-800); /* Darker Info text for contrast */
-}
-
-.llm-data-prep-page .help-text {
-    font-size: 0.875rem;
-    color: var(--text-secondary); /* Neutral-700 */
-    margin-top: 0.5rem;
-    line-height: 1.4;
+.editable-cell.is-editing:hover::after {
+    content: "";
 }
 
-.llm-data-prep-page .field-groups {
-    display: grid;
-    gap: 1.5rem;
-}
-
-@media (min-width: 768px) {
-    .llm-data-prep-page .field-groups {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-.llm-data-prep-page .field-group { /* Container for a group of checkboxes */
-    background: var(--element-bg-light); /* Neutral-100 */
-    border: 1px solid var(--border-color); /* Neutral-200 */
-    border-radius: var(--border-radius); /* 8px */
-    overflow: hidden;
-}
-
-.llm-data-prep-page .field-group-header {
-    background: var(--bi-neutral-200); /* Slightly darker than field-group bg */
-    padding: 1rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    transition: background 0.2s;
-    border: none; /* No border for header itself */
-    border-bottom: 1px solid var(--border-color); /* Separator from content */
-}
-.llm-data-prep-page .field-group-header:hover {
-    background: var(--bi-neutral-300); /* Warm Gray on hover */
-}
-
-.llm-data-prep-page .field-group-title {
-    font-weight: 500; /* Medium */
-    color: var(--text-primary); /* Black */
-    margin: 0;
-    font-size: 1rem; /* Consistent size */
-}
-
-.llm-data-prep-page .field-group-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.llm-data-prep-page .field-group-content {
-    padding: 1.5rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adjusted minmax */
-    gap: 0.75rem;
-}
-
-.llm-data-prep-page .checkbox-item { /* Individual checkbox + label */
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem;
-    border-radius: var(--border-radius-xs); /* 4px */
-    transition: background 0.2s;
-}
-.llm-data-prep-page .checkbox-item:hover {
-    background: var(--bi-white);
-}
-.llm-data-prep-page .checkbox-item input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    margin: 0;
-    flex-shrink: 0; /* Prevent checkbox from shrinking */
-}
-.llm-data-prep-page .checkbox-item label {
-    flex: 1;
-    cursor: pointer;
-    font-size: 0.875rem;
-    margin: 0;
-    font-weight: 400; /* Normal */
-    color: var(--text-primary); /* Black */
-}
-
-.llm-data-prep-page .system-prompt textarea { /* Uses global textarea styles */
-    width: 100%;
-    min-height: 120px;
-    /* padding, border, radius inherited */
-    resize: vertical;
-    font-family: var(--font-family-secondary); /* Ensure consistent font */
-    line-height: 1.5;
-}
-.llm-data-prep-page .system-prompt textarea:focus { /* Uses global focus styles */
-    /* outline, border-color, box-shadow inherited */
-}
-
-.llm-data-prep-page .preview-empty {
-    text-align: center;
-    padding: 3rem 2rem;
-    color: var(--text-secondary); /* Neutral-700 */
-    font-family: var(--font-family-secondary);
-}
-.llm-data-prep-page .preview-empty i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: var(--bi-neutral-300); /* Lighter neutral for icon */
-}
-.llm-data-prep-page .preview-empty h3 {
-    font-family: var(--font-family-primary); /* Headline font */
-    font-size: 1.1rem; /* Custom size */
-    line-height: 1.3;
-    font-weight: 500; /* Medium */
-    margin-bottom: 0.5rem;
-    color: var(--text-primary); /* Black */
-}
-
-.llm-data-prep-page .chat-container { /* Uses global chat-container styles */
-    background: var(--element-bg-light); /* Neutral-100 */
-    border-radius: var(--border-radius); /* 8px */
-    min-height: 300px;
-    /* display, flex-direction inherited */
-    border: 1px solid var(--border-color); /* Neutral-200 */
-}
-
-.llm-data-prep-page .chat-display {
-    flex: 1;
-    padding: 1.5rem;
-    overflow-y: auto;
-    min-height: 200px;
-}
-
-.llm-data-prep-page .chat-placeholder {
-    text-align: center;
-    color: var(--text-secondary); /* Neutral-700 */
-    padding: 2rem;
-    font-family: var(--font-family-secondary);
-}
-.llm-data-prep-page .chat-placeholder i {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: var(--bi-neutral-300); /* Lighter neutral for icon */
-}
-
-.llm-data-prep-page .btn-primary { /* Uses global .btn-primary styles */
-    /* background, color, border, font-weight, padding, radius, transition, shadow inherited */
-}
-.llm-data-prep-page .btn-primary:hover {
-    /* background, transform, shadow inherited */
-}
-.llm-data-prep-page .btn-primary i {
-    margin-inline-end: 0.5rem;
-}
-
-.llm-data-prep-page .btn-link { /* Text button */
-    color: var(--text-secondary); /* Neutral-700 */
-    text-decoration: none;
-    background: none;
-    border: none;
-    padding: 0;
-    font-family: var(--font-family-secondary);
-    font-weight: 500; /* Medium */
-    cursor: pointer;
-}
-.llm-data-prep-page .btn-link:hover {
-    color: var(--color-primary); /* Dark Green */
-    text-decoration: underline; /* Add underline on hover for clarity */
-}
-
-.llm-data-prep-page .form-check { /* Uses global form-check styles */
-    /* display, align-items, margin inherited */
-    font-family: var(--font-family-secondary);
-}
-
-.llm-data-prep-page .fieldset-dashed-border .form-check {
-    padding: 0.25rem 0;
-}
-
-.llm-data-prep-page .form-select[multiple] { /* Multi-select list box */
-    min-height: 150px;
-    max-height: 250px;
-    /* Uses global select styles for border, radius, bg, color, font */
-    padding: var(--spacing-sm); /* Adjust padding for multi-select */
-}
-
-.llm-data-prep-page .form-control-sm { /* Small form control */
-    font-size: 0.875rem;
-    padding: .25rem .5rem;
-    /* Inherits other .form-control styles like border, radius */
-    font-family: var(--font-family-secondary);
-}
-
-.llm-data-prep-page .fieldset-dashed-border { /* Decorative fieldset */
-    border: 1px dashed var(--border-color); /* Neutral-200 */
-    padding: 1rem 1.5rem;
-    border-radius: var(--border-radius-sm); /* 8px */
-    margin-bottom: 1.5rem;
-}
-
-.llm-data-prep-page .fieldset-legend { /* Legend for fieldset */
-    font-size: 0.9rem;
-    font-weight: 500; /* Medium */
-    color: var(--text-secondary); /* Neutral-700 */
-    padding: 0 0.5rem;
-    width: auto;
-    margin-bottom: 0.75rem;
-    border-bottom: none;
-    font-family: var(--font-family-secondary);
-}
-
-.llm-data-prep-page .form-check-inline { /* Inline form check */
-    margin-inline-end: 0;
-    margin-bottom: 0;
-    padding: 0;
-    /* display, align-items inherited from .form-check if also applied */
-    font-family: var(--font-family-secondary);
-}
-
-.llm-data-prep-page label .selected-count-display { /* Count display in label */
-    font-weight: 400; /* Normal */
-    font-size: 0.8em;
-    color: var(--text-muted); /* Neutral-600 */
-    margin-inline-start: var(--spacing-sm);
-}
-
-.llm-data-prep-page .table-responsive {
-    overflow-x: auto;
-    margin-top: 1rem;
-    border: 1px solid var(--border-color); /* Add border around responsive table */
-    border-radius: var(--border-radius-sm); /* Match card radius */
-}
-
-.llm-data-prep-page .table {
-    width: 100%;
-    border-collapse: collapse; /* Standard table practice */
-    min-width: 900px; /* Ensure horizontal scroll on smaller viewports */
-    font-family: var(--font-family-secondary);
-    font-size: 0.875rem; /* Slightly smaller for table data */
-}
-
-.llm-data-prep-page .table th,
-.llm-data-prep-page .table td {
-    vertical-align: top;
-    padding: var(--spacing-sm) var(--spacing-md); /* Consistent padding */
-    white-space: normal; /* Allow wrapping */
-    word-wrap: break-word;
-    word-break: break-word;
-    text-align: left; /* Ensure left alignment */
-    border-bottom: 1px solid var(--border-color); /* Row separator */
-}
-.llm-data-prep-page .table th:first-child,
-.llm-data-prep-page .table td:first-child {
-    padding-left: var(--spacing-lg); /* More padding for first cell */
-}
-.llm-data-prep-page .table th:last-child,
-.llm-data-prep-page .table td:last-child {
-    padding-right: var(--spacing-lg); /* More padding for last cell */
-}
-
-
-.llm-data-prep-page .table thead.table-light th { /* Table header */
-    background-color: var(--element-bg-light); /* Neutral-100 */
-    border-bottom-width: 2px; /* Thicker border under header */
-    border-bottom-color: var(--bi-neutral-300); /* Darker neutral */
-    font-weight: 500; /* Medium */
-    color: var(--text-primary); /* Black */
-    font-size: 0.9rem; /* Slightly larger for header */
-}
-
-.llm-data-prep-page .table .col-fixed-short { width: 60px; min-width: 60px; }
-.llm-data-prep-page .table .col-name { min-width: 150px; }
-.llm-data-prep-page .table .col-bi-id { min-width: 120px; }
-.llm-data-prep-page .table .col-content { min-width: 200px; }
-
-.llm-data-prep-page .table .scrollable-cell-content,
-.llm-data-prep-page .table .cell-display-content {
-    display: block;
+.editable-cell input {
     width: 100%;
     box-sizing: border-box;
-    padding-inline-end: 5px; /* For scrollbar */
-}
-
-.llm-data-prep-page .table .scrollable-cell-content {
-    max-height: 100px;
-    overflow-y: auto;
-    background-color: var(--bi-neutral-050); /* Slight bg for scrollable area */
-    border: 1px solid var(--bi-neutral-200); /* Border for scrollable area */
-    padding: var(--spacing-xs); /* Padding inside scrollable area */
+    font-family: var(--font-family-secondary);
+    font-size: 0.875rem;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid var(--color-accent);
     border-radius: var(--border-radius-xs);
 }
-
-.llm-data-prep-page .table .cell-display-content {
-    max-height: 100px;
-    overflow-y: hidden; /* Clips content */
+.table td.is-editing {
+    padding: 2px !important;
+    vertical-align: middle;
 }
 
-.llm-data-prep-page .table td pre { /* Preformatted text in table */
-    font-size: 0.85rem;
-    margin: 0;
-    padding: 0;
-    background-color: transparent;
-    border: none;
-    color: var(--text-primary); /* Black */
-    line-height: 1.4;
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-}
-
-#jsonPreviewContainer { /* Container for JSON preview */
-    border: 1px solid var(--border-color); /* Neutral-200 */
-    border-radius: var(--border-radius-sm); /* 8px */
-    margin-top: 1rem;
-    background-color: var(--element-bg-light); /* Neutral-100 */
-    overflow: hidden; /* To contain the pre element's possible overflow */
-}
-
-#jsonDataPreview { /* The pre element for JSON data */
-    max-height: 400px;
-    overflow-y: auto;
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    font-size: 0.85rem;
-    line-height: 1.5;
-    color: var(--text-primary); /* Black */
-    background-color: transparent; /* Inherit from container or set explicitly */
-    padding: 1rem;
-    border-radius: 0; /* No radius for pre itself if container has it */
-    margin: 0; /* Reset margin */
-}
-
-#copyJsonButton, #toggleJsonPreview { /* Buttons related to JSON preview */
-    /* Use global .btn or .btn-secondary styles */
-    /* Example: apply .btn .btn-secondary class in HTML */
-    border: 1px solid var(--border-color); /* Neutral-200 */
-    background-color: var(--bi-white);
-    color: var(--text-primary); /* Black */
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-    /* Ensure they use button padding, radius from global styles */
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--border-radius-xs);
-    font-family: var(--font-family-secondary);
-    font-weight: 500;
-}
-#copyJsonButton:hover, #toggleJsonPreview:hover {
-    background-color: var(--element-bg-light); /* Neutral-100 */
-    color: var(--text-primary); /* Black */
-    border-color: var(--bi-neutral-300); /* Darker border on hover */
-}
-
-/* 4.9 LLM Chat Window (General) */
-.chat-container { /* General chat window structure */
+/* Table Header Actions (Sort & Filter) */
+.table thead th .header-content {
     display: flex;
-    flex-direction: column;
-    min-height: 400px;
-    font-family: var(--font-family-secondary);
-    background-color: var(--bi-white); /* Usually white or light neutral */
-    border-radius: var(--border-radius-sm); /* 8px */
-    /* border: 1px solid var(--border-color); Added in .llm-data-prep-page specific style */
-}
-
-.chat-bubble {
-    padding: var(--spacing-sm) var(--spacing-md); /* Adjusted padding */
-    border-radius: var(--border-radius); /* 8px, consistent large radius */
-    margin-bottom: var(--spacing-sm);
-    max-width: 85%;
-    line-height: 1.5; /* Adjusted from 1.6 */
-    word-wrap: break-word;
-    white-space: pre-wrap; /* Allow wrapping of long words/code */
-    box-shadow: var(--shadow-xs); /* Subtle shadow */
-    font-size: 0.95rem; /* Consistent text size */
-}
-
-.chat-bubble-user {
-    background-color: var(--solid-primary-bg); /* Dark Green 800 */
-    color: var(--text-color-on-primary); /* White */
-    margin-inline-start: auto;
-    border-bottom-right-radius: var(--border-radius-xs); /* 4px, "tail" effect */
-}
-
-.chat-bubble-assistant {
-    background-color: var(--element-bg-light); /* Neutral-100 */
-    color: var(--text-primary); /* Black */
-    margin-inline-end: auto;
-    border: 1px solid var(--border-color); /* Neutral-200 */
-    border-bottom-left-radius: var(--border-radius-xs); /* 4px, "tail" effect */
-}
-
-.chat-bubble-error {
-    background-color: var(--bi-negative-100); /* Light Error Red */
-    color: var(--bi-negative-800); /* Dark Error Red text */
-    border: 1px solid var(--bi-negative-500); /* Error Red border */
-    font-weight: 500; /* Medium weight for error messages */
-}
-
-.chat-bubble pre { /* Code blocks within chat bubbles */
-    background: var(--bi-neutral-050); /* Lightest neutral for contrast */
-    border: 1px solid var(--bi-neutral-200); /* Light border */
-    border-radius: var(--border-radius-sm); /* 8px */
-    padding: var(--spacing-sm);
-    margin-top: var(--spacing-sm);
-    white-space: pre-wrap;
-    word-break: break-all;
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    font-size: 0.85em; /* Smaller for code */
-    overflow-x: auto;
-    color: var(--bi-neutral-800); /* Dark neutral text for code */
-}
-.chat-bubble code { /* Inline code within chat bubbles */
-    background-color: var(--bi-neutral-100); /* Light Neutral */
-    border-radius: var(--border-radius-xs); /* 4px */
-    padding: 2px 5px;
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    font-size: 0.9em;
-    color: var(--bi-neutral-800); /* Dark neutral text */
-    border: 1px solid var(--bi-neutral-200); /* Subtle border */
-}
-.chat-bubble strong { font-weight: 700; /* Bold, as per guide */ }
-.chat-bubble em { font-style: italic; }
-.chat-bubble p:last-child { margin-bottom: 0; }
-
-.chat-input-area { /* Container for chat input elements */
-    border-top: 1px solid var(--border-color); /* Neutral-200 */
-    padding: 1rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    background: var(--bi-white);
-    border-bottom-left-radius: var(--border-radius-sm); /* Match chat container */
-    border-bottom-right-radius: var(--border-radius-sm); /* Match chat container */
-}
-
-.chat-input-area .image-preview-wrapper {
-    width: 100%;
-}
-.chat-input-area .image-preview-wrapper img {
-    max-width: 150px;
-    max-height: 100px;
-    height: auto;
-    display: block;
-    border-radius: var(--border-radius-sm);
-    border: 1px solid var(--border-color);
-    object-fit: contain;
-}
-
-.chat-input-area .main-input-row {
-    display: flex;
-    align-items: flex-end; /* Align items to bottom for varied heights */
-    gap: 1rem;
-    width: 100%;
-}
-
-.chat-input-area .main-input-row select { /* Select dropdown in chat input */
-    flex-shrink: 0;
-    width: auto;
-    min-width: 100px;
-    max-width: 180px;
-    padding: 0.5rem; /* Smaller padding */
-    /* Inherits global select styles for border, radius, font */
-    font-size: 0.9rem; /* Slightly smaller */
-    height: calc(0.5rem * 2 + 0.9rem * 1.5 + 2px); /* Match textarea approx height */
-}
-
-.chat-input-area .main-input-row textarea { /* Textarea for chat message */
-    flex-grow: 1;
-    resize: vertical;
-    min-height: calc(0.5rem * 2 + 0.95rem * 1.5 + 2px); /* Match button height (padding + line-height + border) */
-    max-height: 150px;
-    padding: 0.5rem 0.75rem; /* Smaller padding */
-    /* Inherits global textarea styles for border, radius, font */
-    font-size: 0.95rem;
-}
-
-.chat-input-area .main-input-row .btn { /* Send button */
-    flex-shrink: 0;
-    padding: 0.5rem 1rem; /* Smaller padding */
-    font-size: 0.9em;
-    /* Uses global button styles (e.g., .btn-primary for Accent Green) */
-    height: calc(0.5rem * 2 + 0.9em * 1.5 + 2px); /* Match textarea approx height */
-}
-
-.chat-input-area textarea.drag-over { /* Visual feedback for drag-over */
-    border-color: var(--bi-accent-green-500); /* Accent Green border */
-    box-shadow: 0 0 0 3px var(--bi-accent-green-100); /* Light Accent Green glow */
-}
-.chat-input-area textarea.has-image { /* Visual feedback if image is attached */
-    background-color: var(--bi-info-100); /* Light Info Blue */
-    border-color: var(--bi-info-500); /* Info Blue border */
-    font-weight: 500; /* Medium weight to indicate content */
-}
-.card-header-subtle { /* A less prominent card header style */
-    border-bottom: 1px solid var(--border-color); /* Neutral-200 */
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
-    /* Typically used with h4 or h5 for title */
-}
-
-/* 4.10 Relevance Map Page */
-.relevance-visualize-page .card-body {
-    display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    min-height: 600px;
-    overflow: hidden;
-    padding: var(--spacing-xl);
-}
-
-#relevanceChart {
-    min-width: 300px; /* Ensure chart has some base width */
-    width: 100%; /* Allow it to take full width of parent */
-    height: 100%; /* Allow it to take full height of parent */
-    margin: 0 auto;
-}
-
-/* 4.11 Data Alignment Page */
-.data-alignment-page .table td {
-    vertical-align: middle; /* Center content vertically in table cells */
-}
-
-.data-alignment-actions {
-    display: flex;
-    gap: var(--spacing-md);
-    align-items: center;
-    margin-bottom: var(--spacing-lg);
-}
-.data-alignment-actions .btn {
-    min-width: 120px;
-    /* Uses global button styles */
-}
-.pending-changes-info {
-    font-family: var(--font-family-secondary);
-    font-size: 0.95rem;
-    color: var(--text-secondary); /* Neutral-700 */
-    font-weight: 500; /* Medium */
-}
-
-/* 4.12 Settings Page */
-/* (Currently no specific styles beyond generic UI components) */
-
-/* 4.13 Step Injection Preview Page */
-.step-injection-preview-page .status-badge {
-    min-width: 70px;
-    display: inline-block;
-    text-align: center; /* Center text in badge */
-    /* Uses global .badge styles if defined, or custom badge styling here */
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--border-radius-xs);
-    font-size: 0.8rem;
-    font-weight: 500;
-    font-family: var(--font-family-secondary);
-    /* Example: .status-badge.success { background: var(--bi-positive-100); color: var(--bi-positive-800); } */
-}
-
-/* 4.14 Review Process Links Page */
-.review-process-links-page .table th.sortable:hover {
-    background-color: var(--element-bg-light); /* Light hover for sortable headers */
-}
-
-.review-process-links-page .table th.sorted-asc,
-.review-process-links-page .table th.sorted-desc {
-    background-color: var(--bi-neutral-200); /* Slightly darker for active sort */
-    color: var(--text-primary);
-}
-.review-process-links-page .table th.sorted-asc::after {
-    content: " ▲";
-    font-size: 0.8em;
-}
-.review-process-links-page .table th.sorted-desc::after {
-    content: " ▼";
-    font-size: 0.8em;
-}
-
-/* For Issue 3: Content Snippet styling */
-.review-process-links-page .table td .content-snippet {
-    white-space: pre-wrap;   /* Allow wrapping of text, preserving whitespace like in <pre> */
-    word-break: break-word;  /* Break long words to prevent overflow */
-    max-height: none;        /* Remove any fixed max-height to allow full content display */
-    overflow-y: visible;     /* If content overflows cell, it should expand cell or be visible */
-    /* Optional: If you want a scrollbar for very long content instead of cell expansion:
-    max-height: 200px;  /* Or a suitable value */
-    /* overflow-y: auto; */
-    font-size: 0.85rem;      /* Adjust font size if necessary */
-    line-height: 1.4;        /* Adjust line height for readability */
-}
-
-
-.review-process-links-page .filter-inputs label {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.review-process-links-page #linksTable {
-    display: table; /* Default, but explicitly show if data loads, hide if not */
-}
-
-.review-process-links-page #linksPlaceholder {
-    display: block; /* Default for p, ensure it's block */
-}
-
-
-/* ========================================================================== */
-/* --- 5. Bulk Edit Page Specific Styles (for Steps and Use Cases) --- */
-/* ========================================================================== */
-.edit-step-card .card-body,
-.edit-usecase-card .card-body {
-    padding: var(--spacing-lg);
-}
-.edit-step-card .info-list dt, /* These are not standard dl>dt, but custom classes */
-.edit-usecase-card .info-list dt {
-    text-align: left;
-    padding-right: 0;
-    font-size: 0.95rem;
-    font-weight: 500; /* Medium */
-    color: var(--text-secondary); /* Neutral-700 */
-    font-family: var(--font-family-secondary);
-}
-.edit-step-card .field-row,
-.edit-usecase-card .field-row {
-    display: grid;
-    grid-template-columns: 200px 1fr 1.5fr; /* Field Name | Current Value | New Value */
-    gap: var(--spacing-md);
-    padding-bottom: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
-    border-bottom: 1px dashed var(--border-color); /* Neutral-200 */
-    align-items: start; /* Align items to the top */
-}
-.edit-step-card .field-row:last-child,
-.edit-usecase-card .field-row:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-.edit-step-card .field-row h5, /* Field name label */
-.edit-usecase-card .field-row h5 {
-    font-family: var(--font-family-secondary); /* Use Text font for these labels */
-    font-size: 1rem;
-    line-height: 1.4; /* Ensure consistent line height */
-    font-weight: 500; /* Medium */
-    color: var(--color-primary); /* Dark Green for field labels */
-    margin-top: var(--spacing-xs); /* Align with top of inputs */
-    margin-bottom: 0;
-}
-.edit-step-card .field-row .current-value-display, /* Display of current value */
-.edit-usecase-card .field-row .current-value-display {
-    min-height: 40px; /* Adjusted to match input height better */
-    font-size: 0.9rem;
-    color: var(--text-secondary); /* Neutral-700 */
-    white-space: pre-wrap;
-    word-break: break-word;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--border-color); /* Neutral-200 */
-    background-color: var(--element-bg-light); /* Neutral-100 */
-    border-radius: var(--border-radius-sm); /* 8px */
-    font-family: var(--font-family-secondary);
-    line-height: 1.5; /* Match input line height */
-}
-.edit-step-card .field-row .new-value-input, /* Textarea for new value */
-.edit-step-card .field-row .new-value-select, /* Select for new value */
-.edit-usecase-card .field-row .new-value-input,
-.edit-usecase-card .field-row .new-value-select {
-    /* Inherit global form control styles */
-    font-size: 0.9rem;
-    padding: var(--spacing-sm) var(--spacing-md); /* Consistent padding */
-    min-height: 40px; /* Base height for single line */
-    width: 100%;
-    resize: vertical;
-    line-height: 1.5; /* Consistent line height */
-}
-/* Specific adjustments if needed */
-.edit-step-card .field-row.area-field .new-value-select,
-.edit-usecase-card .field-row.process_step-field .new-value-select,
-.edit-usecase-card .field-row.priority-field .new-value-input {
-    min-height: unset; /* Allow select to be its natural height */
-    height: auto;
-}
-
-.unsaved-field-change .current-value-display, /* Visual indicator for unsaved changes */
-.unsaved-field-change .new-value-input,
-.unsaved-field-change .new-value-select {
-    background-color: var(--bi-warning-100) !important; /* Light Warning Yellow */
-    border-color: var(--bi-warning-500) !important; /* Warning Yellow border */
-}
-/* The specific input might need stronger border */
-.unsaved-field-change .new-value-input,
-.unsaved-field-change .new-value-select {
-    border-color: var(--bi-warning-800) !important; /* Darker Warning border for input itself */
-}
-
-.action-buttons-group { /* Container for Save/Cancel buttons per field */
-    grid-column: 3 / 4; /* Place in the third column */
-    display: flex;
     gap: var(--spacing-sm);
-    justify-content: flex-end;
-    padding-top: var(--spacing-sm); /* Reduced top padding */
-    /* border-top: 1px dashed var(--border-color); Removed, actions are per row */
-}
-.action-buttons-group .btn {
-    /* Uses global button styles, e.g., .btn-sm for smaller buttons */
 }
 
-.save-all-controls { /* Container for "Save All" button */
+.table thead th .header-actions {
     display: flex;
-    gap: var(--spacing-md);
     align-items: center;
-    margin-bottom: var(--spacing-lg);
-    padding-top: var(--spacing-lg); /* Add padding if it's above all fields */
-    border-top: 1px solid var(--border-color); /* Separator */
-}
-.save-all-controls .btn {
-    min-width: 150px;
-    /* Uses global button styles, e.g., .btn-primary */
+    gap: var(--spacing-sm);
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
 }
 
-
-/* ========================================================================== */
-/* --- 6. Responsive Styles --- */
-/* ========================================================================== */
-
-@media (max-width: 1024px) {
-    .sidebar {
-        width: 250px;
-    }
-
-    .main-header {
-        padding: var(--spacing-md) var(--spacing-lg); /* 16px 24px */
-    }
-
-    .page-content {
-        padding: var(--spacing-lg) var(--spacing-xl); /* 24px 32px */
-    }
-
-    /* Bulk Edit Page Responsive Adjustments */
-    .edit-step-card .field-row,
-    .edit-usecase-card .field-row {
-        grid-template-columns: 1fr; /* Stack elements */
-        gap: var(--spacing-sm);
-    }
-    .edit-step-card .field-row h5,
-    .edit-usecase-card .field-row h5 {
-        margin-top: 0; /* Remove top margin when stacked */
-    }
-    .action-buttons-group {
-        grid-column: 1 / -1; /* Span full width when stacked */
-        justify-content: flex-start; /* Align to start */
-        padding-top: var(--spacing-md);
-        border-top: 1px dashed var(--border-color); /* Add separator when stacked like this */
-    }
-
+.table thead th:hover .header-actions {
+    opacity: 1;
 }
 
-@media (max-width: 768px) {
-    /* Typography scale adjustments from Style Guide */
-    h1, .text-headline-large { font-size: 48px !important; /* from 60px */ }
-    h2, .text-headline-medium { font-size: 36px !important; /* from 48px */ }
-    h3, .text-subheadline { font-size: 20px !important; /* from 24px */ }
-    /* H4, H5, H6 can also be scaled down if needed */
-    h4 { font-size: 18px !important; /* from 20px */ }
-
-
-    .main-header {
-        padding: var(--spacing-sm) var(--spacing-md); /* 8px 16px */
-        flex-direction: column;
-        gap: var(--spacing-sm); /* Reduced gap */
-        min-height: auto;
-        align-items: flex-end; /* Keep actions to the right */
-    }
-
-    .sidebar {
-        width: 100%;
-        height: auto; /* Allow content to define height */
-        max-height: 100vh; /* Prevent overflow */
-        overflow-y: auto; /* Allow scrolling if content exceeds viewport */
-        position: fixed;
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        z-index: 1000;
-        top: 0;
-        left: 0;
-        border-right: none;
-        box-shadow: var(--shadow-lg); /* Add shadow when overlaying */
-        padding-top: var(--spacing-lg); /* More padding at top for mobile menu */
-        padding-bottom: var(--spacing-lg);
-    }
-
-    .sidebar.show {
-        transform: translateX(0);
-    }
-
-    .breadcrumbs-fixed {
-        padding: var(--spacing-sm) var(--spacing-md) 0; /* 8px 16px 0 */
-        font-size: 0.8rem; /* Smaller breadcrumbs */
-    }
-
-    .card-body,
-    .card-header {
-        padding: var(--spacing-md); /* 16px, reduced padding for cards */
-    }
-    .llm-data-prep-page .card-header {
-        padding: var(--spacing-md) var(--spacing-lg); /* Keep slightly more horizontal for LLM */
-    }
-
-
-    /* LLM specific mobile rules */
-    .llm-data-prep-page .selection-grid,
-    .llm-data-prep-page .field-groups {
-        grid-template-columns: 1fr;
-    }
-    .llm-data-prep-page .card-body {
-        padding: var(--spacing-md); /* 16px */
-    }
-    .llm-data-prep-page .search-button-row {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .llm-data-prep-page .button-group {
-        justify-content: stretch; /* Full width buttons */
-    }
-    .llm-data-prep-page .button-group .btn {
-        flex-grow: 1; /* Make buttons in group take equal space */
-    }
-
-    .chat-input-area .main-input-row {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.75rem;
-    }
-    .chat-input-area .main-input-row select,
-    .chat-input-area .main-input-row textarea,
-    .chat-input-area .main-input-row .btn {
-        width: 100%;
-        max-width: 100%;
-        min-width: unset;
-        height: auto; /* Allow natural height for select/textarea */
-    }
-    .chat-input-area .main-input-row .btn {
-        padding: 12px 24px; /* Restore some padding for touch target */
-    }
-
-
-    .collapse .row {
-        margin-inline-start: 0;
-        margin-inline-end: 0;
-    }
-
-    .collapse .col {
-        padding-inline-start: var(--spacing-md); /* 16px */
-        padding-inline-end: var(--spacing-md); /* 16px */
-    }
-
-    /* Area Overview tabs responsive */
-    .container { /* Used for Area Overview */
-        padding: var(--spacing-md);
-    }
-
-    .header h1 { /* Used for Area Overview Header */
-        font-size: 1.75rem; /* Consistent with markdown H1 */
-    }
-
-    .cards-grid { /* Used for Area Overview Cards */
-        grid-template-columns: 1fr;
-    }
-
-    .tab-navigation { /* Used for Area Overview Tabs */
-        overflow-x: auto; /* Allow horizontal scroll for tabs */
-        white-space: nowrap; /* Prevent tabs from wrapping */
-        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-        scrollbar-width: none; /* Hide scrollbar for Firefox */
-    }
-    .tab-navigation::-webkit-scrollbar { display: none; /* Hide scrollbar for Chrome, Safari, Opera */ }
-
-
-    .tab-button { /* Used for Area Overview Tabs */
-        padding: var(--spacing-sm) var(--spacing-md); /* Reduced padding */
-        font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 480px) {
-    /* Typography scale adjustments for very small screens from Style Guide */
-    h1, .text-headline-large { font-size: 36px !important; /* from 48px */ }
-    h2, .text-headline-medium { font-size: 28px !important; /* from 36px */ }
-    h3, .text-subheadline { font-size: 18px !important; /* from 20px */ }
-    h4 { font-size: 16px !important; /* from 18px */ }
-
-    .page-content {
-        padding: var(--spacing-md); /* 16px on very small screens */
-    }
-    .main-header {
-        padding: var(--spacing-xs) var(--spacing-sm); /* 4px 8px */
-    }
-    .breadcrumbs-fixed {
-        padding: var(--spacing-xs) var(--spacing-sm) 0; /* 4px 8px 0 */
-    }
-    .llm-data-prep-page .card-header,
-    .llm-data-prep-page .card-body {
-        padding: var(--spacing-sm); /* 8px for LLM cards on small screens */
-    }
-    .process-card .card-header { /* Area Overview process card */
-         padding: var(--spacing-md);
-    }
-}
-
-
-/* ========================================================================== */
-/* --- 7. Overrides & Specific Fixes --- */
-/* ========================================================================== */
-
-/* ECharts Tooltip Styling for text wrapping */
-.echarts-tooltip-container {
-    max-width: 400px;
-    box-sizing: border-box;
-}
-
-.echarts-tooltip-content {
-    white-space: normal;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    max-width: 100%;
-    box-sizing: border-box; /* Changed from border-sizing */
-    font-family: var(--font-family-secondary); /* Ensure brand font */
-    font-size: 0.85rem; /* Adjust size if needed */
-    line-height: 1.4;
-}
-
-.echarts-tooltip-content pre,
-.echarts-tooltip-content code {
-    white-space: pre-wrap;
-    word-break: break-all;
-    overflow-x: auto;
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace; /* Monospace for code */
-    font-size: 0.9em; /* Relative to parent */
-    background-color: var(--bi-neutral-100); /* Light bg for code in tooltip */
-    border: 1px solid var(--bi-neutral-200); /* Border for code */
+.table .table-sort-icon,
+.table .table-filter-icon {
+    cursor: pointer;
+    color: var(--text-secondary);
     padding: var(--spacing-xs);
     border-radius: var(--border-radius-xs);
 }
 
-/* Data Alignment Page - For unsaved changes */
-.unsaved-change { /* Applies to <tr> or <td> */
-    background-color: var(--bi-warning-100) !important; /* Light Warning Yellow BG */
-    /* border-color for td itself might not be what's wanted if it's a row */
-    transition: background-color 0.3s ease;
-}
-.unsaved-change td { /* Ensure child cells also reflect this, if applied to tr */
-    /* background-color: inherit; */ /* This can cause issues if td has own bg */
-}
-.unsaved-change select,
-.unsaved-change input, /* If inputs are directly in .unsaved-change */
-.unsaved-change textarea {
-    border-color: var(--bi-warning-500) !important; /* Warning Yellow border for form elements */
-    background-color: var(--bi-white) !important; /* Keep input background white or very light */
-}
-/* If .unsaved-change is on a wrapper and input is child: */
-.unsaved-change .form-control {
-    border-color: var(--bi-warning-500) !important;
-    background-color: var(--bi-white) !important;
+.table .table-sort-icon:hover,
+.table .table-filter-icon:hover {
+    color: var(--color-primary);
+    background-color: var(--bi-neutral-200);
 }
 
-
-/* LLM Data Prep Page - Enhance System Prompt Textarea */
-.llm-data-prep-page #systemPromptInput {
-    display: block;
-    width: 100%;
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow: auto; /* Ensure scrollbars appear if content overflows */
-    box-sizing: border-box;
-    /* Inherits global textarea styles for font, padding, border, radius */
+.table .table-sort-icon.sorted,
+.table .table-filter-icon.filter-active {
+    color: var(--bi-info-500);
+    font-weight: bold;
 }
 
-/* LLM Data Prep Page - Adjustments for checkbox columns in fieldsets */
-.llm-data-prep-page .fieldset-dashed-border .row {
-    display: flex;
-    flex-wrap: wrap;
-    margin-left: -0.375rem; /* Offset half of gap for items */
-    margin-right: -0.375rem; /* Offset half of gap for items */
+/* Filter Dropdown Menu Styles */
+.filter-dropdown-menu {
+    min-width: 250px;
+    box-shadow: var(--shadow-lg);
 }
 
-.llm-data-prep-page .fieldset-dashed-border .col { /* .col used inside .field-group-content */
-    /* display: block; Default for div */
-    /* flex-direction: unset; Default for div */
-    padding-left: 0.375rem; /* Half of gap */
-    padding-right: 0.375rem; /* Half of gap */
-    box-sizing: border-box;
-}
-
-.llm-data-prep-page .form-check .form-check-input { /* Checkbox itself */
-    margin-top: 0.1em; /* Align better with text */
-    margin-inline-end: 0.5rem;
-    margin-bottom: 0;
-    flex-shrink: 0; /* Prevent shrinking */
-    width: 16px;
-    height: 16px;
-}
-
-.llm-data-prep-page .form-check .form-check-label { /* Label for checkbox */
-    margin-bottom: 0;
-    word-break: break-word;
-    line-height: 1.4;
-    cursor: pointer;
-    padding-inline-start: 0; /* Reset padding if any */
-    color: var(--text-primary); /* Ensure label text color */
-    font-weight: 400; /* Normal weight for checkbox labels */
-}
-
-/* --- NEW STYLES FOR AREA OVERVIEW TABS AND CARDS (BI BRANDING) --- */
-.container { /* Used for Area Overview Pages */
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: var(--spacing-lg);
-}
-
-.header { /* Used for Area Overview Pages */
-    margin-bottom: var(--spacing-xl);
-    text-align: center;
-}
-
-.header h1 { /* Title for Area Overview Page */
-    font-family: var(--font-family-primary);
-    font-size: 2rem; /* Consistent with LLM page title */
-    line-height: 1.2;
-    font-weight: 400; /* Lighter weight as per original, guide offers 400,500,700 for Head */
-    color: var(--text-primary); /* Black or Dark Green */
-    margin-bottom: var(--spacing-sm);
-}
-
-.header p { /* Subtitle for Area Overview Page */
-    font-family: var(--font-family-secondary);
-    color: var(--text-secondary); /* Neutral-700 */
-    font-size: 1rem;
-}
-
-.tab-navigation { /* Tab container */
-    background: var(--bi-white);
-    border-radius: var(--border-radius-xs); /* 4px for tab container */
-    margin-bottom: var(--spacing-lg); /* Increased margin */
-    display: flex;
-    flex-wrap: wrap; /* Allow wrapping for many tabs */
-    box-shadow: var(--shadow-sm);
-    padding: var(--spacing-xs); /* Small padding inside container */
-    gap: var(--spacing-xs); /* Small gap between tab buttons */
-    border-bottom: 1px solid var(--border-color); /* Add a bottom border to the nav area */
-}
-
-.tab-button { /* Individual tab button */
-    padding: var(--spacing-sm) var(--spacing-lg); /* Adjusted padding */
-    border: none;
-    background: transparent;
-    color: var(--text-secondary); /* Neutral-700 for inactive */
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: var(--font-family-secondary);
-    font-size: 0.9rem; /* Adjusted size */
-    font-weight: 500; /* Medium weight */
-    text-transform: none; /* No uppercase, sentence case for tabs */
-    letter-spacing: normal; /* No forced letter spacing */
-    white-space: nowrap;
-    flex-shrink: 0;
-    border-bottom: 3px solid transparent; /* Thicker indicator line */
-    position: relative;
-    border-radius: var(--border-radius-xs) var(--border-radius-xs) 0 0; /* Slight top rounding */
-}
-
-.tab-button:hover {
-    color: var(--color-primary); /* Dark Green */
-    background: var(--element-bg-light); /* Neutral-100 subtle bg */
-    border-bottom-color: var(--color-primary-light); /* Lighter green indicator on hover */
-}
-
-.tab-button.active {
-    color: var(--color-primary); /* Dark Green for active text */
-    font-weight: 700; /* Bold for active tab text */
-    border-bottom-color: var(--color-primary); /* Dark Green indicator */
-    background: var(--bi-white); /* Ensure active tab contrasts with nav bg if different */
-}
-
-.tab-badge { /* Badge within a tab */
-    display: inline-block;
-    background: var(--element-bg-light); /* Neutral-100 */
-    color: var(--text-secondary); /* Neutral-700 */
-    padding: 2px 8px;
-    border-radius: 12px; /* Pill shape */
-    font-size: 0.75rem;
-    margin-inline-start: var(--spacing-sm);
-    font-weight: 400; /* Normal */
-    line-height: 1.2; /* Ensure badge text is centered */
-}
-
-.tab-button.active .tab-badge {
-    background: var(--color-primary); /* Dark Green BG for active tab's badge */
-    color: var(--bi-white); /* White text on Dark Green BG */
-}
-
-.tab-content {
-    display: none;
-    background: var(--bi-white);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
-    /* box-shadow: var(--shadow-sm); Content usually doesn't need its own shadow if cards inside do */
-    border: 1px solid var(--border-color); /* Add border to tab content area */
-    border-top: none; /* Remove top border as nav has bottom border */
-    border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm); /* Round bottom corners */
-}
-
-.tab-content.active {
-    display: block;
-}
-
-.empty-state { /* For when tab content is empty */
-    text-align: center;
-    padding: var(--spacing-xxl) var(--spacing-lg); /* More padding */
-    color: var(--text-secondary); /* Neutral-700 */
-    font-family: var(--font-family-secondary);
-}
-
-.empty-state h3 { /* Title in empty state */
-    font-family: var(--font-family-primary); /* Headline font */
-    font-size: 1.25rem;
-    line-height: 1.3;
-    font-weight: 400; /* Normal weight for empty state title */
-    margin-bottom: var(--spacing-sm);
-    color: var(--text-primary); /* Black */
-}
-
-.empty-state p {
-    color: var(--text-secondary); /* Neutral-700 */
-}
-
-.cards-grid { /* Grid for process cards */
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjusted minmax */
-    gap: var(--spacing-lg); /* Increased gap */
-}
-
-.process-card { /* Individual card in the grid */
-    /* Uses global .card styles for background, border, radius, shadow, transition */
-    cursor: pointer; /* Indicate clickable */
-}
-
-.process-card .card-header { /* Header of a process card */
-    /* Uses global .card-header styles for padding, border-bottom, background */
-    position: relative; /* For card-number */
-    display: block; /* Override flex if not needed for this specific header */
-}
-
-.card-number { /* Decorative number on card */
-    position: absolute;
-    top: var(--spacing-md);
-    right: var(--spacing-lg);
-    font-family: var(--font-family-primary); /* Headline font */
-    font-size: 2rem;
-    font-weight: 300; /* Light weight for decorative number */
-    color: var(--bi-neutral-200); /* Very light neutral */
-    line-height: 1; /* Prevent extra spacing */
-}
-
-.step-badge { /* Badge indicating step type/area */
-    display: inline-block;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--border-radius-xs); /* 4px */
-    font-size: 0.75rem;
-    margin-bottom: var(--spacing-sm);
-    font-family: var(--font-family-secondary); /* Text font for badges */
-    font-weight: 500; /* Medium */
-    line-height: 1.2; /* Ensure text centered in badge */
-    text-transform: capitalize; /* Consistent casing */
-}
-
-.process-card .card-title { /* Title of the process card */
-    /* Uses global .card-title styles for font, size, weight, color, margin */
-    /* Ensure it's BI Dark Green on light backgrounds */
-    font-size: 1.125rem; /* Consistent size */
-    font-weight: 500; /* Medium */
-    line-height: 1.4;
-    margin-bottom: var(--spacing-xs);
-}
-
-.card-subtitle { /* Subtitle for process card */
-    font-family: var(--font-family-secondary);
-    font-size: 0.875rem;
-    color: var(--text-secondary); /* Neutral-700 */
-}
-
-.expand-indicator { /* Arrow for collapsible content */
-    position: absolute;
-    bottom: var(--spacing-md); /* Adjusted position */
-    right: var(--spacing-md); /* Adjusted position */
-    font-size: 1.25rem;
-    color: var(--text-muted); /* Neutral-600 */
-    transition: transform 0.2s ease;
-}
-
-.process-card.expanded .expand-indicator {
-    transform: rotate(180deg);
-}
-
-.card-content { /* Collapsible content area */
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out; /* Smoother transition */
-    border-top: 1px solid var(--element-bg-light); /* Separator when expanded */
-}
-
-.card-content.expanded {
-    max-height: 1000px; /* Large enough for content */
-}
-
-.sub-process { /* Item within expanded card content */
-    display: block;
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-bottom: 1px solid var(--element-bg-light); /* Neutral-100 separator */
-    transition: background-color 0.2s ease;
-    text-decoration: none; /* If it's an <a> tag */
-}
-.sub-process:last-child {
-    border-bottom: none;
-}
-.sub-process:hover {
-    background: var(--element-bg-light); /* Neutral-100 on hover */
-}
-
-.sub-process-title {
-    font-family: var(--font-family-secondary);
-    font-weight: 400; /* Normal */
-    color: var(--text-primary); /* Black */
-    margin-bottom: var(--spacing-xs);
-    font-size: 0.9rem; /* Adjusted size */
-    line-height: 1.4;
-}
-.sub-process-title:hover { /* If sub-process is a link */
-    color: var(--color-primary); /* Dark Green on hover */
-}
-
-.sub-process-id {
-    font-size: 0.75rem;
-    color: var(--text-muted); /* Neutral-600 */
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace; /* Monospace for IDs */
-}
-
-.no-use-cases { /* Message when no sub-items */
-    font-family: var(--font-family-secondary);
-    color: var(--text-muted); /* Neutral-600 */
-    font-size: 0.875rem;
-    padding: var(--spacing-xl) var(--spacing-lg);
-    text-align: center;
-    font-style: italic;
-}
-
-/* Styles for Inline Editing in Tables */
-.editable-cell {
-    cursor: pointer;
-    position: relative;
-    min-height: 30px; /* Ensure cell has some height for hover indicator */
-}
-.editable-cell:hover::after { /* Simple hover indicator */
-    content: "✎";
-    position: absolute;
-    right: 8px; /* Adjusted position */
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.9em; /* Adjusted size */
-    color: var(--bi-dark-green-800); /* Dark Green for edit icon (ACCESSIBILITY: Accent Green fails on white) */
-    opacity: 0.7; /* Make it slightly subtle */
-    pointer-events: none; /* Prevent icon from interfering with click */
-}
-
-.editable-cell.is-editing:hover::after {
-    content: ""; /* Remove pencil when editing */
-}
-
-.editable-cell input, .editable-cell select {
-    width: 100%;
-    box-sizing: border-box;
-    font-family: var(--font-family-secondary);
-    font-size: 0.875rem; /* Consistent with table data */
-    padding: 0.2rem 0.4rem;
-    border: 1px solid var(--bi-accent-green-500); /* Accent Green border for active edit */
-    border-radius: var(--border-radius-xs); /* 4px */
-    background-color: var(--bi-white);
-    color: var(--text-primary); /* Black */
-    /* outline: none; /* Remove default outline if custom border is enough */
-}
-.editable-cell input:focus, .editable-cell select:focus {
-    /* outline: 1px solid var(--bi-accent-green-600); /* Slightly darker accent for focus within edit */
-    /* box-shadow: 0 0 0 2px var(--bi-accent-green-100); /* Subtle glow */
-    /* Keep border as is or slightly enhance */
-}
-
-
-.table td.is-editing { /* Reduce padding when input is active */
-    padding: 2px !important; /* Minimal padding */
-    vertical-align: middle; /* Align input nicely */
-}
-
-.table th.editable-header::after { /* Indicate editable columns in header */
-    content: " ✎";
-    font-size: 0.7em;
-    color: var(--text-muted); /* Neutral-600 */
-    font-weight: normal; /* Prevent from being too bold */
-}
-
-/* Style for the container of all filter dropdowns */
-.filter-controls {
-    display: flex; /* Allow filters to sit side-by-side */
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
-    gap: var(--spacing-md); /* Space between filter groups */
-    margin-bottom: var(--spacing-lg); /* Space below filters */
-}
-.filter-controls .area-filter-tabs { /* If tabs are part of filters */
-    border-bottom: none;
-    padding-bottom: 0;
-    margin-bottom: 0; /* Remove margin when inline */
-}
-.filter-controls > * {
-    margin-bottom: 0; /* Remove bottom margin from direct children if gap handles it */
-}
-
-
-/* Style for each individual filter dropdown's parent container */
-.filter-dropdown-container {
-    position: relative;
-}
-
-/* Style for the toggle button itself */
-.filter-dropdown-toggle { /* Should be styled like a small button or link */
-    font-family: var(--font-family-secondary);
-    padding: var(--spacing-xs) var(--spacing-sm); /* Small padding */
-    border: 1px solid var(--border-color); /* Neutral-200 */
-    border-radius: var(--border-radius-xs); /* 4px */
-    background-color: var(--bi-white);
-    color: var(--text-secondary); /* Neutral-700 */
-    cursor: pointer;
-    font-size: 0.85rem;
-    display: inline-flex; /* Align icon and text */
-    align-items: center;
-    gap: var(--spacing-xs);
-}
-.filter-dropdown-toggle:hover {
-    border-color: var(--bi-neutral-300); /* Darker border */
-    color: var(--color-primary); /* Dark Green */
-}
-.filter-dropdown-toggle .filter-indicator { /* e.g., "(2 selected)" */
-    font-size: 0.9em; /* Relative to button text */
-    color: var(--color-primary); /* Dark Green for indicator */
-}
-.filter-dropdown-toggle .dropdown-arrow { /* Down arrow icon */
-    font-size: 0.8em;
-}
-
-
-/* Style for the dropdown menu itself */
-.filter-dropdown-container .filter-dropdown-menu {
-    display: none;
-    position: absolute;
-    background-color: var(--bi-white);
-    border: 1px solid var(--border-color); /* Neutral-200 */
-    border-radius: var(--border-radius-sm); /* 8px for dropdown menu */
-    z-index: 1000;
-    min-width: 220px; /* Adjusted width */
-    max-height: 300px;
-    overflow-y: auto;
-    box-shadow: var(--shadow-md); /* Consistent shadow */
-    padding-top: var(--spacing-sm); /* Padding at top */
-    padding-bottom: var(--spacing-sm); /* Padding at bottom */
-    margin-top: var(--spacing-xs); /* Small gap from toggle */
-}
-
-/* Style for showing the dropdown menu */
-.filter-dropdown-container .filter-dropdown-menu.show {
-    display: block;
-}
-
-/* Style for the list of filter options (checkboxes) */
 .filter-options-list {
-    font-family: var(--font-family-secondary);
-}
-.filter-options-list label {
-    display: block;
-    padding: var(--spacing-xs) var(--spacing-md); /* Adjusted padding */
-    font-weight: 400; /* Normal */
-    white-space: nowrap;
-    cursor: pointer;
-    font-size: 0.875rem;
-    color: var(--text-primary); /* Black */
-    border-radius: var(--border-radius-xs); /* Slight rounding for hover */
-}
-.filter-options-list label:hover {
-    background-color: var(--element-bg-light); /* Neutral-100 */
-    color: var(--color-primary); /* Dark Green */
-}
-.filter-options-list input[type="checkbox"] {
-    margin-right: 0.5em;
-    vertical-align: middle;
-    width: 14px; /* Smaller checkbox for filters */
-    height: 14px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 0 var(--spacing-xs);
 }
 
-/* Style for the "Select All" / "Clear" action bar */
-.filter-actions {
-    padding: var(--spacing-sm) var(--spacing-md); /* Consistent padding */
-    border-bottom: 1px solid var(--border-color); /* Neutral-200 */
+.filter-options-list .form-check {
     display: flex;
-    justify-content: space-between;
-    background-color: var(--element-bg-light); /* Slight bg for action bar */
-}
-.filter-actions .btn-link { /* Text link style for actions */
-    font-family: var(--font-family-secondary);
-    text-decoration: none;
-    font-size: 0.8em; /* Smaller */
-    padding: 0.1rem 0.2rem;
-    color: var(--color-primary); /* Dark Green */
-    font-weight: 500; /* Medium */
-}
-.filter-actions .btn-link:hover {
-    text-decoration: underline;
-    color: var(--color-primary-dark); /* Darker Green */
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-xs);
+    margin-left: 15px;
 }
 
+.filter-options-list .form-check:hover {
+    background-color: var(--element-bg-light);
+}
 
-/* Color variations for different areas (BI Branding) - These look good and follow guide */
-.bio-excellence .step-badge { background: var(--bi-accent-green-500); color: var(--bi-dark-green-800); }
-.logistics .step-badge { background: var(--bi-violet-400); color: var(--bi-dark-green-800); }
-.maintenance .step-badge { background: var(--bi-neutral-700); color: var(--bi-white); }
-.manufacturing .step-badge { background: var(--bi-dark-green-800); color: var(--bi-white); }
-.performance .step-badge { background: var(--bi-neutral-800); color: var(--bi-white); }
-.quality-assurance .step-badge { background: var(--bi-accent-green-500); color: var(--bi-dark-green-800); }
-.quality-control .step-badge { background: var(--bi-violet-400); color: var(--bi-dark-green-800); }
-.strategic-partner .step-badge { background: var(--bi-neutral-700); color: var(--bi-white); }
-.supply-chain .step-badge { background: var(--bi-dark-green-900); color: var(--bi-white); }
+.filter-options-list .form-check-input {
+    margin-top: 0;
+    margin-right: var(--spacing-sm);
+}
 
+.filter-options-list .form-check-label {
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+}
+
+/* ========================================================================== */
+/* --- 5. Responsive Styles --- */
+/* ========================================================================== */
+
+@media (max-width: 1024px) {
+    .sidebar { width: 250px; }
+    .main-header { padding: var(--spacing-md) var(--spacing-lg); }
+    .page-content { padding: var(--spacing-lg) var(--spacing-xl); }
+}
+
+@media (max-width: 768px) {
+    h1 { font-size: 48px !important; }
+    h2 { font-size: 36px !important; }
+    h3 { font-size: 20px !important; }
+    h4 { font-size: 18px !important; }
+
+    .main-header {
+        padding: var(--spacing-sm) var(--spacing-md);
+        min-height: auto;
+    }
+
+    .sidebar {
+        position: fixed;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        height: 100vh;
+    }
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .page-content {
+        padding: var(--spacing-lg);
+    }
+    
+    .card-body,
+    .card-header {
+        padding: var(--spacing-md);
+    }
+}
+
+@media (max-width: 480px) {
+    h1 { font-size: 36px !important; }
+    h2 { font-size: 28px !important; }
+    h3 { font-size: 18px !important; }
+    h4 { font-size: 16px !important; }
+
+    .page-content {
+        padding: var(--spacing-md);
+    }
+}

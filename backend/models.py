@@ -2,7 +2,8 @@
 from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey, DateTime, Table
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.sql import func
-from sqlalchemy.dialects.postgresql import JSONB # Import JSONB
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.inspection import inspect
 from passlib.hash import pbkdf2_sha256
 from flask_login import UserMixin
 
@@ -58,8 +59,11 @@ class Product(Base):
     challenges = relationship("ManufacturingChallenge", secondary=product_to_challenge_association, back_populates="products")
     technologies = relationship("ManufacturingTechnology", secondary=product_to_technology_association, back_populates="products")
 
-# (The other model classes: Indication, ManufacturingChallenge, etc. remain unchanged)
-# ... rest of the models.py file ...
+    @classmethod
+    def get_all_fields(cls):
+        """Returns a list of all column names for the model."""
+        return [c.key for c in inspect(cls).attrs if c.key not in ['indications', 'supply_chain', 'challenges', 'technologies']]
+    
 class Indication(Base):
     __tablename__ = 'indications'
     indication_id = Column(Integer, primary_key=True)

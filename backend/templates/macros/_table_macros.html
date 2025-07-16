@@ -1,0 +1,84 @@
+{# This macro renders the "Columns" dropdown button and its form #}
+{% macro render_column_selector(all_fields, selected_fields, entity_type, table_id) %}
+<div class="dropdown mb-3" id="{{ table_id }}-column-selector">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="column-dropdown-btn" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-columns"></i> Columns
+    </button>
+    <div class="dropdown-menu p-3" aria-labelledby="column-dropdown-btn" style="min-width: 400px;">
+        <h6 class="dropdown-header">Select columns to display</h6>
+        <div class="row">
+            {% for field in all_fields %}
+            <div class="col-6">
+                <div class="form-check">
+                    <input class="form-check-input column-select-checkbox" type="checkbox" value="{{ field }}" id="col-check-{{ field }}" 
+                           data-field="{{ field }}" {% if field in selected_fields %}checked{% endif %}>
+                    <label class="form-check-label" for="col-check-{{ field }}">
+                        {{ field.replace('_', ' ') | title }}
+                    </label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="dropdown-divider"></div>
+        <button class="btn btn-primary btn-sm w-100" id="apply-columns-btn" type="button">Apply</button>
+    </div>
+</div>
+{% endmacro %}
+
+
+{# This macro renders the table with dynamic headers and data #}
+{% macro render_dynamic_table(items, selected_fields, entity_type, table_id) %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover" id="{{ table_id }}" data-entity-type="{{ entity_type }}">
+        <thead class="table-light">
+            <tr>
+                {% for field in selected_fields %}
+                    <th data-field-name="{{ field }}">
+                        <div class="header-content">
+                            <span>{{ field.replace('_', ' ') | title }}</span>
+                            <div class="header-actions">
+                                <i class="fas fa-sort table-sort-icon" title="Sort this column"></i>
+                                
+                                <div class="dropdown">
+                                    <i class="fas fa-filter table-filter-icon" 
+                                       title="Filter this column" 
+                                       data-bs-toggle="dropdown" 
+                                       aria-expanded="false" 
+                                       onclick="event.stopPropagation()"></i>
+                                    <div class="dropdown-menu filter-dropdown-menu p-2" onclick="event.stopPropagation()">
+                                        <div class="filter-menu-header">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input select-all-filter" checked>
+                                                <label class="form-check-label">Select All</label>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown-divider"></div>
+                                        <div class="filter-options-list">
+                                            <div class="text-center text-muted p-2">
+                                                <small>Loading...</small>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown-divider"></div>
+                                        <div class="filter-menu-actions">
+                                             <button class="btn btn-primary btn-sm w-100 apply-filter-btn">Apply</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr data-entity-id="{{ item[entity_type ~ '_id'] }}">
+                {% for field in selected_fields %}
+                    <td class="editable-cell" data-field="{{ field }}">{{ item[field] or '' }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endmacro %}

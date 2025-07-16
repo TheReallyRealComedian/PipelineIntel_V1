@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{# Import the new macros at the top #}
+{% from "macros/_table_macros.html" import render_column_selector, render_dynamic_table %}
+
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
@@ -10,34 +13,12 @@
         <div class="card-header"><h2 class="card-title mb-0">All Products</h2></div>
         <div class="card-body">
             {% if products %}
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover" id="productsTable" data-entity-type="product">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="sortable">Product Code</th>
-                                <th class="sortable">Product Name</th>
-                                <th class="sortable">Therapeutic Area</th>
-                                <th class="sortable">Current Phase</th>
-                                <th class="sortable">Project Status</th>
-                                <th class="sortable">Launch Year</th>
-                                <th>Manufacturing Strategy</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for product in products %}
-                            <tr data-entity-id="{{ product.product_id }}">
-                                <td class="editable-cell" data-field="product_code">{{ product.product_code }}</td>
-                                <td class="editable-cell" data-field="product_name">{{ product.product_name }}</td>
-                                <td class="editable-cell" data-field="therapeutic_area">{{ product.therapeutic_area }}</td>
-                                <td class="editable-cell" data-field="current_phase">{{ product.current_phase }}</td>
-                                <td class="editable-cell" data-field="project_status">{{ product.project_status }}</td>
-                                <td class="editable-cell" data-field="expected_launch_year">{{ product.expected_launch_year }}</td>
-                                <td class="editable-cell" data-field="manufacturing_strategy">{{ product.manufacturing_strategy }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                {# Use the column selector macro #}
+                {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
+
+                {# Use the dynamic table macro #}
+                {{ render_dynamic_table(products, selected_fields, entity_type, table_id) }}
+
             {% else %}
                 <p class="text-muted text-center p-4">
                     <em>No products found. Import data via the <a href="{{ url_for('data_management.data_management_page') }}">Data Management</a> page.</em>
@@ -52,8 +33,10 @@
     {{ super() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            if (window.initializeTableSorter) {
-                window.initializeTableSorter('productsTable');
+            // The table sorter initialization needs to use the dynamic table_id
+            const tableId = "{{ table_id|default('') }}";
+            if (tableId && window.initializeTableSorter) {
+                window.initializeTableSorter(tableId);
             }
         });
     </script>
