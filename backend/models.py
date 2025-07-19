@@ -63,7 +63,7 @@ class Product(Base):
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
         return [c.key for c in inspect(cls).attrs if c.key not in ['indications', 'supply_chain', 'challenges', 'technologies']]
-    
+
 class Indication(Base):
     __tablename__ = 'indications'
     indication_id = Column(Integer, primary_key=True)
@@ -81,6 +81,11 @@ class ManufacturingChallenge(Base):
     challenge_name = Column(String(255), unique=True, nullable=False)
     explanation = Column(Text, nullable=True)
     products = relationship("Product", secondary=product_to_challenge_association, back_populates="challenges")
+
+    @classmethod
+    def get_all_fields(cls):
+        """Returns a list of all column names for the model."""
+        return [c.key for c in inspect(cls).attrs if c.key not in ['products']]
 
 class ManufacturingTechnology(Base):
     __tablename__ = 'manufacturing_technologies'
@@ -114,8 +119,12 @@ class User(UserMixin, Base):
     password = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     llm_settings = relationship("LLMSettings", back_populates="user", uselist=False, cascade="all, delete-orphan")
-    def set_password(self, password): self.password = pbkdf2_sha256.hash(password)
-    def check_password(self, password): return pbkdf2_sha256.verify(password, self.password)
+    
+    def set_password(self, password):
+        self.password = pbkdf2_sha256.hash(password)
+    
+    def check_password(self, password):
+        return pbkdf2_sha256.verify(password, self.password)
 
 class LLMSettings(Base):
     __tablename__ = 'llm_settings'

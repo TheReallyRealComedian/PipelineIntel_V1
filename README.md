@@ -1,18 +1,24 @@
+# Pipeline Intelligence
+
+Pipeline Intelligence is a web application designed to track and manage a portfolio of pharmaceutical assets. It provides a centralized platform for viewing product details, clinical indications, supply chain information, and associated manufacturing challenges and technologies.
+
+The entire application is containerized using Docker for consistent development and deployment.
+
 ## Technical Architecture
 
-UsecaseExplorer is a modern web application built on a Python/Flask backend and a dynamic, JavaScript-powered frontend. The entire application is containerized using Docker for consistent development and deployment.
+The application is built on a Python/Flask backend and a dynamic, JavaScript-powered frontend, with a PostgreSQL database for data persistence.
 
 ### High-Level Overview
 
 The architecture follows a standard client-server model, orchestrated by Docker Compose.
 
 ```
-+----------------+      +--------------------------+      +---------------------+      +----------------+
-|                |      |                          |      |                     |      |                |
-|      User      +----->|     Web Browser          |      |   Backend (Flask)   |      |   LLM APIs     |
-|                |      |  (HTML/CSS/JavaScript)   |<---->|  (Gunicorn Server)  |<---->| (OpenAI, etc.) |
-+----------------+      |                          |      |                     |      |                |
-                        +--------------------------+      +----------+----------+      +----------------+
++----------------+      +--------------------------+      +---------------------+
+|                |      |                          |      |                     |
+|      User      +----->|     Web Browser          |      |   Backend (Flask)   |
+|                |      |  (HTML/CSS/JavaScript)   |<---->|  (Gunicorn Server)  |
++----------------+      |                          |      |                     |
+                        +--------------------------+      +----------+----------+
                                                                      |
                                                                      |
                                                             +--------v--------+
@@ -27,181 +33,186 @@ The architecture follows a standard client-server model, orchestrated by Docker 
 
 ### Backend (Python/Flask)
 
-The backend is the application's core, handling business logic, data persistence, and communication with external AI services. It is built using the **Flask** web framework.
+The backend is the application's core, handling business logic, data persistence, and API endpoints. It is built using the **Flask** web framework.
 
 The backend code is structured into three main layers:
 
-1.  **Routes (`/backend/routes`)**: This layer handles incoming HTTP requests. It uses Flask Blueprints to organize functionality by domain (e.g., `usecase_routes.py`, `area_routes.py`). Routes are responsible for receiving requests, calling the appropriate service to handle the logic, and rendering a Jinja2 template or returning a JSON response.
+1.  **Routes (`/backend/routes`)**: This layer handles incoming HTTP requests. It uses Flask Blueprints to organize functionality by domain (e.g., `product_routes.py`, `challenge_routes.py`). Routes are responsible for receiving requests, calling the appropriate service to handle the logic, and rendering a Jinja2 template or returning a JSON response.
 
-2.  **Services (`/backend/services`)**: This is the business logic layer. It's decoupled from the web framework and contains the core application logic. For example, `llm_service.py` handles all interactions with different LLM providers, while `data_management_service.py` contains the complex logic for importing and exporting data. This separation makes the code more maintainable and testable.
+2.  **Services (`/backend/services`)**: This is the business logic layer, decoupled from the web framework. It contains the core application logic. For example, `product_service.py` handles business logic related to products, while `data_management_service.py` contains the logic for importing and exporting data.
 
-3.  **Models (`/backend/models.py`)**: This is the data access layer. It uses the **SQLAlchemy ORM** to define the database schema as Python classes (`Area`, `ProcessStep`, `UseCase`, etc.). All database interactions from the services go through these models.
+3.  **Models (`/backend/models.py`)**: This is the data access layer. It uses the **SQLAlchemy ORM** to define the database schema as Python classes (`Product`, `Indication`, `ManufacturingChallenge`, etc.). All database interactions from the services go through these models.
 
 #### Key Libraries & Components:
 
 *   **Flask**: The micro web framework that underpins the entire backend.
 *   **Flask-SQLAlchemy & SQLAlchemy**: For Object-Relational Mapping (ORM), allowing interaction with the database using Python objects.
-*   **Flask-Migrate & Alembic**: For managing database schema migrations. The `migrations/` directory contains the version history, allowing for controlled, repeatable updates to the database structure.
-*   **Flask-Login**: Manages user sessions, authentication, and access control.
+*   **Flask-Migrate & Alembic**: For managing database schema migrations. The `migrations/` directory contains the version history.
+*   **Flask-Login**: Manages user sessions and authentication.
 *   **Gunicorn**: The production-ready WSGI web server used to run the Flask application inside the Docker container.
-*   **LLM SDKs**: The application integrates with multiple Large Language Model providers using their respective Python libraries (`openai`, `anthropic`, `google-generativeai`).
 *   **dotenv**: Manages environment variables from the `.env` file for local development.
 
 ### Frontend (HTML/CSS/JavaScript)
 
-The frontend is responsible for rendering the user interface and handling user interactions in the browser.
+The frontend renders the user interface and handles user interactions in the browser.
 
 *   **Templating**: The UI is rendered using the **Jinja2** templating engine. The `backend/templates/` directory contains all HTML templates, with `base.html` serving as the main layout.
-*   **Styling**: The application uses a custom stylesheet (`backend/static/css/style.css`) that follows the Boehringer Ingelheim brand style guide. **Flask-Assets** is used to bundle and minify CSS and JavaScript files for optimal performance, with bundled assets being output to the `backend/static/gen/` directory.
-*   **JavaScript**: The frontend employs a modular JavaScript approach:
-    *   **UI Modules (`/backend/static/js`)**: Specific files like `breadcrumb_ui.js`, `usecase_overview.js`, and `review_process_links_ui.js` handle the logic for different parts of the application, such as dynamic dropdowns, table filtering, and interactive modals.
-    *   **Common Modules**: `common_llm_chat.js` provides a reusable interface for the AI chat functionality seen across different pages.
-    *   **Main Entry Point**: `main.js` initializes all the necessary UI modules on page load.
-*   **Libraries**: The frontend is built on **Bootstrap 5** for its responsive grid system and core components, and **FontAwesome** for icons.
+*   **Styling**: The application uses a custom stylesheet (`backend/static/css/style.css`). **Flask-Assets** is used to bundle and minify CSS and JavaScript files for optimal performance.
+*   **JavaScript**: `main.js` provides dynamic table features like client-side sorting, filtering, and inline editing. `data_export_ui.js` powers the interactive data export page.
+*   **Libraries**: **Bootstrap 5** for its responsive grid and core components, and **FontAwesome** for icons.
 
 ### Database
 
-*   **Database System**: The application is configured to use **PostgreSQL** (version 15). The `docker-compose.yml` file defines a `db` service that runs the official `postgres:15-alpine` image.
-*   **Data Persistence**: A Docker volume (`db_data`) is used to persist the PostgreSQL data, ensuring that data is not lost when the container is stopped or restarted.
-*   **Schema Management**: Database schema is defined in `backend/models.py` and managed through **Alembic** migrations located in the `migrations/versions/` directory.
+*   **Database System**: **PostgreSQL** (version 15). The `docker-compose.yml` file defines a `db` service running the official `postgres:15-alpine` image.
+*   **Data Persistence**: A Docker volume (`db_data`) is used to persist the PostgreSQL data across container restarts.
+*   **Schema Management**: The database schema is defined in `backend/models.py` and managed through **Alembic** migrations located in the `migrations/versions/` directory.
 
 ### Containerization & Deployment
 
-The entire application stack is containerized using **Docker** and orchestrated with **Docker Compose**, ensuring a consistent and reproducible environment.
+The entire application stack is containerized using **Docker** and orchestrated with **Docker Compose**.
 
-*   **`docker-compose.yml`**: This file defines and links the two primary services:
-    *   `db`: The PostgreSQL database container.
-    *   `backend`: The Flask application container. It is configured to depend on the `db` service, ensuring the database is healthy before the backend starts.
-*   **`Dockerfile` (`backend/Dockerfile`)**: This file specifies how to build the `backend` service image. It installs Python dependencies from `requirements.txt`, copies the application code, and sets `gunicorn` as the command to run the application.
-*   **`entrypoint.sh`**: A shell script that runs when the `backend` container starts. It is responsible for running database migrations via Alembic (`flask db upgrade`) before starting the Gunicorn server, ensuring the database schema is up-to-date.
+*   **`docker-compose.yml`**: Defines the `db` and `backend` services and links them.
+*   **`Dockerfile` (`backend/Dockerfile`)**: Specifies how to build the `backend` service image.
+*   **`entrypoint.sh`**: Runs database migrations (`flask db upgrade`) before starting the Gunicorn server, ensuring the database schema is up-to-date.
+
+---
+
+## Local Development Setup
+
+To run the application on your local machine, you will need Git, Docker, and Docker Compose installed.
+
+1.  **Clone the Repository**
+    ```sh
+    git clone <your-repository-url>
+    cd PipelineIntelligence
+    ```
+
+2.  **Create Environment File**
+    Create a `.env` file in the project root by copying the provided `.env` content. You can change `SECRET_KEY` for better security.
+    ```env
+    SECRET_KEY=a-very-secret-key-that-you-should-change
+    POSTGRES_USER=user
+    POSTGRES_PASSWORD=password
+    POSTGRES_DB=asset_tracker_db
+    DATABASE_URL=postgresql://user:password@db:5432/asset_tracker_db
+    ```
+
+3.  **Build and Run with Docker Compose**
+    From the project root, run the following command:
+    ```sh
+    docker-compose up --build
+    ```
+    This will build the Docker images, start the database and backend containers, and apply any pending database migrations.
+
+4.  **Access the Application**
+    Once the containers are running, you can access the application in your web browser at:
+    [http://localhost:5001](http://localhost:5001)
+
+5.  **First-Time Use**
+    You will need to register a new user to log in and access the application features.
+
 ---
 
 ## Database Schema Overview
 
-The application utilizes a PostgreSQL database, managed by SQLAlchemy and Alembic for migrations. The schema is designed around three core concepts: **Areas**, **Process Steps**, and **Use Cases**, with a flexible system for establishing relevance links and adding descriptive tags.
+The application utilizes a PostgreSQL database. The schema is designed around a central **Product** entity, with several related entities describing its characteristics, challenges, and supply chain.
 
-### 1. Areas (`areas`)
+### 1. Products (`products`)
 
-This table represents the highest-level business or functional domains in the organization.
+The core entity representing a pharmaceutical asset.
 
-| Field Name      | Data Type       | Description                                         |
-| :-------------- | :-------------- | :-------------------------------------------------- |
-| `id`            | Integer         | Primary Key.                                        |
-| `name`          | String(255)     | The unique name of the area (e.g., "Logistics").    |
-| `description`   | Text            | A detailed description of the area's scope.         |
-| `created_at`    | DateTime        | Timestamp of when the area was created.             |
+| Field Name                | Data Type                | Description                                                                 |
+| :------------------------ | :----------------------- | :-------------------------------------------------------------------------- |
+| `product_id`              | Integer                  | **Primary Key**.                                                            |
+| `product_code`            | String(100)              | **Unique, Required**. The main business identifier for the product (e.g., "XYZ-001"). |
+| `product_name`            | String(255)              | The common name of the product.                                             |
+| `product_type`            | String(100)              | The type of product (e.g., "Monoclonal Antibody", "Small Molecule").        |
+| `base_technology`         | String(255)              | The core technology platform used for the product.                          |
+| `mechanism_of_action`     | Text                     | A description of how the product works.                                     |
+| `dosage_form`             | String(255)              | The physical form of the drug (e.g., "Tablet", "Injectable").               |
+| `therapeutic_area`        | String(255)              | The primary medical field for the product (e.g., "Oncology"). Indexed.      |
+| `current_phase`           | String(100)              | The current clinical development phase (e.g., "Phase III"). Indexed.        |
+| `project_status`          | String(100)              | The current status of the project (e.g., "Ongoing"). Indexed.               |
+| `lead_indication`         | String(255)              | The primary indication the product is being developed for.                  |
+| `expected_launch_year`    | Integer                  | The projected year of market launch.                                        |
+| `lifecycle_indications`   | JSONB                    | A JSON field to store a list of potential future indications.               |
+| `regulatory_designations` | JSONB                    | A JSON field for special regulatory statuses (e.g., "Fast Track").          |
+| `manufacturing_strategy`  | String(100)              | The high-level strategy for manufacturing (e.g., "Internal", "CMO").        |
+| `manufacturing_sites`     | JSONB                    | A JSON field to list the manufacturing sites.                               |
+| `volume_forecast`         | JSONB                    | A JSON field to store forecasted production volumes.                        |
+| `created_at` / `updated_at` | DateTime             | Timestamps for record creation and last update.                             |
 
-### 2. Process Steps (`process_steps`)
+### 2. Indications (`indications`)
 
-These are the individual processes or "Process Target Pictures" (PTPs) that exist within an **Area**.
+Represents specific clinical indications for which a product is being developed.
 
-| Field Name                  | Data Type       | Description                                                           |
-| :-------------------------- | :-------------- | :-------------------------------------------------------------------- |
-| `id`                        | Integer         | Primary Key.                                                          |
-| `bi_id`                     | String(255)     | A unique Business ID for the step (e.g., "MFG-001").                  |
-| `name`                      | String(255)     | The descriptive name of the process step.                             |
-| `area_id`                   | Integer         | Foreign Key linking to the parent `areas.id`.                         |
-| `step_description`          | Text            | A short, high-level description of the step.                          |
-| `vision_statement`          | Text            | The future vision or goal for this process.                           |
-| `what_is_actually_done`     | Text            | A description of the current state or "as-is" process.                |
-| `in_scope`                  | Text            | Defines what is included within this process step.                    |
-| `out_of_scope`              | Text            | Defines what is explicitly excluded from this process step.           |
-| `pain_points`               | Text            | Known issues, challenges, or inefficiencies in the current process.   |
-| `interfaces_text`           | Text            | Description of interactions with other systems or processes.          |
-| `targets_text`              | Text            | Specific goals and objectives for this process.                       |
-| `summary`                   | Text            | A generic, often AI-generated, summary of the step.                   |
-| `raw_content`               | Text            | Unstructured, raw text or notes about the process step.               |
-| `llm_comment_1` to `_5`     | Text            | Five fields for storing comments or analyses, often from LLMs.        |
-| `created_at` / `updated_at` | DateTime        | Timestamps for creation and last update.                              |
+| Field Name              | Data Type   | Description                                                           |
+| :---------------------- | :---------- | :-------------------------------------------------------------------- |
+| `indication_id`         | Integer     | **Primary Key**.                                                      |
+| `product_id`            | Integer     | Foreign Key linking to `products.product_id`.                         |
+| `indication_name`       | String(255) | **Required**. The name of the medical indication.                     |
+| `therapeutic_area`      | String(255) | The medical field for this specific indication.                       |
+| `development_phase`     | String(100) | The development phase for this specific indication.                   |
+| `expected_launch_year`  | Integer     | The projected launch year for this indication.                        |
 
-### 3. Use Cases (`use_cases`)
+### 3. Manufacturing Challenges (`manufacturing_challenges`)
 
-These represent specific, actionable ideas or projects that are direct children of a **Process Step**.
+Defines specific challenges related to manufacturing.
 
-| Field Name                      | Data Type       | Description                                                            |
-| :------------------------------ | :-------------- | :--------------------------------------------------------------------- |
-| `id`                            | Integer         | Primary Key.                                                           |
-| `bi_id`                         | String(255)     | A unique Business ID for the use case (e.g., "UC-001").                |
-| `name`                          | String(255)     | The descriptive name of the use case.                                  |
-| `process_step_id`               | Integer         | Foreign Key linking to the parent `process_steps.id`.                  |
-| `priority`                      | Integer         | Priority score (1-4). Mapped to High, Medium, Low.                     |
-| `wave`                          | String(255)     | A project wave or grouping identifier (e.g., "Wave 1", "2024").        |
-| `status`                        | String(255)     | Current status (e.g., "Ideated", "Ongoing", "Completed").              |
-| `effort_level`                  | String(255)     | Estimated effort (e.g., "Low", "Medium", "High").                      |
-| `usecase_type_category`         | String(255)     | Use Case category (e.g., "Strategic", "Improvement", "Fundamental").   |
-| `business_problem_solved`       | Text            | The "as-is" situation and business need this use case addresses.       |
-| `target_solution_description`   | Text            | The proposed "to-be" state or solution description.                    |
-| `technologies_text`             | Text            | Comma-separated list of technologies involved.                         |
-| `requirements`                  | Text            | Specific requirements for implementation.                              |
-| `dependencies_text`             | Text            | Redundancies and dependencies on other projects, systems, or teams.    |
-| `effort_quantification`         | Text            | A detailed description of the effort involved (costs, time).           |
-| `potential_quantification`      | Text            | A detailed description of the potential benefits.                      |
-| `contact_persons_text`          | Text            | Key contacts for this use case.                                        |
-| `related_projects_text`         | Text            | Links or mentions of other related projects.                           |
-| `pilot_site_factory_text`       | Text            | The designated pilot site or factory for implementation.               |
-| `reduction_time_transfer`       | String(255)     | Estimated time reduction for product transfer.                         |
-| `reduction_time_launches`       | String(255)     | Estimated time reduction for product launches.                         |
-| `reduction_costs_supply`        | String(255)     | Estimated cost reduction in the supply chain.                          |
-| `quality_improvement_quant`     | String(255)     | Estimated quality improvement.                                         |
-| `summary`                       | Text            | A high-level summary of the use case.                                  |
-| `inspiration`                   | Text            | The source of inspiration or original idea.                            |
-| `ideation_notes`                | Text            | Original notes from the ideation phase.                                |
-| `further_ideas`                 | Text            | Additional ideas or inputs.                                            |
-| `raw_content`                   | Text            | Unstructured, raw text or notes about the use case.                    |
-| `relevants_text`                | Text            | Legacy field for free-text tags.                                       |
-| `llm_comment_1` to `_5`         | Text            | Five fields for storing comments or analyses, often from LLMs.         |
-| `created_at` / `updated_at`     | DateTime        | Timestamps for creation and last update.                               |
+| Field Name             | Data Type   | Description                                                           |
+| :--------------------- | :---------- | :-------------------------------------------------------------------- |
+| `challenge_id`         | Integer     | **Primary Key**.                                                      |
+| `challenge_category`   | String(255) | **Required**. A high-level category for the challenge. Indexed.       |
+| `challenge_name`       | String(255) | **Required, Unique**. The specific name of the challenge.             |
+| `explanation`          | Text        | A detailed description of the challenge.                              |
 
-### 4. Tags (`tags` & `usecase_tag_association`)
+### 4. Manufacturing Technologies (`manufacturing_technologies`)
 
-A flexible tagging system for `Use Cases` to categorize them by IT systems, data types, or general keywords.
+Defines specific technologies used in the manufacturing process.
 
-| Table                 | Field Name | Data Type    | Description                                                     |
-| :-------------------- | :--------- | :----------- | :-------------------------------------------------------------- |
-| **`tags`**            | `id`       | Integer      | Primary Key.                                                    |
-|                       | `name`     | String(255)  | The name of the tag (e.g., "SAP", "Batch Records").             |
-|                       | `category` | String(50)   | The type of tag (e.g., `it_system`, `data_type`, `tag`).        |
-| **`usecase_tag_...`** | `usecase_id` | Integer    | Foreign Key to `use_cases.id`.                                  |
-|                       | `tag_id`   | Integer      | Foreign Key to `tags.id`.                                       |
+| Field Name        | Data Type   | Description                                              |
+| :---------------- | :---------- | :------------------------------------------------------- |
+| `technology_id`   | Integer     | **Primary Key**.                                         |
+| `technology_name` | String(255) | **Required, Unique**. The name of the technology.        |
+| `description`     | Text        | A detailed description of the technology.                |
 
-### 5. Users & Settings (`users`, `llm_settings`)
+### 5. Partners (`partners`)
 
-Manages user authentication and user-specific settings for Large Language Model (LLM) providers.
+Represents external partners, such as Contract Manufacturing Organizations (CMOs).
 
-| Table              | Field Name                     | Data Type    | Description                                                         |
-| :----------------- | :----------------------------- | :----------- | :------------------------------------------------------------------ |
-| **`users`**        | `id`                           | Integer      | Primary Key.                                                        |
-|                    | `username`                     | String(80)   | Unique username for login.                                          |
-|                    | `password`                     | String(255)  | Hashed user password.                                               |
-|                    | `system_prompt`                | Text         | User's custom system prompt for the general AI chat.                |
-|                    | `step_summary_system_prompt`   | Text         | User's custom system prompt for the "Summarize Step" AI feature.    |
-| **`llm_settings`** | `id`                           | Integer      | Primary Key.                                                        |
-|                    | `user_id`                      | Integer      | Foreign Key to `users.id`.                                          |
-|                    | `openai_api_key`               | String(255)  | User-specific OpenAI API key.                                       |
-|                    | `anthropic_api_key`            | String(255)  | User-specific Anthropic API key.                                    |
-|                    | `google_api_key`               | String(255)  | User-specific Google API key.                                       |
-|                    | `ollama_base_url`              | String(255)  | URL for a self-hosted Ollama instance.                              |
-|                    | `apollo_client_id`             | String(255)  | User-specific Apollo (BI Internal) Client ID.                       |
-|                    | `apollo_client_secret`         | String(255)  | User-specific Apollo (BI Internal) Client Secret.                   |
+| Field Name       | Data Type   | Description                                              |
+| :--------------- | :---------- | :------------------------------------------------------- |
+| `partner_id`     | Integer     | **Primary Key**.                                         |
+| `partner_name`   | String(255) | **Required, Unique**. The name of the partner company.   |
+| `specialization` | Text        | A description of the partner's area of expertise.        |
 
-### 6. Relevance Link Tables
+### 6. Product Supply Chain (`product_supply_chain`)
 
-These four tables establish scored relevance connections between the core entities. They all share a similar structure.
+Links products to internal sites or external partners for different manufacturing stages.
 
-| Table                                 | Source                   | Target               | Description                                           |
-| :------------------------------------ | :----------------------- | :------------------- | :---------------------------------------------------- |
-| `usecase_area_relevance`              | `use_cases.id`           | `areas.id`           | Links a Use Case to a relevant Area.                  |
-| `usecase_step_relevance`              | `use_cases.id`           | `process_steps.id`   | Links a Use Case to a relevant Process Step.          |
-| `usecase_usecase_relevance`           | `use_cases.id` (source)  | `use_cases.id` (target)| Links a Use Case to another relevant Use Case.        |
-| `process_step_process_step_relevance` | `process_steps.id` (source) | `process_steps.id` (target) | Links a Process Step to another relevant Process Step.|
+| Field Name           | Data Type   | Description                                                                 |
+| :------------------- | :---------- | :-------------------------------------------------------------------------- |
+| `id`                 | Integer     | **Primary Key**.                                                            |
+| `product_id`         | Integer     | **Required**. Foreign Key linking to `products.product_id`.                 |
+| `manufacturing_stage`| String(255) | **Required**. The stage of manufacturing (e.g., "Drug Substance", "API").   |
+| `supply_model`       | String(100) | The model of supply (e.g., "Primary", "Secondary").                         |
+| `partner_id`         | Integer     | Foreign Key linking to `partners.partner_id`. Used for external partners.   |
+| `internal_site_name` | String(255) | The name of the internal manufacturing site.                                |
 
-**Common Fields in all Relevance Tables:**
+### 7. Association Tables
 
-| Field Name          | Data Type | Description                                                        |
-| :------------------ | :-------- | :----------------------------------------------------------------- |
-| `id`                | Integer   | Primary Key.                                                       |
-| `source_*_id`       | Integer   | Foreign Key to the source entity's ID.                             |
-| `target_*_id`       | Integer   | Foreign Key to the target entity's ID.                             |
-| `relevance_score`   | Integer   | A score from 0 to 100 indicating the strength of the connection.   |
-| `relevance_content` | Text      | A description or justification for the relevance link.             |
-| `created_at` / `updated_at` | DateTime | Timestamps for creation and last update.                     |
+These tables manage the many-to-many relationships.
+
+| Table Name                | Links                                                   | Purpose                                           |
+| :------------------------ | :------------------------------------------------------ | :------------------------------------------------ |
+| `product_to_challenge`    | `products` ↔ `manufacturing_challenges`                 | Associates products with the challenges they face.|
+| `product_to_technology`   | `products` ↔ `manufacturing_technologies`               | Associates products with the technologies they use.|
+
+### 8. System Tables (`users`, `llm_settings`)
+
+Manages user authentication and settings.
+
+| Table              | Field Name                     | Description                                           |
+| :----------------- | :----------------------------- | :---------------------------------------------------- |
+| **`users`**        | `id`, `username`, `password`   | Standard user authentication fields.                  |
+| **`llm_settings`** | `id`, `user_id`, `*_api_key`   | Stores user-specific API keys for LLM providers (optional). |

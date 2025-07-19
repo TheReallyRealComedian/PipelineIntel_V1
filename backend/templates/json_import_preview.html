@@ -48,7 +48,23 @@
                     {% if item.diff %}
                         <ul class="list-unstyled mb-0 small">
                         {% for field, values in item.diff.items() %}
-                            <li><strong>{{ field }}:</strong> '{{ values.old | default('none', true) | truncate(30) }}' → '{{ values.new | default('none', true) | truncate(30) }}'</li>
+                            {% if field == 'product_links' %}
+                                <li>
+                                    <strong>Product Links:</strong>
+                                    {% if values.added %}
+                                        <div>Added: 
+                                        {% for code in values.added %}<span class="badge bg-success me-1">{{ code }}</span>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    {% if values.removed %}
+                                        <div>Removed: 
+                                        {% for code in values.removed %}<span class="badge bg-danger me-1">{{ code }}</span>{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </li>
+                            {% else %}
+                                <li><strong>{{ field }}:</strong> '{{ values.old | default('none', true) | truncate(30) }}' → '{{ values.new | default('none', true) | truncate(30) }}'</li>
+                            {% endif %}
                         {% endfor %}
                         </ul>
                     {% else %}
