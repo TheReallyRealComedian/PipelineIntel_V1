@@ -10,7 +10,8 @@ def get_all_modalities(db_session: Session):
 
 def get_modality_table_context(db_session: Session, requested_columns_str: str = None):
     """Prepares the full context needed for rendering the dynamic modalities table."""
-    DEFAULT_COLUMNS = ['modality_name', 'modality_category', 'description']
+    # UPDATED: Use 'short_description' instead of 'description' for the default view
+    DEFAULT_COLUMNS = ['modality_name', 'modality_category', 'short_description']
     
     all_fields = Modality.get_all_fields()
     
@@ -32,6 +33,7 @@ def get_modality_table_context(db_session: Session, requested_columns_str: str =
         'all_fields': all_fields,
         'selected_fields': selected_fields,
         'entity_type': 'modality',
+        'entity_plural': 'modalities', # ADD THIS LINE
         'table_id': 'modalitiesTable'
     }
 

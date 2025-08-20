@@ -17,7 +17,8 @@
             <form method="POST">
                 {# --- ENTITY SELECTION --- #}
                 <div class="row g-3">
-                    {% for entity_name, items in {'products': products, 'indications': indications, 'challenges': challenges, 'technologies': technologies}.items() %}
+                    {# THIS LOOP IS NOW FULLY DYNAMIC #}
+                    {% for entity_name, items in all_items.items() %}
                     <div class="col-lg-4 col-md-6">
                         <div class="selection-item p-3 border rounded">
                             <div class="d-flex justify-content-between">
@@ -31,8 +32,10 @@
                             </div>
                             <div class="custom-select-list border rounded p-1" id="{{ entity_name }}-select-container" style="height: 150px; overflow-y: auto;">
                                 {% for item in items %}
-                                    {% set item_id = item[entity_name[:-1] ~ '_id'] %}
-                                    {% set item_name = item[entity_name[:-1] ~ '_name'] %}
+                                    {# THIS LOGIC IS NOW ROBUST, USING THE CONFIG FROM THE ROUTE #}
+                                    {% set config = display_config[entity_name] %}
+                                    {% set item_id = item[config.pk] %}
+                                    {% set item_name = item[config.name] %}
                                     {% set is_selected = (entity_name ~ '_ids') in form_data and item_id|string in form_data.getlist(entity_name ~ '_ids') %}
                                     <div class="select-option p-1 {% if is_selected %}selected{% endif %}" data-value="{{ item_id }}" data-name="{{ entity_name }}_ids">
                                         {{ item_name }}

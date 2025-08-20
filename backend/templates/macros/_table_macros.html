@@ -27,9 +27,10 @@
 
 
 {# This macro renders the table with dynamic headers and data #}
-{% macro render_dynamic_table(items, selected_fields, entity_type, table_id) %}
+{% macro render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural) %} {# ADD entity_plural #}
 <div class="table-responsive">
-    <table class="table table-striped table-hover" id="{{ table_id }}" data-entity-type="{{ entity_type }}">
+    {# UPDATE THIS LINE to include data-entity-plural #}
+    <table class="table table-striped table-hover" id="{{ table_id }}" data-entity-type="{{ entity_type }}" data-entity-plural="{{ entity_plural }}">
         <thead class="table-light">
             <tr>
                 {% for field in selected_fields %}
@@ -71,8 +72,10 @@
             </tr>
         </thead>
         <tbody>
+            {# The key to look up the ID might be different, let's make it robust #}
+            {% set id_key = entity_type ~ '_id' %}
             {% for item in items %}
-            <tr data-entity-id="{{ item[entity_type ~ '_id'] }}">
+            <tr data-entity-id="{{ item[id_key] }}">
                 {% for field in selected_fields %}
                     <td class="editable-cell" data-field="{{ field }}">{{ item[field] or '' }}</td>
                 {% endfor %}

@@ -10,7 +10,8 @@ def get_product_table_context(db_session: Session, requested_columns_str: str = 
     """Prepares the full context needed for rendering the dynamic product table."""
     
     # Define default columns to show if none are requested
-    DEFAULT_COLUMNS = ['product_code', 'product_name', 'therapeutic_area', 'current_phase', 'project_status']
+    # UPDATED: Replaced 'project_status' with 'short_description' for a better summary view.
+    DEFAULT_COLUMNS = ['product_code', 'product_name', 'short_description', 'therapeutic_area', 'current_phase']
     
     all_fields = Product.get_all_fields()
     

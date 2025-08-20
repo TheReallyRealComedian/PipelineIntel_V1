@@ -17,8 +17,8 @@
                 {# Use the column selector macro #}
                 {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
 
-                {# Use the dynamic table macro, passing the 'items' variable #}
-                {{ render_dynamic_table(items, selected_fields, entity_type, table_id) }}
+                {# UPDATE THIS LINE to pass the plural name #}
+                {{ render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural) }}
             {% else %}
                 <p class="text-muted text-center p-4">
                     <em>No modalities found. Import data via the <a href="{{ url_for('data_management.data_management_page') }}">Data Management</a> page.</em>

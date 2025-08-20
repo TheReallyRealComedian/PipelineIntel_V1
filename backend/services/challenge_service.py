@@ -8,7 +8,8 @@ def get_all_challenges(db_session: Session):
 def get_challenge_table_context(db_session: Session, requested_columns_str: str = None):
     """Prepares the full context needed for rendering the dynamic challenges table."""
     
-    DEFAULT_COLUMNS = ['challenge_name', 'challenge_category', 'explanation']
+    # UPDATED: Use 'short_description' instead of the longer 'explanation' field.
+    DEFAULT_COLUMNS = ['challenge_name', 'challenge_category', 'short_description']
     
     all_fields = ManufacturingChallenge.get_all_fields()
     

@@ -249,17 +249,18 @@
     window.usecaseExplorer.initializeInlineTableEditing = function(table) {
         if (!table) return; // Guard clause
         const entityType = table.dataset.entityType;
+        const entityPlural = table.dataset.entityPlural; // GET THE PLURAL NAME
 
         table.addEventListener('click', function(event) {
             const cell = event.target.closest('td.editable-cell');
             if (cell && !cell.classList.contains('is-editing')) {
-                startEdit(cell, entityType);
+                // Pass both singular and plural names to the edit handler
+                startEdit(cell, entityType, entityPlural);
             }
         });
     };
-    // The rest of the inline editing logic (startEdit, handleSaveOrCancel) doesn't need to change
-    // but should be kept in the file. Ensure it is defined within this scope.
-    function startEdit(cell, entityType) {
+    
+    function startEdit(cell, entityType, entityPlural) { // Accept plural name
         cell.classList.add('is-editing');
         const originalHTML = cell.innerHTML;
         const field = cell.dataset.field;
@@ -276,7 +277,7 @@
         inputElement.dataset.field = field;
         cell.appendChild(inputElement);
         inputElement.focus();
-        const save = () => handleSaveOrCancel(true, cell, inputElement, entityType, entityId);
+        const save = () => handleSaveOrCancel(true, cell, inputElement, entityType, entityId, entityPlural); // Pass plural name
         const cancel = () => handleSaveOrCancel(false, cell);
         inputElement.addEventListener('blur', save, { once: true });
         inputElement.addEventListener('keydown', (e) => {
@@ -284,7 +285,8 @@
             else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
         });
     }
-    function handleSaveOrCancel(shouldSave, cell, inputElement = null, entityType = null, entityId = null) {
+
+    function handleSaveOrCancel(shouldSave, cell, inputElement = null, entityType = null, entityId = null, entityPlural = null) { // Accept plural name
         if (!cell.classList.contains('is-editing')) return;
         cell.classList.remove('is-editing');
         const originalHTML = cell.dataset.originalHTML;
@@ -294,20 +296,29 @@
         const originalText = new DOMParser().parseFromString(cell.dataset.originalHTML, "text/html").body.textContent.trim();
         if (newValue === originalText) { cell.innerHTML = originalHTML; return; }
         cell.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        const apiEndpoint = `/${entityType}s/api/${entityType}s/${entityId}/inline-update`;
+
+        // *** THE FIX ***: Use the correct plural name passed from the backend
+        const pluralName = entityPlural || (entityType + 's'); // Fallback just in case
+        const apiEndpoint = `/${pluralName}/api/${pluralName}/${entityId}/inline-update`;
+
         fetch(apiEndpoint, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ [field]: newValue })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) { // Check for 404 or other HTTP errors
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) { cell.innerHTML = newValue; } 
             else { alert(`Error: ${data.message}`); cell.innerHTML = originalHTML; }
         })
         .catch(error => {
             console.error('Error updating record:', error);
-            alert('An error occurred while saving.');
+            alert('An error occurred while saving. Check the console for details.');
             cell.innerHTML = originalHTML;
         });
     }

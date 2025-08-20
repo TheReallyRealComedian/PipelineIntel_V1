@@ -27,9 +27,11 @@ class Product(Base):
     product_id = Column(Integer, primary_key=True)
     product_code = Column(String(100), unique=True, nullable=False, index=True)
     product_name = Column(String(255), nullable=True)
-    
+
     # Core Product Info
     product_type = Column(String(100), nullable=True)
+    short_description = Column(Text, nullable=True) # CHANGED from String(255)
+    description = Column(Text, nullable=True)
     base_technology = Column(String(255), nullable=True)
     mechanism_of_action = Column(Text, nullable=True)
     dosage_form = Column(String(255), nullable=True)
@@ -48,10 +50,10 @@ class Product(Base):
     manufacturing_strategy = Column(String(100), nullable=True)
     manufacturing_sites = Column(JSONB, nullable=True)
     volume_forecast = Column(JSONB, nullable=True)
-    
+
     # New Field from Phase 1
     modality_id = Column(Integer, ForeignKey('modalities.modality_id'))
-    
+
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
@@ -63,6 +65,7 @@ class Product(Base):
     technologies = relationship("ManufacturingTechnology", secondary=product_to_technology_association, back_populates="products")
     process_overrides = relationship("ProductProcessOverride", back_populates="product", cascade="all, delete-orphan")
     requirements = relationship("ProductRequirement", back_populates="product")
+    # This line is correct. It points to 'products' on the Modality model.
     modality = relationship("Modality", back_populates="products")
 
     @classmethod
@@ -80,11 +83,17 @@ class Indication(Base):
     expected_launch_year = Column(Integer, nullable=True)
     product = relationship("Product", back_populates="indications")
 
+    @classmethod
+    def get_all_fields(cls):
+        """Returns a list of all column names for the model."""
+        return [c.key for c in inspect(cls).attrs if c.key not in ['product']]
+
 class ManufacturingChallenge(Base):
     __tablename__ = 'manufacturing_challenges'
     challenge_id = Column(Integer, primary_key=True)
     challenge_category = Column(String(255), nullable=False, index=True)
     challenge_name = Column(String(255), unique=True, nullable=False)
+    short_description = Column(Text, nullable=True)
     explanation = Column(Text, nullable=True)
     related_capabilities = Column(JSONB) # New field from Phase 3
     products = relationship("Product", secondary=product_to_challenge_association, back_populates="challenges")
@@ -98,12 +107,18 @@ class ManufacturingTechnology(Base):
     __tablename__ = 'manufacturing_technologies'
     technology_id = Column(Integer, primary_key=True)
     technology_name = Column(String(255), unique=True, nullable=False)
+    short_description = Column(Text, nullable=True)
     description = Column(Text, nullable=True)
     stage_id = Column(Integer, ForeignKey('process_stages.stage_id')) # New field from Phase 3
     innovation_potential = Column(Text) # New field from Phase 3
     complexity_rating = Column(Integer) # New field from Phase 3
     stage = relationship("ProcessStage", back_populates="technologies")
     products = relationship("Product", secondary=product_to_technology_association, back_populates="technologies")
+
+    @classmethod
+    def get_all_fields(cls):
+        """Returns a list of all column names for the model."""
+        return [c.key for c in inspect(cls).attrs if c.key not in ['stage', 'products']]
 
 class ProductSupplyChain(Base):
     __tablename__ = 'product_supply_chain'
@@ -123,21 +138,23 @@ class Modality(Base):
     modality_id = Column(Integer, primary_key=True)
     modality_name = Column(String(255), unique=True, nullable=False)
     modality_category = Column(String(255))
+    short_description = Column(Text, nullable=True) # CHANGED from String(255)
     description = Column(Text)
     standard_challenges = Column(JSONB)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+
     # Relationships
+    # THIS IS THE CORRECTED LINE. It points back to 'modality' on the Product model.
     products = relationship("Product", back_populates="modality")
     process_templates = relationship("ProcessTemplate", back_populates="modality")
     requirements = relationship("ModalityRequirement", back_populates="modality")
-    
+
     @classmethod
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
         # Exclude relationship fields that shouldn't be displayed as simple columns
         return [c.key for c in inspect(cls).attrs if c.key not in ['products', 'process_templates', 'requirements']]
-    
+
 class ManufacturingCapability(Base):
     __tablename__ = 'manufacturing_capabilities'
     capability_id = Column(Integer, primary_key=True)
@@ -152,6 +169,11 @@ class ManufacturingCapability(Base):
     modality_requirements = relationship("ModalityRequirement", back_populates="capability")
     product_requirements = relationship("ProductRequirement", back_populates="capability")
     entity_provisions = relationship("EntityCapability", back_populates="capability")
+
+    @classmethod
+    def get_all_fields(cls):
+        """Returns a list of all column names for the model."""
+        return [c.key for c in inspect(cls).attrs if not c.key.startswith('_') and c.key not in ['modality_requirements', 'product_requirements', 'entity_provisions']]
 
 class ManufacturingEntity(Base):
     __tablename__ = 'manufacturing_entities'
@@ -168,6 +190,11 @@ class ManufacturingEntity(Base):
     # Note: `external_partner` relationship is defined in the ExternalPartner model below
     external_partner = relationship("ExternalPartner", back_populates="entity", uselist=False, cascade="all, delete-orphan")
     capabilities = relationship("EntityCapability", back_populates="entity", cascade="all, delete-orphan")
+
+    @classmethod
+    def get_all_fields(cls):
+        """Returns a list of all column names for the model."""
+        return [c.key for c in inspect(cls).attrs if not c.key.startswith('_') and c.key not in ['supply_chain_links', 'internal_facility', 'external_partner', 'capabilities']]
 
 
 # --- New Models from Phase 2 ---
@@ -236,6 +263,7 @@ class ProcessStage(Base):
     stage_id = Column(Integer, primary_key=True)
     stage_name = Column(String(255), unique=True, nullable=False)
     stage_category = Column(String(255))
+    short_description = Column(Text, nullable=True)
     description = Column(Text)
     # Relationships
     template_links = relationship("TemplateStage", back_populates="stage")
@@ -274,7 +302,7 @@ class ProductProcessOverride(Base):
     # Relationships
     product = relationship("Product", back_populates="process_overrides")
     stage = relationship("ProcessStage", back_populates="product_overrides")
-    
+
 
 # --- SQL View Mappings ---
 # These are unmanaged by Alembic but allow SQLAlchemy to query the views
@@ -307,10 +335,10 @@ class User(UserMixin, Base):
     password = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     llm_settings = relationship("LLMSettings", back_populates="user", uselist=False, cascade="all, delete-orphan")
-    
+
     def set_password(self, password):
         self.password = pbkdf2_sha256.hash(password)
-    
+
     def check_password(self, password):
         return pbkdf2_sha256.verify(password, self.password)
 
