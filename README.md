@@ -1,16 +1,24 @@
 # Pipeline Intelligence
 
-Pipeline Intelligence is a web application designed to track and manage a portfolio of pharmaceutical assets. It provides a centralized platform for viewing product details, clinical indications, supply chain information, and associated manufacturing challenges and technologies.
+Pipeline Intelligence is a web application designed to track and manage a portfolio of pharmaceutical assets. It provides a centralized platform for viewing product details, clinical indications, supply chain information, manufacturing challenges and technologies, with advanced data management and export capabilities.
 
 The entire application is containerized using Docker for consistent development and deployment.
 
+## Key Features
+
+- **Dynamic Data Tables**: Interactive tables with client-side sorting, filtering, and inline editing
+- **Flexible Column Management**: Users can customize which columns to display for each entity type
+- **JSON Data Import**: Import data with preview and conflict resolution before committing changes
+- **Custom Data Export**: Generate tailored JSON exports with token counting for LLM applications
+- **User Authentication**: Secure user registration and login system
+- **LLM Integration Settings**: User-specific API key management for various LLM providers
+- **Modern UI**: Responsive design with Boehringer Ingelheim branding
+
 ## Technical Architecture
 
-The application is built on a Python/Flask backend and a dynamic, JavaScript-powered frontend, with a PostgreSQL database for data persistence.
+The application is built on a Python/Flask backend with a dynamic JavaScript-powered frontend, using PostgreSQL for data persistence.
 
 ### High-Level Overview
-
-The architecture follows a standard client-server model, orchestrated by Docker Compose.
 
 ```
 +----------------+      +--------------------------+      +---------------------+
@@ -33,186 +41,223 @@ The architecture follows a standard client-server model, orchestrated by Docker 
 
 ### Backend (Python/Flask)
 
-The backend is the application's core, handling business logic, data persistence, and API endpoints. It is built using the **Flask** web framework.
+The backend follows a clean architecture with three main layers:
 
-The backend code is structured into three main layers:
+1. **Routes (`/backend/routes`)**: HTTP request handling using Flask Blueprints
+   - `auth_routes.py` - User authentication and registration
+   - `product_routes.py` - Product management and inline editing
+   - `indication_routes.py` - Clinical indications
+   - `challenge_routes.py` - Manufacturing challenges with inline editing
+   - `technology_routes.py` - Manufacturing technologies
+   - `partner_routes.py` - Partner/CMO management
+   - `data_management_routes.py` - JSON import with preview functionality
+   - `export_routes.py` - Custom data export with field selection
+   - `settings_routes.py` - User settings and LLM API key management
+   - `api_routes.py` - RESTful API endpoints
 
-1.  **Routes (`/backend/routes`)**: This layer handles incoming HTTP requests. It uses Flask Blueprints to organize functionality by domain (e.g., `product_routes.py`, `challenge_routes.py`). Routes are responsible for receiving requests, calling the appropriate service to handle the logic, and rendering a Jinja2 template or returning a JSON response.
+2. **Services (`/backend/services`)**: Business logic layer
+   - Decoupled from web framework for better testability
+   - Handles all database operations and business rules
+   - Includes specialized services for data import/export operations
 
-2.  **Services (`/backend/services`)**: This is the business logic layer, decoupled from the web framework. It contains the core application logic. For example, `product_service.py` handles business logic related to products, while `data_management_service.py` contains the logic for importing and exporting data.
-
-3.  **Models (`/backend/models.py`)**: This is the data access layer. It uses the **SQLAlchemy ORM** to define the database schema as Python classes (`Product`, `Indication`, `ManufacturingChallenge`, etc.). All database interactions from the services go through these models.
+3. **Models (`/backend/models.py`)**: Data access layer using SQLAlchemy ORM
 
 #### Key Libraries & Components:
 
-*   **Flask**: The micro web framework that underpins the entire backend.
-*   **Flask-SQLAlchemy & SQLAlchemy**: For Object-Relational Mapping (ORM), allowing interaction with the database using Python objects.
-*   **Flask-Migrate & Alembic**: For managing database schema migrations. The `migrations/` directory contains the version history.
-*   **Flask-Login**: Manages user sessions and authentication.
-*   **Gunicorn**: The production-ready WSGI web server used to run the Flask application inside the Docker container.
-*   **dotenv**: Manages environment variables from the `.env` file for local development.
+- **Flask**: Micro web framework
+- **Flask-SQLAlchemy & SQLAlchemy**: Object-Relational Mapping (ORM)
+- **Flask-Migrate & Alembic**: Database schema migrations
+- **Flask-Login**: User session management
+- **Flask-Assets**: CSS/JS bundling and minification
+- **Gunicorn**: Production WSGI server
+- **tiktoken**: Token counting for LLM integrations
 
 ### Frontend (HTML/CSS/JavaScript)
 
-The frontend renders the user interface and handles user interactions in the browser.
+- **Templating**: Jinja2 with reusable macros for dynamic tables
+- **Styling**: Custom CSS with Boehringer Ingelheim branding, Bootstrap 5 for responsive grid
+- **JavaScript**: Advanced table functionality including:
+  - Client-side sorting and filtering
+  - Inline cell editing with real-time validation
+  - Column selection and persistence
+  - Dynamic filter dropdowns
+- **User Experience**: Modern, responsive interface with hover effects and smooth transitions
 
-*   **Templating**: The UI is rendered using the **Jinja2** templating engine. The `backend/templates/` directory contains all HTML templates, with `base.html` serving as the main layout.
-*   **Styling**: The application uses a custom stylesheet (`backend/static/css/style.css`). **Flask-Assets** is used to bundle and minify CSS and JavaScript files for optimal performance.
-*   **JavaScript**: `main.js` provides dynamic table features like client-side sorting, filtering, and inline editing. `data_export_ui.js` powers the interactive data export page.
-*   **Libraries**: **Bootstrap 5** for its responsive grid and core components, and **FontAwesome** for icons.
+### Database Schema
 
-### Database
+The application uses PostgreSQL with the following core entities:
 
-*   **Database System**: **PostgreSQL** (version 15). The `docker-compose.yml` file defines a `db` service running the official `postgres:15-alpine` image.
-*   **Data Persistence**: A Docker volume (`db_data`) is used to persist the PostgreSQL data across container restarts.
-*   **Schema Management**: The database schema is defined in `backend/models.py` and managed through **Alembic** migrations located in the `migrations/versions/` directory.
+#### 1. Products (`products`)
+| Field Name                | Data Type   | Description                                                                 |
+| :------------------------ | :---------- | :-------------------------------------------------------------------------- |
+| `product_id`              | Integer     | **Primary Key**                                                             |
+| `product_code`            | String(100) | **Unique, Required**. Business identifier (e.g., "XYZ-001")                |
+| `product_name`            | String(255) | Common name of the product                                                  |
+| `product_type`            | String(100) | Product type (e.g., "Monoclonal Antibody")                                 |
+| `base_technology`         | String(255) | Core technology platform                                                    |
+| `mechanism_of_action`     | Text        | Description of how the product works                                        |
+| `dosage_form`             | String(255) | Physical form (e.g., "Tablet", "Injectable")                               |
+| `therapeutic_area`        | String(255) | **Indexed**. Primary medical field (e.g., "Oncology")                      |
+| `current_phase`           | String(100) | **Indexed**. Clinical development phase (e.g., "Phase III")                |
+| `project_status`          | String(100) | **Indexed**. Current project status (e.g., "Ongoing")                      |
+| `lead_indication`         | String(255) | Primary indication for development                                          |
+| `expected_launch_year`    | Integer     | Projected market launch year                                                |
+| `lifecycle_indications`   | JSONB       | Array of potential future indications                                       |
+| `regulatory_designations` | JSONB       | Special regulatory statuses (e.g., "Fast Track")                           |
+| `manufacturing_strategy`  | String(100) | High-level manufacturing strategy (e.g., "Internal", "CMO")                |
+| `manufacturing_sites`     | JSONB       | Array of manufacturing sites                                                |
+| `volume_forecast`         | JSONB       | Forecasted production volumes                                               |
+| `created_at`/`updated_at` | DateTime    | Audit timestamps                                                            |
 
-### Containerization & Deployment
+#### 2. Indications (`indications`)
+Specific clinical indications linked to products.
 
-The entire application stack is containerized using **Docker** and orchestrated with **Docker Compose**.
+#### 3. Manufacturing Challenges (`manufacturing_challenges`)
+Categorized manufacturing challenges with many-to-many product relationships.
 
-*   **`docker-compose.yml`**: Defines the `db` and `backend` services and links them.
-*   **`Dockerfile` (`backend/Dockerfile`)**: Specifies how to build the `backend` service image.
-*   **`entrypoint.sh`**: Runs database migrations (`flask db upgrade`) before starting the Gunicorn server, ensuring the database schema is up-to-date.
+#### 4. Manufacturing Technologies (`manufacturing_technologies`)
+Technologies used in manufacturing processes.
+
+#### 5. Partners (`partners`)
+External partners including Contract Manufacturing Organizations (CMOs).
+
+#### 6. Product Supply Chain (`product_supply_chain`)
+Links products to internal sites or external partners for different manufacturing stages.
+
+#### 7. Association Tables
+- `product_to_challenge`: Many-to-many relationship between products and challenges
+- `product_to_technology`: Many-to-many relationship between products and technologies
+
+#### 8. System Tables
+- `users`: User authentication
+- `llm_settings`: User-specific LLM API keys and settings
 
 ---
 
 ## Local Development Setup
 
-To run the application on your local machine, you will need Git, Docker, and Docker Compose installed.
+### Prerequisites
+- Git
+- Docker and Docker Compose
+- Web browser
 
-1.  **Clone the Repository**
-    ```sh
-    git clone <your-repository-url>
-    cd PipelineIntelligence
-    ```
+### Installation Steps
 
-2.  **Create Environment File**
-    Create a `.env` file in the project root by copying the provided `.env` content. You can change `SECRET_KEY` for better security.
-    ```env
-    SECRET_KEY=a-very-secret-key-that-you-should-change
-    POSTGRES_USER=user
-    POSTGRES_PASSWORD=password
-    POSTGRES_DB=asset_tracker_db
-    DATABASE_URL=postgresql://user:password@db:5432/asset_tracker_db
-    ```
+1. **Clone the Repository**
+   ```bash
+   git clone <your-repository-url>
+   cd PipelineIntelligence
+   ```
 
-3.  **Build and Run with Docker Compose**
-    From the project root, run the following command:
-    ```sh
-    docker-compose up --build
-    ```
-    This will build the Docker images, start the database and backend containers, and apply any pending database migrations.
+2. **Environment Configuration**
+   Create a `.env` file in the project root:
+   ```env
+   SECRET_KEY=a-very-secret-key-that-you-should-change-in-production
+   POSTGRES_USER=user
+   POSTGRES_PASSWORD=password
+   POSTGRES_DB=asset_tracker_db
+   DATABASE_URL=postgresql://user:password@db:5432/asset_tracker_db
+   ```
 
-4.  **Access the Application**
-    Once the containers are running, you can access the application in your web browser at:
-    [http://localhost:5001](http://localhost:5001)
+3. **Build and Run**
+   ```bash
+   docker-compose up --build
+   ```
+   
+   This will:
+   - Build the Docker images
+   - Start PostgreSQL and Flask containers
+   - Apply database migrations automatically
+   - Install all dependencies
 
-5.  **First-Time Use**
-    You will need to register a new user to log in and access the application features.
+4. **Access the Application**
+   Open your browser to: [http://localhost:5001](http://localhost:5001)
+
+5. **First-Time Setup**
+   - Register a new user account
+   - Import sample data via the Data Management page (optional)
+
+### Development Workflow
+
+- **Live Reloading**: The application supports live reloading during development
+- **Database Changes**: Use `flask db migrate` and `flask db upgrade` for schema changes
+- **Asset Changes**: CSS/JS files are automatically bundled and minified
 
 ---
 
-## Database Schema Overview
+## Application Usage
 
-The application utilizes a PostgreSQL database. The schema is designed around a central **Product** entity, with several related entities describing its characteristics, challenges, and supply chain.
+### Data Management
+- **Import**: Upload JSON files with automatic conflict detection and preview
+- **Export**: Generate custom JSON datasets with field selection and token counting
+- **Inline Editing**: Edit data directly in tables with real-time validation
 
-### 1. Products (`products`)
+### Table Features
+- **Sorting**: Click column headers to sort ascending/descending
+- **Filtering**: Use dropdown filters to show/hide specific values
+- **Column Selection**: Customize which columns are displayed
+- **Persistence**: Table preferences are saved per user session
 
-The core entity representing a pharmaceutical asset.
+### User Settings
+- Configure LLM API keys for OpenAI, Anthropic, Google, and other providers
+- Set up local model endpoints (Ollama)
+- Configure Apollo integration settings
 
-| Field Name                | Data Type                | Description                                                                 |
-| :------------------------ | :----------------------- | :-------------------------------------------------------------------------- |
-| `product_id`              | Integer                  | **Primary Key**.                                                            |
-| `product_code`            | String(100)              | **Unique, Required**. The main business identifier for the product (e.g., "XYZ-001"). |
-| `product_name`            | String(255)              | The common name of the product.                                             |
-| `product_type`            | String(100)              | The type of product (e.g., "Monoclonal Antibody", "Small Molecule").        |
-| `base_technology`         | String(255)              | The core technology platform used for the product.                          |
-| `mechanism_of_action`     | Text                     | A description of how the product works.                                     |
-| `dosage_form`             | String(255)              | The physical form of the drug (e.g., "Tablet", "Injectable").               |
-| `therapeutic_area`        | String(255)              | The primary medical field for the product (e.g., "Oncology"). Indexed.      |
-| `current_phase`           | String(100)              | The current clinical development phase (e.g., "Phase III"). Indexed.        |
-| `project_status`          | String(100)              | The current status of the project (e.g., "Ongoing"). Indexed.               |
-| `lead_indication`         | String(255)              | The primary indication the product is being developed for.                  |
-| `expected_launch_year`    | Integer                  | The projected year of market launch.                                        |
-| `lifecycle_indications`   | JSONB                    | A JSON field to store a list of potential future indications.               |
-| `regulatory_designations` | JSONB                    | A JSON field for special regulatory statuses (e.g., "Fast Track").          |
-| `manufacturing_strategy`  | String(100)              | The high-level strategy for manufacturing (e.g., "Internal", "CMO").        |
-| `manufacturing_sites`     | JSONB                    | A JSON field to list the manufacturing sites.                               |
-| `volume_forecast`         | JSONB                    | A JSON field to store forecasted production volumes.                        |
-| `created_at` / `updated_at` | DateTime             | Timestamps for record creation and last update.                             |
+---
 
-### 2. Indications (`indications`)
+## Production Deployment
 
-Represents specific clinical indications for which a product is being developed.
+For production deployment:
 
-| Field Name              | Data Type   | Description                                                           |
-| :---------------------- | :---------- | :-------------------------------------------------------------------- |
-| `indication_id`         | Integer     | **Primary Key**.                                                      |
-| `product_id`            | Integer     | Foreign Key linking to `products.product_id`.                         |
-| `indication_name`       | String(255) | **Required**. The name of the medical indication.                     |
-| `therapeutic_area`      | String(255) | The medical field for this specific indication.                       |
-| `development_phase`     | String(100) | The development phase for this specific indication.                   |
-| `expected_launch_year`  | Integer     | The projected launch year for this indication.                        |
+1. Update the `SECRET_KEY` in your `.env` file
+2. Configure proper PostgreSQL credentials
+3. Set `FLASK_ENV=production`
+4. Consider using a reverse proxy (nginx) for SSL termination
+5. Set up proper backup procedures for the PostgreSQL database
 
-### 3. Manufacturing Challenges (`manufacturing_challenges`)
+---
 
-Defines specific challenges related to manufacturing.
+## Data Import Format
 
-| Field Name             | Data Type   | Description                                                           |
-| :--------------------- | :---------- | :-------------------------------------------------------------------- |
-| `challenge_id`         | Integer     | **Primary Key**.                                                      |
-| `challenge_category`   | String(255) | **Required**. A high-level category for the challenge. Indexed.       |
-| `challenge_name`       | String(255) | **Required, Unique**. The specific name of the challenge.             |
-| `explanation`          | Text        | A detailed description of the challenge.                              |
+The application accepts JSON arrays for data import. Example format for products:
 
-### 4. Manufacturing Technologies (`manufacturing_technologies`)
+```json
+[
+  {
+    "product_code": "XYZ-001",
+    "product_name": "Example Drug",
+    "therapeutic_area": "Oncology",
+    "current_phase": "Phase III",
+    "project_status": "Ongoing",
+    "expected_launch_year": 2026
+  }
+]
+```
 
-Defines specific technologies used in the manufacturing process.
+For manufacturing challenges, include `product_codes` array to link to existing products:
 
-| Field Name        | Data Type   | Description                                              |
-| :---------------- | :---------- | :------------------------------------------------------- |
-| `technology_id`   | Integer     | **Primary Key**.                                         |
-| `technology_name` | String(255) | **Required, Unique**. The name of the technology.        |
-| `description`     | Text        | A detailed description of the technology.                |
+```json
+[
+  {
+    "challenge_name": "Scale-up Challenges",
+    "challenge_category": "Manufacturing",
+    "explanation": "Difficulties in scaling production",
+    "product_codes": ["XYZ-001", "ABC-002"]
+  }
+]
+```
 
-### 5. Partners (`partners`)
+---
 
-Represents external partners, such as Contract Manufacturing Organizations (CMOs).
+## Contributing
 
-| Field Name       | Data Type   | Description                                              |
-| :--------------- | :---------- | :------------------------------------------------------- |
-| `partner_id`     | Integer     | **Primary Key**.                                         |
-| `partner_name`   | String(255) | **Required, Unique**. The name of the partner company.   |
-| `specialization` | Text        | A description of the partner's area of expertise.        |
+1. Follow the existing code structure with routes, services, and models separation
+2. Add appropriate database migrations for schema changes
+3. Include both frontend and backend validation for new features
+4. Update this README when adding new major features
 
-### 6. Product Supply Chain (`product_supply_chain`)
+---
 
-Links products to internal sites or external partners for different manufacturing stages.
+## License
 
-| Field Name           | Data Type   | Description                                                                 |
-| :------------------- | :---------- | :-------------------------------------------------------------------------- |
-| `id`                 | Integer     | **Primary Key**.                                                            |
-| `product_id`         | Integer     | **Required**. Foreign Key linking to `products.product_id`.                 |
-| `manufacturing_stage`| String(255) | **Required**. The stage of manufacturing (e.g., "Drug Substance", "API").   |
-| `supply_model`       | String(100) | The model of supply (e.g., "Primary", "Secondary").                         |
-| `partner_id`         | Integer     | Foreign Key linking to `partners.partner_id`. Used for external partners.   |
-| `internal_site_name` | String(255) | The name of the internal manufacturing site.                                |
-
-### 7. Association Tables
-
-These tables manage the many-to-many relationships.
-
-| Table Name                | Links                                                   | Purpose                                           |
-| :------------------------ | :------------------------------------------------------ | :------------------------------------------------ |
-| `product_to_challenge`    | `products` ↔ `manufacturing_challenges`                 | Associates products with the challenges they face.|
-| `product_to_technology`   | `products` ↔ `manufacturing_technologies`               | Associates products with the technologies they use.|
-
-### 8. System Tables (`users`, `llm_settings`)
-
-Manages user authentication and settings.
-
-| Table              | Field Name                     | Description                                           |
-| :----------------- | :----------------------------- | :---------------------------------------------------- |
-| **`users`**        | `id`, `username`, `password`   | Standard user authentication fields.                  |
-| **`llm_settings`** | `id`, `user_id`, `*_api_key`   | Stores user-specific API keys for LLM providers (optional). |
+[Add your license information here]
