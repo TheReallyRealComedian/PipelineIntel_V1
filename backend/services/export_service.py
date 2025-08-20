@@ -2,7 +2,8 @@
 import json
 import tiktoken
 from sqlalchemy.orm import Session
-from . import product_service, indication_service, challenge_service, technology_service, partner_service
+from . import product_service, indication_service, challenge_service, technology_service
+
 
 # Define a map of entities that can be exported
 # This makes the service easily extensible in the future
@@ -22,10 +23,6 @@ EXPORTABLE_ENTITIES = {
     'technologies': {
         'model': technology_service.ManufacturingTechnology,
         'fetch_all_func': technology_service.get_all_technologies
-    },
-    'partners': {
-        'model': partner_service.Partner,
-        'fetch_all_func': partner_service.get_all_partners
     }
 }
 

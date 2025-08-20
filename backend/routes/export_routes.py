@@ -1,7 +1,8 @@
 # backend/routes/export_routes.py
 from flask import Blueprint, render_template, request, g
 from flask_login import login_required
-from ..services import export_service, product_service, indication_service, challenge_service, technology_service, partner_service
+from ..services import export_service, product_service, indication_service, challenge_service, technology_service
+
 
 export_bp = Blueprint('export', __name__, url_prefix='/export')
 
@@ -10,8 +11,7 @@ SELECTABLE_FIELDS = {
     'products': [f.key for f in product_service.Product.__mapper__.attrs if not f.key.startswith('_')],
     'indications': [f.key for f in indication_service.Indication.__mapper__.attrs if not f.key.startswith('_')],
     'challenges': [f.key for f in challenge_service.ManufacturingChallenge.__mapper__.attrs if not f.key.startswith('_')],
-    'technologies': [f.key for f in technology_service.ManufacturingTechnology.__mapper__.attrs if not f.key.startswith('_')],
-    'partners': [f.key for f in partner_service.Partner.__mapper__.attrs if not f.key.startswith('_')]
+    'technologies': [f.key for f in technology_service.ManufacturingTechnology.__mapper__.attrs if not f.key.startswith('_')]
 }
 
 @export_bp.route('/data-export', methods=['GET', 'POST'])
@@ -31,7 +31,6 @@ def data_export_page():
         'indications': indication_service.get_all_indications(g.db_session),
         'challenges': challenge_service.get_all_challenges(g.db_session),
         'technologies': technology_service.get_all_technologies(g.db_session),
-        'partners': partner_service.get_all_partners(g.db_session),
     }
     context.update(all_items)
     context['selectable_fields'] = SELECTABLE_FIELDS
