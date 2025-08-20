@@ -1,34 +1,41 @@
-# Dependency directories
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Dependency directories & Virtual Environments
 .Python
-.DS_Store
+venv/
+.venv/
+env/
+ENV/
+node_modules/
 
 # Environment variables file (contains sensitive info)
 .env
-venv/
-.venv/
 
 # Docker artifacts
-*.dockerignore # Often similar to .gitignore, but sometimes distinct
-docker-compose.override.yml # Often used for local overrides, keep out of main repo
-# Docker build cache
-.dockerignore # (if you create one later)
+*.dockerignore
+docker-compose.override.yml
 
 # Flask specific
+# Instance folder (good practice to ignore, even with .env)
 instance/
+backend/instance/
+
+# Flask-Assets cache
+backend/static/webassets-cache/
+backend/static/.webassets-cache/
+backend/static/gen/
 
 # Frontend specific (if build step generates files, e.g. webpack, npm)
 dist/
 build/
-node_modules/
 
-
-backend/static/webassets-cache/
-backend/static/.webassets-cache/
-backend/static/gen/
+# Node.js and Vite
+/node_modules
+.vite
 
 # Operating System files
 .DS_Store # macOS
@@ -44,8 +51,3 @@ Thumbs.db # Windows
 
 # Uploaded files (if users can upload)
 /uploads/
-
-
-# Node.js and Vite
-/node_modules
-.vite

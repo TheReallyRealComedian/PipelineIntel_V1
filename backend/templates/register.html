@@ -5,16 +5,7 @@
 {% block head_extra %}
     {{ super() }}
     {# Add any register-specific styles or meta tags here if needed #}
-    <style>
-        /* Specific styles for auth pages if base.html includes sidebar/header */
-        .auth-page-container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Align to top to see flash messages properly */
-            min-height: calc(100vh - 120px); /* Adjust based on your header/footer height if base.html is complex */
-            padding-top: 50px; /* Space from top */
-        }
-    </style>
+
 {% endblock %}
 
 {% block content %}

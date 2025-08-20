@@ -6,17 +6,6 @@
     {{ super() }}
     {# Add any login-specific styles or meta tags here if needed #}
     {# The main style.css is already included by base.html #}
-    <style>
-        /* Specific styles for auth pages if base.html includes sidebar/header */
-        /* This ensures the auth card is centered even with the sidebar present */
-        .auth-page-container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Align to top to see flash messages properly */
-            min-height: calc(100vh - 120px); /* Adjust based on your header/footer height if base.html is complex */
-            padding-top: 50px; /* Space from top */
-        }
-    </style>
 {% endblock %}
 
 {% block content %}

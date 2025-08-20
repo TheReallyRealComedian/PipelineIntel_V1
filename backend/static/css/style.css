@@ -585,6 +585,15 @@ textarea.form-control {
     }
 }
 
+/* Centering container for auth pages within the main layout */
+.auth-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    padding-top: 50px;
+}
+
 @media (max-width: 480px) {
     h1 { font-size: 36px !important; }
     h2 { font-size: 28px !important; }
