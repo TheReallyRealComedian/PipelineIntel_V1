@@ -131,7 +131,13 @@ class Modality(Base):
     products = relationship("Product", back_populates="modality")
     process_templates = relationship("ProcessTemplate", back_populates="modality")
     requirements = relationship("ModalityRequirement", back_populates="modality")
-
+    
+    @classmethod
+    def get_all_fields(cls):
+        """Returns a list of all column names for the model."""
+        # Exclude relationship fields that shouldn't be displayed as simple columns
+        return [c.key for c in inspect(cls).attrs if c.key not in ['products', 'process_templates', 'requirements']]
+    
 class ManufacturingCapability(Base):
     __tablename__ = 'manufacturing_capabilities'
     capability_id = Column(Integer, primary_key=True)

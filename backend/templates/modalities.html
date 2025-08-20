@@ -1,39 +1,28 @@
 {% extends "base.html" %}
+{# Import the macros that create your dynamic table #}
+{% from "macros/_table_macros.html" import render_column_selector, render_dynamic_table %}
+
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
 <div class="modalities-page">
     <h1>{{ title }}</h1>
-    <p class="text-color-light mb-4">A list of all defined manufacturing modalities.</p>
+    <p class="text-color-light mb-4">A filterable and editable list of all defined manufacturing modalities.</p>
 
     <div class="card">
         <div class="card-header"><h2 class="card-title mb-0">All Modalities</h2></div>
         <div class="card-body">
-            {% if modalities %}
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Modality Name</th>
-                            <th>Category</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for modality in modalities %}
-                        <tr>
-                            <td><strong>{{ modality.modality_name }}</strong></td>
-                            <td>{{ modality.modality_category or '' }}</td>
-                            <td>{{ modality.description or '' }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            {# This now checks for 'items', which the route provides #}
+            {% if items %}
+                {# Use the column selector macro #}
+                {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
+
+                {# Use the dynamic table macro, passing the 'items' variable #}
+                {{ render_dynamic_table(items, selected_fields, entity_type, table_id) }}
             {% else %}
-            <p class="text-muted text-center p-4">
-                <em>No modalities found. Import data via the <a href="{{ url_for('data_management.data_management_page') }}">Data Management</a> page.</em>
-            </p>
+                <p class="text-muted text-center p-4">
+                    <em>No modalities found. Import data via the <a href="{{ url_for('data_management.data_management_page') }}">Data Management</a> page.</em>
+                </p>
             {% endif %}
         </div>
     </div>

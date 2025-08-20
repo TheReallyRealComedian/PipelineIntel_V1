@@ -1,0 +1,110 @@
+[
+  {
+    "modality_name": "Small Molecule",
+    "modality_category": "Traditional",
+    "description": "Traditional chemically synthesized compounds (NCEs - New Chemical Entities). Steady FDA approval rates with well-established manufacturing processes including synthesis, purification, and formulation. Includes compounds requiring high-selectivity synthesis, covalent inhibitor stability management, and specialized formulations like amorphous solid dispersions for poorly soluble compounds.",
+    "standard_challenges": ["High-Selectivity Synthesis", "Covalent Inhibitor Stability", "Amorphous Solid Dispersion Manufacturing"]
+  },
+  {
+    "modality_name": "Monoclonal Antibody",
+    "modality_category": "Biologics",
+    "description": "Standard monoclonal antibodies (mAbs) targeting specific antigens. Largest established biologics class, expanding beyond oncology into Alzheimer's and other indications. Requires cell culture systems, downstream purification, and cold chain logistics. Well-established manufacturing processes but requires high titer production and complex purification.",
+    "standard_challenges": ["High Titer Production", "Downstream Purification", "Cold Chain Logistics"]
+  },
+  {
+    "modality_name": "Peptides",
+    "modality_category": "Biologics",
+    "description": "Therapeutic peptides including multi-agonists, modified peptides, and peptide drug conjugates. Requires specialized Solid-Phase Peptide Synthesis (SPPS), advanced purification, and precise control of stereochemistry. Examples include GLP-1R/GIPR agonists like Survodutide. Often requires device integration for delivery and cold chain management.",
+    "standard_challenges": ["Advanced Peptide Manufacturing", "Device & Combination Product Manufacturing", "Cold Chain Logistics"]
+  },
+  {
+    "modality_name": "T-cell Engager",
+    "modality_category": "Engineered Biologics",
+    "description": "Bispecific antibodies that engage T-cells to target cancer cells through two-target engagement mechanisms. Requires complex protein engineering and specialized expression systems (e.g., BI-HEX® platform) to ensure correct heavy/light chain pairing and prevent mispairing and aggregation. Examples include B7-H6/CD3 and ALPG/CD3 T-cell engagers.",
+    "standard_challenges": ["Bispecific/Multi-specific Antibody Manufacturing", "Complex Biologics Manufacturing"]
+  },
+  {
+    "modality_name": "ADC",
+    "modality_category": "Engineered Biologics",
+    "description": "Antibody-Drug Conjugates represent a complex dual-stream manufacturing scenario, combining biologics manufacturing with HPAPI (cytotoxic payload) synthesis. Rapid growth segment expanding into non-oncology applications. Requires site-specific conjugation technologies, OEB4 containment for payload, and advanced analytics to control drug-to-antibody ratio (DAR).",
+    "standard_challenges": ["Antibody-Drug Conjugate (ADC) Manufacturing", "High-Potency Active Pharmaceutical Ingredient (HPAPI) Handling"]
+  },
+  {
+    "modality_name": "Recombinant Proteins",
+    "modality_category": "Biologics",
+    "description": "Engineered proteins including fusion proteins, complex receptor modulators, and proteins that are not standard monoclonal antibodies. Requires specialized process development for expression, purification, and analytical characterization to ensure proper structure and function. Examples include DcR3-Fc fusion proteins and FZD4_LRP5 modulators.",
+    "standard_challenges": ["Complex Biologics Manufacturing", "Advanced Purification"]
+  },
+  {
+    "modality_name": "PROTAC",
+    "modality_category": "Engineered Biologics",
+    "description": "Proteolysis Targeting Chimeras are targeted protein degraders representing the fastest growing market segment. Highly complex manufacturing involving multi-component synthesis, precise linker chemistry, and advanced purification for high molecular weight (>1000 Da) compounds. Pose significant formulation and bioavailability challenges while targeting previously 'undruggable' proteins.",
+    "standard_challenges": ["PROTAC Manufacturing", "Complex Synthesis", "Advanced Formulation"]
+  },
+  {
+    "modality_name": "CAR-T",
+    "modality_category": "Advanced Therapy",
+    "description": "Chimeric Antigen Receptor T-cell therapies, a form of personalized immunotherapy established in hematologic malignancies. Requires autologous cell collection and processing, viral transduction for CAR gene insertion, controlled cell expansion, quality control, cryopreservation, and patient-specific logistics with extremely tight timelines. Highest manufacturing complexity due to personalized medicine requirements.",
+    "standard_challenges": ["Personalized Manufacturing", "Autologous Cell Processing", "Viral Transduction", "Cryopreservation", "Patient-Specific Logistics"]
+  },
+  {
+    "modality_name": "Gene Therapy",
+    "modality_category": "Advanced Therapy",
+    "description": "Genetic material modification approaches including AAV vectors, lentiviral vectors, and oncolytic viruses (OV/CV). Beyond BSL-2+ containment requirements, requires specialized cell culture systems for viral replication, advanced purification to separate viral particles from cell debris, extensive viral safety testing (e.g., for RCV), and complex process development.",
+    "standard_challenges": ["Viral Vector / Gene Therapy Manufacturing", "BSL-2+ Containment Facilities required", "Viral Safety Testing"]
+  },
+  {
+    "modality_name": "Bacteria",
+    "modality_category": "Advanced Therapy",
+    "description": "Live biotherapeutics including engineered bacteria for therapeutic applications. Requires specialized containment and controlled atmosphere processing, bacterial fermentation capabilities, and unique regulatory considerations for living organisms. Emerging field with growing pipeline especially in microbiome and oncology applications.",
+    "standard_challenges": ["Live Organism Manufacturing", "Specialized Containment", "Bacterial Fermentation"]
+  },
+  {
+    "modality_name": "Oligonucleotides",
+    "modality_category": "Nucleic Acids",
+    "description": "Gene expression modulation therapies including antisense oligonucleotides (ASOs) that bind mRNA to inhibit translation/alter splicing, small interfering RNA (siRNA) that induce target mRNA degradation, and messenger RNA (mRNA) therapies that deliver therapeutic proteins. Requires specialized solid-phase synthesis, complex HPLC purification, stability management, and delivery system integration (LNPs, conjugates).",
+    "standard_challenges": ["Specialized Solid-Phase Synthesis", "Complex Purification", "Delivery System Integration", "Stability Management"]
+  },
+  {
+    "modality_name": "CAR-NK",
+    "modality_category": "Emerging Therapy",
+    "description": "CAR-Natural Killer cell therapies offering manufacturing advantages over CAR-T with potential for allogeneic approaches. In vivo approaches are being developed to reduce manufacturing complexity. Alternative to CAR-T for solid tumor applications with potentially broader clinical utility and reduced manufacturing burden.",
+    "standard_challenges": ["Cell Engineering", "Allogeneic Processing", "In Vivo Delivery"]
+  },
+  {
+    "modality_name": "TCR-T",
+    "modality_category": "Emerging Therapy",
+    "description": "T-cell Receptor therapies designed for solid tumor applications, broadening clinical utility beyond CAR-T applications. Requires T-cell engineering with TCR modification, specialized processing similar to CAR-T but with different target recognition mechanisms. Growing pipeline for solid tumor indications.",
+    "standard_challenges": ["T-cell Engineering", "Solid Tumor Targeting", "TCR Manufacturing"]
+  },
+  {
+    "modality_name": "Trispecific Antibodies",
+    "modality_category": "Emerging Biologics",
+    "description": "Three-target engagement antibodies for enhanced cancer immunotherapy efficacy. Even more complex than bispecific antibodies, requiring sophisticated protein engineering to ensure correct multi-chain pairing and prevent aggregation. Novel therapeutic mechanisms with enhanced specificity and efficacy potential.",
+    "standard_challenges": ["Multi-specific Antibody Manufacturing", "Complex Protein Engineering", "Advanced Analytics"]
+  },
+  {
+    "modality_name": "Base/Prime Editing",
+    "modality_category": "Emerging Therapy",
+    "description": "Precise genetic modifications beyond traditional CRISPR with improved specificity and reduced off-target effects. Next-generation gene editing technologies offering more precise therapeutic interventions. Requires specialized delivery systems and advanced manufacturing for editing components.",
+    "standard_challenges": ["Precision Gene Editing Manufacturing", "Advanced Delivery Systems", "Component Stability"]
+  },
+  {
+    "modality_name": "Molecular Glues",
+    "modality_category": "Emerging Biologics",
+    "description": "Novel protein degradation approach targeting previously 'undruggable' proteins through induced protein-protein interactions. Different mechanism from PROTACs but similar complexity in targeting protein degradation pathways. Requires specialized synthesis and formulation approaches.",
+    "standard_challenges": ["Novel Protein Degradation Manufacturing", "Specialized Synthesis", "Target Validation"]
+  },
+  {
+    "modality_name": "Radiopharmaceuticals",
+    "modality_category": "Emerging Therapy",
+    "description": "Targeted radioactive isotope delivery for cancer therapy. Requires specialized facilities for radioactive material handling, precise isotope incorporation, short half-life management, and specialized containment and logistics. Growing field for targeted cancer treatment with unique manufacturing and regulatory challenges.",
+    "standard_challenges": ["Radioactive Material Handling", "Isotope Manufacturing", "Specialized Containment", "Short Half-Life Logistics"]
+  },
+  {
+    "modality_name": "Stem Cell Therapies",
+    "modality_category": "Advanced Therapy",
+    "description": "Tissue repair and regenerative applications using various stem cell types. Growing pipeline especially in oncology and rare diseases. Requires specialized cell culture, cell banking, quality control for cellular products, and often autologous or allogeneic processing depending on application.",
+    "standard_challenges": ["Stem Cell Culture", "Cell Banking", "Regenerative Manufacturing", "Cellular Quality Control"]
+  }
+]
