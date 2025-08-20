@@ -16,12 +16,19 @@
                     <label for="entity_type" class="form-label">Select Data Type:</label>
                     <select name="entity_type" id="entity_type" class="form-select" required>
                         <option value="">-- Choose data type --</option>
-                        <option value="products">Products</option>
-                        <option value="indications">Indications</option>
-                        <option value="challenges">Manufacturing Challenges</option>
-                        <option value="technologies">Manufacturing Technologies</option>
-                        <option value="partners">Partners</option>
-                        <option value="supply_chain">Product Supply Chain</option>
+                        <optgroup label="Core Entities">
+                            <option value="products">Products</option>
+                            <option value="indications">Indications</option>
+                            <option value="supply_chain">Product Supply Chain</option>
+                        </optgroup>
+                        <optgroup label="Manufacturing Schema">
+                            <option value="modalities">Modalities</option>
+                            <option value="manufacturing_capabilities">Manufacturing Capabilities</option>
+                            <option value="manufacturing_challenges">Manufacturing Challenges</option>
+                            <option value="manufacturing_technologies">Manufacturing Technologies</option>
+                            <option value="internal_facilities">Internal Facilities</option>
+                            <option value="external_partners">External Partners (CMOs)</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div class="col-md-5">

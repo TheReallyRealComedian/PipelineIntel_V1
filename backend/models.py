@@ -1,6 +1,6 @@
 # backend/models.py
-from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey, DateTime, Table
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey, DateTime, Table, Boolean, Date
+from sqlalchemy.orm import relationship, declarative_base, column_property
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.inspection import inspect
@@ -49,6 +49,9 @@ class Product(Base):
     manufacturing_sites = Column(JSONB, nullable=True)
     volume_forecast = Column(JSONB, nullable=True)
     
+    # New Field from Phase 1
+    modality_id = Column(Integer, ForeignKey('modalities.modality_id'))
+    
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
@@ -58,6 +61,9 @@ class Product(Base):
     supply_chain = relationship("ProductSupplyChain", back_populates="product", cascade="all, delete-orphan")
     challenges = relationship("ManufacturingChallenge", secondary=product_to_challenge_association, back_populates="products")
     technologies = relationship("ManufacturingTechnology", secondary=product_to_technology_association, back_populates="products")
+    process_overrides = relationship("ProductProcessOverride", back_populates="product", cascade="all, delete-orphan")
+    requirements = relationship("ProductRequirement", back_populates="product")
+    modality = relationship("Modality", back_populates="products")
 
     @classmethod
     def get_all_fields(cls):
@@ -80,6 +86,7 @@ class ManufacturingChallenge(Base):
     challenge_category = Column(String(255), nullable=False, index=True)
     challenge_name = Column(String(255), unique=True, nullable=False)
     explanation = Column(Text, nullable=True)
+    related_capabilities = Column(JSONB) # New field from Phase 3
     products = relationship("Product", secondary=product_to_challenge_association, back_populates="challenges")
 
     @classmethod
@@ -92,14 +99,11 @@ class ManufacturingTechnology(Base):
     technology_id = Column(Integer, primary_key=True)
     technology_name = Column(String(255), unique=True, nullable=False)
     description = Column(Text, nullable=True)
+    stage_id = Column(Integer, ForeignKey('process_stages.stage_id')) # New field from Phase 3
+    innovation_potential = Column(Text) # New field from Phase 3
+    complexity_rating = Column(Integer) # New field from Phase 3
+    stage = relationship("ProcessStage", back_populates="technologies")
     products = relationship("Product", secondary=product_to_technology_association, back_populates="technologies")
-
-class Partner(Base):
-    __tablename__ = 'partners'
-    partner_id = Column(Integer, primary_key=True)
-    partner_name = Column(String(255), unique=True, nullable=False)
-    specialization = Column(Text, nullable=True)
-    supply_chain_links = relationship("ProductSupplyChain", back_populates="partner")
 
 class ProductSupplyChain(Base):
     __tablename__ = 'product_supply_chain'
@@ -107,11 +111,189 @@ class ProductSupplyChain(Base):
     product_id = Column(Integer, ForeignKey('products.product_id'), nullable=False)
     manufacturing_stage = Column(String(255), nullable=False)
     supply_model = Column(String(100), nullable=True)
-    partner_id = Column(Integer, ForeignKey('partners.partner_id'), nullable=True)
+    entity_id = Column(Integer, ForeignKey('manufacturing_entities.entity_id'), nullable=True)
     internal_site_name = Column(String(255), nullable=True)
     product = relationship("Product", back_populates="supply_chain")
-    partner = relationship("Partner", back_populates="supply_chain_links")
+    manufacturing_entity = relationship("ManufacturingEntity", back_populates="supply_chain_links")
+
+# --- New Models from Phase 1 ---
+
+class Modality(Base):
+    __tablename__ = 'modalities'
+    modality_id = Column(Integer, primary_key=True)
+    modality_name = Column(String(255), unique=True, nullable=False)
+    modality_category = Column(String(255))
+    description = Column(Text)
+    standard_challenges = Column(JSONB)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
     
+    # Relationships
+    products = relationship("Product", back_populates="modality")
+    process_templates = relationship("ProcessTemplate", back_populates="modality")
+    requirements = relationship("ModalityRequirement", back_populates="modality")
+
+class ManufacturingCapability(Base):
+    __tablename__ = 'manufacturing_capabilities'
+    capability_id = Column(Integer, primary_key=True)
+    capability_name = Column(String(255), unique=True, nullable=False)
+    capability_category = Column(String(255), index=True)
+    approach_category = Column(String(255))
+    description = Column(Text)
+    complexity_weight = Column(Integer, default=1)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships back to requirements
+    modality_requirements = relationship("ModalityRequirement", back_populates="capability")
+    product_requirements = relationship("ProductRequirement", back_populates="capability")
+    entity_provisions = relationship("EntityCapability", back_populates="capability")
+
+class ManufacturingEntity(Base):
+    __tablename__ = 'manufacturing_entities'
+    entity_id = Column(Integer, primary_key=True)
+    entity_name = Column(String(255), nullable=False)
+    entity_type = Column(String(50), nullable=False, index=True)
+    location = Column(String(255))
+    operational_status = Column(String(100))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    supply_chain_links = relationship("ProductSupplyChain", back_populates="manufacturing_entity")
+    internal_facility = relationship("InternalFacility", back_populates="entity", uselist=False, cascade="all, delete-orphan")
+    # Note: `external_partner` relationship is defined in the ExternalPartner model below
+    external_partner = relationship("ExternalPartner", back_populates="entity", uselist=False, cascade="all, delete-orphan")
+    capabilities = relationship("EntityCapability", back_populates="entity", cascade="all, delete-orphan")
+
+
+# --- New Models from Phase 2 ---
+
+class ModalityRequirement(Base):
+    __tablename__ = 'modality_requirements'
+    modality_id = Column(Integer, ForeignKey('modalities.modality_id'), primary_key=True)
+    required_capability_id = Column(Integer, ForeignKey('manufacturing_capabilities.capability_id'), primary_key=True)
+    requirement_level = Column(String(100))
+    is_critical = Column(Boolean, default=False)
+    timeline_context = Column(Text)
+    # Relationships
+    modality = relationship("Modality", back_populates="requirements")
+    capability = relationship("ManufacturingCapability", back_populates="modality_requirements")
+
+class ProductRequirement(Base):
+    __tablename__ = 'product_requirements'
+    product_id = Column(Integer, ForeignKey('products.product_id'), primary_key=True)
+    required_capability_id = Column(Integer, ForeignKey('manufacturing_capabilities.capability_id'), primary_key=True)
+    requirement_level = Column(String(100))
+    is_critical = Column(Boolean, default=False)
+    timeline_needed = Column(Date)
+    notes = Column(Text)
+    # Relationships
+    product = relationship("Product", back_populates="requirements")
+    capability = relationship("ManufacturingCapability", back_populates="product_requirements")
+
+class InternalFacility(Base):
+    __tablename__ = 'internal_facilities'
+    entity_id = Column(Integer, ForeignKey('manufacturing_entities.entity_id'), primary_key=True)
+    facility_code = Column(String(100))
+    cost_center = Column(String(100))
+    facility_type = Column(String(100))
+    compatible_product_types = Column(JSONB)
+    internal_capacity = Column(JSONB)
+    entity = relationship("ManufacturingEntity", back_populates="internal_facility")
+
+class EntityCapability(Base):
+    __tablename__ = 'entity_capabilities'
+    entity_id = Column(Integer, ForeignKey('manufacturing_entities.entity_id'), primary_key=True)
+    capability_id = Column(Integer, ForeignKey('manufacturing_capabilities.capability_id'), primary_key=True)
+    capability_level = Column(String(100))
+    implementation_date = Column(Date)
+    upgrade_planned = Column(Boolean, default=False)
+    notes = Column(Text)
+    # Relationships
+    entity = relationship("ManufacturingEntity", back_populates="capabilities")
+    capability = relationship("ManufacturingCapability", back_populates="entity_provisions")
+
+class ExternalPartner(Base):
+    __tablename__ = 'external_partners'
+    entity_id = Column(Integer, ForeignKey('manufacturing_entities.entity_id'), primary_key=True)
+    company_name = Column(String(255), nullable=False)
+    relationship_type = Column(String(100))
+    contract_terms = Column(Text)
+    exclusivity_level = Column(String(100))
+    capacity_allocation = Column(Text)
+    specialization = Column(Text)
+    entity = relationship("ManufacturingEntity", back_populates="external_partner")
+
+
+# --- New Models from Phase 3 ---
+
+class ProcessStage(Base):
+    __tablename__ = 'process_stages'
+    stage_id = Column(Integer, primary_key=True)
+    stage_name = Column(String(255), unique=True, nullable=False)
+    stage_category = Column(String(255))
+    description = Column(Text)
+    # Relationships
+    template_links = relationship("TemplateStage", back_populates="stage")
+    product_overrides = relationship("ProductProcessOverride", back_populates="stage")
+    technologies = relationship("ManufacturingTechnology", back_populates="stage")
+
+class ProcessTemplate(Base):
+    __tablename__ = 'process_templates'
+    template_id = Column(Integer, primary_key=True)
+    modality_id = Column(Integer, ForeignKey('modalities.modality_id'))
+    template_name = Column(String(255), nullable=False)
+    description = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    # Relationships
+    modality = relationship("Modality", back_populates="process_templates")
+    stages = relationship("TemplateStage", back_populates="template", cascade="all, delete-orphan")
+
+class TemplateStage(Base):
+    __tablename__ = 'template_stages'
+    template_id = Column(Integer, ForeignKey('process_templates.template_id'), primary_key=True)
+    stage_id = Column(Integer, ForeignKey('process_stages.stage_id'), primary_key=True)
+    stage_order = Column(Integer)
+    is_required = Column(Boolean, default=True)
+    base_capabilities = Column(JSONB)
+    # Relationships
+    template = relationship("ProcessTemplate", back_populates="stages")
+    stage = relationship("ProcessStage", back_populates="template_links")
+
+class ProductProcessOverride(Base):
+    __tablename__ = 'product_process_overrides'
+    product_id = Column(Integer, ForeignKey('products.product_id'), primary_key=True)
+    stage_id = Column(Integer, ForeignKey('process_stages.stage_id'), primary_key=True)
+    override_type = Column(String(50)) # e.g., 'add', 'skip', 'modify'
+    additional_capabilities = Column(JSONB)
+    notes = Column(Text)
+    # Relationships
+    product = relationship("Product", back_populates="process_overrides")
+    stage = relationship("ProcessStage", back_populates="product_overrides")
+    
+
+# --- SQL View Mappings ---
+# These are unmanaged by Alembic but allow SQLAlchemy to query the views
+
+all_product_requirements_view = Table('all_product_requirements', Base.metadata,
+    Column('product_id', Integer, primary_key=True),
+    Column('required_capability_id', Integer, primary_key=True),
+    Column('requirement_level', String),
+    Column('is_critical', Boolean),
+    Column('requirement_source', String),
+    Column('modality_name', String),
+    Column('capability_name', String)
+)
+
+product_complexity_summary_view = Table('product_complexity_summary', Base.metadata,
+    Column('product_id', Integer, primary_key=True),
+    Column('product_name', String),
+    Column('modality_id', Integer),
+    Column('modality_name', String),
+    Column('expected_launch_year', Integer),
+    Column('total_requirements', Integer),
+    Column('complexity_score', Integer),
+    Column('critical_requirements', Integer),
+)
+
 class User(UserMixin, Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)

@@ -34,8 +34,12 @@
                         <li class="{% if request.blueprint == 'technologies' %}active{% endif %}">
                             <a href="{{ url_for('technologies.list_technologies') }}"><i class="fas fa-microchip"></i> Technologies</a>
                         </li>
-                        <li class="{% if request.blueprint == 'partners' %}active{% endif %}">
-                            <a href="{{ url_for('partners.list_partners') }}"><i class="fas fa-handshake"></i> Partners</a>
+                    <li class="sidebar-menu-header">MANUFACTURING SCHEMA</li>
+                        <li class="{% if request.blueprint == 'modalities' %}active{% endif %}">
+                            <a href="{{ url_for('modalities.list_modalities') }}"><i class="fas fa-dna"></i> Modalities</a>
+                        </li>
+                        <li class="{% if request.blueprint == 'facilities' %}active{% endif %}">
+                            <a href="{{ url_for('facilities.list_facilities') }}"><i class="fas fa-industry"></i> Facilities & Partners</a>
                         </li>
                     <li class="sidebar-menu-header">DATA</li>
                         <li class="{% if request.blueprint == 'data_management' %}active{% endif %}">
@@ -43,6 +47,10 @@
                         </li>
                         <li class="{% if request.blueprint == 'export' %}active{% endif %}">
                             <a href="{{ url_for('export.data_export_page') }}"><i class="fas fa-file-export"></i> Data Export</a>
+                        </li>
+                    <li class="sidebar-menu-header">ANALYTICS</li>
+                        <li class="{% if request.blueprint == 'analytics' %}active{% endif %}">
+                            <a href="{{ url_for('analytics.manufacturing_forecast') }}"><i class="fas fa-chart-line"></i> Strategic Analytics</a>
                         </li>
                     <li class="sidebar-menu-header">SYSTEM</li>
                         <li class="{% if request.blueprint == 'settings' %}active{% endif %}">

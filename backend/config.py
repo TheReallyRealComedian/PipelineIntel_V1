@@ -8,7 +8,9 @@ load_dotenv(os.path.join(basedir, '..', '.env'))
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'a-very-secret-key-that-you-should-change'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'postgresql://user:password@db:5432/asset_tracker_db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    if not SQLALCHEMY_DATABASE_URI:
+        raise ValueError("DATABASE_URL environment variable is not set. Please configure it in your .env file.")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class DevelopmentConfig(Config):

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="facilities-page">
+    <h1>{{ title }}</h1>
+    <p class="text-color-light mb-4">A list of all internal and external manufacturing entities.</p>
+
+    <div class="card">
+        <div class="card-header"><h2 class="card-title mb-0">All Entities</h2></div>
+        <div class="card-body">
+            {% if facilities %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Entity Name</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for facility in facilities %}
+                        <tr>
+                            <td><strong>{{ facility.entity_name }}</strong></td>
+                            <td><span class="badge bg-{{ 'primary' if facility.entity_type == 'Internal' else 'secondary' }}">{{ facility.entity_type }}</span></td>
+                            <td>{{ facility.location or '' }}</td>
+                            <td>{{ facility.operational_status or '' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center p-4">
+                <em>No facilities or partners found. Import data via the <a href="{{ url_for('data_management.data_management_page') }}">Data Management</a> page.</em>
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

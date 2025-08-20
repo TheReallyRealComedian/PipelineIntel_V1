@@ -1,6 +1,6 @@
 # backend/services/product_service.py
-from sqlalchemy.orm import Session
-from ..models import Product
+from sqlalchemy.orm import Session, joinedload
+from ..models import Product, Modality, all_product_requirements_view
 
 def get_all_products(db_session: Session):
     return db_session.query(Product).order_by(Product.product_code).all()
@@ -58,3 +58,22 @@ def inline_update_product_field(db_session: Session, product_id: int, field: str
     setattr(product, field, value)
     db_session.commit()
     return product, "Product updated."
+
+def get_product_with_requirements(db_session: Session, product_id: int):
+    """
+    Gets a single product and eagerly loads its combined requirements (both inherited from its modality
+    and specific to the product) by querying the all_product_requirements view.
+    """
+    product = db_session.query(Product).options(
+        joinedload(Product.modality)
+    ).get(product_id)
+    
+    if not product:
+        return None, None
+
+    requirements = db_session.query(all_product_requirements_view).filter_by(product_id=product_id).all()
+    return product, requirements
+
+def get_products_by_modality(db_session: Session, modality_id: int):
+    """Gets all products for a specific modality."""
+    return db_session.query(Product).filter(Product.modality_id == modality_id).order_by(Product.product_name).all()

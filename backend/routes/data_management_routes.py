@@ -4,18 +4,20 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from flask_login import login_required
 
 from ..services.data_management_service import analyze_json_import, finalize_import
-from ..models import Product, Indication, ManufacturingChallenge, ManufacturingTechnology, Partner, ProductSupplyChain
+from ..models import Product, Indication, ManufacturingChallenge, ManufacturingTechnology, ProductSupplyChain, Modality, ManufacturingCapability, InternalFacility, ExternalPartner
 
 data_management_bp = Blueprint('data_management', __name__, url_prefix='/data-management')
 
 ENTITY_MAP = {
     'products': {'model': Product, 'key': 'product_code'},
     'indications': {'model': Indication, 'key': 'indication_name'},
-    'challenges': {'model': ManufacturingChallenge, 'key': 'challenge_name'},
-    'technologies': {'model': ManufacturingTechnology, 'key': 'technology_name'},
-    'partners': {'model': Partner, 'key': 'partner_name'},
-    # Supply chain is complex, let's use its primary key for now if we need to update it
-    'supply_chain': {'model': ProductSupplyChain, 'key': 'id'}
+    'manufacturing_challenges': {'model': ManufacturingChallenge, 'key': 'challenge_name'},
+    'manufacturing_technologies': {'model': ManufacturingTechnology, 'key': 'technology_name'},
+    'supply_chain': {'model': ProductSupplyChain, 'key': 'id'},
+    'modalities': {'model': Modality, 'key': 'modality_name'},
+    'manufacturing_capabilities': {'model': ManufacturingCapability, 'key': 'capability_name'},
+    'internal_facilities': {'model': InternalFacility, 'key': 'facility_code'},
+    'external_partners': {'model': ExternalPartner, 'key': 'company_name'},
 }
 
 @data_management_bp.route('/')
@@ -42,7 +44,6 @@ def analyze_json_upload():
         if not isinstance(json_data, list):
             raise ValueError("JSON file must contain a list (array) of objects.")
 
-        # --- THIS IS THE FIX ---
         # Use g.db_session from the application context, not the user session
         analysis_result = analyze_json_import(
             g.db_session,
@@ -50,7 +51,6 @@ def analyze_json_upload():
             ENTITY_MAP[entity_type]['model'],
             ENTITY_MAP[entity_type]['key']
         )
-        # --- END FIX ---
 
         if analysis_result.get('success'):
             session['import_preview_data'] = analysis_result['preview_data']
@@ -80,17 +80,16 @@ def import_preview():
         preview_data=preview_data,
         entity_type=entity_type
     )
-
+    
 @data_management_bp.route('/finalize', methods=['POST'])
 @login_required
 def finalize_json_import():
     resolved_data = request.json.get('resolved_data')
     entity_type = request.json.get('entity_type')
-
-    if not resolved_data or not entity_type or entity_type not in ENTITY_MAP:
+    
+    if not resolved_data or not entity_type or not entity_type in ENTITY_MAP:
         return jsonify(success=False, message="Invalid request data."), 400
 
-    # --- THIS IS THE FIX ---
     # Use g.db_session from the application context here as well
     result = finalize_import(
         g.db_session,
@@ -98,7 +97,6 @@ def finalize_json_import():
         ENTITY_MAP[entity_type]['model'],
         ENTITY_MAP[entity_type]['key']
     )
-    # --- END FIX ---
     
     session.pop('import_preview_data', None)
     session.pop('import_entity_type', None)

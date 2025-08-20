@@ -2,7 +2,7 @@
 import json
 import traceback
 from sqlalchemy.orm import Session
-from ..models import Product, Indication, ManufacturingChallenge, ManufacturingTechnology, Partner, ProductSupplyChain
+from ..models import Product, Indication, ManufacturingChallenge, ManufacturingTechnology, ProductSupplyChain, ManufacturingEntity, InternalFacility, ExternalPartner, Modality, ProcessStage
 
 def analyze_json_import(db_session: Session, json_data: list, model_class, unique_key_field: str):
     """
@@ -99,8 +99,13 @@ def finalize_import(db_session: Session, resolved_data: list, model_class, uniqu
     added_count, updated_count, skipped_count, failed_count = 0, 0, 0, 0
     error_messages = []
 
+    # --- CORRECTED & ENHANCED MAPS ---
     product_map = {p.product_code: p for p in db_session.query(Product).all()}
-    partner_map = {p.partner_name: p.partner_id for p in db_session.query(Partner.partner_name, Partner.partner_id).all()}
+    # Pre-fetch maps for ALL foreign key lookups by name
+    modality_map = {m.modality_name: m.modality_id for m in db_session.query(Modality.modality_name, Modality.modality_id).all()}
+    stage_map = {s.stage_name: s.stage_id for s in db_session.query(ProcessStage.stage_name, ProcessStage.stage_id).all()}
+    # NEW: Map for supply chain entity lookups by name
+    entity_map = {e.entity_name: e.entity_id for e in db_session.query(ManufacturingEntity.entity_name, ManufacturingEntity.entity_id).all()}
 
     for item in resolved_data:
         action = item.get('action')
@@ -112,11 +117,24 @@ def finalize_import(db_session: Session, resolved_data: list, model_class, uniqu
             continue
 
         try:
-            # --- MODIFICATION START: Pop product_codes before object creation/update ---
             product_codes_to_link = []
             if model_class == ManufacturingChallenge:
                 product_codes_to_link = data.pop('product_codes', [])
-            # --- MODIFICATION END ---
+            
+            # --- Handle FK lookups by name from JSON ---
+            if model_class == Product:
+                modality_name = data.pop('modality_name', None)
+                if modality_name and modality_name in modality_map:
+                    data['modality_id'] = modality_map[modality_name]
+                elif modality_name:
+                    raise ValueError(f"Modality '{modality_name}' not found.")
+            
+            if model_class == ManufacturingTechnology:
+                stage_name = data.pop('stage_name', None)
+                if stage_name and stage_name in stage_map:
+                    data['stage_id'] = stage_map[stage_name]
+                elif stage_name:
+                    raise ValueError(f"Process Stage '{stage_name}' not found.")
             
             if model_class == Indication:
                 product_code = data.pop('product_code', None)
@@ -125,39 +143,60 @@ def finalize_import(db_session: Session, resolved_data: list, model_class, uniqu
                 else:
                     raise ValueError(f"Parent Product with code '{product_code}' not found.")
 
+            # --- FIXED AND ENHANCED SUPPLY CHAIN LOGIC ---
             if model_class == ProductSupplyChain:
                 product_code = data.pop('product_code', None)
-                partner_name = data.pop('partner_name', None)
+                entity_name = data.pop('entity_name', None) # Use entity_name for lookup
                 if product_code and product_code in product_map:
                     data['product_id'] = product_map[product_code].product_id
                 else:
                     raise ValueError(f"Parent Product with code '{product_code}' not found for supply chain.")
-                if partner_name and partner_name in partner_map:
-                    data['partner_id'] = partner_map[partner_name]
-                elif partner_name:
-                     raise ValueError(f"Partner with name '{partner_name}' not found for supply chain.")
+                if entity_name and entity_name in entity_map:
+                    data['entity_id'] = entity_map[entity_name] # Look up entity_id
+                elif entity_name:
+                     raise ValueError(f"Manufacturing Entity with name '{entity_name}' not found for supply chain.")
 
             if action == 'add':
-                new_obj = model_class(**data)
+                if model_class in [InternalFacility, ExternalPartner]:
+                    base_entity_data = {
+                        'entity_name': data.get('facility_code') if model_class == InternalFacility else data.get('company_name'),
+                        'entity_type': 'Internal' if model_class == InternalFacility else 'External',
+                        'location': data.pop('location', None),
+                        'operational_status': data.pop('operational_status', None)
+                    }
+                    if not base_entity_data['entity_name']:
+                        raise ValueError(f"Unique identifier '{unique_key_field}' is required.")
+
+                    base_entity = ManufacturingEntity(**base_entity_data)
+                    db_session.add(base_entity)
+                    db_session.flush()
+
+                    data['entity_id'] = base_entity.entity_id
+                    new_obj = model_class(**data)
+                else:
+                    new_obj = model_class(**data)
+                
                 db_session.add(new_obj)
                 added_count += 1
-                # --- MODIFICATION START: Link products for new challenges ---
                 if model_class == ManufacturingChallenge and product_codes_to_link:
                     valid_products = [product_map[code] for code in product_codes_to_link if code in product_map]
                     new_obj.products = valid_products
-                # --- MODIFICATION END ---
 
             elif action == 'update':
                 obj_to_update = db_session.query(model_class).filter(getattr(model_class, unique_key_field) == identifier).first()
                 if obj_to_update:
+                    if model_class in [InternalFacility, ExternalPartner]:
+                        base_entity = db_session.query(ManufacturingEntity).get(obj_to_update.entity_id)
+                        base_entity.location = data.pop('location', base_entity.location)
+                        base_entity.operational_status = data.pop('operational_status', base_entity.operational_status)
+                        base_entity.entity_name = data.get('facility_code', base_entity.entity_name) if model_class == InternalFacility else data.get('company_name', base_entity.entity_name)
+                    
                     for key, value in data.items():
                         setattr(obj_to_update, key, value)
                     updated_count += 1
-                    # --- MODIFICATION START: Update product links for existing challenges ---
                     if model_class == ManufacturingChallenge:
                         valid_products = [product_map[code] for code in product_codes_to_link if code in product_map]
-                        obj_to_update.products = valid_products # SQLAlchemy handles the association changes
-                    # --- MODIFICATION END ---
+                        obj_to_update.products = valid_products
                 else:
                     raise ValueError(f"Could not find existing item with identifier '{identifier}' to update.")
 
@@ -167,7 +206,8 @@ def finalize_import(db_session: Session, resolved_data: list, model_class, uniqu
             db_session.rollback()
     
     if failed_count > 0:
-        return {"success": False, "message": f"Import finished with {failed_count} errors. No changes from the failed items were saved.", "log": error_messages}
+        db_session.rollback()
+        return {"success": False, "message": f"Import finished with {failed_count} errors. No changes were saved.", "log": error_messages}
     
     db_session.commit()
     return {"success": True, "message": f"Import successful! Added: {added_count}, Updated: {updated_count}, Skipped: {skipped_count}."}

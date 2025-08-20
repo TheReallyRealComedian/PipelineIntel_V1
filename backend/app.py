@@ -19,9 +19,12 @@ import backend.routes.product_routes as product_routes_mod
 import backend.routes.indication_routes as indication_routes_mod
 import backend.routes.challenge_routes as challenge_routes_mod
 import backend.routes.technology_routes as technology_routes_mod
-import backend.routes.partner_routes as partner_routes_mod
 import backend.routes.data_management_routes as data_management_routes_mod
 import backend.routes.export_routes as export_routes_mod
+# Import new blueprints from Phase 6
+import backend.routes.modality_routes as modality_routes_mod
+import backend.routes.facility_routes as facility_routes_mod
+import backend.routes.analytics_routes as analytics_routes_mod
 
 
 login_manager = LoginManager()
@@ -85,9 +88,11 @@ def create_app(init_session=True):
     app.register_blueprint(indication_routes_mod.indication_routes)
     app.register_blueprint(challenge_routes_mod.challenge_routes)
     app.register_blueprint(technology_routes_mod.technology_routes)
-    app.register_blueprint(partner_routes_mod.partner_routes)
     app.register_blueprint(data_management_routes_mod.data_management_bp)
     app.register_blueprint(export_routes_mod.export_bp)
+    app.register_blueprint(modality_routes_mod.modality_routes)
+    app.register_blueprint(facility_routes_mod.facility_routes)
+    app.register_blueprint(analytics_routes_mod.analytics_routes)
 
 
     @app.route('/')
