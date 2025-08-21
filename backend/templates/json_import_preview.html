@@ -110,6 +110,9 @@
 {% block scripts %}
 {{ super() }}
 <script>
+function getCSRFToken() {
+    return document.querySelector('meta[name=csrf-token]').getAttribute('content');
+}
 document.addEventListener('DOMContentLoaded', function () {
     const previewData = {{ preview_data | tojson | safe }};
     const entityType = "{{ entity_type }}";
@@ -165,7 +168,10 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch("{{ url_for('data_management.finalize_json_import') }}", {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken() // ADD THIS LINE
+                },
                 body: JSON.stringify({ resolved_data: resolved_data, entity_type: entityType })
             });
             const result = await response.json();

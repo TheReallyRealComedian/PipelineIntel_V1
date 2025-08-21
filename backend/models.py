@@ -1,28 +1,27 @@
 # backend/models.py
-from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey, DateTime, Table, Boolean, Date
-from sqlalchemy.orm import relationship, declarative_base, column_property
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Table, Boolean, Date
+from sqlalchemy.orm import relationship, column_property
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.inspection import inspect
 from passlib.hash import pbkdf2_sha256
 from flask_login import UserMixin
-
-Base = declarative_base()
+from .db import db
 
 # --- Association Tables ---
-product_to_challenge_association = Table('product_to_challenge', Base.metadata,
+product_to_challenge_association = Table('product_to_challenge', db.metadata,
     Column('product_id', Integer, ForeignKey('products.product_id'), primary_key=True),
     Column('challenge_id', Integer, ForeignKey('manufacturing_challenges.challenge_id'), primary_key=True)
 )
 
-product_to_technology_association = Table('product_to_technology', Base.metadata,
+product_to_technology_association = Table('product_to_technology', db.metadata,
     Column('product_id', Integer, ForeignKey('products.product_id'), primary_key=True),
     Column('technology_id', Integer, ForeignKey('manufacturing_technologies.technology_id'), primary_key=True)
 )
 
 # --- Core Entity Tables ---
 
-class Product(Base):
+class Product(db.Model):
     __tablename__ = 'products'
     product_id = Column(Integer, primary_key=True)
     product_code = Column(String(100), unique=True, nullable=False, index=True)
@@ -73,7 +72,7 @@ class Product(Base):
         """Returns a list of all column names for the model."""
         return [c.key for c in inspect(cls).attrs if c.key not in ['indications', 'supply_chain', 'challenges', 'technologies']]
 
-class Indication(Base):
+class Indication(db.Model):
     __tablename__ = 'indications'
     indication_id = Column(Integer, primary_key=True)
     product_id = Column(Integer, ForeignKey('products.product_id'), nullable=False)
@@ -88,7 +87,7 @@ class Indication(Base):
         """Returns a list of all column names for the model."""
         return [c.key for c in inspect(cls).attrs if c.key not in ['product']]
 
-class ManufacturingChallenge(Base):
+class ManufacturingChallenge(db.Model):
     __tablename__ = 'manufacturing_challenges'
     challenge_id = Column(Integer, primary_key=True)
     challenge_category = Column(String(255), nullable=False, index=True)
@@ -103,7 +102,7 @@ class ManufacturingChallenge(Base):
         """Returns a list of all column names for the model."""
         return [c.key for c in inspect(cls).attrs if c.key not in ['products']]
 
-class ManufacturingTechnology(Base):
+class ManufacturingTechnology(db.Model):
     __tablename__ = 'manufacturing_technologies'
     technology_id = Column(Integer, primary_key=True)
     technology_name = Column(String(255), unique=True, nullable=False)
@@ -120,7 +119,7 @@ class ManufacturingTechnology(Base):
         """Returns a list of all column names for the model."""
         return [c.key for c in inspect(cls).attrs if c.key not in ['stage', 'products']]
 
-class ProductSupplyChain(Base):
+class ProductSupplyChain(db.Model):
     __tablename__ = 'product_supply_chain'
     id = Column(Integer, primary_key=True)
     product_id = Column(Integer, ForeignKey('products.product_id'), nullable=False)
@@ -133,7 +132,7 @@ class ProductSupplyChain(Base):
 
 # --- New Models from Phase 1 ---
 
-class Modality(Base):
+class Modality(db.Model):
     __tablename__ = 'modalities'
     modality_id = Column(Integer, primary_key=True)
     modality_name = Column(String(255), unique=True, nullable=False)
@@ -155,7 +154,7 @@ class Modality(Base):
         # Exclude relationship fields that shouldn't be displayed as simple columns
         return [c.key for c in inspect(cls).attrs if c.key not in ['products', 'process_templates', 'requirements']]
 
-class ManufacturingCapability(Base):
+class ManufacturingCapability(db.Model):
     __tablename__ = 'manufacturing_capabilities'
     capability_id = Column(Integer, primary_key=True)
     capability_name = Column(String(255), unique=True, nullable=False)
@@ -175,7 +174,7 @@ class ManufacturingCapability(Base):
         """Returns a list of all column names for the model."""
         return [c.key for c in inspect(cls).attrs if not c.key.startswith('_') and c.key not in ['modality_requirements', 'product_requirements', 'entity_provisions']]
 
-class ManufacturingEntity(Base):
+class ManufacturingEntity(db.Model):
     __tablename__ = 'manufacturing_entities'
     entity_id = Column(Integer, primary_key=True)
     entity_name = Column(String(255), nullable=False)
@@ -199,7 +198,7 @@ class ManufacturingEntity(Base):
 
 # --- New Models from Phase 2 ---
 
-class ModalityRequirement(Base):
+class ModalityRequirement(db.Model):
     __tablename__ = 'modality_requirements'
     modality_id = Column(Integer, ForeignKey('modalities.modality_id'), primary_key=True)
     required_capability_id = Column(Integer, ForeignKey('manufacturing_capabilities.capability_id'), primary_key=True)
@@ -210,7 +209,7 @@ class ModalityRequirement(Base):
     modality = relationship("Modality", back_populates="requirements")
     capability = relationship("ManufacturingCapability", back_populates="modality_requirements")
 
-class ProductRequirement(Base):
+class ProductRequirement(db.Model):
     __tablename__ = 'product_requirements'
     product_id = Column(Integer, ForeignKey('products.product_id'), primary_key=True)
     required_capability_id = Column(Integer, ForeignKey('manufacturing_capabilities.capability_id'), primary_key=True)
@@ -222,7 +221,7 @@ class ProductRequirement(Base):
     product = relationship("Product", back_populates="requirements")
     capability = relationship("ManufacturingCapability", back_populates="product_requirements")
 
-class InternalFacility(Base):
+class InternalFacility(db.Model):
     __tablename__ = 'internal_facilities'
     entity_id = Column(Integer, ForeignKey('manufacturing_entities.entity_id'), primary_key=True)
     facility_code = Column(String(100))
@@ -232,7 +231,7 @@ class InternalFacility(Base):
     internal_capacity = Column(JSONB)
     entity = relationship("ManufacturingEntity", back_populates="internal_facility")
 
-class EntityCapability(Base):
+class EntityCapability(db.Model):
     __tablename__ = 'entity_capabilities'
     entity_id = Column(Integer, ForeignKey('manufacturing_entities.entity_id'), primary_key=True)
     capability_id = Column(Integer, ForeignKey('manufacturing_capabilities.capability_id'), primary_key=True)
@@ -244,7 +243,7 @@ class EntityCapability(Base):
     entity = relationship("ManufacturingEntity", back_populates="capabilities")
     capability = relationship("ManufacturingCapability", back_populates="entity_provisions")
 
-class ExternalPartner(Base):
+class ExternalPartner(db.Model):
     __tablename__ = 'external_partners'
     entity_id = Column(Integer, ForeignKey('manufacturing_entities.entity_id'), primary_key=True)
     company_name = Column(String(255), nullable=False)
@@ -258,7 +257,7 @@ class ExternalPartner(Base):
 
 # --- New Models from Phase 3 ---
 
-class ProcessStage(Base):
+class ProcessStage(db.Model):
     __tablename__ = 'process_stages'
     stage_id = Column(Integer, primary_key=True)
     stage_name = Column(String(255), unique=True, nullable=False)
@@ -270,7 +269,7 @@ class ProcessStage(Base):
     product_overrides = relationship("ProductProcessOverride", back_populates="stage")
     technologies = relationship("ManufacturingTechnology", back_populates="stage")
 
-class ProcessTemplate(Base):
+class ProcessTemplate(db.Model):
     __tablename__ = 'process_templates'
     template_id = Column(Integer, primary_key=True)
     modality_id = Column(Integer, ForeignKey('modalities.modality_id'))
@@ -281,7 +280,7 @@ class ProcessTemplate(Base):
     modality = relationship("Modality", back_populates="process_templates")
     stages = relationship("TemplateStage", back_populates="template", cascade="all, delete-orphan")
 
-class TemplateStage(Base):
+class TemplateStage(db.Model):
     __tablename__ = 'template_stages'
     template_id = Column(Integer, ForeignKey('process_templates.template_id'), primary_key=True)
     stage_id = Column(Integer, ForeignKey('process_stages.stage_id'), primary_key=True)
@@ -292,7 +291,7 @@ class TemplateStage(Base):
     template = relationship("ProcessTemplate", back_populates="stages")
     stage = relationship("ProcessStage", back_populates="template_links")
 
-class ProductProcessOverride(Base):
+class ProductProcessOverride(db.Model):
     __tablename__ = 'product_process_overrides'
     product_id = Column(Integer, ForeignKey('products.product_id'), primary_key=True)
     stage_id = Column(Integer, ForeignKey('process_stages.stage_id'), primary_key=True)
@@ -307,7 +306,7 @@ class ProductProcessOverride(Base):
 # --- SQL View Mappings ---
 # These are unmanaged by Alembic but allow SQLAlchemy to query the views
 
-all_product_requirements_view = Table('all_product_requirements', Base.metadata,
+all_product_requirements_view = Table('all_product_requirements', db.metadata,
     Column('product_id', Integer, primary_key=True),
     Column('required_capability_id', Integer, primary_key=True),
     Column('requirement_level', String),
@@ -317,7 +316,7 @@ all_product_requirements_view = Table('all_product_requirements', Base.metadata,
     Column('capability_name', String)
 )
 
-product_complexity_summary_view = Table('product_complexity_summary', Base.metadata,
+product_complexity_summary_view = Table('product_complexity_summary', db.metadata,
     Column('product_id', Integer, primary_key=True),
     Column('product_name', String),
     Column('modality_id', Integer),
@@ -328,7 +327,7 @@ product_complexity_summary_view = Table('product_complexity_summary', Base.metad
     Column('critical_requirements', Integer),
 )
 
-class User(UserMixin, Base):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     username = Column(String(80), unique=True, nullable=False)
@@ -342,7 +341,7 @@ class User(UserMixin, Base):
     def check_password(self, password):
         return pbkdf2_sha256.verify(password, self.password)
 
-class LLMSettings(Base):
+class LLMSettings(db.Model):
     __tablename__ = 'llm_settings'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), unique=True, nullable=False)

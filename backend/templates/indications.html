@@ -1,7 +1,28 @@
 {% extends "base.html" %}
+{% from "macros/_table_macros.html" import render_column_selector, render_dynamic_table %}
+
 {% block title %}{{ title }}{% endblock %}
+
 {% block content %}
-<h1>{{ title }}</h1>
-<p>List of all clinical indications.</p>
-<!-- Table will go here -->
+<div class="indications-page">
+    <h1>{{ title }}</h1>
+    <p class="text-color-light mb-4">A filterable and editable list of all clinical indications across the product portfolio.</p>
+
+    <div class="card">
+        <div class="card-header"><h2 class="card-title mb-0">All Indications</h2></div>
+        <div class="card-body">
+            {% if items %}
+                {# Use the column selector macro #}
+                {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
+
+                {# Use the dynamic table macro #}
+                {{ render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural) }}
+            {% else %}
+                <p class="text-muted text-center p-4">
+                    <em>No indications found. Import data via the <a href="{{ url_for('data_management.data_management_page') }}">Data Management</a> page.</em>
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

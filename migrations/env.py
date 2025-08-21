@@ -1,4 +1,4 @@
-# C:\Users\glutholi\CODE\UsecaseExplorer\migrations\env.py
+# migrations/env.py - FIXED VERSION
 
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config
@@ -18,14 +18,15 @@ config = context.config
 #if config.config_file_name is not None:
 #    fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-from backend.models import Base
+# CHANGE THIS: Instead of importing Base, import db
 from backend.app import create_app
+from backend.db import db
 
 # THIS IS THE KEY CHANGE: Call create_app with the new flag
 app = create_app(init_session=False)  
-target_metadata = Base.metadata
+
+# CHANGE THIS: Use db.metadata instead of Base.metadata
+target_metadata = db.metadata
 
 # Exclude specific tables from Alembic migrations
 def include_object(object, name, type_, reflected, compare_to):
@@ -41,9 +42,7 @@ def include_object(object, name, type_, reflected, compare_to):
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
-    # ... (rest of the function is correct) ...
-    """
+    """Run migrations in 'offline' mode."""
     url = app.config.get("SQLALCHEMY_DATABASE_URI")
     context.configure(
         url=url,
@@ -59,7 +58,6 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    # --- START MODIFICATION ---
     # We wrap the code that needs the Flask app in an app_context.
     with app.app_context():
         connectable = app.extensions['sqlalchemy'].engine
@@ -73,7 +71,6 @@ def run_migrations_online() -> None:
 
             with context.begin_transaction():
                 context.run_migrations()
-    # --- END MODIFICATION ---
 
 
 if context.is_offline_mode():

@@ -1,6 +1,10 @@
 (function() {
     'use strict';
 
+    function getCSRFToken() {
+        return document.querySelector('meta[name=csrf-token]').getAttribute('content');
+    }
+
     /**
      * Initializes client-side sorting for a given table.
      * @param {HTMLTableElement} table The table element to make sortable.
@@ -286,7 +290,7 @@
         });
     }
 
-    function handleSaveOrCancel(shouldSave, cell, inputElement = null, entityType = null, entityId = null, entityPlural = null) { // Accept plural name
+    function handleSaveOrCancel(shouldSave, cell, inputElement = null, entityType = null, entityId = null, entityPlural = null) {
         if (!cell.classList.contains('is-editing')) return;
         cell.classList.remove('is-editing');
         const originalHTML = cell.dataset.originalHTML;
@@ -297,24 +301,30 @@
         if (newValue === originalText) { cell.innerHTML = originalHTML; return; }
         cell.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-        // *** THE FIX ***: Use the correct plural name passed from the backend
-        const pluralName = entityPlural || (entityType + 's'); // Fallback just in case
+        const pluralName = entityPlural || (entityType + 's');
         const apiEndpoint = `/${pluralName}/api/${pluralName}/${entityId}/inline-update`;
 
         fetch(apiEndpoint, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken() // ADD THIS LINE
+            },
             body: JSON.stringify({ [field]: newValue })
         })
         .then(response => {
-            if (!response.ok) { // Check for 404 or other HTTP errors
+            if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            if (data.success) { cell.innerHTML = newValue; } 
-            else { alert(`Error: ${data.message}`); cell.innerHTML = originalHTML; }
+            if (data.success) { 
+                cell.innerHTML = newValue; 
+            } else { 
+                alert(`Error: ${data.message}`); 
+                cell.innerHTML = originalHTML; 
+            }
         })
         .catch(error => {
             console.error('Error updating record:', error);

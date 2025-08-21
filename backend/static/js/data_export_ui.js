@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    function getCSRFToken() {
+        return document.querySelector('meta[name=csrf-token]').getAttribute('content');
+    }
+
     function updateHiddenInputs(inputName) {
         const entityType = inputName.replace('_ids', '');
         const container = document.getElementById(`${entityType}_hidden_inputs`);

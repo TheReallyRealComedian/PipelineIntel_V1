@@ -1,5 +1,5 @@
 # backend/routes/auth_routes.py
-from flask import Blueprint, render_template, redirect, url_for, flash, request, g
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from urllib.parse import urlparse
 
@@ -18,7 +18,7 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        new_user, message = auth_service.create_user(g.db_session, username, password)
+        new_user, message = auth_service.create_user(username, password)
         if new_user:
             flash(message, 'success')
             return redirect(url_for('auth.login'))
@@ -37,7 +37,7 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         remember = request.form.get('remember_me') is not None
-        user = auth_service.authenticate_user(g.db_session, username, password)
+        user = auth_service.authenticate_user(username, password)
         if user:
             login_user(user, remember=remember)
             flash('Login successful!', 'success')

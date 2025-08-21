@@ -1,17 +1,18 @@
 import os
-from flask import Flask, g, redirect, url_for
+from flask import Flask, redirect, url_for
 from flask_login import LoginManager
 from flask_session import Session
 from flask_assets import Environment
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect  # ADD THIS IMPORT
 
 from backend.config import get_config
 from backend.models import User
-from backend.db import db, init_app_db, SessionLocal
+from backend.db import db, init_app_db
 from backend.utils import nl2br, markdown_to_html_filter, truncate_filter
 from backend.assets import js_main_bundle, css_bundle
 
-# Import new blueprints
+# Import blueprints (unchanged)
 import backend.routes.auth_routes as auth_routes_mod
 import backend.routes.settings_routes as settings_routes_mod
 import backend.routes.api_routes as api_routes_mod
@@ -21,11 +22,9 @@ import backend.routes.challenge_routes as challenge_routes_mod
 import backend.routes.technology_routes as technology_routes_mod
 import backend.routes.data_management_routes as data_management_routes_mod
 import backend.routes.export_routes as export_routes_mod
-# Import new blueprints from Phase 6
 import backend.routes.modality_routes as modality_routes_mod
 import backend.routes.facility_routes as facility_routes_mod
 import backend.routes.analytics_routes as analytics_routes_mod
-
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
@@ -34,24 +33,22 @@ login_manager.login_message_category = 'info'
 
 @login_manager.user_loader
 def load_user(user_id):
-    session = g.get('db_session', SessionLocal())
+    """Load user - now using db.session directly."""
     try:
-        return session.query(User).get(int(user_id))
+        return User.query.get(int(user_id))
     except (ValueError, TypeError):
         return None
-    finally:
-        if 'db_session' not in g:
-            SessionLocal.remove()
-
 
 def create_app(init_session=True):
     app = Flask(__name__, instance_relative_config=True, static_folder='static', template_folder='templates')
-
     app.config.from_object(get_config())
     
     # Initialize extensions
     init_app_db(app)
     login_manager.init_app(app)
+    
+    # ADD THIS: Initialize CSRF protection
+    csrf = CSRFProtect(app)
 
     assets = Environment(app)
     assets.register('js_main', js_main_bundle)
@@ -70,17 +67,7 @@ def create_app(init_session=True):
         app.config['PERMANENT_SESSION_LIFETIME'] = 3600 * 24 * 7
         Session(app)
 
-    @app.before_request
-    def before_request():
-        g.db_session = SessionLocal()
-
-    @app.teardown_appcontext
-    def teardown_appcontext(exception=None):
-        db_session = g.pop('db_session', None)
-        if db_session is not None:
-            SessionLocal.remove()
-
-    # Register blueprints
+    # Register blueprints (unchanged)
     app.register_blueprint(auth_routes_mod.auth_routes)
     app.register_blueprint(settings_routes_mod.settings_routes)
     app.register_blueprint(api_routes_mod.api_bp)
@@ -93,7 +80,6 @@ def create_app(init_session=True):
     app.register_blueprint(modality_routes_mod.modality_routes)
     app.register_blueprint(facility_routes_mod.facility_routes)
     app.register_blueprint(analytics_routes_mod.analytics_routes)
-
 
     @app.route('/')
     def index():

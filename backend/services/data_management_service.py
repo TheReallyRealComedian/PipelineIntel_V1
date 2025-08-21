@@ -1,21 +1,20 @@
 # backend/services/data_management_service.py
 import json
 import traceback
-from sqlalchemy.orm import Session
+from ..db import db
 from ..models import Product, Indication, ManufacturingChallenge, ManufacturingTechnology, ProductSupplyChain, ManufacturingEntity, InternalFacility, ExternalPartner, Modality, ProcessStage
 
-def analyze_json_import(db_session: Session, json_data: list, model_class, unique_key_field: str):
+def analyze_json_import(json_data: list, model_class, unique_key_field: str):
     """
     Analyzes a list of JSON objects against existing data in the database.
     This function performs the comparison and generates a detailed preview.
     """
     preview_data = []
     try:
-        # --- MODIFICATION START: Pre-fetch product map for challenge analysis ---
-        product_map = {p.product_code: p for p in db_session.query(Product).all()} if model_class == ManufacturingChallenge else {}
-        # --- MODIFICATION END ---
-        
-        existing_items_query = db_session.query(model_class).all()
+        # AFTER  
+        product_map = {p.product_code: p for p in Product.query.all()} if model_class == ManufacturingChallenge else {}
+        existing_items_query = model_class.query.all()
+
         existing_items_map = {getattr(item, unique_key_field): item for item in existing_items_query}
         
         for json_item in json_data:
@@ -92,7 +91,7 @@ def analyze_json_import(db_session: Session, json_data: list, model_class, uniqu
         traceback.print_exc()
         return {"success": False, "message": f"An unexpected analysis error occurred: {e}"}
 
-def finalize_import(db_session: Session, resolved_data: list, model_class, unique_key_field: str):
+def finalize_import(resolved_data: list, model_class, unique_key_field: str):
     """
     Takes user-approved changes from the preview and commits them to the DB.
     """
@@ -100,12 +99,14 @@ def finalize_import(db_session: Session, resolved_data: list, model_class, uniqu
     error_messages = []
 
     # --- CORRECTED & ENHANCED MAPS ---
-    product_map = {p.product_code: p for p in db_session.query(Product).all()}
+    product_map = {p.product_code: p for p in Product.query.all()}
+
     # Pre-fetch maps for ALL foreign key lookups by name
-    modality_map = {m.modality_name: m.modality_id for m in db_session.query(Modality.modality_name, Modality.modality_id).all()}
-    stage_map = {s.stage_name: s.stage_id for s in db_session.query(ProcessStage.stage_name, ProcessStage.stage_id).all()}
+    modality_map = {m.modality_name: m.modality_id for m in Modality.query.with_entities(Modality.modality_name, Modality.modality_id).all()}
+    stage_map = {s.stage_name: s.stage_id for s in ProcessStage.query.with_entities(ProcessStage.stage_name, ProcessStage.stage_id).all()}
     # NEW: Map for supply chain entity lookups by name
-    entity_map = {e.entity_name: e.entity_id for e in db_session.query(ManufacturingEntity.entity_name, ManufacturingEntity.entity_id).all()}
+    entity_map = {e.entity_name: e.entity_id for e in ManufacturingEntity.query.with_entities(ManufacturingEntity.entity_name, ManufacturingEntity.entity_id).all()}
+
 
     for item in resolved_data:
         action = item.get('action')
@@ -168,25 +169,25 @@ def finalize_import(db_session: Session, resolved_data: list, model_class, uniqu
                         raise ValueError(f"Unique identifier '{unique_key_field}' is required.")
 
                     base_entity = ManufacturingEntity(**base_entity_data)
-                    db_session.add(base_entity)
-                    db_session.flush()
+                    db.session.add(base_entity)
+                    db.session.flush()
 
                     data['entity_id'] = base_entity.entity_id
                     new_obj = model_class(**data)
                 else:
                     new_obj = model_class(**data)
                 
-                db_session.add(new_obj)
+                db.session.add(new_obj)
                 added_count += 1
                 if model_class == ManufacturingChallenge and product_codes_to_link:
                     valid_products = [product_map[code] for code in product_codes_to_link if code in product_map]
                     new_obj.products = valid_products
 
             elif action == 'update':
-                obj_to_update = db_session.query(model_class).filter(getattr(model_class, unique_key_field) == identifier).first()
+                obj_to_update = model_class.query.filter(getattr(model_class, unique_key_field) == identifier).first()
                 if obj_to_update:
                     if model_class in [InternalFacility, ExternalPartner]:
-                        base_entity = db_session.query(ManufacturingEntity).get(obj_to_update.entity_id)
+                        base_entity = ManufacturingEntity.query.get(obj_to_update.entity_id)
                         base_entity.location = data.pop('location', base_entity.location)
                         base_entity.operational_status = data.pop('operational_status', base_entity.operational_status)
                         base_entity.entity_name = data.get('facility_code', base_entity.entity_name) if model_class == InternalFacility else data.get('company_name', base_entity.entity_name)
@@ -203,11 +204,11 @@ def finalize_import(db_session: Session, resolved_data: list, model_class, uniqu
         except Exception as e:
             failed_count += 1
             error_messages.append(f"Failed to process '{identifier}': {e}")
-            db_session.rollback()
+            db.session.rollback()
     
     if failed_count > 0:
-        db_session.rollback()
+        db.session.rollback()
         return {"success": False, "message": f"Import finished with {failed_count} errors. No changes were saved.", "log": error_messages}
     
-    db_session.commit()
+    db.session.commit()
     return {"success": True, "message": f"Import successful! Added: {added_count}, Updated: {updated_count}, Skipped: {skipped_count}."}

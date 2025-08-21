@@ -1,11 +1,14 @@
 # backend/services/challenge_service.py
-from sqlalchemy.orm import Session
+from ..db import db
 from ..models import ManufacturingChallenge
 
-def get_all_challenges(db_session: Session):
-    return db_session.query(ManufacturingChallenge).order_by(ManufacturingChallenge.challenge_category, ManufacturingChallenge.challenge_name).all()
+def get_all_challenges():
+    return ManufacturingChallenge.query.order_by(
+        ManufacturingChallenge.challenge_category, 
+        ManufacturingChallenge.challenge_name
+    ).all()
 
-def get_challenge_table_context(db_session: Session, requested_columns_str: str = None):
+def get_challenge_table_context(requested_columns_str: str = None):
     """Prepares the full context needed for rendering the dynamic challenges table."""
     
     # UPDATED: Use 'short_description' instead of the longer 'explanation' field.
@@ -21,7 +24,7 @@ def get_challenge_table_context(db_session: Session, requested_columns_str: str 
     if not selected_fields:
         selected_fields = DEFAULT_COLUMNS
 
-    challenges = get_all_challenges(db_session)
+    challenges = get_all_challenges()
     
     # Convert SQLAlchemy objects to dictionaries
     challenge_dicts = [{field: getattr(c, field) for field in all_fields} for c in challenges]
@@ -31,12 +34,13 @@ def get_challenge_table_context(db_session: Session, requested_columns_str: str 
         'all_fields': all_fields,
         'selected_fields': selected_fields,
         'entity_type': 'challenge',
+        'entity_plural': 'challenges',  # ADD THIS LINE
         'table_id': 'challengesTable'
     }
 
-def inline_update_challenge_field(db_session: Session, challenge_id: int, field: str, value: any):
+def inline_update_challenge_field(challenge_id: int, field: str, value: any):
     """Updates a single field on a manufacturing challenge."""
-    challenge = db_session.query(ManufacturingChallenge).get(challenge_id)
+    challenge = ManufacturingChallenge.query.get(challenge_id)
     if not challenge:
         return None, "Challenge not found."
 
@@ -47,7 +51,7 @@ def inline_update_challenge_field(db_session: Session, challenge_id: int, field:
     if field == 'challenge_name':
         if not value or not str(value).strip():
             return None, "Challenge Name cannot be empty."
-        existing = db_session.query(ManufacturingChallenge).filter(
+        existing = ManufacturingChallenge.query.filter(
             ManufacturingChallenge.challenge_name == value, 
             ManufacturingChallenge.challenge_id != challenge_id
         ).first()
@@ -55,5 +59,5 @@ def inline_update_challenge_field(db_session: Session, challenge_id: int, field:
             return None, f"Challenge Name '{value}' already exists."
 
     setattr(challenge, field, value)
-    db_session.commit()
+    db.session.commit()
     return challenge, "Challenge updated."

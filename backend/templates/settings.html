@@ -11,6 +11,7 @@
     <div class="card-body">
         <p class="text-muted">These settings are optional and provide a way for users to override system-wide API keys for LLM providers. This might be useful for future integrations.</p>
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             {# OpenAI API Key #}
             <div class="mb-3">
                 <label for="openai_api_key" class="form-label">OpenAI API Key:</label>

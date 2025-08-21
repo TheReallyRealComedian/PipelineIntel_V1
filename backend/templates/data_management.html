@@ -11,6 +11,7 @@
     <div class="card-header"><h2 class="card-title mb-0">Interactive JSON Import</h2></div>
     <div class="card-body">
         <form action="{{ url_for('data_management.analyze_json_upload') }}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="row g-3 align-items-end">
                 <div class="col-md-5">
                     <label for="entity_type" class="form-label">Select Data Type:</label>

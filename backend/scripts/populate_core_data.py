@@ -8,7 +8,7 @@ from backend.app import create_app
 from backend.db import db
 from backend.models import Modality, ManufacturingCapability
 
-def populate_initial_modalities(session):
+def populate_initial_modalities():
     """Populate basic modality classifications"""
     print("Populating initial modalities...")
     modalities_to_add = [
@@ -21,18 +21,18 @@ def populate_initial_modalities(session):
     ]
     
     for mod_data in modalities_to_add:
-        exists = session.query(Modality).filter_by(modality_name=mod_data["modality_name"]).first()
+        exists = Modality.query.filter_by(modality_name=mod_data["modality_name"]).first()
         if not exists:
             modality = Modality(**mod_data)
-            session.add(modality)
+            db.session.add(modality)
             print(f"  - Added modality: {mod_data['modality_name']}")
         else:
             print(f"  - Modality '{mod_data['modality_name']}' already exists. Skipping.")
-    session.commit()
+    db.session.commit()
     print("Modalities population complete.")
 
 
-def populate_basic_capabilities(session):
+def populate_basic_capabilities():
     """Populate fundamental manufacturing capabilities"""
     print("\nPopulating basic capabilities...")
     capabilities_to_add = [
@@ -46,14 +46,14 @@ def populate_basic_capabilities(session):
     ]
 
     for cap_data in capabilities_to_add:
-        exists = session.query(ManufacturingCapability).filter_by(capability_name=cap_data["capability_name"]).first()
+        exists = ManufacturingCapability.query.filter_by(capability_name=cap_data["capability_name"]).first()
         if not exists:
             capability = ManufacturingCapability(**cap_data)
-            session.add(capability)
+            db.session.add(capability)
             print(f"  - Added capability: {cap_data['capability_name']}")
         else:
             print(f"  - Capability '{cap_data['capability_name']}' already exists. Skipping.")
-    session.commit()
+    db.session.commit()
     print("Capabilities population complete.")
 
 
@@ -62,6 +62,6 @@ if __name__ == "__main__":
     app = create_app()
     with app.app_context():
         # The db object is now properly configured
-        populate_initial_modalities(db.session)
-        populate_basic_capabilities(db.session)
+        populate_initial_modalities()
+        populate_basic_capabilities()
         print("\nInitial data population script finished successfully.")

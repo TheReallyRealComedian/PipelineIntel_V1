@@ -16,8 +16,8 @@
                 {# Use the column selector macro #}
                 {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
 
-                {# Use the dynamic table macro #}
-                {{ render_dynamic_table(products, selected_fields, entity_type, table_id) }}
+                {# Use the dynamic table macro with entity_plural parameter #}
+                {{ render_dynamic_table(products, selected_fields, entity_type, table_id, 'products') }}
 
             {% else %}
                 <p class="text-muted text-center p-4">
