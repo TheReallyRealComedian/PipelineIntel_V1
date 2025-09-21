@@ -35,13 +35,17 @@
                         <li class="{% if request.blueprint == 'technologies' %}active{% endif %}">
                             <a href="{{ url_for('technologies.list_technologies') }}"><i class="fas fa-microchip"></i> Technologies</a>
                         </li>
-                    <li class="sidebar-menu-header">MANUFACTURING SCHEMA</li>
-                        <li class="{% if request.blueprint == 'modalities' %}active{% endif %}">
-                            <a href="{{ url_for('modalities.list_modalities') }}"><i class="fas fa-dna"></i> Modalities</a>
-                        </li>
-                        <li class="{% if request.blueprint == 'facilities' %}active{% endif %}">
-                            <a href="{{ url_for('facilities.list_facilities') }}"><i class="fas fa-industry"></i> Facilities & Partners</a>
-                        </li>
+                        <li class="sidebar-menu-header">MANUFACTURING SCHEMA</li>
+                            <li class="{% if request.blueprint == 'modalities' %}active{% endif %}">
+                                <a href="{{ url_for('modalities.list_modalities') }}"><i class="fas fa-dna"></i> Modalities</a>
+                            </li>
+                            <!-- ADD THIS NEW LINK: -->
+                            <li class="{% if request.blueprint == 'process_stages' %}active{% endif %}">
+                                <a href="{{ url_for('process_stages.list_process_stages') }}"><i class="fas fa-project-diagram"></i> Process Stages</a>
+                            </li>
+                            <li class="{% if request.blueprint == 'facilities' %}active{% endif %}">
+                                <a href="{{ url_for('facilities.list_facilities') }}"><i class="fas fa-industry"></i> Facilities & Partners</a>
+                            </li>
                     <li class="sidebar-menu-header">DATA</li>
                         <li class="{% if request.blueprint == 'data_management' %}active{% endif %}">
                             <a href="{{ url_for('data_management.data_management_page') }}"><i class="fas fa-database"></i> Data Management</a>

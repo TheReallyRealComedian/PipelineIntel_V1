@@ -25,6 +25,7 @@ import backend.routes.export_routes as export_routes_mod
 import backend.routes.modality_routes as modality_routes_mod
 import backend.routes.facility_routes as facility_routes_mod
 import backend.routes.analytics_routes as analytics_routes_mod
+import backend.routes.process_stage_routes as process_stage_routes_mod
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
@@ -80,6 +81,7 @@ def create_app(init_session=True):
     app.register_blueprint(modality_routes_mod.modality_routes)
     app.register_blueprint(facility_routes_mod.facility_routes)
     app.register_blueprint(analytics_routes_mod.analytics_routes)
+    app.register_blueprint(process_stage_routes_mod.process_stage_routes)
 
     @app.route('/')
     def index():

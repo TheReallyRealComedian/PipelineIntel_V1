@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block head_extra %}
+<style>
+.hierarchy-tree {
+    font-family: var(--font-family-secondary);
+}
+
+.stage-node {
+    margin: 8px 0;
+    padding: 12px 16px;
+    background: var(--element-bg);
+    border-left: 3px solid var(--color-primary);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.stage-node:hover {
+    background: var(--element-bg-light);
+    border-left-color: var(--color-accent);
+    transform: translateX(4px);
+}
+
+.stage-children {
+    margin-left: 32px;
+    border-left: 2px dashed var(--border-color);
+    padding-left: 16px;
+}
+
+.stage-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.1em;
+}
+
+.stage-category {
+    display: inline-block;
+    margin-left: 12px;
+    padding: 2px 8px;
+    background: var(--color-accent);
+    color: var(--text-color-on-accent);
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.stage-level {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    margin-left: 8px;
+}
+
+.stage-description {
+    color: var(--text-secondary);
+    margin-top: 6px;
+    font-size: 0.95em;
+}
+
+.stage-path {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    font-style: italic;
+    margin-top: 4px;
+}
+
+.hierarchy-stats {
+    background: var(--element-bg-light);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.hierarchy-stats .stat {
+    display: inline-block;
+    margin-right: 24px;
+}
+
+.hierarchy-stats .stat-value {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.hierarchy-stats .stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="process-stages-hierarchy-page">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>{{ title }}</h1>
+            <p class="text-color-light">Hierarchical visualization of manufacturing process stages</p>
+        </div>
+        <div>
+            <a href="{{ url_for('process_stages.list_process_stages') }}" class="btn btn-outline-primary">
+                <i class="fas fa-table"></i> Table View
+            </a>
+        </div>
+    </div>
+
+    {% if stages %}
+    <div class="hierarchy-stats">
+        <div class="stat">
+            <div class="stat-value">{{ stages|length }}</div>
+            <div class="stat-label">Top-Level Phases</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title mb-0">Process Stage Tree</h2>
+        </div>
+        <div class="card-body">
+            <div class="hierarchy-tree">
+                {% macro render_stage_node(node, depth=0) %}
+                <div class="stage-node" style="margin-left: {{ depth * 20 }}px;">
+                    <div>
+                        <span class="stage-name">{{ node.stage.stage_name }}</span>
+                        {% if node.stage.stage_category %}
+                        <span class="stage-category">{{ node.stage.stage_category }}</span>
+                        {% endif %}
+                        <span class="stage-level">Level {{ node.stage.hierarchy_level }}</span>
+                    </div>
+                    {% if node.stage.short_description %}
+                    <div class="stage-description">{{ node.stage.short_description }}</div>
+                    {% endif %}
+                    {% if depth > 0 %}
+                    <div class="stage-path">
+                        <i class="fas fa-sitemap"></i> {{ node.stage.get_full_path() }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% if node.children %}
+                <div class="stage-children">
+                    {% for child in node.children %}
+                    {{ render_stage_node(child, depth + 1) }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endmacro %}
+
+                {% for root_node in stages %}
+                {{ render_stage_node(root_node) }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        No process stages found. Import data via the <a href="{{ url_for('data_management.data_management_page') }}">Data Management</a> page.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
