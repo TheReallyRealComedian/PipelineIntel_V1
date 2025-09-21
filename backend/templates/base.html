@@ -43,6 +43,11 @@
                             <li class="{% if request.blueprint == 'process_stages' %}active{% endif %}">
                                 <a href="{{ url_for('process_stages.list_process_stages') }}"><i class="fas fa-project-diagram"></i> Process Stages</a>
                             </li>
+                            <li class="{% if request.blueprint == 'capabilities' %}active{% endif %}">
+                                <a href="{{ url_for('capabilities.list_capabilities') }}">
+                                    <i class="fas fa-cogs"></i> Manufacturing Capabilities
+                                </a>
+                            </li>                            
                             <li class="{% if request.blueprint == 'facilities' %}active{% endif %}">
                                 <a href="{{ url_for('facilities.list_facilities') }}"><i class="fas fa-industry"></i> Facilities & Partners</a>
                             </li>

@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block head_extra %}
+<style>
+.capability-matrix {
+    font-family: var(--font-family-secondary);
+}
+
+.category-section {
+    margin-bottom: 32px;
+}
+
+.category-header {
+    background: var(--element-bg-light);
+    padding: 16px 20px;
+    border-left: 4px solid var(--color-primary);
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+
+.category-title {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.capability-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.capability-card {
+    background: var(--element-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    transition: all 0.2s ease;
+}
+
+.capability-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.capability-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.05em;
+    margin-bottom: 8px;
+}
+
+.capability-approach {
+    display: inline-block;
+    padding: 3px 10px;
+    background: var(--color-accent);
+    color: var(--text-color-on-accent);
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.capability-complexity {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 0.9em;
+}
+
+.complexity-label {
+    color: var(--text-secondary);
+    margin-right: 8px;
+}
+
+.complexity-bar {
+    flex-grow: 1;
+    height: 8px;
+    background: var(--bi-neutral-200);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.complexity-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
+    transition: width 0.3s ease;
+}
+
+.complexity-value {
+    margin-left: 8px;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.capability-description {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    margin-top: 8px;
+    line-height: 1.4;
+}
+
+.stats-bar {
+    background: var(--element-bg-light);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 2em;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    margin-top: 4px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="capability-matrix-page">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>{{ title }}</h1>
+            <p class="text-color-light">Manufacturing capabilities organized by category with complexity ratings</p>
+        </div>
+        <div>
+            <a href="{{ url_for('capabilities.list_capabilities') }}" class="btn btn-outline-primary">
+                <i class="fas fa-table"></i> Table View
+            </a>
+        </div>
+    </div>
+
+    {% if capabilities_by_category %}
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-value">{{ capabilities_by_category|length }}</div>
+            <div class="stat-label">Categories</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">
+                {% set total_caps = namespace(count=0) %}
+                {% for category, caps in capabilities_by_category.items() %}
+                    {% set total_caps.count = total_caps.count + caps|length %}
+                {% endfor %}
+                {{ total_caps.count }}
+            </div>
+            <div class="stat-label">Total Capabilities</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">
+                {% set avg_complexity = namespace(sum=0, count=0) %}
+                {% for category, caps in capabilities_by_category.items() %}
+                    {% for cap in caps %}
+                        {% set avg_complexity.sum = avg_complexity.sum + (cap.complexity_weight or 0) %}
+                        {% set avg_complexity.count = avg_complexity.count + 1 %}
+                    {% endfor %}
+                {% endfor %}
+                {{ (avg_complexity.sum / avg_complexity.count)|round(1) if avg_complexity.count > 0 else 0 }}
+            </div>
+            <div class="stat-label">Avg Complexity</div>
+        </div>
+    </div>
+
+    <div class="capability-matrix">
+        {% for category, capabilities in capabilities_by_category.items()|sort %}
+        <div class="category-section">
+            <div class="category-header">
+                <h2 class="category-title">
+                    {{ category }}
+                    <span style="font-weight: 400; font-size: 0.8em; color: var(--text-secondary);">
+                        ({{ capabilities|length }} capabilities)
+                    </span>
+                </h2>
+            </div>
+            
+            <div class="capability-grid">
+                {% for cap in capabilities|sort(attribute='capability_name') %}
+                <div class="capability-card">
+                    <div class="capability-name">{{ cap.capability_name }}</div>
+                    
+                    {% if cap.approach_category %}
+                    <span class="capability-approach">{{ cap.approach_category }}</span>
+                    {% endif %}
+                    
+                    {% if cap.complexity_weight %}
+                    <div class="capability-complexity">
+                        <span class="complexity-label">Complexity:</span>
+                        <div class="complexity-bar">
+                            <div class="complexity-fill" style="width: {{ (cap.complexity_weight / 10 * 100)|int }}%"></div>
+                        </div>
+                        <span class="complexity-value">{{ cap.complexity_weight }}/10</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if cap.description %}
+                    <div class="capability-description">
+                        {{ cap.description[:200] }}{% if cap.description|length > 200 %}...{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        No manufacturing capabilities found. Import data via the <a href="{{ url_for('data_management.data_management_page') }}">Data Management</a> page.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
