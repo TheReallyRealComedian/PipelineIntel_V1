@@ -104,9 +104,8 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
     # Pre-fetch maps for ALL foreign key lookups by name
     modality_map = {m.modality_name: m.modality_id for m in Modality.query.with_entities(Modality.modality_name, Modality.modality_id).all()}
     stage_map = {s.stage_name: s.stage_id for s in ProcessStage.query.with_entities(ProcessStage.stage_name, ProcessStage.stage_id).all()}
-    # NEW: Map for supply chain entity lookups by name
+    # Map for supply chain entity lookups by name
     entity_map = {e.entity_name: e.entity_id for e in ManufacturingEntity.query.with_entities(ManufacturingEntity.entity_name, ManufacturingEntity.entity_id).all()}
-
 
     for item in resolved_data:
         action = item.get('action')
@@ -137,6 +136,24 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
                 elif stage_name:
                     raise ValueError(f"Process Stage '{stage_name}' not found.")
             
+            # NEW: Handle ProcessStage hierarchy
+            if model_class == ProcessStage:
+                parent_stage_name = data.pop('parent_stage_name', None)
+                if parent_stage_name:
+                    if parent_stage_name in stage_map:
+                        data['parent_stage_id'] = stage_map[parent_stage_name]
+                    else:
+                        raise ValueError(f"Parent stage '{parent_stage_name}' not found.")
+            
+            # NEW: Handle ManufacturingChallenge stage link
+            if model_class == ManufacturingChallenge:
+                primary_stage_name = data.pop('primary_stage_name', None)
+                if primary_stage_name:
+                    if primary_stage_name in stage_map:
+                        data['primary_stage_id'] = stage_map[primary_stage_name]
+                    else:
+                        raise ValueError(f"Primary stage '{primary_stage_name}' not found.")
+            
             if model_class == Indication:
                 product_code = data.pop('product_code', None)
                 if product_code and product_code in product_map:
@@ -147,15 +164,15 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
             # --- FIXED AND ENHANCED SUPPLY CHAIN LOGIC ---
             if model_class == ProductSupplyChain:
                 product_code = data.pop('product_code', None)
-                entity_name = data.pop('entity_name', None) # Use entity_name for lookup
+                entity_name = data.pop('entity_name', None)
                 if product_code and product_code in product_map:
                     data['product_id'] = product_map[product_code].product_id
                 else:
                     raise ValueError(f"Parent Product with code '{product_code}' not found for supply chain.")
                 if entity_name and entity_name in entity_map:
-                    data['entity_id'] = entity_map[entity_name] # Look up entity_id
+                    data['entity_id'] = entity_map[entity_name]
                 elif entity_name:
-                     raise ValueError(f"Manufacturing Entity with name '{entity_name}' not found for supply chain.")
+                    raise ValueError(f"Manufacturing Entity with name '{entity_name}' not found for supply chain.")
 
             if action == 'add':
                 if model_class in [InternalFacility, ExternalPartner]:

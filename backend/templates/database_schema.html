@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Asset Tracker{% endblock %}
+
+{% block content %}
+<div class="database-schema-page">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>{{ title }}</h1>
+            <p class="text-color-light">Visual representation of the complete database structure</p>
+        </div>
+        <div class="btn-group">
+            <a href="{{ url_for('settings.download_schema', format='png') }}" class="btn btn-outline-primary">
+                <i class="fas fa-download"></i> PNG
+            </a>
+            <a href="{{ url_for('settings.download_schema', format='pdf') }}" class="btn btn-outline-primary">
+                <i class="fas fa-download"></i> PDF
+            </a>
+            <a href="{{ url_for('settings.download_schema', format='svg') }}" class="btn btn-outline-primary">
+                <i class="fas fa-download"></i> SVG
+            </a>
+        </div>
+    </div>
+
+    <!-- Schema Statistics -->
+    {% if stats %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title mb-0">Schema Statistics</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="text-center p-3">
+                        <h3 class="display-4 text-primary">{{ stats.total_tables }}</h3>
+                        <p class="text-muted mb-0">Total Tables</p>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Table Name</th>
+                                    <th>Columns</th>
+                                    <th>Foreign Keys</th>
+                                    <th>Primary Keys</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for table in stats.tables %}
+                                <tr>
+                                    <td><code>{{ table.name }}</code></td>
+                                    <td>{{ table.columns }}</td>
+                                    <td>{{ table.foreign_keys }}</td>
+                                    <td>{{ table.primary_keys }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Schema Diagram -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-title mb-0">Entity Relationship Diagram</h2>
+            <button class="btn btn-sm btn-outline-secondary" onclick="toggleZoom()">
+                <i class="fas fa-search-plus"></i> Toggle Zoom
+            </button>
+        </div>
+        <div class="card-body">
+            {% if diagram_data %}
+            <div id="schema-diagram-container" class="text-center p-3" style="background: #f8f9fa; border-radius: 8px; overflow: auto;">
+                <img 
+                    id="schema-diagram" 
+                    src="data:{{ mime_type }};base64,{{ diagram_data }}" 
+                    alt="Database Schema Diagram"
+                    class="img-fluid"
+                    style="max-width: 100%; height: auto; cursor: zoom-in;"
+                />
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> 
+                Unable to generate schema diagram. Please check server logs.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h2 class="card-title mb-0">Legend</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Relationship Types</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-long-arrow-alt-right text-primary"></i> <strong>One-to-Many:</strong> Single arrow (e.g., Product → Indications)</li>
+                        <li><i class="fas fa-exchange-alt text-success"></i> <strong>Many-to-Many:</strong> Double arrows (e.g., Products ↔ Challenges)</li>
+                        <li><i class="fas fa-link text-info"></i> <strong>One-to-One:</strong> Single line (e.g., User → LLM Settings)</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5>Key Entities</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-pills text-primary"></i> <strong>Products:</strong> Central entity for pharmaceutical assets</li>
+                        <li><i class="fas fa-industry text-success"></i> <strong>Manufacturing Entities:</strong> Facilities and partners</li>
+                        <li><i class="fas fa-cogs text-info"></i> <strong>Capabilities:</strong> Manufacturing skills and technologies</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+let isZoomed = false;
+
+function toggleZoom() {
+    const img = document.getElementById('schema-diagram');
+    const container = document.getElementById('schema-diagram-container');
+    
+    isZoomed = !isZoomed;
+    
+    if (isZoomed) {
+        img.style.maxWidth = 'none';
+        img.style.width = 'auto';
+        img.style.cursor = 'zoom-out';
+        container.style.overflow = 'scroll';
+    } else {
+        img.style.maxWidth = '100%';
+        img.style.width = 'auto';
+        img.style.cursor = 'zoom-in';
+        container.style.overflow = 'auto';
+    }
+}
+
+// Click to zoom
+document.getElementById('schema-diagram')?.addEventListener('click', toggleZoom);
+</script>
+{% endblock %}

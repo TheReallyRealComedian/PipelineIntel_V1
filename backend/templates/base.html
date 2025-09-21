@@ -54,8 +54,15 @@
                             <a href="{{ url_for('analytics.manufacturing_forecast') }}"><i class="fas fa-chart-line"></i> Strategic Analytics</a>
                         </li>
                     <li class="sidebar-menu-header">SYSTEM</li>
-                        <li class="{% if request.blueprint == 'settings' %}active{% endif %}">
-                            <a href="{{ url_for('settings.manage_settings') }}"><i class="fas fa-sliders-h"></i> Settings</a>
+                        <li class="{% if request.blueprint == 'settings' and 'database-schema' in request.path %}active{% endif %}">
+                            <a href="{{ url_for('settings.database_schema') }}">
+                                <i class="fas fa-project-diagram"></i> Database Schema
+                            </a>
+                        </li>
+                        <li class="{% if request.blueprint == 'settings' and 'database-schema' not in request.path %}active{% endif %}">
+                            <a href="{{ url_for('settings.manage_settings') }}">
+                                <i class="fas fa-sliders-h"></i> Settings
+                            </a>
                         </li>
                     {% if current_user.is_authenticated %}
                         <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout ({{ current_user.username }})</a></li>

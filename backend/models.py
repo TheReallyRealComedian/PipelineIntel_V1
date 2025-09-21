@@ -94,13 +94,20 @@ class ManufacturingChallenge(db.Model):
     challenge_name = Column(String(255), unique=True, nullable=False)
     short_description = Column(Text, nullable=True)
     explanation = Column(Text, nullable=True)
-    related_capabilities = Column(JSONB) # New field from Phase 3
+    related_capabilities = Column(JSONB)
+    
+    # NEW: Link to primary process stage where this challenge occurs
+    primary_stage_id = Column(Integer, ForeignKey('process_stages.stage_id'))
+    severity_level = Column(String(50))  # 'minor', 'moderate', 'major', 'critical'
+    
+    # Relationships
     products = relationship("Product", secondary=product_to_challenge_association, back_populates="challenges")
+    primary_stage = relationship("ProcessStage", back_populates="challenges")  # NEW
 
     @classmethod
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
-        return [c.key for c in inspect(cls).attrs if c.key not in ['products']]
+        return [c.key for c in inspect(cls).attrs if c.key not in ['products', 'primary_stage']]
 
 class ManufacturingTechnology(db.Model):
     __tablename__ = 'manufacturing_technologies'
@@ -264,10 +271,41 @@ class ProcessStage(db.Model):
     stage_category = Column(String(255))
     short_description = Column(Text, nullable=True)
     description = Column(Text)
+    
+    # NEW: Hierarchical structure
+    parent_stage_id = Column(Integer, ForeignKey('process_stages.stage_id'))
+    hierarchy_level = Column(Integer)  # 1=Phase, 2=Stage, 3=Operation, etc.
+    stage_order = Column(Integer)  # Order within parent level
+    
     # Relationships
     template_links = relationship("TemplateStage", back_populates="stage")
     product_overrides = relationship("ProductProcessOverride", back_populates="stage")
     technologies = relationship("ManufacturingTechnology", back_populates="stage")
+    challenges = relationship("ManufacturingChallenge", back_populates="primary_stage")
+    
+    # NEW: Self-referential hierarchy
+    parent = relationship("ProcessStage", 
+                         remote_side=[stage_id],
+                         backref="children")
+    
+    @classmethod
+    def get_top_level_phases(cls):
+        """Get all Level 1 phases (top of hierarchy)"""
+        return cls.query.filter_by(hierarchy_level=1).order_by(cls.stage_order).all()
+    
+    @classmethod
+    def get_by_level(cls, level):
+        """Get all stages at a specific hierarchy level"""
+        return cls.query.filter_by(hierarchy_level=level).order_by(cls.stage_order).all()
+    
+    def get_full_path(self):
+        """Get the full hierarchical path for this stage"""
+        path = [self.stage_name]
+        current = self.parent
+        while current:
+            path.insert(0, current.stage_name)
+            current = current.parent
+        return " > ".join(path)
 
 class ProcessTemplate(db.Model):
     __tablename__ = 'process_templates'

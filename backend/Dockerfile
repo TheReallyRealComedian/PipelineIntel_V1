@@ -4,7 +4,8 @@ WORKDIR /app
 
 # --- START OF FIX ---
 # Install build dependencies, including the Rust compiler, and then postgresql-client
-RUN apk add --no-cache cargo rust postgresql-client netcat-openbsd
+RUN apk add --no-cache cargo rust postgresql-client netcat-openbsd graphviz graphviz-dev
+
 # --- END OF FIX ---
 
 ENV PYTHONPATH /app
