@@ -288,6 +288,13 @@ class ProcessStage(db.Model):
                          remote_side=[stage_id],
                          backref="children")
     
+        
+    @classmethod
+    def get_all_fields(cls):
+        """Returns a list of all column names for the model."""
+        from sqlalchemy import inspect
+        return [c.key for c in inspect(cls).attrs if c.key not in ['template_links', 'product_overrides', 'technologies', 'challenges', 'parent', 'children']]
+    
     @classmethod
     def get_top_level_phases(cls):
         """Get all Level 1 phases (top of hierarchy)"""

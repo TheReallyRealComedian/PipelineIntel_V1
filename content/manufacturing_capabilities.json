@@ -1,0 +1,506 @@
+[
+  {
+    "capability_name": "Multi-Step Organic Synthesis",
+    "capability_category": "Chemical Manufacturing",
+    "approach_category": "Upstream",
+    "description": "Expertise in complex multi-step chemical transformations for small molecule API synthesis including protection/deprotection strategies, coupling reactions, and advanced organic chemistry techniques",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Asymmetric Synthesis",
+    "capability_category": "Chemical Manufacturing",
+    "approach_category": "Upstream",
+    "description": "Specialized capability for stereoselective synthesis of chiral molecules using catalytic methods, chiral auxiliaries, or enzymatic approaches. Critical for producing single enantiomers with high optical purity",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Transition Metal Catalysis",
+    "capability_category": "Chemical Manufacturing",
+    "approach_category": "Upstream",
+    "description": "Advanced expertise in transition metal-catalyzed reactions (Pd, Pt, Rh, Ru) for C-C bond formation, hydrogenation, and complex transformations. Requires specialized handling and recovery systems",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Heterocyclic Chemistry",
+    "capability_category": "Chemical Manufacturing",
+    "approach_category": "Upstream",
+    "description": "Specialized knowledge in synthesis and manipulation of heterocyclic ring systems common in pharmaceutical APIs. Essential for most modern small molecule drugs",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Cryogenic Reaction Control",
+    "capability_category": "Chemical Manufacturing",
+    "approach_category": "Upstream",
+    "description": "Capability to conduct reactions at extremely low temperatures (down to -78°C or lower) with precise temperature control for sensitive transformations and reactive intermediates",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Continuous Flow Chemistry",
+    "capability_category": "Process Technology",
+    "approach_category": "Advanced",
+    "description": "Expertise in continuous chemical synthesis using microreactors and flow systems for improved reaction control, safety, and consistency. Enables process intensification for small molecules",
+    "complexity_weight": 8
+  },
+  {
+    "capability_name": "Large-Scale Hydrogenation",
+    "capability_category": "Chemical Manufacturing",
+    "approach_category": "Upstream",
+    "description": "Industrial-scale capability for high-pressure catalytic hydrogenation using precious metal catalysts with appropriate safety controls and catalyst recovery systems",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Advanced Click Chemistry",
+    "capability_category": "Chemical Manufacturing",
+    "approach_category": "Upstream",
+    "description": "Expertise in click chemistry reactions (CuAAC, SPAAC, thiol-ene) and SuFEx chemistry for efficient molecular assembly. Critical for PROTACs and complex conjugates",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "PROTAC Synthesis",
+    "capability_category": "Chemical Manufacturing",
+    "approach_category": "Upstream",
+    "description": "Specialized capability for synthesizing targeted protein degraders requiring 24+ synthetic steps with complex linker chemistry and three-component molecular assembly (>900 Da)",
+    "complexity_weight": 9
+  },
+  {
+    "capability_name": "High-Potency API Handling",
+    "capability_category": "Safety & Containment",
+    "approach_category": "Facility",
+    "description": "Containment facilities and protocols for handling highly potent compounds (OEL <1 μg/m³) including cytotoxics for ADCs. Requires dedicated suites with negative pressure and specialized HVAC",
+    "complexity_weight": 8
+  },
+  {
+    "capability_name": "Mammalian Cell Culture (CHO/HEK293)",
+    "capability_category": "Biologics Production",
+    "approach_category": "Upstream",
+    "description": "Large-scale mammalian cell culture expertise in stirred-tank bioreactors (2,000-20,000L) with process control, cell line management, and culture optimization for monoclonal antibody and protein production",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Microbial Fermentation",
+    "capability_category": "Biologics Production",
+    "approach_category": "Upstream",
+    "description": "High-density bacterial fermentation (E. coli, yeast) for producing non-glycosylated proteins, enzymes, and peptides. Faster and more cost-effective than mammalian systems",
+    "complexity_weight": 5
+  },
+  {
+    "capability_name": "Perfusion Culture Technology",
+    "capability_category": "Biologics Production",
+    "approach_category": "Upstream",
+    "description": "Advanced continuous cell culture capability using ATF or TFF systems achieving high cell densities (>100 × 10⁶ cells/mL) and improved volumetric productivity",
+    "complexity_weight": 8
+  },
+  {
+    "capability_name": "Cell Line Development & Engineering",
+    "capability_category": "Biologics Production",
+    "approach_category": "Upstream",
+    "description": "Capability to develop stable, high-producing cell lines using traditional methods or CRISPR/Cas9 gene editing. Includes MCB/WCB generation and characterization under GMP",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Fed-Batch Culture Optimization",
+    "capability_category": "Biologics Production",
+    "approach_category": "Upstream",
+    "description": "Expertise in optimizing fed-batch processes to achieve high titers (>10 g/L for mAbs) through media optimization, feeding strategies, and process intensification",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Multi-Step Chromatography Platform",
+    "capability_category": "Purification",
+    "approach_category": "Downstream",
+    "description": "Integrated multi-modal chromatography capability including affinity (Protein A), ion exchange, hydrophobic interaction, and mixed-mode chromatography for biologics purification",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Continuous Chromatography",
+    "capability_category": "Purification",
+    "approach_category": "Downstream",
+    "description": "Advanced continuous purification using SMB, multi-column, or periodic counter-current systems. Improves productivity and reduces buffer consumption versus batch chromatography",
+    "complexity_weight": 8
+  },
+  {
+    "capability_name": "Protein A Purification",
+    "capability_category": "Purification",
+    "approach_category": "Downstream",
+    "description": "Industry-standard affinity capture for antibodies using Protein A chromatography. Single-step achieves 90-95% purity with high selectivity for immunoglobulin Fc region",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Viral Clearance & Safety",
+    "capability_category": "Purification",
+    "approach_category": "Downstream",
+    "description": "Validated viral inactivation and removal capability including low pH treatment, solvent/detergent, and nanofiltration (20nm) demonstrating >4 log reduction for patient safety",
+    "complexity_weight": 8
+  },
+  {
+    "capability_name": "Ultra-High Purity Purification",
+    "capability_category": "Purification",
+    "approach_category": "Downstream",
+    "description": "Capability to achieve >99% purity with tight control of aggregates, fragments, and variants. Essential for biologics and sensitive small molecules requiring exceptional purity",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Crystallization & Polymorphism Control",
+    "capability_category": "Chemical Manufacturing",
+    "approach_category": "Downstream",
+    "description": "Controlled crystallization capability ensuring target polymorphic form and particle size distribution. Uses PAT monitoring (FBRM, PVM) and seeding strategies for reproducible results",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Amorphous Solid Dispersion (ASD) Technology",
+    "capability_category": "Formulation",
+    "approach_category": "Drug Product",
+    "description": "Capability to create stable amorphous solid dispersions via hot-melt extrusion or spray drying for poorly soluble compounds, enhancing bioavailability through molecular dispersion in polymer matrix",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Spray Drying Technology",
+    "capability_category": "Process Technology",
+    "approach_category": "Drug Product",
+    "description": "Single-step drying and particle formation capability creating fine powders, ASDs, or inhalable particles with controlled size distribution through rapid solvent evaporation",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "BSL-2+ Containment Facilities",
+    "capability_category": "Safety & Containment",
+    "approach_category": "Facility",
+    "description": "Biosafety Level 2 (or higher) facilities with negative pressure, HEPA filtration, and appropriate PPE for handling live viral vectors, genetically modified organisms, and infectious materials",
+    "complexity_weight": 9
+  },
+  {
+    "capability_name": "Viral Vector Manufacturing",
+    "capability_category": "Advanced Therapies",
+    "approach_category": "Upstream",
+    "description": "Production capability for AAV, lentivirus, or adenovirus vectors using transient transfection or baculovirus systems. Requires BSL-2+ containment and specialized purification for empty/full capsid separation",
+    "complexity_weight": 9
+  },
+  {
+    "capability_name": "Lentiviral Vector Production",
+    "capability_category": "Advanced Therapies",
+    "approach_category": "Upstream",
+    "description": "Multi-plasmid transient transfection capability for lentiviral vector production used in CAR-T manufacturing. Requires BSL-2+ containment and achieves 10⁶-10⁷ TU/mL titers",
+    "complexity_weight": 9
+  },
+  {
+    "capability_name": "AAV Vector Production",
+    "capability_category": "Advanced Therapies",
+    "approach_category": "Upstream",
+    "description": "Capability for AAV production using triple-plasmid HEK293 transfection or baculovirus-Sf9 systems. Latter provides 10-100x higher yields enabling commercial-scale gene therapy manufacturing",
+    "complexity_weight": 9
+  },
+  {
+    "capability_name": "Empty/Full Capsid Separation",
+    "capability_category": "Advanced Therapies",
+    "approach_category": "Downstream",
+    "description": "Specialized purification capability separating functional (full) AAV capsids from empty capsids using advanced chromatography or ultracentrifugation. Critical quality attribute for gene therapies",
+    "complexity_weight": 9
+  },
+  {
+    "capability_name": "Autologous Cell Processing",
+    "capability_category": "Advanced Therapies",
+    "approach_category": "Cell Therapy",
+    "description": "Patient-specific cell isolation, modification, and expansion with rigorous chain-of-identity tracking from leukapheresis through manufacturing to re-infusion. Requires specialized logistics and quality systems",
+    "complexity_weight": 10
+  },
+  {
+    "capability_name": "Allogeneic Cell Manufacturing",
+    "capability_category": "Advanced Therapies",
+    "approach_category": "Cell Therapy",
+    "description": "Production of off-the-shelf cell therapies from healthy donor master cell banks. Requires CRISPR editing to prevent rejection and enables scalable batch manufacturing versus autologous approach",
+    "complexity_weight": 10
+  },
+  {
+    "capability_name": "Ex-Vivo Cell Expansion",
+    "capability_category": "Advanced Therapies",
+    "approach_category": "Cell Therapy",
+    "description": "7-14 day expansion of genetically modified T-cells using activation beads, cytokines, and controlled culture to generate therapeutic doses (10⁸-10⁹ cells) for CAR-T products",
+    "complexity_weight": 9
+  },
+  {
+    "capability_name": "Genetic Modification (Viral Transduction)",
+    "capability_category": "Advanced Therapies",
+    "approach_category": "Cell Therapy",
+    "description": "Capability to genetically modify primary cells via lentiviral or retroviral transduction for CAR-T and TCR-T therapies. Requires optimization of transduction efficiency and vector copy number",
+    "complexity_weight": 9
+  },
+  {
+    "capability_name": "Cell Cryopreservation",
+    "capability_category": "Advanced Therapies",
+    "approach_category": "Cell Therapy",
+    "description": "Controlled-rate freezing capability using DMSO-based formulations and programmable freezers to preserve cell viability during storage (-150°C to -196°C) and transport for cell therapy products",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Vein-to-Vein Logistics",
+    "capability_category": "Advanced Therapies",
+    "approach_category": "Cell Therapy",
+    "description": "End-to-end coordination of autologous cell therapy from patient leukapheresis through manufacturing to re-infusion. Requires sophisticated tracking, quality systems, and cold chain management (current: 3-5 weeks)",
+    "complexity_weight": 10
+  },
+  {
+    "capability_name": "Lipid Nanoparticle (LNP) Formulation",
+    "capability_category": "Advanced Therapies",
+    "approach_category": "Formulation",
+    "description": "Microfluidic assembly of nucleic acid-lipid nanoparticles for mRNA/siRNA delivery. Requires precise control to achieve 75±25nm particle size, <0.1 PDI, and >90% encapsulation efficiency",
+    "complexity_weight": 8
+  },
+  {
+    "capability_name": "Nucleic Acid Manufacturing",
+    "capability_category": "Advanced Therapies",
+    "approach_category": "Upstream",
+    "description": "Production capability for oligonucleotides, siRNA, or mRNA including solid-phase synthesis (oligos), in-vitro transcription (mRNA), and purification achieving >85-90% main peak purity",
+    "complexity_weight": 8
+  },
+  {
+    "capability_name": "Antibody-Drug Conjugation (ADC)",
+    "capability_category": "Biologics Production",
+    "approach_category": "Downstream",
+    "description": "Chemical conjugation of cytotoxic payloads to antibodies via lysine/cysteine or site-specific methods. Requires high-potency containment and post-conjugation purification to achieve target DAR (2-4)",
+    "complexity_weight": 9
+  },
+  {
+    "capability_name": "Site-Specific Conjugation",
+    "capability_category": "Biologics Production",
+    "approach_category": "Downstream",
+    "description": "Advanced conjugation using engineered cysteines, unnatural amino acids, or enzymatic methods for homogeneous ADCs with improved therapeutic index versus random conjugation",
+    "complexity_weight": 9
+  },
+  {
+    "capability_name": "Biologics Formulation Development",
+    "capability_category": "Formulation",
+    "approach_category": "Drug Product",
+    "description": "Expertise in formulating stable protein therapeutics including buffer selection (histidine, citrate), stabilizers (sucrose, trehalose), and surfactants (polysorbate). Optimizes pH, osmolality, and ionic strength",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Poorly Soluble Compound Formulation",
+    "capability_category": "Formulation",
+    "approach_category": "Drug Product",
+    "description": "Specialized formulation approaches for BCS Class II/IV compounds including lipid-based systems, self-emulsifying formulations, and nanotechnology to enhance bioavailability",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Controlled Release Technology",
+    "capability_category": "Formulation",
+    "approach_category": "Drug Product",
+    "description": "Capability to develop modified-release dosage forms including extended-release, delayed-release, and pulsatile delivery systems using polymer coatings, matrix systems, or specialized excipients",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Aseptic Fill-Finish (Biologics)",
+    "capability_category": "Drug Product",
+    "approach_category": "Fill-Finish",
+    "description": "Class A/B cleanroom operations for sterile filling of vials, syringes, or cartridges with aseptic technique, environmental monitoring, and container closure integrity. Critical for injectable biologics",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Lyophilization (Freeze-Drying)",
+    "capability_category": "Drug Product",
+    "approach_category": "Fill-Finish",
+    "description": "Controlled freeze-drying capability with cycle development (freezing, primary/secondary drying) to create stable powder formulations achieving <3% residual moisture. Extends biologics shelf-life",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Pre-Filled Syringe Manufacturing",
+    "capability_category": "Drug Product",
+    "approach_category": "Fill-Finish",
+    "description": "Direct filling into syringes with specialized equipment handling siliconized syringes, plungers, and tip caps. Improves dosing accuracy and patient convenience for biologics",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Auto-Injector Device Integration",
+    "capability_category": "Drug Product",
+    "approach_category": "Fill-Finish",
+    "description": "Integration of drug product with delivery devices (auto-injectors, pen injectors) requiring device assembly, functionality testing, and human factors validation for self-administration",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Continuous Manufacturing (Pharma)",
+    "capability_category": "Process Technology",
+    "approach_category": "Advanced",
+    "description": "End-to-end continuous processing from API synthesis through final dosage form. Requires real-time monitoring, material traceability, residence time modeling, and control strategies per ICH Q13",
+    "complexity_weight": 9
+  },
+  {
+    "capability_name": "Twin Screw Granulation (TSG)",
+    "capability_category": "Process Technology",
+    "approach_category": "Drug Product",
+    "description": "Continuous wet granulation using twin-screw extruders enabling consistent particle formation and integration into continuous tablet manufacturing lines. Superior content uniformity versus batch",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Direct Compression",
+    "capability_category": "Drug Product",
+    "approach_category": "Fill-Finish",
+    "description": "Single-step tablet manufacturing mixing API and excipients followed directly by compression. Simplest approach when material properties allow, reducing processing steps and cost",
+    "complexity_weight": 3
+  },
+  {
+    "capability_name": "Tablet Coating Technology",
+    "capability_category": "Drug Product",
+    "approach_category": "Fill-Finish",
+    "description": "Application of functional (enteric, sustained-release) or aesthetic coatings using pan coating or fluid bed systems. Controls drug release and improves product appearance/stability",
+    "complexity_weight": 5
+  },
+  {
+    "capability_name": "Single-Use Systems",
+    "capability_category": "Process Technology",
+    "approach_category": "Advanced",
+    "description": "Capability to utilize pre-sterilized disposable bioreactors, mixers, and transfer systems eliminating cleaning validation and cross-contamination risks. Standard for clinical/commercial biologics",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Isolator Technology",
+    "capability_category": "Safety & Containment",
+    "approach_category": "Facility",
+    "description": "Grade A isolators with HEPA filtration providing superior sterility assurance for aseptic processing or high-potency compound handling. Reduces human intervention risk",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Cold Chain Management",
+    "capability_category": "Logistics",
+    "approach_category": "Distribution",
+    "description": "Unbroken cold chain capability (2-8°C or frozen) with qualified shipping containers, continuous temperature monitoring, and validated shipping lanes for biologics and mRNA products",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Cryogenic Storage & Handling",
+    "capability_category": "Logistics",
+    "approach_category": "Distribution",
+    "description": "Ultra-cold storage and handling capability (-70°C to -196°C) using liquid nitrogen dewars or ultra-low freezers. Required for mRNA vaccines, viral vectors, and cell therapies",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Serialization & Track-Trace",
+    "capability_category": "Process Technology",
+    "approach_category": "Advanced",
+    "description": "Implementation of unit-level unique identifiers and aggregation per DSCSA/EU FMD requirements for supply chain security and anti-counterfeiting compliance",
+    "complexity_weight": 5
+  },
+  {
+    "capability_name": "Quality by Design (QbD)",
+    "capability_category": "Process Development",
+    "approach_category": "Quality Systems",
+    "description": "Systematic QbD approach with QTPP definition, CQA/CPP identification, Design of Experiments, design space establishment, and control strategy development per ICH Q8/Q9/Q10",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Process Analytical Technology (PAT)",
+    "capability_category": "Process Development",
+    "approach_category": "Quality Systems",
+    "description": "Real-time process monitoring and control using NIR, Raman spectroscopy, FBRM, or other in-line/on-line analytics enabling proactive quality management and RTRT",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Design of Experiments (DoE)",
+    "capability_category": "Process Development",
+    "approach_category": "Quality Systems",
+    "description": "Statistical experimental design capability using factorial or response surface methods to understand parameter-attribute relationships and establish science-based design space",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Scale-Up & Technology Transfer",
+    "capability_category": "Process Development",
+    "approach_category": "Quality Systems",
+    "description": "Capability to progress from pilot to commercial scale (e.g., 200L to 20,000L) with comprehensive documentation, cross-functional teams, and validation demonstrating comparability",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Advanced Analytical Methods",
+    "capability_category": "Quality Control",
+    "approach_category": "Quality Systems",
+    "description": "Sophisticated characterization capability including mass spectrometry, Multi-Attribute Methods (MAM), higher-order structure analysis, and impurity profiling validated per ICH Q2(R2)/Q14",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Mass Spectrometry (Protein Characterization)",
+    "capability_category": "Quality Control",
+    "approach_category": "Quality Systems",
+    "description": "High-resolution MS capability for comprehensive biologics characterization including sequence variants, PTMs, glycosylation, and host cell protein analysis",
+    "complexity_weight": 7
+  },
+  {
+    "capability_name": "Real-Time Release Testing (RTRT)",
+    "capability_category": "Quality Control",
+    "approach_category": "Quality Systems",
+    "description": "Advanced PAT application verifying product quality through process data rather than end-product testing. Significantly reduces cycle times with appropriate validation",
+    "complexity_weight": 8
+  },
+  {
+    "capability_name": "Stability & Comparability Studies",
+    "capability_category": "Quality Control",
+    "approach_category": "Quality Systems",
+    "description": "ICH-compliant stability programs and comparability assessment capability demonstrating manufacturing changes don't adversely impact quality using risk-based approaches",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Current Good Manufacturing Practice (cGMP)",
+    "capability_category": "Regulatory Compliance",
+    "approach_category": "Quality Systems",
+    "description": "Comprehensive GMP systems covering facility design, equipment qualification, personnel training, documentation, batch records, change control, deviation management, and CAPA",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Regulatory CMC Submissions",
+    "capability_category": "Regulatory Compliance",
+    "approach_category": "Quality Systems",
+    "description": "Capability to prepare comprehensive Chemistry, Manufacturing, and Controls documentation for regulatory submissions (IND, NDA, BLA, MAA) in eCTD format for global agencies",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Regulatory Inspection Readiness",
+    "capability_category": "Regulatory Compliance",
+    "approach_category": "Quality Systems",
+    "description": "Systems ensuring continuous inspection readiness including mock audits, compliance monitoring, rapid CAPA for observations, and maintaining robust quality management systems",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "ICH Guideline Implementation",
+    "capability_category": "Regulatory Compliance",
+    "approach_category": "Quality Systems",
+    "description": "Implementation of harmonized international standards (ICH Q7, Q8-Q14, Q2(R2)) enabling consistent requirements across regions and streamlined global development",
+    "complexity_weight": 5
+  },
+  {
+    "capability_name": "Process Validation",
+    "capability_category": "Quality Control",
+    "approach_category": "Quality Systems",
+    "description": "Risk-based validation approach including prospective, concurrent, and continued process verification demonstrating consistent manufacturing of quality products per regulatory requirements",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Cleaning Validation",
+    "capability_category": "Quality Control",
+    "approach_category": "Quality Systems",
+    "description": "Validated cleaning procedures and analytical methods demonstrating adequate removal of product residues, cleaning agents, and microbial contamination between campaigns",
+    "complexity_weight": 5
+  },
+  {
+    "capability_name": "Environmental Monitoring (Cleanroom)",
+    "capability_category": "Quality Control",
+    "approach_category": "Quality Systems",
+    "description": "Comprehensive monitoring of viable/non-viable particles, temperature, humidity, and differential pressure in classified environments ensuring aseptic processing conditions",
+    "complexity_weight": 5
+  },
+  {
+    "capability_name": "Supply Chain Risk Management",
+    "capability_category": "Process Development",
+    "approach_category": "Quality Systems",
+    "description": "Systematic supply chain mapping, supplier qualification, dual-sourcing strategies, and AI-powered risk monitoring to mitigate geopolitical risks and ensure material availability",
+    "complexity_weight": 6
+  },
+  {
+    "capability_name": "Digital Manufacturing & Industry 4.0",
+    "capability_category": "Process Technology",
+    "approach_category": "Advanced",
+    "description": "Digital transformation capability including process simulation, digital twins, predictive maintenance, and data analytics for continuous improvement and optimization",
+    "complexity_weight": 8
+  },
+  {
+    "capability_name": "Biosafety & Biosecurity",
+    "capability_category": "Safety & Containment",
+    "approach_category": "Facility",
+    "description": "Comprehensive biosafety programs including facility design, SOPs, training, waste management, and incident response for handling biological materials and GMOs",
+    "complexity_weight": 7
+  }
+]
