@@ -1,0 +1,404 @@
+[
+  {
+    "stage_name": "Drug Substance (DS) Manufacturing",
+    "stage_category": "Core Process",
+    "hierarchy_level": 1,
+    "stage_order": 1,
+    "short_description": "Production of active pharmaceutical ingredient (API)",
+    "description": "All stages involved in producing the drug substance, from initial synthesis or cell culture to final purification and isolation. Encompasses upstream production, downstream purification, and API finishing."
+  },
+  {
+    "stage_name": "Drug Product (DP) Manufacturing",
+    "stage_category": "Core Process",
+    "hierarchy_level": 1,
+    "stage_order": 2,
+    "short_description": "Conversion of API into final dosage form",
+    "description": "Process of converting drug substance into final dosage form suitable for patient administration, including formulation development, manufacturing operations, fill-finish, and packaging."
+  },
+  {
+    "stage_name": "Process Technology & Quality Systems",
+    "stage_category": "Support Process",
+    "hierarchy_level": 1,
+    "stage_order": 3,
+    "short_description": "Cross-cutting systems ensuring process control and compliance",
+    "description": "Overarching principles and systems governing all manufacturing stages, ensuring processes are controlled, validated, and compliant with global regulatory standards including GMP and ICH guidelines."
+  },
+  {
+    "stage_name": "Upstream Processing",
+    "stage_category": "Drug Substance",
+    "hierarchy_level": 2,
+    "stage_order": 1,
+    "parent_stage_name": "Drug Substance (DS) Manufacturing",
+    "short_description": "Initial production phase - synthesis or cell culture",
+    "description": "Initial phase where drug substance is created through chemical synthesis (small molecules), biological production (cell culture for proteins), or specialized processing (advanced therapies). Includes all activities from raw materials to crude product."
+  },
+  {
+    "stage_name": "Downstream Processing",
+    "stage_category": "Drug Substance",
+    "hierarchy_level": 2,
+    "stage_order": 2,
+    "parent_stage_name": "Drug Substance (DS) Manufacturing",
+    "short_description": "Recovery, purification, and isolation of drug substance",
+    "description": "Recovery, purification, and isolation of drug substance from complex upstream mixture. Achieves required purity and concentration while removing process-related and product-related impurities. Can account for 50-80% of biologics manufacturing costs."
+  },
+  {
+    "stage_name": "Drug Substance Finishing",
+    "stage_category": "Drug Substance",
+    "hierarchy_level": 2,
+    "stage_order": 3,
+    "parent_stage_name": "Drug Substance (DS) Manufacturing",
+    "short_description": "Final API processing and preparation for storage",
+    "description": "Final preparation of purified API for storage or transfer to DP manufacturing. Includes physical processing (drying, milling, blending), comprehensive quality control testing, and establishment of appropriate storage conditions with stability programs."
+  },
+  {
+    "stage_name": "Formulation Development",
+    "stage_category": "Drug Product",
+    "hierarchy_level": 2,
+    "stage_order": 1,
+    "parent_stage_name": "Drug Product (DP) Manufacturing",
+    "short_description": "Design of stable, effective drug product formulation",
+    "description": "Creating stable, effective, and safe drug product by combining drug substance with selected excipients. Optimized for target delivery route (oral, injectable, etc.) with focus on stability, bioavailability, and patient acceptability."
+  },
+  {
+    "stage_name": "Manufacturing Operations",
+    "stage_category": "Drug Product",
+    "hierarchy_level": 2,
+    "stage_order": 2,
+    "parent_stage_name": "Drug Product (DP) Manufacturing",
+    "short_description": "Large-scale production of final dosage form",
+    "description": "Large-scale execution of developed formulation process to produce final dosage form. Includes unit operations such as blending, granulation, compression, coating (solids) or aseptic processing (injectables), conducted under appropriate GMP conditions."
+  },
+  {
+    "stage_name": "Fill-Finish & Packaging",
+    "stage_category": "Drug Product",
+    "hierarchy_level": 2,
+    "stage_order": 3,
+    "parent_stage_name": "Drug Product (DP) Manufacturing",
+    "short_description": "Final container filling, sealing, and packaging",
+    "description": "Final step where manufactured drug product is filled into primary container, sealed, inspected, and packaged for distribution. Includes serialization for track-and-trace, cold chain management for biologics, and integration with delivery devices."
+  },
+  {
+    "stage_name": "Process Development & Scale-Up",
+    "stage_category": "Quality Systems",
+    "hierarchy_level": 2,
+    "stage_order": 1,
+    "parent_stage_name": "Process Technology & Quality Systems",
+    "short_description": "Process design and commercial scale transfer",
+    "description": "Activities to design robust manufacturing process and successfully transfer from laboratory scale to commercial production. Utilizes Quality by Design (QbD) principles, Design of Experiments (DoE), and risk-based validation strategies."
+  },
+  {
+    "stage_name": "Quality Control & Analytics",
+    "stage_category": "Quality Systems",
+    "hierarchy_level": 2,
+    "stage_order": 2,
+    "parent_stage_name": "Process Technology & Quality Systems",
+    "short_description": "Analytical methods and process monitoring",
+    "description": "Analytical methods and systems for monitoring and controlling manufacturing process and ensuring final product quality. Includes traditional laboratory testing, Process Analytical Technology (PAT), and advanced techniques per ICH Q2(R2) and Q14 guidelines."
+  },
+  {
+    "stage_name": "Regulatory Framework & Compliance",
+    "stage_category": "Quality Systems",
+    "hierarchy_level": 2,
+    "stage_order": 3,
+    "parent_stage_name": "Process Technology & Quality Systems",
+    "short_description": "GMP compliance and regulatory adherence",
+    "description": "Regulatory framework ensuring patient safety and product efficacy through Current Good Manufacturing Practice (GMP), Chemistry Manufacturing and Controls (CMC) submissions, and harmonized international standards (ICH, FDA, EMA)."
+  },
+  {
+    "stage_name": "Chemical/Biological Production",
+    "stage_category": "Production",
+    "hierarchy_level": 3,
+    "stage_order": 1,
+    "parent_stage_name": "Upstream Processing",
+    "short_description": "Core synthesis or culture operations",
+    "description": "Primary production activities including multi-step organic synthesis for small molecules, mammalian/microbial cell culture for biologics, or specialized production for advanced therapies. Requires precise control of critical process parameters."
+  },
+  {
+    "stage_name": "Process Intensification",
+    "stage_category": "Production",
+    "hierarchy_level": 3,
+    "stage_order": 2,
+    "parent_stage_name": "Upstream Processing",
+    "short_description": "Advanced production optimization techniques",
+    "description": "Advanced techniques to improve productivity and efficiency including continuous processing, perfusion culture systems, flow chemistry, or process analytical technology for real-time optimization."
+  },
+  {
+    "stage_name": "Cell Line Development",
+    "stage_category": "Biologics",
+    "hierarchy_level": 3,
+    "stage_order": 3,
+    "parent_stage_name": "Upstream Processing",
+    "short_description": "Generation of production cell lines",
+    "description": "Development of stable, high-producing cell lines for biologics. Includes host cell selection (CHO, HEK293, E. coli), genetic engineering, clonal selection, and establishment of Master and Working Cell Banks. Modern platforms using CRISPR/Cas9 can achieve stable lines in 12 weeks."
+  },
+  {
+    "stage_name": "Primary Recovery & Clarification",
+    "stage_category": "Purification",
+    "hierarchy_level": 3,
+    "stage_order": 1,
+    "parent_stage_name": "Downstream Processing",
+    "short_description": "Initial separation and clarification",
+    "description": "Initial recovery of product from reaction mixture or cell culture fluid. Includes harvest operations, depth filtration, centrifugation, or solvent extraction to achieve clarified intermediate (typically >95% recovery, <10 NTU turbidity for biologics)."
+  },
+  {
+    "stage_name": "Chromatography & Advanced Purification",
+    "stage_category": "Purification",
+    "hierarchy_level": 3,
+    "stage_order": 2,
+    "parent_stage_name": "Downstream Processing",
+    "short_description": "High-resolution purification steps",
+    "description": "Advanced purification using multiple chromatography modes (affinity, ion exchange, hydrophobic interaction, size exclusion), crystallization, or specialty techniques. Multi-step platforms achieve target purity specifications while removing impurities and variants."
+  },
+  {
+    "stage_name": "Conjugation & Modification",
+    "stage_category": "Purification",
+    "hierarchy_level": 3,
+    "stage_order": 3,
+    "parent_stage_name": "Downstream Processing",
+    "short_description": "Post-production molecular modifications",
+    "description": "Chemical or enzymatic modifications performed on purified molecules. Includes antibody-drug conjugation (ADCs), PEGylation, glycoengineering, or other post-translational modifications. Requires subsequent purification to achieve target drug-to-antibody ratio or modification level."
+  },
+  {
+    "stage_name": "Viral Safety & Impurity Clearance",
+    "stage_category": "Purification",
+    "hierarchy_level": 3,
+    "stage_order": 4,
+    "parent_stage_name": "Downstream Processing",
+    "short_description": "Safety-critical clearance steps",
+    "description": "Dedicated steps for viral inactivation and removal, plus clearance of process and product-related impurities. For biologics includes low pH viral inactivation, solvent/detergent treatment, and 20nm viral filtration. Critical for patient safety."
+  },
+  {
+    "stage_name": "Physical Processing & Drying",
+    "stage_category": "API Finishing",
+    "hierarchy_level": 3,
+    "stage_order": 1,
+    "parent_stage_name": "Drug Substance Finishing",
+    "short_description": "Controlled drying and particle engineering",
+    "description": "Controlled drying operations (vacuum, fluid bed, spray drying) to remove solvents and achieve target moisture content. Includes particle engineering via milling, micronization, or spray techniques to control particle size distribution and morphology."
+  },
+  {
+    "stage_name": "Quality Control Release Testing",
+    "stage_category": "API Finishing",
+    "hierarchy_level": 3,
+    "stage_order": 2,
+    "parent_stage_name": "Drug Substance Finishing",
+    "short_description": "Comprehensive API testing and release",
+    "description": "Comprehensive analytical testing to verify drug substance meets all specifications for identity, purity, assay, impurity profiles, physical properties, and stability before release. Performed according to validated methods per compendial and regulatory requirements."
+  },
+  {
+    "stage_name": "Storage & Stability Management",
+    "stage_category": "API Finishing",
+    "hierarchy_level": 3,
+    "stage_order": 3,
+    "parent_stage_name": "Drug Substance Finishing",
+    "short_description": "Controlled storage and stability programs",
+    "description": "Storage of finished drug substance under validated conditions (temperature, humidity, light protection). Supported by ICH-compliant stability programs to establish retest dates or expiry. Biologics often require -70°C, small molecules may be ambient or refrigerated."
+  },
+  {
+    "stage_name": "Excipient Selection & Optimization",
+    "stage_category": "Formulation",
+    "hierarchy_level": 3,
+    "stage_order": 1,
+    "parent_stage_name": "Formulation Development",
+    "short_description": "Selection of stabilizers and delivery enhancers",
+    "description": "Selection and optimization of excipients, buffers, stabilizers, surfactants, and delivery system components. For biologics: buffer systems (histidine, citrate), stabilizers (sucrose, trehalose), surfactants (polysorbate). For small molecules: disintegrants, binders, lubricants."
+  },
+  {
+    "stage_name": "Physical Form Development",
+    "stage_category": "Formulation",
+    "hierarchy_level": 3,
+    "stage_order": 2,
+    "parent_stage_name": "Formulation Development",
+    "short_description": "Solid form, particle engineering, delivery systems",
+    "description": "Development of appropriate physical form and delivery system. Options include crystalline/amorphous solids, solid dispersions, lipid-based systems, nanoparticles (LNPs for mRNA), liposomes, or combination products. Critical for bioavailability and stability."
+  },
+  {
+    "stage_name": "Formulation Characterization & Stability",
+    "stage_category": "Formulation",
+    "hierarchy_level": 3,
+    "stage_order": 3,
+    "parent_stage_name": "Formulation Development",
+    "short_description": "Analytical characterization and stability assessment",
+    "description": "Comprehensive characterization of formulation including physical properties (pH, osmolality, particle size, viscosity), chemical stability, and compatibility. Accelerated and long-term stability studies establish shelf-life and storage conditions."
+  },
+  {
+    "stage_name": "Solid Dosage Manufacturing",
+    "stage_category": "Oral Dosage",
+    "hierarchy_level": 3,
+    "stage_order": 1,
+    "parent_stage_name": "Manufacturing Operations",
+    "short_description": "Tablet and capsule production",
+    "description": "Production of oral solid dosage forms through blending, granulation (wet/dry/continuous), compression or encapsulation, and coating. Modern operations increasingly use continuous manufacturing platforms integrating all unit operations."
+  },
+  {
+    "stage_name": "Aseptic Processing",
+    "stage_category": "Sterile Manufacturing",
+    "hierarchy_level": 3,
+    "stage_order": 2,
+    "parent_stage_name": "Manufacturing Operations",
+    "short_description": "Sterile product manufacturing",
+    "description": "Manufacturing of sterile injectables in Class A/B cleanroom environments with laminar airflow. Includes sterile filtration (0.22μm), aseptic transfer using single-use systems, and environmental monitoring to prevent microbial contamination."
+  },
+  {
+    "stage_name": "Personalized/Autologous Manufacturing",
+    "stage_category": "Advanced Therapy",
+    "hierarchy_level": 3,
+    "stage_order": 3,
+    "parent_stage_name": "Manufacturing Operations",
+    "short_description": "Patient-specific cell therapy production",
+    "description": "Highly complex vein-to-vein manufacturing for autologous cell therapies. Includes patient cell collection, isolation, genetic modification, ex-vivo expansion (7-14 days), and cryopreservation. Requires rigorous chain-of-identity and contamination control. Current timelines 3-5 weeks."
+  },
+  {
+    "stage_name": "Continuous Manufacturing Integration",
+    "stage_category": "Advanced Manufacturing",
+    "hierarchy_level": 3,
+    "stage_order": 4,
+    "parent_stage_name": "Manufacturing Operations",
+    "short_description": "End-to-end continuous processing",
+    "description": "Integration of continuous unit operations from API synthesis through final dosage form. Requires real-time monitoring, material traceability, residence time distribution modeling, and advanced control strategies per ICH Q13 guidance."
+  },
+  {
+    "stage_name": "Primary Container Filling",
+    "stage_category": "Fill-Finish",
+    "hierarchy_level": 3,
+    "stage_order": 1,
+    "parent_stage_name": "Fill-Finish & Packaging",
+    "short_description": "Vial, syringe, or device filling operations",
+    "description": "Precision filling into primary containers using time-pressure filling, peristaltic pumps, or rotary piston systems. For biologics: aseptic filling into vials, pre-filled syringes, or cartridges. Includes automated weight checks and in-process controls."
+  },
+  {
+    "stage_name": "Lyophilization & Stabilization",
+    "stage_category": "Fill-Finish",
+    "hierarchy_level": 3,
+    "stage_order": 2,
+    "parent_stage_name": "Fill-Finish & Packaging",
+    "short_description": "Freeze-drying for stability enhancement",
+    "description": "Freeze-drying of unstable liquid biologics to create stable powder formulations. Controlled process includes freezing, primary drying under vacuum, and secondary drying to achieve residual moisture <3%. Extends shelf-life and enables ambient storage."
+  },
+  {
+    "stage_name": "Container Closure & Device Integration",
+    "stage_category": "Fill-Finish",
+    "hierarchy_level": 3,
+    "stage_order": 3,
+    "parent_stage_name": "Fill-Finish & Packaging",
+    "short_description": "Sealing and combination product assembly",
+    "description": "Container closure (stoppers, caps, seals) and integration with delivery devices (auto-injectors, pen injectors, inhalers). Requires container closure integrity testing and functionality testing. For cell therapies: controlled-rate freezing and cryogenic storage (-150°C to -196°C)."
+  },
+  {
+    "stage_name": "Visual Inspection & Quality Verification",
+    "stage_category": "Fill-Finish",
+    "hierarchy_level": 3,
+    "stage_order": 4,
+    "parent_stage_name": "Fill-Finish & Packaging",
+    "short_description": "100% inspection for defects",
+    "description": "Automated visual inspection systems examine each unit for particulates, fill volume, container defects, and closure integrity. Uses high-resolution cameras and machine vision. Complemented by manual inspection for complex defects. Rejection criteria per compendial standards."
+  },
+  {
+    "stage_name": "Secondary Packaging & Serialization",
+    "stage_category": "Fill-Finish",
+    "hierarchy_level": 3,
+    "stage_order": 5,
+    "parent_stage_name": "Fill-Finish & Packaging",
+    "short_description": "Labeling, packaging, and track-trace",
+    "description": "Secondary and tertiary packaging with product labeling. Serialization adds unique identifiers at unit, bundle, and case levels for supply chain security and anti-counterfeiting per DSCSA/FMD regulations. Aggregation links parent-child relationships through packaging hierarchy."
+  },
+  {
+    "stage_name": "Cold Chain & Distribution",
+    "stage_category": "Fill-Finish",
+    "hierarchy_level": 3,
+    "stage_order": 6,
+    "parent_stage_name": "Fill-Finish & Packaging",
+    "short_description": "Temperature-controlled logistics",
+    "description": "Unbroken cold chain management (2-8°C or frozen) from manufacturing through distribution. Uses qualified shipping containers with continuous temperature monitoring, mapped shipping lanes, and contingency protocols. Critical for biologics and advanced therapies to maintain product integrity."
+  },
+  {
+    "stage_name": "Quality by Design (QbD) Implementation",
+    "stage_category": "Process Development",
+    "hierarchy_level": 3,
+    "stage_order": 1,
+    "parent_stage_name": "Process Development & Scale-Up",
+    "short_description": "Systematic process understanding and design",
+    "description": "Systematic approach beginning with Quality Target Product Profile (QTPP), identifying Critical Quality Attributes (CQAs) and Critical Process Parameters (CPPs). Uses Design of Experiments (DoE) to establish design space and develop control strategy per ICH Q8/Q9/Q10."
+  },
+  {
+    "stage_name": "Technology Transfer & Scale-Up",
+    "stage_category": "Process Development",
+    "hierarchy_level": 3,
+    "stage_order": 2,
+    "parent_stage_name": "Process Development & Scale-Up",
+    "short_description": "Lab to commercial scale progression",
+    "description": "Progression from pilot scale to commercial manufacturing (e.g., 200L to 20,000L bioreactors, batch to continuous). Requires comprehensive documentation, cross-functional teams, process validation with minimum three consecutive commercial batches, and comparability assessment."
+  },
+  {
+    "stage_name": "Supply Chain Risk Management",
+    "stage_category": "Process Development",
+    "hierarchy_level": 3,
+    "stage_order": 3,
+    "parent_stage_name": "Process Development & Scale-Up",
+    "short_description": "Risk mitigation and supplier diversification",
+    "description": "Mapping and securing supply chain for critical materials and services. Includes supplier qualification, dual-sourcing strategies, inventory management, and AI-powered risk monitoring tools to mitigate geopolitical risks, natural disasters, and cybersecurity threats."
+  },
+  {
+    "stage_name": "Process Analytical Technology (PAT)",
+    "stage_category": "Analytics",
+    "hierarchy_level": 3,
+    "stage_order": 1,
+    "parent_stage_name": "Quality Control & Analytics",
+    "short_description": "Real-time process monitoring and control",
+    "description": "In-line, on-line, or at-line analytical techniques (NIR, Raman spectroscopy, focused beam reflectance measurement) providing real-time monitoring of CPPs. Enables proactive quality management, reduces cycle times, and supports real-time release testing (RTRT)."
+  },
+  {
+    "stage_name": "Advanced Analytical Methods",
+    "stage_category": "Analytics",
+    "hierarchy_level": 3,
+    "stage_order": 2,
+    "parent_stage_name": "Quality Control & Analytics",
+    "short_description": "Sophisticated characterization techniques",
+    "description": "Advanced methods for comprehensive product characterization. For biologics: Multi-Attribute Methods (MAM), mass spectrometry for post-translational modifications, higher-order structure analysis. For small molecules: impurity profiling, polymorph analysis. All methods validated per ICH Q2(R2) and Q14."
+  },
+  {
+    "stage_name": "Stability & Comparability Studies",
+    "stage_category": "Analytics",
+    "hierarchy_level": 3,
+    "stage_order": 3,
+    "parent_stage_name": "Quality Control & Analytics",
+    "short_description": "Long-term product monitoring",
+    "description": "ICH-compliant stability programs establishing shelf-life and storage conditions through accelerated and long-term studies. Comparability studies demonstrate manufacturing changes don't adversely impact quality. Uses risk-based approaches per ICH Q9 to determine study scope."
+  },
+  {
+    "stage_name": "Current Good Manufacturing Practice (cGMP)",
+    "stage_category": "Regulatory Compliance",
+    "hierarchy_level": 3,
+    "stage_order": 1,
+    "parent_stage_name": "Regulatory Framework & Compliance",
+    "short_description": "Core GMP requirements and systems",
+    "description": "Fundamental regulatory standard governing all aspects: facility design, equipment qualification/validation, personnel training, documentation systems, batch records, change control, deviation management, CAPA, and quality systems. Ensures consistent quality and patient safety."
+  },
+  {
+    "stage_name": "CMC Regulatory Submissions",
+    "stage_category": "Regulatory Compliance",
+    "hierarchy_level": 3,
+    "stage_order": 2,
+    "parent_stage_name": "Regulatory Framework & Compliance",
+    "short_description": "Chemistry, Manufacturing, and Controls documentation",
+    "description": "Comprehensive documentation of manufacturing process, analytical methods, specifications, and quality systems for regulatory submissions (IND, NDA, BLA, MAA). Follows electronic Common Technical Document (eCTD) format for FDA, EMA, and other agencies."
+  },
+  {
+    "stage_name": "Regulatory Inspections & Compliance",
+    "stage_category": "Regulatory Compliance",
+    "hierarchy_level": 3,
+    "stage_order": 3,
+    "parent_stage_name": "Regulatory Framework & Compliance",
+    "short_description": "Inspection readiness and remediation",
+    "description": "Preparation for and response to regulatory inspections (FDA, EMA, local authorities). Includes mock audits, continuous compliance monitoring, rapid CAPA implementation for observations, and maintaining inspection readiness through robust quality systems."
+  },
+  {
+    "stage_name": "International Harmonization & Standards",
+    "stage_category": "Regulatory Compliance",
+    "hierarchy_level": 3,
+    "stage_order": 4,
+    "parent_stage_name": "Regulatory Framework & Compliance",
+    "short_description": "Global regulatory alignment",
+    "description": "Implementation of harmonized international standards (ICH Q7, Q8-Q13, Q2(R2), Q14) enabling consistent requirements across regions. Includes participation in regulatory working groups, adoption of new guidelines, and leveraging mutual recognition agreements to streamline global development."
+  }
+]

@@ -107,6 +107,10 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
     # Map for supply chain entity lookups by name
     entity_map = {e.entity_name: e.entity_id for e in ManufacturingEntity.query.with_entities(ManufacturingEntity.entity_name, ManufacturingEntity.entity_id).all()}
 
+    # CRITICAL: For ProcessStage imports, sort by hierarchy_level to ensure parents are created before children
+    if model_class == ProcessStage:
+        resolved_data = sorted(resolved_data, key=lambda item: item.get('data', {}).get('hierarchy_level', 999))
+
     for item in resolved_data:
         action = item.get('action')
         data = item.get('data')
@@ -196,6 +200,10 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
                 
                 db.session.add(new_obj)
                 added_count += 1
+                if model_class == ProcessStage:
+                    db.session.flush()  # Get the ID
+                    stage_map[new_obj.stage_name] = new_obj.stage_id
+
                 if model_class == ManufacturingChallenge and product_codes_to_link:
                     valid_products = [product_map[code] for code in product_codes_to_link if code in product_map]
                     new_obj.products = valid_products

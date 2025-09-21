@@ -7,7 +7,7 @@ from ..services.data_management_service import analyze_json_import, finalize_imp
 from ..models import (
     Product, Indication, ManufacturingChallenge, ManufacturingTechnology,
     ProductSupplyChain, Modality, ManufacturingCapability, InternalFacility,
-    ExternalPartner
+    ExternalPartner, ProcessStage
 )
 
 data_management_bp = Blueprint('data_management', __name__, url_prefix='/data-management')
@@ -17,6 +17,7 @@ ENTITY_MAP = {
     'indications': {'model': Indication, 'key': 'indication_name'},
     'manufacturing_challenges': {'model': ManufacturingChallenge, 'key': 'challenge_name'},
     'manufacturing_technologies': {'model': ManufacturingTechnology, 'key': 'technology_name'},
+    'process_stages': {'model': ProcessStage, 'key': 'stage_name'},  # ← ADD THIS LINE
     'supply_chain': {'model': ProductSupplyChain, 'key': 'id'},
     'modalities': {'model': Modality, 'key': 'modality_name'},
     'manufacturing_capabilities': {'model': ManufacturingCapability, 'key': 'capability_name'},
