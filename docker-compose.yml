@@ -37,7 +37,6 @@ services:
       - ./backend:/app/backend
       - ./migrations:/app/migrations
       - ./alembic.ini:/app/alembic.ini
-      - ./backend/entrypoint.sh:/app/entrypoint.sh
     ports:
       - "5001:5000"
     depends_on:
