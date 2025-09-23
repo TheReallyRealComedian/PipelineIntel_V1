@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block head_extra %}
+    {{ super() }}
+    <!-- Marked.js for rendering markdown in chat bubbles -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="llm-chat-page">
+    <h1>{{ title }}</h1>
+    <p class="text-color-light mb-4">A simple chat interface with conversation memory.</p>
+
+    <div class="row">
+        <!-- Main Chat Area -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="card-title mb-0">Conversation</h2>
+                    <button class="btn btn-sm btn-outline-danger" id="clearChatBtn">
+                        <i class="fas fa-trash"></i> Clear History
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="chat-container" style="height: 60vh; display: flex; flex-direction: column;">
+                        <div id="chatDisplay" class="chat-display flex-grow-1 p-3" style="overflow-y: auto;">
+                            <!-- Chat messages will be appended here by JavaScript -->
+                             <div class="chat-placeholder text-center text-muted p-5">
+                                <i class="fas fa-comments fa-3x"></i>
+                                <p class="mt-3">Start a conversation to begin.</p>
+                            </div>
+                        </div>
+                        <div class="chat-input-area p-3 border-top">
+                            <div class="main-input-row d-flex align-items-end gap-2">
+                                <textarea id="chatInput" class="form-control" rows="1" placeholder="Type your message..."></textarea>
+                                <button class="btn btn-primary" id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings and Controls -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">Settings</h2>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="llmModelSelect" class="form-label">LLM Model:</label>
+                        <select id="llmModelSelect" class="form-select">
+                            <option>Loading...</option>
+                        </select>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <label for="systemPromptInput" class="form-label d-flex justify-content-between">
+                            <span>System Prompt:</span>
+                            <button id="saveSystemPromptBtn" class="btn btn-sm btn-link p-0">Save</button>
+                        </label>
+                        <textarea id="systemPromptInput" class="form-control" rows="8">{{ current_user.system_prompt or '' }}</textarea>
+                        <div id="savePromptStatus" class="form-text small mt-1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/llm_chat_ui.js') }}" type="module"></script>
+{% endblock %}

@@ -13,6 +13,16 @@ class Config:
         raise ValueError("DATABASE_URL environment variable is not set. Please configure it in your .env file.")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # LLM API Keys
+    OLLAMA_BASE_URL = os.environ.get('OLLAMA_BASE_URL')
+    MAX_CHAT_HISTORY_LENGTH = int(os.environ.get('MAX_CHAT_HISTORY_LENGTH', 10))
+
+    # Apollo LLM API settings
+    APOLLO_CLIENT_ID = os.environ.get('APOLLO_CLIENT_ID')
+    APOLLO_CLIENT_SECRET = os.environ.get('APOLLO_CLIENT_SECRET')
+    APOLLO_TOKEN_URL = os.environ.get('APOLLO_TOKEN_URL')
+    APOLLO_LLM_API_BASE_URL = os.environ.get('APOLLO_LLM_API_BASE_URL')
+
 class DevelopmentConfig(Config):
     DEBUG = True
 

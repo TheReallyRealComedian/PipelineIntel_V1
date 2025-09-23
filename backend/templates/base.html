@@ -73,6 +73,10 @@
                                 <i class="fas fa-sliders-h"></i> Settings
                             </a>
                         </li>
+                    <li class="{% if request.blueprint == 'llm' %}active{% endif %}">
+                        <a href="{{ url_for('llm.chat_page') }}"><i class="fas fa-robot"></i> LLM Chat</a>
+                    </li>
+                    
                     {% if current_user.is_authenticated %}
                         <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout ({{ current_user.username }})</a></li>
                     {% endif %}
