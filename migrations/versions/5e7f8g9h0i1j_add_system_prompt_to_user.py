@@ -1,7 +1,7 @@
 """Add system_prompt to user model
 
 Revision ID: 5e7f8g9h0i1j
-Revises: f9d8e7c6b5a4
+Revises: 1a2b3c4d5e6f
 Create Date: 2025-09-23 08:40:00.000000
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '5e7f8g9h0i1j'
-down_revision = 'f9d8e7c6b5a4' # This should be the ID of the previous migration
+down_revision = '1a2b3c4d5e6f'
 branch_labels = None
 depends_on = None
 
