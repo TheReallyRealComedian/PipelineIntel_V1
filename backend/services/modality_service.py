@@ -11,7 +11,7 @@ def get_all_modalities():
 def get_modality_table_context(requested_columns_str: str = None):
     """Prepares the full context needed for rendering the dynamic modalities table."""
     # UPDATED: Use 'short_description' instead of 'description' for the default view
-    DEFAULT_COLUMNS = ['modality_name', 'modality_category', 'short_description']
+    DEFAULT_COLUMNS = ['label', 'modality_name', 'modality_category', 'short_description']
     
     all_fields = Modality.get_all_fields()
     

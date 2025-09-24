@@ -15,6 +15,9 @@
         </div>
         <div class="card-body">
             <form method="POST">
+                {# ADD THIS CSRF TOKEN LINE #}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
                 {# --- ENTITY SELECTION --- #}
                 <div class="row g-3">
                     {# THIS LOOP IS NOW FULLY DYNAMIC #}

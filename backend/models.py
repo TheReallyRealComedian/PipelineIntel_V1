@@ -182,6 +182,7 @@ class Modality(db.Model):
     modality_id = Column(Integer, primary_key=True)
     modality_name = Column(String(255), unique=True, nullable=False)
     modality_category = Column(String(255))
+    label = Column(String(255), nullable=True)
     short_description = Column(Text, nullable=True) # CHANGED from String(255)
     description = Column(Text)
     standard_challenges = Column(JSONB)
@@ -196,7 +197,6 @@ class Modality(db.Model):
     @classmethod
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
-        # Exclude relationship fields that shouldn't be displayed as simple columns
         return [c.key for c in inspect(cls).attrs if c.key not in ['products', 'process_templates', 'requirements']]
 
 class ManufacturingCapability(db.Model):
