@@ -2,9 +2,9 @@ import os
 from flask import Flask, redirect, url_for
 from flask_login import LoginManager
 from flask_session import Session
-from flask_assets import Environment
+from flask_assets import Environment, Bundle
 from flask_migrate import Migrate
-from flask_wtf.csrf import CSRFProtect  # ADD THIS IMPORT
+from flask_wtf.csrf import CSRFProtect
 
 from backend.config import get_config
 from backend.models import User
@@ -29,6 +29,13 @@ import backend.routes.process_stage_routes as process_stage_routes_mod
 import backend.routes.capability_routes as capability_routes_mod
 import backend.routes.llm_routes as llm_routes_mod
 
+# Add to existing bundles
+js_data_management_bundle = Bundle(
+    'js/data_management.js',
+    filters='jsmin',
+    output='gen/data_management.min.js'
+)
+
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.login_message = 'Please log in to access this page.'
@@ -50,12 +57,12 @@ def create_app(init_session=True):
     init_app_db(app)
     login_manager.init_app(app)
     
-    # ADD THIS: Initialize CSRF protection
     csrf = CSRFProtect(app)
 
     assets = Environment(app)
     assets.register('js_main', js_main_bundle)
     assets.register('css_main', css_bundle)
+    assets.register('js_data_management', js_data_management_bundle)
     assets.url = app.static_url_path
 
     app.jinja_env.filters['nl2br'] = nl2br

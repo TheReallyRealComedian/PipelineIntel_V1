@@ -1,6 +1,11 @@
 # backend/services/data_management_service.py
 import json
 import traceback
+import difflib
+from collections import defaultdict
+from datetime import datetime, date
+import re
+
 from ..db import db
 from ..models import (
     Product, Indication, ManufacturingChallenge, ManufacturingTechnology,
@@ -8,8 +13,7 @@ from ..models import (
     Modality, ProcessStage, ProductTimeline, ProductRegulatoryFiling,
     ProductManufacturingSupplier
 )
-from datetime import datetime, date
-import re
+
 
 def analyze_json_import(json_data: list, model_class, unique_key_field: str):
     """
@@ -92,6 +96,124 @@ def analyze_json_import(json_data: list, model_class, unique_key_field: str):
         traceback.print_exc()
         return {"success": False, "message": f"An unexpected analysis error occurred: {e}"}
 
+
+def analyze_json_import_with_resolution(json_data: list, model_class, unique_key_field: str):
+    """
+    Enhanced analysis that detects missing foreign keys and suggests matches.
+    """
+    preview_data = []
+    missing_keys = defaultdict(set)  # {field_name: {missing_values}}
+    suggestions = {}  # {field_name: {missing_value: [suggestions]}}
+
+    try:
+        # Get foreign key field mappings for this model
+        foreign_key_fields = get_foreign_key_fields(model_class)
+
+        # Pre-fetch existing entities for suggestions
+        existing_entities = {}
+        for field_name, (related_model, lookup_field) in foreign_key_fields.items():
+            entities = related_model.query.all()
+            existing_entities[field_name] = {
+                getattr(entity, lookup_field): entity
+                for entity in entities
+            }
+
+        # Analyze each JSON item
+        for json_item in json_data:
+            entry = {
+                'status': 'pending_resolution',
+                'action': 'add',
+                'identifier': json_item.get(unique_key_field),
+                'json_item': json_item,
+                'missing_foreign_keys': {},
+                'messages': []
+            }
+
+            # Check for missing foreign keys
+            has_missing_keys = False
+            for field_name, (related_model, lookup_field) in foreign_key_fields.items():
+                if field_name in json_item:
+                    lookup_value = json_item[field_name]
+                    if lookup_value not in existing_entities[field_name]:
+                        # Missing foreign key found
+                        missing_keys[field_name].add(lookup_value)
+                        has_missing_keys = True
+
+                        # Generate suggestions
+                        if lookup_value not in suggestions.get(field_name, {}):
+                            if field_name not in suggestions:
+                                suggestions[field_name] = {}
+                            suggestions[field_name][lookup_value] = generate_suggestions(
+                                lookup_value,
+                                list(existing_entities[field_name].keys())
+                            )
+
+                        entry['missing_foreign_keys'][field_name] = lookup_value
+
+            if has_missing_keys:
+                entry['status'] = 'needs_resolution'
+                entry['messages'].append("Missing foreign key references found")
+            else:
+                entry['status'] = 'ready'
+                entry['messages'].append("All foreign key references validated")
+
+            preview_data.append(entry)
+
+        return {
+            "success": True,
+            "preview_data": preview_data,
+            "missing_keys": dict(missing_keys),
+            "suggestions": suggestions,
+            "needs_resolution": any(missing_keys.values())
+        }
+
+    except Exception as e:
+        traceback.print_exc()
+        return {"success": False, "message": f"Analysis error: {e}"}
+
+
+def get_foreign_key_fields(model_class):
+    """
+    Returns mapping of foreign key fields for a model.
+    Format: {field_name: (related_model_class, lookup_field)}
+    """
+    from ..models import Product, Modality, ProcessStage, ManufacturingCapability
+
+    mappings = {
+        Product: {
+            'modality_name': (Modality, 'modality_name'),
+        },
+        # Add other model mappings as needed
+    }
+
+    return mappings.get(model_class, {})
+
+
+def generate_suggestions(missing_value, existing_values, max_suggestions=3):
+    """
+    Generate smart suggestions for missing foreign key values.
+    """
+    suggestions = []
+
+    # Use difflib for fuzzy matching
+    matches = difflib.get_close_matches(
+        missing_value,
+        existing_values,
+        n=max_suggestions,
+        cutoff=0.6
+    )
+
+    for match in matches:
+        similarity = difflib.SequenceMatcher(None, missing_value.lower(), match.lower()).ratio()
+        suggestions.append({
+            'value': match,
+            'similarity': similarity,
+            'reason': f"{similarity:.0%} match"
+        })
+
+    return suggestions
+
+
 def _parse_date(date_string):
     """Helper function to parse date strings into date objects."""
     if not date_string:
@@ -109,6 +231,7 @@ def _parse_date(date_string):
                 continue
 
     return None
+
 
 def _enhanced_field_comparison(existing_obj, json_data, fields_to_check):
     """
@@ -144,11 +267,12 @@ def _enhanced_field_comparison(existing_obj, json_data, fields_to_check):
 
     return changed_fields
 
+
 def _process_product_related_tables(product_obj, json_data):
     """
     Process and create related table entries for Products during import.
     Handles ProductTimeline, ProductRegulatoryFiling, and ProductManufacturingSupplier.
-    
+
     Args:
         product_obj: SQLAlchemy Product object (must have product_id)
         json_data: Dictionary containing the JSON import data
@@ -221,6 +345,7 @@ def _process_product_related_tables(product_obj, json_data):
         import traceback
         traceback.print_exc()
 
+
 def _auto_populate_suppliers_from_jsonb(product):
     """
     Auto-populate ProductManufacturingSupplier records from ds_suppliers/dp_suppliers JSONB fields.
@@ -279,6 +404,7 @@ def _auto_populate_suppliers_from_jsonb(product):
         import traceback
         traceback.print_exc()
 
+
 def _separate_product_data(json_data):
     """
     Separate main Product fields from related table data.
@@ -301,6 +427,7 @@ def _separate_product_data(json_data):
             main_product_data[key] = value
 
     return main_product_data, related_table_data
+
 
 def finalize_import(resolved_data: list, model_class, unique_key_field: str):
     """

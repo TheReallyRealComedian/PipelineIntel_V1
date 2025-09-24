@@ -3,7 +3,11 @@ import json
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, jsonify
 from flask_login import login_required
 
-from ..services.data_management_service import analyze_json_import, finalize_import
+from ..services.data_management_service import (
+    analyze_json_import,
+    finalize_import,
+    analyze_json_import_with_resolution
+)
 from ..models import (
     Product, Indication, ManufacturingChallenge, ManufacturingTechnology,
     ProductSupplyChain, Modality, ManufacturingCapability, InternalFacility,
@@ -34,6 +38,7 @@ ENTITY_MAP = {
 def data_management_page():
     return render_template('data_management.html', title="Data Management")
 
+
 @data_management_bp.route('/analyze', methods=['POST'])
 @login_required
 def analyze_json_upload():
@@ -47,29 +52,148 @@ def analyze_json_upload():
     if file.filename == '' or not entity_type or entity_type not in ENTITY_MAP:
         flash('No file selected or invalid entity type.', 'warning')
         return redirect(url_for('data_management.data_management_page'))
-
+    
     try:
         json_data = json.load(file.stream)
         if not isinstance(json_data, list):
             raise ValueError("JSON file must contain a list (array) of objects.")
 
-        analysis_result = analyze_json_import(
+        # Use enhanced analysis
+        analysis_result = analyze_json_import_with_resolution(
             json_data,
             ENTITY_MAP[entity_type]['model'],
             ENTITY_MAP[entity_type]['key']
         )
 
         if analysis_result.get('success'):
-            session['import_preview_data'] = analysis_result['preview_data']
-            session['import_entity_type'] = entity_type
-            return redirect(url_for('data_management.import_preview'))
+            if analysis_result.get('needs_resolution'):
+                # Store data for resolution step
+                session['import_original_data'] = json_data
+                session['import_entity_type'] = entity_type
+                session['import_analysis_result'] = analysis_result
+                return redirect(url_for('data_management.foreign_key_resolution'))
+            else:
+                # No resolution needed, proceed as normal
+                session['import_preview_data'] = analysis_result['preview_data']
+                session['import_entity_type'] = entity_type
+                return redirect(url_for('data_management.import_preview'))
         else:
-            flash(f"Analysis failed: {analysis_result.get('message', 'Unknown error.')}", 'danger')
+            flash(f"Analysis failed: {analysis_result.get('message')}", 'danger')
             return redirect(url_for('data_management.data_management_page'))
 
-    except (json.JSONDecodeError, ValueError) as e:
+    except Exception as e:
         flash(f"Invalid JSON file: {e}", "danger")
         return redirect(url_for('data_management.data_management_page'))
+
+
+@data_management_bp.route('/foreign-key-resolution')
+@login_required
+def foreign_key_resolution():
+    analysis_result = session.get('import_analysis_result')
+    entity_type = session.get('import_entity_type')
+    
+    if not analysis_result or not entity_type:
+        flash("No resolution data found. Please start a new import.", "warning")
+        return redirect(url_for('data_management.data_management_page'))
+    
+    # Prepare data for resolution template
+    items_needing_resolution = [
+        item for item in analysis_result['preview_data']
+        if item['status'] == 'needs_resolution'
+    ]
+    
+    missing_fields = list(analysis_result['missing_keys'].keys())
+    
+    return render_template(
+        'foreign_key_resolution.html',
+        title="Resolve Missing References",
+        items_needing_resolution=items_needing_resolution,
+        missing_fields=missing_fields,
+        missing_keys=analysis_result['missing_keys'],
+        suggestions=analysis_result['suggestions'],
+        entity_type=entity_type
+    )
+
+
+@data_management_bp.route('/resolve-foreign-keys', methods=['POST'])
+@login_required
+def resolve_foreign_keys():
+    """
+    Apply foreign key resolutions and continue import process.
+    """
+    data = request.json
+    resolutions = data.get('resolutions', {})
+    entity_type = data.get('entity_type')
+    original_data = data.get('original_data')
+
+    try:
+        # Apply resolutions to create missing entities
+        created_entities = {}
+        
+        for item_index, item_resolutions in resolutions.items():
+            for field_name, resolution in item_resolutions.items():
+                if resolution['type'] == 'create_new':
+                    # Create the missing entity
+                    created_entity = create_missing_entity(
+                        field_name,
+                        resolution['value'],
+                        resolution.get('metadata', {})
+                    )
+                    created_entities[resolution['value']] = created_entity
+        
+        # Update original data with resolved foreign keys
+        resolved_data = []
+        for index, item in enumerate(original_data):
+            resolved_item = item.copy()
+            
+            if str(index) in resolutions:
+                for field_name, resolution in resolutions[str(index)].items():
+                    if resolution['type'] == 'existing':
+                        resolved_item[field_name] = resolution['value']
+                    elif resolution['type'] == 'create_new':
+                        resolved_item[field_name] = resolution['value']
+            
+            resolved_data.append(resolved_item)
+        
+        # Now proceed with normal import analysis
+        analysis_result = analyze_json_import(
+            resolved_data,
+            ENTITY_MAP[entity_type]['model'],
+            ENTITY_MAP[entity_type]['key']
+        )
+        
+        return jsonify({
+            'success': True,
+            'resolved_data': resolved_data,
+            'created_entities': list(created_entities.keys()),
+            'analysis_result': analysis_result
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+def create_missing_entity(field_name, entity_name, metadata):
+    """
+    Create missing entity based on field type.
+    """
+    from ..db import db
+    from ..models import Modality
+    
+    if field_name == 'modality_name':
+        modality = Modality(
+            modality_name=entity_name,
+            modality_category=metadata.get('category', 'Other'),
+            short_description=metadata.get('description', ''),
+            description=metadata.get('description', '')
+        )
+        db.session.add(modality)
+        db.session.commit()
+        return modality
+    
+    # Add other entity types as needed
+    raise ValueError(f"Unknown field type for creation: {field_name}")
+
 
 @data_management_bp.route('/preview')
 @login_required
@@ -87,6 +211,7 @@ def import_preview():
         preview_data=preview_data,
         entity_type=entity_type
     )
+
 
 @data_management_bp.route('/finalize', methods=['POST'])
 @login_required
