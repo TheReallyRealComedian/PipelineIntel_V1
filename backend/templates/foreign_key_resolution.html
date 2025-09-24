@@ -1,153 +1,142 @@
-{% block scripts %}
-{{ super() }}
-<script src="{{ url_for('static', filename='js/data_management.js') }}"></script>
-<script>
-    // Pass data to JavaScript  
-    window.previewData = {{ preview_data | tojson | safe }};
-    window.entityType = "{{ entity_type }}";
-</script>
-{% endblock %}
+{% extends "base.html" %}
 
-<!-- Foreign Key Resolution Modal -->
-<div class="modal fade" id="foreignKeyResolutionModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-xl" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Resolve Missing References</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted">
-                    Some imported items reference entities that don't exist yet. 
-                    Please resolve these references before continuing.
-                </p>
-                
-                <!-- Resolution Table -->
-                <div class="table-responsive">
-                    <table class="table table-bordered foreign-key-resolution-table">
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                {% for field_name in missing_fields %}
-                                <th>{{ field_name | title | replace('_', ' ') }}</th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in items_needing_resolution %}
-                            <tr data-item-id="{{ loop.index0 }}">
-                                <td>
-                                    <strong>{{ item.identifier }}</strong>
-                                    {% if item.json_item.get('product_name') %}
-                                    <br><small class="text-muted">{{ item.json_item.product_name }}</small>
-                                    {% endif %}
-                                </td>
-                                
-                                {% for field_name in missing_fields %}
-                                <td>
-                                    {% if field_name in item.missing_foreign_keys %}
-                                    <div class="foreign-key-resolution" 
-                                         data-field="{{ field_name }}" 
-                                         data-missing-value="{{ item.missing_foreign_keys[field_name] }}">
-                                        
-                                        <div class="missing-value-display">
-                                            <small class="text-muted">Missing:</small><br>
-                                            <code>{{ item.missing_foreign_keys[field_name] }}</code>
-                                        </div>
-                                        
-                                        <!-- Resolution Options -->
-                                        <div class="resolution-options mt-2">
-                                            {% set field_suggestions = suggestions.get(field_name, {}).get(item.missing_foreign_keys[field_name], []) %}
-                                            
-                                            {% if field_suggestions %}
-                                            <!-- Existing Entity Suggestions -->
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" 
-                                                       name="resolution_{{ field_name }}_{{ loop.index0 }}" 
-                                                       id="use_existing_{{ field_name }}_{{ loop.index0 }}" 
-                                                       value="existing" checked>
-                                                <label class="form-check-label">Use existing:</label>
-                                            </div>
-                                            
-                                            <select class="form-select form-select-sm mt-1 existing-entity-select"
-                                                    data-field="{{ field_name }}" data-item="{{ loop.index0 }}">
-                                                {% for suggestion in field_suggestions %}
-                                                <option value="{{ suggestion.value }}" 
-                                                        {% if loop.first %}selected{% endif %}>
-                                                    {{ suggestion.value }} ({{ suggestion.reason }})
-                                                </option>
-                                                {% endfor %}
-                                            </select>
-                                            {% endif %}
-                                            
-                                            <!-- Create New Option -->
-                                            <div class="form-check mt-2">
-                                                <input class="form-check-input" type="radio" 
-                                                       name="resolution_{{ field_name }}_{{ loop.index0 }}" 
-                                                       id="create_new_{{ field_name }}_{{ loop.index0 }}" 
-                                                       value="create_new" {% if not field_suggestions %}checked{% endif %}>
-                                                <label class="form-check-label">Create new:</label>
-                                            </div>
-                                            
-                                            <div class="create-new-form mt-1" 
-                                                 {% if field_suggestions %}style="display: none;"{% endif %}>
-                                                <input type="text" class="form-control form-control-sm new-entity-name" 
-                                                       value="{{ item.missing_foreign_keys[field_name] }}"
-                                                       data-field="{{ field_name }}" data-item="{{ loop.index0 }}">
-                                                
-                                                <!-- Additional fields for entity creation -->
-                                                {% if field_name == 'modality_name' %}
-                                                <select class="form-select form-select-sm mt-1 new-entity-category">
-                                                    <option value="Chemical">Chemical</option>
-                                                    <option value="Biologics">Biologics</option>
-                                                    <option value="Advanced Therapy">Advanced Therapy</option>
-                                                </select>
-                                                <input type="text" class="form-control form-control-sm mt-1 new-entity-description" 
-                                                       placeholder="Short description...">
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% else %}
-                                    <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-                                {% endfor %}
-                            </tr>
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <h1>{{ title }}</h1>
+            <p class="text-muted">
+                Some imported items reference entities that don't exist yet. 
+                Please resolve these references before continuing.
+            </p>
+            
+            <!-- Resolution Table -->
+            <div class="table-responsive">
+                <table class="table table-bordered foreign-key-resolution-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            {% for field_name in missing_fields %}
+                            <th>{{ field_name | title | replace('_', ' ') }}</th>
                             {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- Bulk Actions -->
-                <div class="bulk-actions mt-3">
-                    <h6>Bulk Actions</h6>
-                    <div class="row">
-                        {% for field_name, missing_values in missing_keys.items() %}
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">{{ field_name | title | replace('_', ' ') }}</h6>
-                                    {% for missing_value in missing_values %}
-                                    <div class="bulk-action-item">
-                                        <small class="text-muted">Missing:</small> 
-                                        <code>{{ missing_value }}</code>
-                                        <button class="btn btn-sm btn-outline-primary ms-2 bulk-apply-btn"
-                                                data-field="{{ field_name }}" 
-                                                data-missing-value="{{ missing_value }}">
-                                            Apply to All
-                                        </button>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items_needing_resolution %}
+                        <tr data-item-id="{{ loop.index0 }}">
+                            <td>
+                                <strong>{{ item.identifier }}</strong>
+                                {% if item.json_item.get('product_name') %}
+                                <br><small class="text-muted">{{ item.json_item.product_name }}</small>
+                                {% endif %}
+                            </td>
+                            
+                            {% for field_name in missing_fields %}
+                            <td>
+                                {% if field_name in item.missing_foreign_keys %}
+                                <div class="foreign-key-resolution" 
+                                     data-field="{{ field_name }}" 
+                                     data-missing-value="{{ item.missing_foreign_keys[field_name] }}">
+                                    
+                                    <div class="missing-value-display">
+                                        <small class="text-muted">Missing:</small><br>
+                                        <code>{{ item.missing_foreign_keys[field_name] }}</code>
                                     </div>
-                                    {% endfor %}
+                                    
+                                    <!-- Resolution Options -->
+                                    <div class="resolution-options mt-2">
+                                        {% set field_suggestions = suggestions.get(field_name, {}).get(item.missing_foreign_keys[field_name], []) %}
+                                        
+                                        {% if field_suggestions %}
+                                        <!-- Existing Entity Suggestions -->
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" 
+                                                   name="resolution_{{ field_name }}_{{ loop.index0 }}" 
+                                                   id="use_existing_{{ field_name }}_{{ loop.index0 }}" 
+                                                   value="existing" checked>
+                                            <label class="form-check-label">Use existing:</label>
+                                        </div>
+                                        
+                                        <select class="form-select form-select-sm mt-1 existing-entity-select"
+                                                data-field="{{ field_name }}" data-item="{{ loop.index0 }}">
+                                            {% for suggestion in field_suggestions %}
+                                            <option value="{{ suggestion.value }}" 
+                                                    {% if loop.first %}selected{% endif %}>
+                                                {{ suggestion.value }} ({{ suggestion.reason }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                        {% endif %}
+                                        
+                                        <!-- Create New Option -->
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="radio" 
+                                                   name="resolution_{{ field_name }}_{{ loop.index0 }}" 
+                                                   id="create_new_{{ field_name }}_{{ loop.index0 }}" 
+                                                   value="create_new" {% if not field_suggestions %}checked{% endif %}>
+                                            <label class="form-check-label">Create new:</label>
+                                        </div>
+                                        
+                                        <div class="create-new-form mt-1" 
+                                             {% if field_suggestions %}style="display: none;"{% endif %}>
+                                            <input type="text" class="form-control form-control-sm new-entity-name" 
+                                                   value="{{ item.missing_foreign_keys[field_name] }}"
+                                                   data-field="{{ field_name }}" data-item="{{ loop.index0 }}">
+                                            
+                                            <!-- Additional fields for entity creation -->
+                                            {% if field_name == 'modality_name' %}
+                                            <select class="form-select form-select-sm mt-1 new-entity-category">
+                                                <option value="Chemical">Chemical</option>
+                                                <option value="Biologics">Biologics</option>
+                                                <option value="Advanced Therapy">Advanced Therapy</option>
+                                            </select>
+                                            <input type="text" class="form-control form-control-sm mt-1 new-entity-description" 
+                                                   placeholder="Short description...">
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 </div>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Bulk Actions -->
+            <div class="bulk-actions mt-3">
+                <h6>Bulk Actions</h6>
+                <div class="row">
+                    {% for field_name, missing_values in missing_keys.items() %}
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ field_name | title | replace('_', ' ') }}</h6>
+                                {% for missing_value in missing_values %}
+                                <div class="bulk-action-item">
+                                    <small class="text-muted">Missing:</small> 
+                                    <code>{{ missing_value }}</code>
+                                    <button class="btn btn-sm btn-outline-primary ms-2 bulk-apply-btn"
+                                            data-field="{{ field_name }}" 
+                                            data-missing-value="{{ missing_value }}">
+                                        Apply to All
+                                    </button>
+                                </div>
+                                {% endfor %}
                             </div>
                         </div>
-                        {% endfor %}
                     </div>
+                    {% endfor %}
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+            <!-- Action Buttons -->
+            <div class="mt-4 text-end">
+                <a href="{{ url_for('data_management.data_management_page') }}" class="btn btn-secondary">Cancel</a>
                 <button type="button" class="btn btn-success" id="applyResolutionsBtn">
                     Apply Resolutions & Continue Import
                 </button>
@@ -155,3 +144,14 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/data_management.js') }}"></script>
+<script>
+    // Pass correct data to JavaScript
+    window.originalImportData = {{ session.get('import_original_data', []) | tojson | safe }};
+    window.currentImportEntityType = "{{ entity_type }}";
+</script>
+{% endblock %}

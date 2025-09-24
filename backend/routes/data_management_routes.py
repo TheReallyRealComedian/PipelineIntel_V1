@@ -91,6 +91,7 @@ def analyze_json_upload():
 def foreign_key_resolution():
     analysis_result = session.get('import_analysis_result')
     entity_type = session.get('import_entity_type')
+    original_data = session.get('import_original_data')
     
     if not analysis_result or not entity_type:
         flash("No resolution data found. Please start a new import.", "warning")
@@ -111,7 +112,8 @@ def foreign_key_resolution():
         missing_fields=missing_fields,
         missing_keys=analysis_result['missing_keys'],
         suggestions=analysis_result['suggestions'],
-        entity_type=entity_type
+        entity_type=entity_type,
+        original_data=original_data
     )
 
 
