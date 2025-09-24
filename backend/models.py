@@ -53,6 +53,44 @@ class Product(db.Model):
     # New Field from Phase 1
     modality_id = Column(Integer, ForeignKey('modalities.modality_id'))
 
+    # ==================== NEW FORMULATION FIELDS ====================
+    primary_packaging = Column(String(100), nullable=True)
+    route_of_administration = Column(String(100), nullable=True)
+    biel_category = Column(String(20), nullable=True)
+    granulation_technology = Column(String(255), nullable=True)
+
+    # ==================== NEW REGULATORY FIELDS ====================
+    submission_status = Column(String(100), nullable=True)
+    submission_date = Column(Date, nullable=True)
+    approval_date = Column(Date, nullable=True)
+    launch_geography = Column(String(255), nullable=True)
+    regulatory_details = Column(JSONB, nullable=True)
+
+    # ==================== NEW OPERATIONAL FIELDS ====================
+    ppq_status = Column(String(100), nullable=True)
+    ppq_completion_date = Column(Date, nullable=True)
+    ppq_details = Column(JSONB, nullable=True)
+    timeline_variance_days = Column(Integer, nullable=True)
+    timeline_variance_baseline = Column(String(50), nullable=True)
+    critical_path_item = Column(String(255), nullable=True)
+    ds_volume_category = Column(String(100), nullable=True)
+    dp_volume_category = Column(String(100), nullable=True)
+
+    # ==================== NEW SUPPLY CHAIN FIELDS ====================
+    ds_suppliers = Column(JSONB, nullable=True)
+    dp_suppliers = Column(JSONB, nullable=True)
+    device_partners = Column(JSONB, nullable=True)
+
+    # ==================== NEW RISK FIELDS ====================
+    operational_risks = Column(JSONB, nullable=True)
+    timeline_risks = Column(JSONB, nullable=True)
+    supply_chain_risks = Column(JSONB, nullable=True)
+
+    # ==================== NEW CLINICAL FIELDS ====================
+    clinical_trials = Column(JSONB, nullable=True)
+    patient_population = Column(Text, nullable=True)
+    development_program_name = Column(String(255), nullable=True)
+
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
@@ -347,6 +385,79 @@ class ProductProcessOverride(db.Model):
     product = relationship("Product", back_populates="process_overrides")
     stage = relationship("ProcessStage", back_populates="product_overrides")
 
+class ProductTimeline(db.Model):
+    """Track milestones and timeline changes for products"""
+    __tablename__ = 'product_timelines'
+    
+    timeline_id = Column(Integer, primary_key=True)
+    product_id = Column(Integer, ForeignKey('products.product_id'), nullable=False)
+    milestone_type = Column(String(100), nullable=False)  # Submission, Approval, Launch, PPQ
+    milestone_name = Column(String(255), nullable=False)
+    planned_date = Column(Date, nullable=True)
+    actual_date = Column(Date, nullable=True)
+    variance_days = Column(Integer, nullable=True)
+    baseline_plan = Column(String(50), nullable=True)  # AD 2024, AD 2023
+    status = Column(String(100), nullable=True)  # On Track, Delayed, Completed
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    product = relationship("Product", backref="timeline_milestones")
+    
+    @classmethod
+    def get_all_fields(cls):
+        return [c.key for c in inspect(cls).attrs if c.key not in ['product']]
+
+
+class ProductRegulatoryFiling(db.Model):
+    """Track regulatory submissions by geography and indication"""
+    __tablename__ = 'product_regulatory_filings'
+    
+    filing_id = Column(Integer, primary_key=True)
+    product_id = Column(Integer, ForeignKey('products.product_id'), nullable=False)
+    indication = Column(String(255), nullable=False)
+    geography = Column(String(100), nullable=False)  # US, China, EU, etc.
+    filing_type = Column(String(100), nullable=True)  # NDA, BLA, MAA
+    submission_date = Column(Date, nullable=True)
+    approval_date = Column(Date, nullable=True)
+    status = Column(String(100), nullable=True)  # Submitted, Under Review, Approved
+    designations = Column(JSONB, nullable=True)  # Breakthrough Therapy, Orphan Drug, etc.
+    regulatory_authority = Column(String(100), nullable=True)  # FDA, EMA, NMPA
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    product = relationship("Product", backref="regulatory_filings")
+    
+    @classmethod
+    def get_all_fields(cls):
+        return [c.key for c in inspect(cls).attrs if c.key not in ['product']]
+
+
+class ProductManufacturingSupplier(db.Model):
+    """Detailed supplier tracking for DS/DP/Device partners"""
+    __tablename__ = 'product_manufacturing_suppliers'
+    
+    supplier_id = Column(Integer, primary_key=True)
+    product_id = Column(Integer, ForeignKey('products.product_id'), nullable=False)
+    supply_type = Column(String(50), nullable=False)  # DS, DP, Device
+    supplier_name = Column(String(255), nullable=False)
+    site_name = Column(String(255), nullable=True)
+    site_location = Column(String(255), nullable=True)
+    role = Column(String(100), nullable=True)  # Primary, Backup, Launch, Commercial
+    status = Column(String(100), nullable=True)  # Qualified, Ongoing PPQ, Planned
+    technology = Column(String(255), nullable=True)  # Granulation tech, process type
+    start_date = Column(Date, nullable=True)
+    qualification_date = Column(Date, nullable=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    product = relationship("Product", backref="manufacturing_suppliers")
+    
+    @classmethod
+    def get_all_fields(cls):
+        return [c.key for c in inspect(cls).attrs if c.key not in ['product']]
 
 # --- SQL View Mappings ---
 # These are unmanaged by Alembic but allow SQLAlchemy to query the views

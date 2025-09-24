@@ -40,3 +40,26 @@ def inline_update_product(product_id):
         'product_code': product.product_code,
         'product_name': product.product_name
     })
+
+@product_routes.route('/<int:product_id>/details')
+@login_required
+def product_details(product_id):
+    """Detailed product view with timeline, filings, and suppliers."""
+    from ..models import Product, ProductTimeline, ProductRegulatoryFiling, ProductManufacturingSupplier
+    
+    product = Product.query.get_or_404(product_id)
+    
+    # Get related data
+    timelines = ProductTimeline.query.filter_by(product_id=product_id).order_by(ProductTimeline.planned_date.desc()).all()
+    filings = ProductRegulatoryFiling.query.filter_by(product_id=product_id).order_by(ProductRegulatoryFiling.submission_date.desc()).all()
+    suppliers = ProductManufacturingSupplier.query.filter_by(product_id=product_id).order_by(ProductManufacturingSupplier.supply_type, ProductManufacturingSupplier.role).all()
+    
+    context = {
+        'title': f"Product Details - {product.product_name}",
+        'product': product,
+        'timelines': timelines,
+        'regulatory_filings': filings,
+        'manufacturing_suppliers': suppliers,
+    }
+    
+    return render_template('product_details.html', **context)

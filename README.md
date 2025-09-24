@@ -326,6 +326,267 @@ Use the `product_codes` array to establish many-to-many relationships.
 
 ---
 
+
+
+# ============================================================================
+# 3. COMPREHENSIVE JSON IMPORT TEMPLATES
+# ============================================================================
+
+# These templates show how to import the comprehensive product data
+
+# Template 1: Enhanced Product with all new fields
+ENHANCED_PRODUCT_TEMPLATE = {
+    "product_code": "BI 1810631",
+    "product_name": "Zongertinib",
+    "modality_name": "Small Molecule",
+    "product_type": "NME",
+    "therapeutic_area": "Oncology",
+    "mechanism_of_action": "Irreversible, HER2-selective Tyrosine Kinase Inhibitor (TKI)",
+    "dosage_form": "Tablet",
+    "current_phase": "Registration",
+    "lead_indication": "NSCLC (2nd Line)",
+    "expected_launch_year": 2025,
+    
+    # NEW FORMULATION FIELDS
+    "primary_packaging": "Bottle",
+    "route_of_administration": "Oral",
+    "biel_category": "3A",
+    "granulation_technology": "Organic Spray Drying; Roller Compaction",
+    
+    # NEW REGULATORY FIELDS
+    "submission_status": "Submitted",
+    "submission_date": "2025-03-15",
+    "launch_geography": "US",
+    "regulatory_details": {
+        "NSCLC_2L": ["Breakthrough Therapy", "Fast Track"],
+        "NSCLC_1L": ["Fast Track"]
+    },
+    
+    # NEW OPERATIONAL FIELDS
+    "ppq_status": "Completed",
+    "ppq_completion_date": "2025-01-30",
+    "ppq_details": {
+        "DS": {"Cambrex": "completed", "Alphora": "backup_qualified"},
+        "DP": {"Hovione": "completed", "ING": "launch_ready"}
+    },
+    "timeline_variance_days": -10,
+    "timeline_variance_baseline": "AD 2024",
+    "critical_path_item": "OPS",
+    "ds_volume_category": "Low (10-1,000 kg)",
+    "dp_volume_category": "Low (1-10 million PCS)",
+    
+    # NEW SUPPLY CHAIN FIELDS (JSONB)
+    "ds_suppliers": [
+        {"name": "Cambrex", "site": "Site A", "role": "Primary", "status": "qualified"},
+        {"name": "Alphora", "site": "Site B", "role": "Backup", "status": "qualified"}
+    ],
+    "dp_suppliers": [
+        {"name": "Hovione", "site": "Portugal", "role": "Primary", "status": "active"},
+        {"name": "ING", "site": "Ingelheim", "role": "Launch", "status": "ready"}
+    ],
+    
+    # NEW RISK FIELDS (JSONB)
+    "operational_risks": [
+        {
+            "risk": "Impact on submission/launch timeline highly likely if issues arise",
+            "severity": "high",
+            "mitigation": "Qualifying additional DS sites for supply chain resilience"
+        }
+    ],
+    "timeline_risks": [
+        {
+            "risk": "Regulatory review timeline uncertainty",
+            "severity": "medium", 
+            "mitigation": "Breakthrough Therapy pathway expedites review"
+        }
+    ],
+    
+    # NEW CLINICAL FIELDS
+    "clinical_trials": [
+        {"nct": "NCT04886804", "phase": "Phase I", "status": "completed"}
+    ],
+    "patient_population": "Patients with HER2-driven cancers / advanced solid tumors with HER2 gene alterations",
+    "development_program_name": "HER2 Targeted Therapy Program",
+    
+    # LIFECYCLE INDICATIONS (existing field, enhanced format)
+    "lifecycle_indications": [
+        {"phase": "Phase III", "indication": "NSCLC (1st Line)", "expected_launch": 2026},
+        {"indication": "Breast Cancer (1L)", "phase": "Phase I", "expected_launch": 2027},
+        {"indication": "Gastric Cancer (2L)", "phase": "Phase I", "expected_launch": 2028}
+    ],
+    
+    # RELATED TABLES DATA (processed by the enhanced import logic)
+    "timeline_milestones": [
+        {
+            "milestone_type": "Submission",
+            "milestone_name": "US NDA Submission",
+            "planned_date": "2025-03-01",
+            "actual_date": "2025-03-15",
+            "variance_days": 14,
+            "baseline_plan": "AD 2024",
+            "status": "Completed",
+            "notes": "Submitted ahead of critical path timeline"
+        },
+        {
+            "milestone_type": "Launch",
+            "milestone_name": "US Commercial Launch",
+            "planned_date": "2025-09-01",
+            "baseline_plan": "AD 2024",
+            "status": "On Track",
+            "notes": "Pending FDA approval"
+        }
+    ],
+    
+    "regulatory_filings": [
+        {
+            "indication": "NSCLC (2nd Line)",
+            "geography": "US",
+            "filing_type": "NDA",
+            "submission_date": "2025-03-15",
+            "status": "Under Review",
+            "designations": ["Breakthrough Therapy", "Fast Track"],
+            "regulatory_authority": "FDA",
+            "notes": "First indication filing"
+        }
+    ],
+    
+    "manufacturing_suppliers": [
+        {
+            "supply_type": "DS",
+            "supplier_name": "Cambrex",
+            "site_name": "Primary Manufacturing Site",
+            "site_location": "US",
+            "role": "Primary",
+            "status": "Qualified",
+            "qualification_date": "2024-12-15",
+            "notes": "PPQ completed successfully"
+        },
+        {
+            "supply_type": "DP",
+            "supplier_name": "Hovione",
+            "site_name": "Portugal Facility",
+            "site_location": "Portugal",
+            "role": "Primary",
+            "status": "Qualified",
+            "technology": "Roller Compaction",
+            "qualification_date": "2025-01-30"
+        }
+    ]
+}
+
+# Template 2: Nerandomilast with dual-formulation risk management
+NERANDOMILAST_TEMPLATE = {
+    "product_code": "BI 1015550",
+    "product_name": "Nerandomilast",
+    "modality_name": "Small Molecule",
+    "product_type": "NME",
+    "mechanism_of_action": "Oral, preferential inhibitor of phosphodiesterase 4B (PDE4B)",
+    "therapeutic_area": "Respiratory",
+    "dosage_form": "Tablet",
+    "current_phase": "Registration",
+    "lead_indication": "Idiopathic Pulmonary Fibrosis (IPF)",
+    "expected_launch_year": 2025,
+    
+    # Formulation details
+    "primary_packaging": "Blister; Bottle", 
+    "route_of_administration": "Oral",
+    "biel_category": "3A",
+    "granulation_technology": "Twin Screw",
+    
+    # Development program details
+    "development_program_name": "FIBRONEER™",
+    "patient_population": "IPF patients and broader pulmonary fibrosis indications",
+    
+    # Manufacturing strategy
+    "manufacturing_strategy": "Internal",
+    "ppq_status": "Completed",
+    "timeline_variance_days": -10,
+    "timeline_variance_baseline": "AD 2024",
+    
+    # Supply chain
+    "ds_suppliers": [{"name": "ING", "site": "Ingelheim", "role": "Primary", "status": "active"}],
+    "dp_suppliers": [
+        {"name": "ING_SoL", "site": "Ingelheim Launch Site", "role": "Launch", "status": "active"},
+        {"name": "Koropi", "site": "Greece", "role": "Commercial", "status": "planned_2025"}
+    ],
+    
+    # Risk management
+    "operational_risks": [
+        {
+            "risk": "TiO2 formulation bridging requires in-vivo BE study",
+            "severity": "major",
+            "mitigation": "Dual-path strategy: parallel development of TiO2+ and TiO2-free formulations",
+            "status": "managed"
+        }
+    ],
+    
+    "regulatory_filings": [
+        {
+            "indication": "IPF",
+            "geography": "US", 
+            "status": "Submitted",
+            "designations": ["Breakthrough Therapy", "Orphan Drug"],
+            "regulatory_authority": "FDA"
+        },
+        {
+            "indication": "IPF",
+            "geography": "China",
+            "status": "Submitted", 
+            "regulatory_authority": "NMPA"
+        }
+    ]
+}
+
+# Template 3: Survodutide (Biologics with device)
+SURVODUTIDE_TEMPLATE = {
+    "product_code": "BI 456906", 
+    "product_name": "Survodutide",
+    "modality_name": "New Biological Entity",
+    "product_type": "NBE",
+    "mechanism_of_action": "GCGR/GLP-1 dual agonist derived from oxyntomodulin",
+    "therapeutic_area": "CRM",
+    "dosage_form": "Injectable",
+    "current_phase": "Phase III",
+    "lead_indication": "Obesity",
+    "expected_launch_year": 2027,
+    
+    # Biologics-specific fields
+    "primary_packaging": "PEN Device",
+    "route_of_administration": "Subcutaneous",
+    
+    # Device partnership
+    "device_partners": [
+        {"type": "PEN", "partner": "Nemera", "status": "volume ramp-up planning"}
+    ],
+    
+    # Manufacturing network 
+    "ds_suppliers": [{"name": "PPG", "status": "PPQ_halted"}, {"name": "Thermo Fisher", "role": "backup"}],
+    "manufacturing_suppliers": [
+        {
+            "supply_type": "Device",
+            "supplier_name": "Nemera", 
+            "role": "Primary",
+            "status": "Development",
+            "technology": "PEN Device Assembly",
+            "notes": "First successful verum cartridge filling completed"
+        }
+    ],
+    
+    # Critical operational risks
+    "operational_risks": [
+        {
+            "risk": "DS PPQ at PPG sites currently stopped",
+            "severity": "critical",
+            "mitigation": "Development and implementation of formulation 2.0 at maximum speed",
+            "status": "active"
+        }
+    ],
+    
+    "timeline_variance_days": 86,
+    "timeline_variance_baseline": "AD 2024", 
+    "critical_path_item": "CMC"
+}
+
 ## License
 
 [Add your license information here]

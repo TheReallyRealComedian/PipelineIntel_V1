@@ -7,6 +7,7 @@ from ..db import db
 # NOTE: We are removing the direct service imports from the top level.
 # They will be imported locally within a helper function to avoid circular dependencies.
 
+
 def _get_exportable_entities():
     """
     A helper function to build the EXPORTABLE_ENTITIES dictionary.
@@ -30,6 +31,9 @@ def _get_exportable_entities():
         Indication,
         ManufacturingChallenge,
         ManufacturingTechnology,
+        ProductTimeline,
+        ProductRegulatoryFiling,
+        ProductManufacturingSupplier,
     )
 
     return {
@@ -74,6 +78,24 @@ def _get_exportable_entities():
             "fetch_all_func": capability_service.get_all_capabilities,
             "pk_field": "capability_id",
             "name_field": "capability_name",
+        },
+        "product_timelines": {
+            "model": ProductTimeline,
+            "fetch_all_func": lambda: ProductTimeline.query.all(),
+            "pk_field": "timeline_id",
+            "name_field": "milestone_name",
+        },
+        "product_regulatory_filings": {
+            "model": ProductRegulatoryFiling,
+            "fetch_all_func": lambda: ProductRegulatoryFiling.query.all(),
+            "pk_field": "filing_id",
+            "name_field": "indication",
+        },
+        "product_manufacturing_suppliers": {
+            "model": ProductManufacturingSupplier,
+            "fetch_all_func": lambda: ProductManufacturingSupplier.query.all(),
+            "pk_field": "supplier_id",
+            "name_field": "supplier_name",
         },
     }
 

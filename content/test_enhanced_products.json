@@ -1,0 +1,42 @@
+[
+  {
+    "product_code": "BI 1015550",
+    "product_name": "Nerandomilast",
+    "modality_name": "Small Molecule", 
+    "product_type": "NME",
+    "therapeutic_area": "Respiratory",
+    "mechanism_of_action": "Preferential PDE4B inhibitor",
+    "current_phase": "Registration",
+    "lead_indication": "IPF",
+    "expected_launch_year": 2025,
+    
+    "primary_packaging": "Blister",
+    "route_of_administration": "Oral",
+    "granulation_technology": "Twin Screw",
+    "ppq_status": "Completed",
+    "timeline_variance_days": -10,
+    "timeline_variance_baseline": "AD 2024",
+    "development_program_name": "FIBRONEER™",
+    
+    "ds_suppliers": [
+      {"name": "ING", "site": "Ingelheim", "role": "Primary", "status": "active"}
+    ],
+    "dp_suppliers": [
+      {"name": "ING_SoL", "site": "Launch Site", "role": "Launch", "status": "ready"},
+      {"name": "Koropi", "site": "Greece", "role": "Commercial", "status": "planned"}
+    ],
+    
+    "operational_risks": [
+      {
+        "risk": "TiO2 formulation bridging requires in-vivo BE study",
+        "severity": "major", 
+        "mitigation": "Dual-path development strategy",
+        "status": "managed"
+      }
+    ],
+    
+    "clinical_trials": [
+      {"program": "FIBRONEER", "geography": "40+ countries", "phase": "Phase III"}
+    ]
+  }
+]
