@@ -1,145 +1,291 @@
 {% extends "base.html" %}
 
+{% block head_extra %}
+<style>
+    /* Foreign Key Resolution Styles */
+    .foreign-key-resolution-page .resolution-group {
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-sm);
+        margin-bottom: 1.5rem;
+        background: var(--element-bg);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .foreign-key-resolution-page .resolution-group-header {
+        background: var(--element-bg-light);
+        padding: var(--spacing-md);
+        border-bottom: 1px solid var(--border-color);
+        border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+    }
+
+    .foreign-key-resolution-page .missing-value-badge {
+        background: var(--color-warning);
+        color: var(--text-color-on-warning);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-family: var(--font-family-mono);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .foreign-key-resolution-page .resolution-choice {
+        border: 2px solid var(--border-color-light);
+        border-radius: var(--border-radius-sm);
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        background: var(--element-bg);
+    }
+
+    .foreign-key-resolution-page .resolution-choice:hover {
+        border-color: var(--color-primary);
+        box-shadow: var(--shadow-md);
+    }
+
+    .foreign-key-resolution-page .resolution-choice.selected {
+        border-color: var(--color-primary);
+        background: var(--element-bg-light);
+    }
+
+    .foreign-key-resolution-page .choice-header {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .foreign-key-resolution-page .choice-content {
+        margin-left: 2rem;
+        display: none;
+    }
+
+    .foreign-key-resolution-page .resolution-choice.selected .choice-content {
+        display: block;
+    }
+
+    .foreign-key-resolution-page .suggestion-item {
+        background: var(--element-bg-light);
+        border: 1px solid var(--border-color-light);
+        border-radius: var(--border-radius-xs);
+        padding: var(--spacing-sm);
+        margin: 0.25rem 0;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .foreign-key-resolution-page .suggestion-item:hover {
+        background: var(--bi-neutral-200);
+    }
+
+    .foreign-key-resolution-page .suggestion-item.selected {
+        background: var(--element-bg-light);
+        border-color: var(--color-primary);
+    }
+
+    .foreign-key-resolution-page .affected-items {
+        background: var(--element-bg-light);
+        border-radius: var(--border-radius-xs);
+        padding: var(--spacing-sm);
+    }
+
+    .foreign-key-resolution-page .affected-item {
+        display: inline-block;
+        background: var(--element-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-xs);
+        padding: 0.25rem var(--spacing-sm);
+        margin: 0.125rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .foreign-key-resolution-page .resolution-summary {
+        background: var(--bi-info-50);
+        border: 1px solid var(--color-primary);
+        border-radius: var(--border-radius-sm);
+        padding: var(--spacing-md);
+        margin-bottom: 1.5rem;
+    }
+
+    .foreign-key-resolution-page .action-buttons {
+        position: sticky;
+        bottom: 0;
+        background: var(--element-bg);
+        border-top: 1px solid var(--border-color);
+        padding: var(--spacing-md);
+        box-shadow: var(--shadow-lg);
+        margin: 0 calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md));
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid foreign-key-resolution-page">
     <div class="row">
         <div class="col">
-            <h1>{{ title }}</h1>
-            <p class="text-muted">
-                Some imported items reference entities that don't exist yet. 
-                Please resolve these references before continuing.
+            <h1><i class="fas fa-link me-2"></i>{{ title }}</h1>
+            <p class="text-color-light mb-4">
+                Some imported items reference entities that don't exist yet. Choose how to handle each missing reference below.
             </p>
-            
-            <!-- Resolution Table -->
-            <div class="table-responsive">
-                <table class="table table-bordered foreign-key-resolution-table">
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            {% for field_name in missing_fields %}
-                            <th>{{ field_name | title | replace('_', ' ') }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in items_needing_resolution %}
-                        <tr data-item-id="{{ loop.index0 }}">
-                            <td>
-                                <strong>{{ item.identifier }}</strong>
-                                {% if item.json_item.get('product_name') %}
-                                <br><small class="text-muted">{{ item.json_item.product_name }}</small>
-                                {% endif %}
-                            </td>
-                            
-                            {% for field_name in missing_fields %}
-                            <td>
-                                {% if field_name in item.missing_foreign_keys %}
-                                <div class="foreign-key-resolution" 
-                                     data-field="{{ field_name }}" 
-                                     data-missing-value="{{ item.missing_foreign_keys[field_name] }}">
-                                    
-                                    <div class="missing-value-display">
-                                        <small class="text-muted">Missing:</small><br>
-                                        <code>{{ item.missing_foreign_keys[field_name] }}</code>
+
+            <!-- Progress Indicator -->
+            <div class="resolution-summary">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="mb-1">Resolution Progress</h5>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 0%" id="progressBar"></div>
+                        </div>
+                        <small class="text-color-light">
+                            <span id="resolvedCount">0</span> of <span id="totalCount">{{ missing_keys.values() | sum | length }}</span> references resolved
+                        </small>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge bg-warning text-dark">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            <span id="unresolvedCount">{{ missing_keys.values() | sum | length }}</span> unresolved
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resolution Groups -->
+            <div id="resolutionGroups">
+                {% for field_name, missing_values in missing_keys.items() %}
+                    {% for missing_value in missing_values %}
+                    <div class="resolution-group" data-field="{{ field_name }}" data-value="{{ missing_value }}">
+                        <div class="resolution-group-header">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h5 class="mb-1">
+                                        <i class="fas fa-tag me-2"></i>
+                                        {{ field_name | title | replace('_', ' ') }}: 
+                                        <span class="missing-value-badge">{{ missing_value }}</span>
+                                    </h5>
+                                    <p class="text-color-light mb-0">
+                                        This reference is missing and affects 
+                                        {% set affected_count = items_needing_resolution | selectattr('missing_foreign_keys.' + field_name, 'equalto', missing_value) | list | length %}
+                                        {{ affected_count }} item{{ 's' if affected_count > 1 else '' }}
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="affected-items">
+                                        <strong>Affected items:</strong><br>
+                                        {% for item in items_needing_resolution %}
+                                            {% if item.missing_foreign_keys.get(field_name) == missing_value %}
+                                            <span class="affected-item">
+                                                {{ item.identifier }}
+                                                {% if item.json_item.get('product_name') %}
+                                                - {{ item.json_item.product_name }}
+                                                {% endif %}
+                                            </span>
+                                            {% endif %}
+                                        {% endfor %}
                                     </div>
-                                    
-                                    <!-- Resolution Options -->
-                                    <div class="resolution-options mt-2">
-                                        {% set field_suggestions = suggestions.get(field_name, {}).get(item.missing_foreign_keys[field_name], []) %}
-                                        
-                                        {% if field_suggestions %}
-                                        <!-- Existing Entity Suggestions -->
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" 
-                                                   name="resolution_{{ field_name }}_{{ loop.index0 }}" 
-                                                   id="use_existing_{{ field_name }}_{{ loop.index0 }}" 
-                                                   value="existing" checked>
-                                            <label class="form-check-label">Use existing:</label>
-                                        </div>
-                                        
-                                        <select class="form-select form-select-sm mt-1 existing-entity-select"
-                                                data-field="{{ field_name }}" data-item="{{ loop.index0 }}">
-                                            {% for suggestion in field_suggestions %}
-                                            <option value="{{ suggestion.value }}" 
-                                                    {% if loop.first %}selected{% endif %}>
-                                                {{ suggestion.value }} ({{ suggestion.reason }})
-                                            </option>
-                                            {% endfor %}
-                                        </select>
-                                        {% endif %}
-                                        
-                                        <!-- Create New Option -->
-                                        <div class="form-check mt-2">
-                                            <input class="form-check-input" type="radio" 
-                                                   name="resolution_{{ field_name }}_{{ loop.index0 }}" 
-                                                   id="create_new_{{ field_name }}_{{ loop.index0 }}" 
-                                                   value="create_new" {% if not field_suggestions %}checked{% endif %}>
-                                            <label class="form-check-label">Create new:</label>
-                                        </div>
-                                        
-                                        <div class="create-new-form mt-1" 
-                                             {% if field_suggestions %}style="display: none;"{% endif %}>
-                                            <input type="text" class="form-control form-control-sm new-entity-name" 
-                                                   value="{{ item.missing_foreign_keys[field_name] }}"
-                                                   data-field="{{ field_name }}" data-item="{{ loop.index0 }}">
-                                            
-                                            <!-- Additional fields for entity creation -->
-                                            {% if field_name == 'modality_name' %}
-                                            <select class="form-select form-select-sm mt-1 new-entity-category">
-                                                <option value="Chemical">Chemical</option>
-                                                <option value="Biologics">Biologics</option>
-                                                <option value="Advanced Therapy">Advanced Therapy</option>
-                                            </select>
-                                            <input type="text" class="form-control form-control-sm mt-1 new-entity-description" 
-                                                   placeholder="Short description...">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="resolution-options p-3">
+                            {% set field_suggestions = suggestions.get(field_name, {}).get(missing_value, []) %}
+                            
+                            {% if field_suggestions %}
+                            <!-- Use Existing Option -->
+                            <div class="resolution-choice selected" data-choice="existing">
+                                <div class="choice-header">
+                                    <input type="radio" name="resolution_{{ field_name }}_{{ loop.index }}" value="existing" checked>
+                                    <i class="fas fa-search me-2 text-primary"></i>
+                                    Use Existing Entity
+                                </div>
+                                <div class="choice-content" style="display: block;">
+                                    <p class="text-color-light mb-2">Select a similar existing {{ field_name | replace('_', ' ') }}:</p>
+                                    <div class="suggestions">
+                                        {% for suggestion in field_suggestions %}
+                                        <div class="suggestion-item {% if loop.first %}selected{% endif %}" 
+                                             data-value="{{ suggestion.value }}">
+                                            <strong>{{ suggestion.value }}</strong>
+                                            <span class="badge bg-info ms-2">{{ suggestion.reason }}</span>
+                                            {% if suggestion.get('description') %}
+                                            <div class="small text-color-light">{{ suggestion.description }}</div>
                                             {% endif %}
                                         </div>
+                                        {% endfor %}
                                     </div>
                                 </div>
-                                {% else %}
-                                <span class="text-muted">-</span>
-                                {% endif %}
-                            </td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Bulk Actions -->
-            <div class="bulk-actions mt-3">
-                <h6>Bulk Actions</h6>
-                <div class="row">
-                    {% for field_name, missing_values in missing_keys.items() %}
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="card-title">{{ field_name | title | replace('_', ' ') }}</h6>
-                                {% for missing_value in missing_values %}
-                                <div class="bulk-action-item">
-                                    <small class="text-muted">Missing:</small> 
-                                    <code>{{ missing_value }}</code>
-                                    <button class="btn btn-sm btn-outline-primary ms-2 bulk-apply-btn"
-                                            data-field="{{ field_name }}" 
-                                            data-missing-value="{{ missing_value }}">
-                                        Apply to All
-                                    </button>
+                            </div>
+                            {% endif %}
+
+                            <!-- Create New Option -->
+                            <div class="resolution-choice {% if not field_suggestions %}selected{% endif %}" data-choice="create">
+                                <div class="choice-header">
+                                    <input type="radio" name="resolution_{{ field_name }}_{{ loop.index }}" value="create" 
+                                           {% if not field_suggestions %}checked{% endif %}>
+                                    <i class="fas fa-plus-circle me-2 text-success"></i>
+                                    Create New Entity
                                 </div>
-                                {% endfor %}
+                                <div class="choice-content" {% if not field_suggestions %}style="display: block;"{% endif %}>
+                                    {% if field_name == 'modality_name' %}
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Name</label>
+                                            <input type="text" class="form-control new-entity-name" 
+                                                   value="{{ missing_value }}" placeholder="Enter modality name">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Category</label>
+                                            <select class="form-select new-entity-category">
+                                                <option value="Chemical">Chemical</option>
+                                                <option value="Biologics" selected>Biologics</option>
+                                                <option value="Advanced Therapy">Advanced Therapy</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="form-label">Description (Optional)</label>
+                                        <input type="text" class="form-control new-entity-description" 
+                                               placeholder="Short description of this modality">
+                                    </div>
+                                    {% else %}
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <label class="form-label">{{ field_name | title | replace('_', ' ') }} Name</label>
+                                            <input type="text" class="form-control new-entity-name" 
+                                                   value="{{ missing_value }}" placeholder="Enter {{ field_name | replace('_', ' ') }} name">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Description (Optional)</label>
+                                            <input type="text" class="form-control new-entity-description" 
+                                                   placeholder="Optional description">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
-                </div>
+                {% endfor %}
             </div>
 
             <!-- Action Buttons -->
-            <div class="mt-4 text-end">
-                <a href="{{ url_for('data_management.data_management_page') }}" class="btn btn-secondary">Cancel</a>
-                <button type="button" class="btn btn-success" id="applyResolutionsBtn">
-                    Apply Resolutions & Continue Import
-                </button>
+            <div class="action-buttons">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center text-color-light">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <span>All missing references must be resolved before continuing</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{{ url_for('data_management.data_management_page') }}" class="btn btn-secondary me-2">Cancel Import</a>
+                        <button type="button" class="btn btn-success" id="applyAllResolutions">
+                            <i class="fas fa-clock me-2"></i>
+                            Resolve all references first
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -148,10 +294,12 @@
 
 {% block scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='js/data_management.js') }}"></script>
+<script src="{{ url_for('static', filename='js/improved_foreign_key_resolution.js') }}"></script>
 <script>
-    // Pass correct data to JavaScript
-    window.originalImportData = {{ session.get('import_original_data', []) | tojson | safe }};
+    // Pass data to JavaScript
+    window.originalImportData = {{ original_data | tojson | safe }};
     window.currentImportEntityType = "{{ entity_type }}";
+    window.missingKeys = {{ missing_keys | tojson | safe }};
+    window.suggestions = {{ suggestions | tojson | safe }};
 </script>
 {% endblock %}
