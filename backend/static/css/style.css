@@ -427,6 +427,28 @@ textarea.form-control {
     color: var(--text-muted);
 }
 
+/* Filter Dropdown Menu Styles */
+.filter-dropdown-menu {
+    min-width: 250px;
+    box-shadow: var(--shadow-lg);
+}
+
+/* --- ADD THIS NEW CSS RULE --- */
+.column-selector-body {
+    max-height: 150px; /* Limit the height of the checkbox list */
+    overflow-y: auto;  /* Add a vertical scrollbar only when the content overflows */
+    margin-bottom: var(--spacing-sm); /* Add a little space above the "Apply" button */
+    padding-right: var(--spacing-sm); /* Prevent the scrollbar from overlapping text */
+}
+/* --- END OF NEW RULE --- */
+
+.filter-options-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 0 var(--spacing-xs);
+}
+
+
 /* ========================================================================== */
 /* --- 4. Core Application Components --- */
 /* ========================================================================== */

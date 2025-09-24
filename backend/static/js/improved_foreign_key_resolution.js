@@ -31,7 +31,7 @@ class ImprovedForeignKeyResolver {
             if (e.target.closest('.resolution-choice')) {
                 this.handleChoiceSelection(e);
             }
-            
+
             if (e.target.closest('.suggestion-item')) {
                 this.handleSuggestionSelection(e);
             }
@@ -78,11 +78,11 @@ class ImprovedForeignKeyResolver {
         const dropdown = e.target;
         const choice = dropdown.closest('.resolution-choice');
         const group = choice.closest('.resolution-group');
-        
+
         if (dropdown.value) {
             // Update resolution data
             this.updateResolutionForGroup(group, choice);
-            
+
             // Mark group as resolved if not already
             if (!group.hasAttribute('data-resolved')) {
                 group.setAttribute('data-resolved', 'true');
@@ -100,69 +100,60 @@ class ImprovedForeignKeyResolver {
     }
 
     populateExistingEntityDropdowns() {
-        // Get existing entities for each field type
         const dropdowns = document.querySelectorAll('.existing-entity-manual');
-        
+
         dropdowns.forEach(dropdown => {
-            const fieldName = dropdown.dataset.field;
-            this.fetchExistingEntities(fieldName).then(entities => {
-                // Clear existing options except the first one
+            const fieldName = dropdown.dataset.field; // e.g., 'modality_name'
+
+            // Map the field name from the template to the entity type needed by our new API
+            const entityTypeMap = {
+                'modality_name': 'modalities',
+                // Add other mappings here as you expand this feature
+            };
+            const entityType = entityTypeMap[fieldName];
+
+            if (!entityType) {
+                console.warn(`No API entity type mapping defined for field: ${fieldName}`);
+                return;
+            }
+
+            this.fetchExistingEntities(entityType).then(entities => {
+                // Clear existing options except the placeholder
                 while (dropdown.children.length > 1) {
                     dropdown.removeChild(dropdown.lastChild);
                 }
-                
-                // Add options for each existing entity
+
+                // Add the new, correct options fetched from the database
                 entities.forEach(entity => {
                     const option = document.createElement('option');
-                    option.value = entity.value;
-                    option.textContent = entity.label;
+                    option.value = entity.value; // e.g., "Peptides"
+                    option.textContent = entity.label; // e.g., "Peptides (Biologics)"
                     dropdown.appendChild(option);
                 });
-            }).catch(error => {
-                console.warn(`Failed to load existing entities for ${fieldName}:`, error);
             });
         });
     }
 
-    async fetchExistingEntities(fieldName) {
-        // This would typically make an API call to get existing entities
-        // For now, return some mock data based on field type
-        const mockData = {
-            'modality_name': [
-                { value: 'Biologics', label: 'Biologics' },
-                { value: 'Chemical', label: 'Chemical' },
-                { value: 'Small Molecule', label: 'Small Molecule' },
-                { value: 'Monoclonal Antibody', label: 'Monoclonal Antibody' },
-                { value: 'Advanced Therapy', label: 'Advanced Therapy' }
-            ],
-            'therapeutic_area': [
-                { value: 'Oncology', label: 'Oncology' },
-                { value: 'Endocrinology', label: 'Endocrinology' },
-                { value: 'Neurology', label: 'Neurology' },
-                { value: 'Cardiovascular', label: 'Cardiovascular' },
-                { value: 'Metabolic Diseases', label: 'Metabolic Diseases' }
-            ],
-            'stage_name': [
-                { value: 'Chemical Synthesis', label: 'Chemical Synthesis' },
-                { value: 'Formulation', label: 'Formulation' },
-                { value: 'Fill & Finish', label: 'Fill & Finish' },
-                { value: 'Packaging', label: 'Packaging' },
-                { value: 'Quality Control', label: 'Quality Control' }
-            ]
-        };
-        
-        // In a real implementation, you'd make an API call like:
-        // try {
-        //     const response = await fetch(`/data-management/api/existing-entities/${fieldName}`);
-        //     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        //     return await response.json();
-        // } catch (error) {
-        //     console.warn(`Failed to load existing entities for ${fieldName}:`, error);
-        //     return [];
-        // }
-        
-        return Promise.resolve(mockData[fieldName] || []);
+    async fetchExistingEntities(entityType) {
+        // ** THIS IS THE FIX: We replace the old mock data with a live API call **
+        try {
+            const response = await fetch(`/data-management/api/lookup/${entityType}`);
+            if (!response.ok) {
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+            const result = await response.json();
+            if (result.success) {
+                return result.data;
+            } else {
+                console.error(`API Error fetching ${entityType}:`, result.message);
+                return []; // Return empty array on failure
+            }
+        } catch (error) {
+            console.error(`Failed to fetch existing entities for ${entityType}:`, error);
+            return []; // Return empty array on network failure
+        }
     }
+
 
     checkInitialSelections() {
         // Check for pre-selected options and update resolved count
@@ -171,16 +162,16 @@ class ImprovedForeignKeyResolver {
             if (selectedChoice) {
                 const field = group.dataset.field;
                 const value = group.dataset.value;
-                
+
                 // Mark as resolved if:
                 // 1. It's a "Use Existing" choice with suggestions (auto-resolved)
                 // 2. It's a "Create New" choice (has default values)
                 const hasSuggestions = selectedChoice.querySelector('.suggestion-item.selected');
                 const isCreateChoice = selectedChoice.dataset.choice === 'create';
-                
+
                 if (hasSuggestions || isCreateChoice) {
                     this.updateResolutionForGroup(group, selectedChoice);
-                    
+
                     if (!group.hasAttribute('data-resolved')) {
                         group.setAttribute('data-resolved', 'true');
                         this.resolvedGroups++;
@@ -196,19 +187,19 @@ class ImprovedForeignKeyResolver {
         const choice = e.target.closest('.resolution-choice');
         const group = choice.closest('.resolution-group');
         const radio = choice.querySelector('input[type="radio"]');
-        
+
         // Update radio selection
         radio.checked = true;
-        
+
         // Update visual selection
         group.querySelectorAll('.resolution-choice').forEach(c => {
             c.classList.remove('selected');
         });
         choice.classList.add('selected');
-        
+
         // Update resolution data
         this.updateResolutionForGroup(group, choice);
-        
+
         // Update progress if this group wasn't resolved before
         if (!group.hasAttribute('data-resolved')) {
             group.setAttribute('data-resolved', 'true');
@@ -221,13 +212,13 @@ class ImprovedForeignKeyResolver {
         const suggestion = e.target.closest('.suggestion-item');
         const container = suggestion.closest('.suggestions');
         const group = suggestion.closest('.resolution-group');
-        
+
         // Update visual selection
         container.querySelectorAll('.suggestion-item').forEach(s => {
             s.classList.remove('selected');
         });
         suggestion.classList.add('selected');
-        
+
         // Update resolution data
         const choice = suggestion.closest('.resolution-choice');
         this.updateResolutionForGroup(group, choice);
@@ -236,15 +227,15 @@ class ImprovedForeignKeyResolver {
     handleRadioChange(e) {
         const choice = e.target.closest('.resolution-choice');
         const group = choice.closest('.resolution-group');
-        
+
         // Update visual selection
         group.querySelectorAll('.resolution-choice').forEach(c => {
             c.classList.remove('selected');
         });
         choice.classList.add('selected');
-        
+
         this.updateResolutionForGroup(group, choice);
-        
+
         // Update progress if needed
         if (!group.hasAttribute('data-resolved')) {
             group.setAttribute('data-resolved', 'true');
@@ -258,7 +249,7 @@ class ImprovedForeignKeyResolver {
         const value = group.dataset.value;
         const choiceType = choice.dataset.choice;
         const key = `${field}_${value}`;
-        
+
         if (choiceType === 'existing') {
             // Check for suggestion selection first
             const selectedSuggestion = choice.querySelector('.suggestion-item.selected');
@@ -289,11 +280,11 @@ class ImprovedForeignKeyResolver {
             const nameInput = choice.querySelector('.new-entity-name');
             const categorySelect = choice.querySelector('.new-entity-category');
             const descriptionInput = choice.querySelector('.new-entity-description');
-            
+
             const metadata = {};
             if (categorySelect) metadata.category = categorySelect.value;
             if (descriptionInput) metadata.description = descriptionInput.value;
-            
+
             this.resolutions[key] = {
                 type: 'create_new',
                 field: field,
@@ -307,7 +298,7 @@ class ImprovedForeignKeyResolver {
     updateResolutionData(input) {
         const choice = input.closest('.resolution-choice');
         const group = choice.closest('.resolution-group');
-        
+
         if (choice.classList.contains('selected')) {
             this.updateResolutionForGroup(group, choice);
         }
@@ -316,10 +307,10 @@ class ImprovedForeignKeyResolver {
     updateProgress() {
         document.getElementById('resolvedCount').textContent = this.resolvedGroups;
         document.getElementById('unresolvedCount').textContent = this.totalGroups - this.resolvedGroups;
-        
+
         const percentage = this.totalGroups > 0 ? (this.resolvedGroups / this.totalGroups) * 100 : 0;
         document.getElementById('progressBar').style.width = percentage + '%';
-        
+
         // Update apply button
         const applyButton = document.getElementById('applyAllResolutions');
         if (this.resolvedGroups === this.totalGroups) {
@@ -347,61 +338,69 @@ class ImprovedForeignKeyResolver {
         applyButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Applying resolutions...';
 
         // Transform resolutions to match backend expectations
-        const backendResolutions = this.transformResolutionsForBackend();
-        
+        const backendResolutions = this.convertToBackendFormat();
+
         console.log('Sending resolutions to backend:', backendResolutions);
 
         // Send to backend
         this.sendResolutionsToBackend(backendResolutions);
     }
 
-    transformResolutionsForBackend() {
+    convertToBackendFormat() {
         const backendFormat = {};
-        
-        // Group resolutions by affected items
-        const affectedItems = new Set();
-        
-        // First, identify all affected items
+        const originalData = window.originalImportData || [];
+        const entityType = window.currentImportEntityType || '';
+
+        const identifierFields = {
+            'products': 'product_code',
+            'indications': 'indication_name',
+            'manufacturing_challenges': 'challenge_name',
+            'manufacturing_technologies': 'technology_name',
+            'process_stages': 'stage_name',
+            'modalities': 'modality_name',
+            // Define other entity identifiers as needed
+        };
+        const identifierField = identifierFields[entityType];
+
+        if (!identifierField) {
+            console.error(`Identifier field for entity type '${entityType}' is not defined.`);
+            return {};
+        }
+
+        // Iterate through each resolution group, which is more reliable
         document.querySelectorAll('.resolution-group').forEach(group => {
             const field = group.dataset.field;
-            const value = group.dataset.value;
-            
-            // Find items affected by this missing reference
-            const affectedElements = group.querySelectorAll('.affected-item');
-            affectedElements.forEach(item => {
-                const itemText = item.textContent.trim();
-                const itemId = itemText.split(' -')[0].trim(); // Extract ID like "BI 456906"
-                affectedItems.add(itemId);
-            });
+            const originalValue = group.dataset.value;
+            const resolutionKey = `${field}_${originalValue}`;
+            const resolution = this.resolutions[resolutionKey];
+
+            if (resolution) {
+                // Find all items affected by this specific resolution
+                group.querySelectorAll('.affected-item').forEach(affectedItem => {
+                    const itemId = affectedItem.textContent.trim().split(' -')[0].trim();
+
+                    // Find the actual index by looking up the unique ID in the original data
+                    const actualIndex = originalData.findIndex(item => String(item[identifierField]) === String(itemId));
+
+                    if (actualIndex !== -1) {
+                        const indexStr = actualIndex.toString();
+                        if (!backendFormat[indexStr]) {
+                            backendFormat[indexStr] = {};
+                        }
+
+                        backendFormat[indexStr][field] = {
+                            type: resolution.type,
+                            value: resolution.value,
+                            metadata: resolution.metadata || {}
+                        };
+                    } else {
+                        console.warn(`Could not find original item with ID: ${itemId}`);
+                    }
+                });
+            }
         });
 
-        // Create resolution entries for each affected item
-        let itemIndex = 0;
-        document.querySelectorAll('.affected-item').forEach(affectedItem => {
-            const itemText = affectedItem.textContent.trim();
-            const itemId = itemText.split(' -')[0].trim();
-            
-            if (!backendFormat[itemIndex]) {
-                backendFormat[itemIndex] = {};
-            }
-            
-            // Find the resolution for the field affecting this item
-            const group = affectedItem.closest('.resolution-group');
-            const field = group.dataset.field;
-            const value = group.dataset.value;
-            const resolutionKey = `${field}_${value}`;
-            
-            if (this.resolutions[resolutionKey]) {
-                backendFormat[itemIndex][field] = {
-                    type: this.resolutions[resolutionKey].type,
-                    value: this.resolutions[resolutionKey].value,
-                    metadata: this.resolutions[resolutionKey].metadata || {}
-                };
-            }
-            
-            itemIndex++;
-        });
-
+        console.log('Sending resolutions to backend with correct indices:', backendFormat);
         return backendFormat;
     }
 
@@ -410,37 +409,37 @@ class ImprovedForeignKeyResolver {
         const entityType = window.currentImportEntityType || '';
 
         fetch('/data-management/resolve-foreign-keys', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': this.getCSRFToken()
-            },
-            body: JSON.stringify({
-                resolutions: resolutions,
-                entity_type: entityType,
-                original_data: originalData
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: JSON.stringify({
+                    resolutions: resolutions,
+                    entity_type: entityType,
+                    original_data: originalData
+                })
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Show success message
-                if (data.created_entities && data.created_entities.length > 0) {
-                    this.showAlert(`Successfully created ${data.created_entities.length} new entities: ${data.created_entities.join(', ')}`, 'success');
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    if (data.created_entities && data.created_entities.length > 0) {
+                        this.showAlert(`Successfully created ${data.created_entities.length} new entities: ${data.created_entities.join(', ')}`, 'success');
+                    }
+
+                    // Continue with import process
+                    this.proceedWithImport(data.analysis_result);
+                } else {
+                    this.showAlert('Resolution failed: ' + data.message, 'danger');
+                    this.resetApplyButton();
                 }
-                
-                // Continue with import process
-                this.proceedWithImport(data.analysis_result);
-            } else {
-                this.showAlert('Resolution failed: ' + data.message, 'danger');
+            })
+            .catch(error => {
+                console.error('Resolution error:', error);
+                this.showAlert('Failed to apply resolutions: ' + error.message, 'danger');
                 this.resetApplyButton();
-            }
-        })
-        .catch(error => {
-            console.error('Resolution error:', error);
-            this.showAlert('Failed to apply resolutions: ' + error.message, 'danger');
-            this.resetApplyButton();
-        });
+            });
     }
 
     resetApplyButton() {
@@ -451,8 +450,8 @@ class ImprovedForeignKeyResolver {
     }
 
     proceedWithImport(analysisResult) {
-        // Store the resolved analysis result and redirect to preview
-        sessionStorage.setItem('resolved_import_data', JSON.stringify(analysisResult));
+        // The backend will now handle storing the preview data in the session.
+        // This function's only job is to redirect to the correct page.
         window.location.href = '/data-management/preview';
     }
 
@@ -462,12 +461,12 @@ class ImprovedForeignKeyResolver {
         if (metaToken) {
             return metaToken.getAttribute('content');
         }
-        
+
         // Fallback: use existing getCSRFToken function if available
         if (typeof getCSRFToken === 'function') {
             return getCSRFToken();
         }
-        
+
         // Fallback: look for CSRF token in cookies
         const cookies = document.cookie.split(';');
         for (let cookie of cookies) {
@@ -476,7 +475,7 @@ class ImprovedForeignKeyResolver {
                 return decodeURIComponent(value);
             }
         }
-        
+
         return '';
     }
 
@@ -486,7 +485,7 @@ class ImprovedForeignKeyResolver {
             showAlert(message, type);
             return;
         }
-        
+
         // Fallback: create bootstrap alert
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
@@ -494,10 +493,10 @@ class ImprovedForeignKeyResolver {
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
-        
+
         const container = document.querySelector('.container-fluid');
         container.insertBefore(alertDiv, container.firstChild);
-        
+
         // Auto-dismiss after 5 seconds
         setTimeout(() => {
             if (alertDiv.parentNode) {

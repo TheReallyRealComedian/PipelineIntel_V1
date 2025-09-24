@@ -6,19 +6,23 @@
     </button>
     <div class="dropdown-menu p-3" aria-labelledby="column-dropdown-btn" style="min-width: 400px;">
         <h6 class="dropdown-header">Select columns to display</h6>
-        <div class="row">
-            {% for field in all_fields %}
-            <div class="col-6">
-                <div class="form-check">
-                    <input class="form-check-input column-select-checkbox" type="checkbox" value="{{ field }}" id="col-check-{{ field }}" 
-                           data-field="{{ field }}" {% if field in selected_fields %}checked{% endif %}>
-                    <label class="form-check-label" for="col-check-{{ field }}">
-                        {{ field.replace('_', ' ') | title }}
-                    </label>
+        
+        <div class="column-selector-body">
+            <div class="row">
+                {% for field in all_fields %}
+                <div class="col-6">
+                    <div class="form-check">
+                        <input class="form-check-input column-select-checkbox" type="checkbox" value="{{ field }}" id="col-check-{{ field }}" 
+                               data-field="{{ field }}" {% if field in selected_fields %}checked{% endif %}>
+                        <label class="form-check-label" for="col-check-{{ field }}">
+                            {{ field.replace('_', ' ') | title }}
+                        </label>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
+
         <div class="dropdown-divider"></div>
         <button class="btn btn-primary btn-sm w-100" id="apply-columns-btn" type="button">Apply</button>
     </div>

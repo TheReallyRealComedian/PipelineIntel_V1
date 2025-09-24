@@ -52,7 +52,7 @@ def analyze_json_upload():
     if file.filename == '' or not entity_type or entity_type not in ENTITY_MAP:
         flash('No file selected or invalid entity type.', 'warning')
         return redirect(url_for('data_management.data_management_page'))
-    
+
     try:
         json_data = json.load(file.stream)
         if not isinstance(json_data, list):
@@ -92,19 +92,19 @@ def foreign_key_resolution():
     analysis_result = session.get('import_analysis_result')
     entity_type = session.get('import_entity_type')
     original_data = session.get('import_original_data')
-    
+
     if not analysis_result or not entity_type:
         flash("No resolution data found. Please start a new import.", "warning")
         return redirect(url_for('data_management.data_management_page'))
-    
+
     # Prepare data for resolution template
     items_needing_resolution = [
         item for item in analysis_result['preview_data']
         if item['status'] == 'needs_resolution'
     ]
-    
+
     missing_fields = list(analysis_result['missing_keys'].keys())
-    
+
     return render_template(
         'foreign_key_resolution.html',
         title="Resolve Missing References",
@@ -121,78 +121,78 @@ def foreign_key_resolution():
 @login_required
 def resolve_foreign_keys():
     """
-    Apply foreign key resolutions and continue import process.
+    Apply foreign key resolutions, re-analyze the data,
+    and store the result in the session for the preview page.
     """
-    data = request.json
-    resolutions = data.get('resolutions', {})
-    entity_type = data.get('entity_type')
-    original_data = data.get('original_data')
-
     try:
-        # Apply resolutions to create missing entities
-        created_entities = {}
-        
-        for item_index, item_resolutions in resolutions.items():
-            for field_name, resolution in item_resolutions.items():
-                if resolution['type'] == 'create_new':
-                    # Create the missing entity
-                    created_entity = create_missing_entity(
-                        field_name,
-                        resolution['value'],
-                        resolution.get('metadata', {})
-                    )
-                    created_entities[resolution['value']] = created_entity
-        
+        data = request.json
+        resolutions = data.get('resolutions', {})
+        entity_type = data.get('entity_type')
+        original_data = data.get('original_data')
+
         # Update original data with resolved foreign keys
         resolved_data = []
         for index, item in enumerate(original_data):
             resolved_item = item.copy()
-            
             if str(index) in resolutions:
                 for field_name, resolution in resolutions[str(index)].items():
-                    if resolution['type'] == 'existing':
+                    # Apply the resolution value to the item
+                    if 'value' in resolution:
                         resolved_item[field_name] = resolution['value']
-                    elif resolution['type'] == 'create_new':
-                        resolved_item[field_name] = resolution['value']
-            
             resolved_data.append(resolved_item)
-        
-        # Now proceed with normal import analysis
+
+        # Re-run the import analysis on the now-resolved data
         analysis_result = analyze_json_import(
             resolved_data,
             ENTITY_MAP[entity_type]['model'],
             ENTITY_MAP[entity_type]['key']
         )
-        
-        return jsonify({
-            'success': True,
-            'resolved_data': resolved_data,
-            'created_entities': list(created_entities.keys()),
-            'analysis_result': analysis_result
-        })
-        
+
+        # Store the new preview data in the Flask session
+        if analysis_result.get('success'):
+            session['import_preview_data'] = analysis_result['preview_data']
+            session['import_entity_type'] = entity_type
+            session.modified = True
+            return jsonify({'success': True, 'message': 'Resolutions applied and data re-analyzed.'})
+        else:
+            return jsonify({'success': False, 'message': 'Failed to re-analyze data after resolution.'}), 400
+
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
 def create_missing_entity(field_name, entity_name, metadata):
     """
     Create missing entity based on field type.
+    DEBUG VERSION with logging
     """
+    print(f"DEBUG: create_missing_entity called with field_name={field_name}, entity_name={entity_name}, metadata={metadata}")
+
     from ..db import db
     from ..models import Modality
-    
+
     if field_name == 'modality_name':
-        modality = Modality(
-            modality_name=entity_name,
-            modality_category=metadata.get('category', 'Other'),
-            short_description=metadata.get('description', ''),
-            description=metadata.get('description', '')
-        )
-        db.session.add(modality)
-        db.session.commit()
-        return modality
-    
+        print(f"DEBUG: Creating modality: {entity_name}")
+        try:
+            modality = Modality(
+                modality_name=entity_name,
+                modality_category=metadata.get('category', 'Other'),
+                short_description=metadata.get('description', ''),
+                description=metadata.get('description', '')
+            )
+            db.session.add(modality)
+            db.session.flush()  # Get ID without committing
+            print(f"DEBUG: Added modality to session: {modality.modality_id}")
+            db.session.commit()
+            print(f"DEBUG: Committed modality: {modality.modality_name}")
+            return modality
+        except Exception as e:
+            print(f"DEBUG: Error creating modality: {e}")
+            db.session.rollback()
+            raise e
+
     # Add other entity types as needed
     raise ValueError(f"Unknown field type for creation: {field_name}")
 
@@ -234,3 +234,33 @@ def finalize_json_import():
     session.pop('import_entity_type', None)
 
     return jsonify(result)
+
+
+@data_management_bp.route('/api/lookup/<string:entity_name>', methods=['GET'])
+@login_required
+def lookup_entities(entity_name):
+    """
+    API endpoint to fetch existing entity names for populating
+    foreign key resolution dropdowns on the frontend.
+    """
+    results = []
+
+    if entity_name == 'modalities':
+        # For modalities, return the name as the value and a more descriptive label
+        # to prevent user confusion. e.g., "Peptides (Biologics)"
+        query = Modality.query.with_entities(
+            Modality.modality_name,
+            Modality.modality_category
+        ).order_by(Modality.modality_name).all()
+
+        results = [{'value': name, 'label': f"{name} ({category})"} for name, category in query]
+
+    # This structure can be expanded for other entities in the future
+    # elif entity_name == 'process_stages':
+    #     query = ProcessStage.query.with_entities(ProcessStage.stage_name).order_by(ProcessStage.stage_name).all()
+    #     results = [{'value': name[0], 'label': name[0]} for name in query]
+
+    else:
+        return jsonify({'success': False, 'message': 'Unknown entity type for lookup'}), 404
+
+    return jsonify({'success': True, 'data': results})

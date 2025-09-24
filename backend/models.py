@@ -7,6 +7,7 @@ from sqlalchemy.inspection import inspect
 from passlib.hash import pbkdf2_sha256
 from flask_login import UserMixin
 from .db import db
+from sqlalchemy.orm.properties import RelationshipProperty
 
 # --- Association Tables ---
 product_to_challenge_association = Table('product_to_challenge', db.metadata,
@@ -107,8 +108,16 @@ class Product(db.Model):
 
     @classmethod
     def get_all_fields(cls):
-        """Returns a list of all column names for the model."""
-        return [c.key for c in inspect(cls).attrs if c.key not in ['indications', 'supply_chain', 'challenges', 'technologies']]
+        """
+        Returns a list of all column/property names for the model,
+        correctly excluding relationship objects.
+        """
+        inspector = inspect(cls)
+        # This logic ensures only simple columns are returned, not entire related objects.
+        return [
+            c.key for c in inspector.attrs 
+            if not isinstance(c, RelationshipProperty) and not c.key.startswith('_')
+        ]
 
 class Indication(db.Model):
     __tablename__ = 'indications'
