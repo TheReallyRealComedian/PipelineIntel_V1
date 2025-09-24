@@ -139,13 +139,13 @@
                             <div class="progress-bar bg-success" role="progressbar" style="width: 0%" id="progressBar"></div>
                         </div>
                         <small class="text-color-light">
-                            <span id="resolvedCount">0</span> of <span id="totalCount">{{ missing_keys.values() | sum | length }}</span> references resolved
+                            <span id="resolvedCount">0</span> of <span id="totalCount">{{ missing_keys.values() | map('length') | sum }}</span> references resolved
                         </small>
                     </div>
                     <div class="col-md-4 text-end">
                         <span class="badge bg-warning text-dark">
                             <i class="fas fa-exclamation-triangle me-1"></i>
-                            <span id="unresolvedCount">{{ missing_keys.values() | sum | length }}</span> unresolved
+                            <span id="unresolvedCount">{{ missing_keys.values() | map('length') | sum }}</span> unresolved
                         </span>
                     </div>
                 </div>
@@ -191,15 +191,15 @@
                         <div class="resolution-options p-3">
                             {% set field_suggestions = suggestions.get(field_name, {}).get(missing_value, []) %}
                             
-                            {% if field_suggestions %}
-                            <!-- Use Existing Option -->
-                            <div class="resolution-choice selected" data-choice="existing">
+                            <!-- Use Existing Option - Always show -->
+                            <div class="resolution-choice {% if field_suggestions %}selected{% endif %}" data-choice="existing">
                                 <div class="choice-header">
-                                    <input type="radio" name="resolution_{{ field_name }}_{{ loop.index }}" value="existing" checked>
+                                    <input type="radio" name="resolution_{{ field_name }}_{{ loop.index }}" value="existing" {% if field_suggestions %}checked{% endif %}>
                                     <i class="fas fa-search me-2 text-primary"></i>
                                     Use Existing Entity
                                 </div>
-                                <div class="choice-content" style="display: block;">
+                                <div class="choice-content" {% if field_suggestions %}style="display: block;"{% endif %}>
+                                    {% if field_suggestions %}
                                     <p class="text-color-light mb-2">Select a similar existing {{ field_name | replace('_', ' ') }}:</p>
                                     <div class="suggestions">
                                         {% for suggestion in field_suggestions %}
@@ -213,9 +213,16 @@
                                         </div>
                                         {% endfor %}
                                     </div>
+                                    {% else %}
+                                    <p class="text-color-light mb-2">Select an existing {{ field_name | replace('_', ' ') }}:</p>
+                                    <select class="form-select existing-entity-manual" data-field="{{ field_name }}">
+                                        <option value="">Choose an existing {{ field_name | replace('_', ' ') }}...</option>
+                                        <!-- Options will be populated by JavaScript -->
+                                    </select>
+                                    <small class="text-color-light mt-1">If you don't see the right option, use "Create New Entity" below.</small>
+                                    {% endif %}
                                 </div>
                             </div>
-                            {% endif %}
 
                             <!-- Create New Option -->
                             <div class="resolution-choice {% if not field_suggestions %}selected{% endif %}" data-choice="create">

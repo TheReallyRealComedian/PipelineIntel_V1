@@ -22,6 +22,7 @@ class ImprovedForeignKeyResolver {
         this.countGroups();
         this.updateProgress();
         this.checkInitialSelections();
+        this.populateExistingEntityDropdowns();
     }
 
     bindEvents() {
@@ -41,6 +42,11 @@ class ImprovedForeignKeyResolver {
             if (e.target.type === 'radio' && e.target.name.startsWith('resolution_')) {
                 this.handleRadioChange(e);
             }
+
+            // Handle manual existing entity dropdown changes
+            if (e.target.classList.contains('existing-entity-manual')) {
+                this.handleManualEntitySelection(e);
+            }
         });
 
         // Handle apply button click
@@ -57,7 +63,7 @@ class ImprovedForeignKeyResolver {
 
         // Handle select changes in create forms  
         document.addEventListener('change', (e) => {
-            if (e.target.closest('.choice-content') && e.target.tagName === 'SELECT') {
+            if (e.target.closest('.choice-content') && e.target.tagName === 'SELECT' && !e.target.classList.contains('existing-entity-manual')) {
                 this.updateResolutionData(e.target);
             }
         });
@@ -68,6 +74,96 @@ class ImprovedForeignKeyResolver {
         document.getElementById('totalCount').textContent = this.totalGroups;
     }
 
+    handleManualEntitySelection(e) {
+        const dropdown = e.target;
+        const choice = dropdown.closest('.resolution-choice');
+        const group = choice.closest('.resolution-group');
+        
+        if (dropdown.value) {
+            // Update resolution data
+            this.updateResolutionForGroup(group, choice);
+            
+            // Mark group as resolved if not already
+            if (!group.hasAttribute('data-resolved')) {
+                group.setAttribute('data-resolved', 'true');
+                this.resolvedGroups++;
+                this.updateProgress();
+            }
+        } else {
+            // Remove resolution if no value selected
+            if (group.hasAttribute('data-resolved')) {
+                group.removeAttribute('data-resolved');
+                this.resolvedGroups--;
+                this.updateProgress();
+            }
+        }
+    }
+
+    populateExistingEntityDropdowns() {
+        // Get existing entities for each field type
+        const dropdowns = document.querySelectorAll('.existing-entity-manual');
+        
+        dropdowns.forEach(dropdown => {
+            const fieldName = dropdown.dataset.field;
+            this.fetchExistingEntities(fieldName).then(entities => {
+                // Clear existing options except the first one
+                while (dropdown.children.length > 1) {
+                    dropdown.removeChild(dropdown.lastChild);
+                }
+                
+                // Add options for each existing entity
+                entities.forEach(entity => {
+                    const option = document.createElement('option');
+                    option.value = entity.value;
+                    option.textContent = entity.label;
+                    dropdown.appendChild(option);
+                });
+            }).catch(error => {
+                console.warn(`Failed to load existing entities for ${fieldName}:`, error);
+            });
+        });
+    }
+
+    async fetchExistingEntities(fieldName) {
+        // This would typically make an API call to get existing entities
+        // For now, return some mock data based on field type
+        const mockData = {
+            'modality_name': [
+                { value: 'Biologics', label: 'Biologics' },
+                { value: 'Chemical', label: 'Chemical' },
+                { value: 'Small Molecule', label: 'Small Molecule' },
+                { value: 'Monoclonal Antibody', label: 'Monoclonal Antibody' },
+                { value: 'Advanced Therapy', label: 'Advanced Therapy' }
+            ],
+            'therapeutic_area': [
+                { value: 'Oncology', label: 'Oncology' },
+                { value: 'Endocrinology', label: 'Endocrinology' },
+                { value: 'Neurology', label: 'Neurology' },
+                { value: 'Cardiovascular', label: 'Cardiovascular' },
+                { value: 'Metabolic Diseases', label: 'Metabolic Diseases' }
+            ],
+            'stage_name': [
+                { value: 'Chemical Synthesis', label: 'Chemical Synthesis' },
+                { value: 'Formulation', label: 'Formulation' },
+                { value: 'Fill & Finish', label: 'Fill & Finish' },
+                { value: 'Packaging', label: 'Packaging' },
+                { value: 'Quality Control', label: 'Quality Control' }
+            ]
+        };
+        
+        // In a real implementation, you'd make an API call like:
+        // try {
+        //     const response = await fetch(`/data-management/api/existing-entities/${fieldName}`);
+        //     if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        //     return await response.json();
+        // } catch (error) {
+        //     console.warn(`Failed to load existing entities for ${fieldName}:`, error);
+        //     return [];
+        // }
+        
+        return Promise.resolve(mockData[fieldName] || []);
+    }
+
     checkInitialSelections() {
         // Check for pre-selected options and update resolved count
         document.querySelectorAll('.resolution-group').forEach(group => {
@@ -75,12 +171,22 @@ class ImprovedForeignKeyResolver {
             if (selectedChoice) {
                 const field = group.dataset.field;
                 const value = group.dataset.value;
-                this.updateResolutionForGroup(group, selectedChoice);
                 
-                if (!group.hasAttribute('data-resolved')) {
-                    group.setAttribute('data-resolved', 'true');
-                    this.resolvedGroups++;
+                // Mark as resolved if:
+                // 1. It's a "Use Existing" choice with suggestions (auto-resolved)
+                // 2. It's a "Create New" choice (has default values)
+                const hasSuggestions = selectedChoice.querySelector('.suggestion-item.selected');
+                const isCreateChoice = selectedChoice.dataset.choice === 'create';
+                
+                if (hasSuggestions || isCreateChoice) {
+                    this.updateResolutionForGroup(group, selectedChoice);
+                    
+                    if (!group.hasAttribute('data-resolved')) {
+                        group.setAttribute('data-resolved', 'true');
+                        this.resolvedGroups++;
+                    }
                 }
+                // For "Use Existing" without suggestions, don't mark as resolved until user selects something
             }
         });
         this.updateProgress();
@@ -154,6 +260,7 @@ class ImprovedForeignKeyResolver {
         const key = `${field}_${value}`;
         
         if (choiceType === 'existing') {
+            // Check for suggestion selection first
             const selectedSuggestion = choice.querySelector('.suggestion-item.selected');
             if (selectedSuggestion) {
                 this.resolutions[key] = {
@@ -162,6 +269,21 @@ class ImprovedForeignKeyResolver {
                     originalValue: value,
                     value: selectedSuggestion.dataset.value
                 };
+            } else {
+                // Check for manual dropdown selection
+                const manualDropdown = choice.querySelector('.existing-entity-manual');
+                if (manualDropdown && manualDropdown.value) {
+                    this.resolutions[key] = {
+                        type: 'existing',
+                        field: field,
+                        originalValue: value,
+                        value: manualDropdown.value
+                    };
+                } else {
+                    // No selection made, remove resolution
+                    delete this.resolutions[key];
+                    return;
+                }
             }
         } else if (choiceType === 'create') {
             const nameInput = choice.querySelector('.new-entity-name');
