@@ -26,13 +26,13 @@
                 {# Use the column selector macro #}
                 {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
 
-                {# Use the dynamic table macro with custom view link #}
-                {{ render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural, view_url_prefix='process_templates.view_template_detail') }}
+                {# Use the dynamic table macro #}
+                {{ render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural) }}
                 
                 <div class="mt-3">
                     <small class="text-muted">
                         <i class="fas fa-info-circle"></i>
-                        Click on a template name to view detailed stage breakdown
+                        Click on a template name to view detailed stage breakdown and process flow
                     </small>
                 </div>
             {% else %}
@@ -98,4 +98,21 @@
     </div>
     {% endif %}
 </div>
-{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Make template names clickable (but preserve inline editing for other fields)
+    document.querySelectorAll('td[data-field="template_name"]').forEach(cell => {
+        const row = cell.closest('tr');
+        const templateId = row.dataset.entityId;
+        const templateName = cell.textContent.trim();
+        
+        // Replace cell content with clickable link
+        cell.innerHTML = `<a href="/process-templates/${templateId}" class="template-detail-link">${templateName}</a>`;
+        
+        // Remove editable functionality from template name cells (since they're now links)
+        cell.classList.remove('editable-cell');
+        cell.style.cursor = 'pointer';
+    });
+});
+</script>

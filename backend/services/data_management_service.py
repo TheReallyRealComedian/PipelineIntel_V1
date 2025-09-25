@@ -628,8 +628,6 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
     return {"success": True, "message": f"Import successful! Added: {added_count}, Updated: {updated_count}, Skipped: {skipped_count}."}
 
 
-# Add these two functions to the END of your existing backend/services/data_management_service.py file
-
 def analyze_process_template_import(json_data):
     """
     Analyze process template import data with nested stages.
@@ -650,14 +648,17 @@ def analyze_process_template_import(json_data):
                 'json_item': item,
                 'identifier': item.get('template_name', f'Item {index}'),
                 'action': 'skip',  # Default to skip
-                'status': 'ready',
-                'issues': [],
+                'status': 'error',  # Will be updated based on analysis
+                'messages': [],     # Changed from 'issues' to match template expectation
+                'diff': {},         # Added to match template expectation
+                'db_item': None,    # Added to match template expectation
                 'stage_count': 0
             }
             
+            
             # Check required fields
             if not item.get('template_name'):
-                preview_item['issues'].append('Missing template_name')
+                preview_item['messages'].append('Missing template_name')
                 preview_item['status'] = 'error'
                 preview_data.append(preview_item)
                 continue
@@ -669,16 +670,30 @@ def analyze_process_template_import(json_data):
             
             if existing_template:
                 preview_item['action'] = 'update'
-                preview_item['existing_id'] = existing_template.template_id
+                preview_item['status'] = 'update'
+                preview_item['db_item'] = existing_template
+                preview_item['messages'].append(f'Template exists - will update existing template')
+                # Add diff information for updates
+                preview_item['diff']['description'] = {
+                    'old': existing_template.description or '',
+                    'new': item.get('description', '')
+                }
+                if item.get('modality_name') != (existing_template.modality.modality_name if existing_template.modality else None):
+                    preview_item['diff']['modality'] = {
+                        'old': existing_template.modality.modality_name if existing_template.modality else 'None',
+                        'new': item.get('modality_name', 'None')
+                    }
             else:
                 preview_item['action'] = 'add'
+                preview_item['status'] = 'new'
+                preview_item['messages'].append('New template - will be created')
             
             # Check modality reference
             modality_name = item.get('modality_name')
             if modality_name:
                 modality = Modality.query.filter_by(modality_name=modality_name).first()
                 if not modality:
-                    preview_item['issues'].append(f'Modality "{modality_name}" not found')
+                    preview_item['messages'].append(f'Modality "{modality_name}" not found')
                     preview_item['status'] = 'needs_resolution'
                     needs_resolution = True
                     
@@ -723,11 +738,15 @@ def analyze_process_template_import(json_data):
                     suggestions['stage_name'][stage_name] = all_stages[:5]
             
             if stage_issues:
-                preview_item['issues'].extend(stage_issues)
+                preview_item['messages'].extend(stage_issues)
                 
-            # If no issues, mark as ready
-            if not preview_item['issues'] and preview_item['status'] != 'needs_resolution':
-                preview_item['status'] = 'ready'
+            # Add stage count to messages
+            preview_item['messages'].append(f'Contains {len(stages)} stages')
+                
+            # If no issues and not needs_resolution, confirm status
+            if not stage_issues and preview_item['status'] not in ['needs_resolution', 'error']:
+                if preview_item['status'] != 'update':
+                    preview_item['status'] = 'new'
             
             preview_data.append(preview_item)
         
