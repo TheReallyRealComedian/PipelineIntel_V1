@@ -1,0 +1,19 @@
+[
+    {
+  "modality_id": 19,
+  "modality_name": "Prescription Digital Therapeutic (SaMD/PDT)",
+  "modality_category": "Digital Therapeutics",
+  "label": "DTx",
+  "short_description": "Software-based medical interventions regulated as Software as a Medical Device (SaMD). Prescription Digital Therapeutics (PDTs) deliver evidence-based therapeutic interventions to prevent, manage, or treat a medical disorder or disease. Delivered via mobile or web platforms, often adjunctive to pharmacotherapy, and require clinical validation through RCTs.",
+  "description": "Digital therapeutics represent a new class of regulated medical products that use software to achieve therapeutic outcomes. Unlike wellness apps, PDTs undergo rigorous clinical evaluation and regulatory review. They require compliance with SaMD standards (e.g., IEC 62304), cybersecurity, data privacy (GDPR/HIPAA), and integration into healthcare workflows. Common use cases include mental health, chronic disease management, and adjunctive therapy in CNS disorders.",
+  "standard_challenges": [
+    "Regulatory compliance for SaMD (FDA, EMA, MDR)",
+    "Quality Management System (QMS) for software lifecycle",
+    "Cybersecurity and data privacy (GDPR, HIPAA)",
+    "Clinical validation and real-world evidence generation",
+    "Patient engagement and adherence",
+    "Payer coverage and reimbursement pathways"
+  ],
+  "created_at": "2025-09-25 14:30:00.000000+00:00"
+}
+]

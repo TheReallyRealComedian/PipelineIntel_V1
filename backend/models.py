@@ -10,9 +10,12 @@ from .db import db
 from sqlalchemy.orm.properties import RelationshipProperty
 
 # --- Association Tables ---
-product_to_challenge_association = Table('product_to_challenge', db.metadata,
+product_to_challenge_association = Table(
+    'product_to_challenge', db.metadata,
     Column('product_id', Integer, ForeignKey('products.product_id'), primary_key=True),
-    Column('challenge_id', Integer, ForeignKey('manufacturing_challenges.challenge_id'), primary_key=True)
+    Column('challenge_id', Integer, ForeignKey('manufacturing_challenges.challenge_id'), primary_key=True),
+    Column('relationship_type', String(20), default='explicit'),  # 'explicit', 'excluded'
+    Column('notes', Text, nullable=True)
 )
 
 product_to_technology_association = Table('product_to_technology', db.metadata,

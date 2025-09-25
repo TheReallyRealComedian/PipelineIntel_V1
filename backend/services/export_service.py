@@ -4,8 +4,6 @@ import tiktoken
 
 from ..db import db
 
-# NOTE: We are removing the direct service imports from the top level.
-# They will be imported locally within a helper function to avoid circular dependencies.
 
 
 def _get_exportable_entities():
@@ -13,7 +11,7 @@ def _get_exportable_entities():
     A helper function to build the EXPORTABLE_ENTITIES dictionary.
     Imports are done locally within the function to prevent circular import errors at startup.
     """
-    # These imports are now safe because they only run when this function is called.
+
     from . import (
         product_service,
         indication_service,
@@ -22,6 +20,7 @@ def _get_exportable_entities():
         modality_service,
         facility_service,
         capability_service,
+        process_stage_service,  # ADD THIS IMPORT
     )
     from ..models import (
         Modality,
@@ -31,6 +30,7 @@ def _get_exportable_entities():
         Indication,
         ManufacturingChallenge,
         ManufacturingTechnology,
+        ProcessStage,  # ADD THIS IMPORT
         ProductTimeline,
         ProductRegulatoryFiling,
         ProductManufacturingSupplier,
@@ -78,6 +78,16 @@ def _get_exportable_entities():
             "fetch_all_func": capability_service.get_all_capabilities,
             "pk_field": "capability_id",
             "name_field": "capability_name",
+        },
+        # ADD THIS ENTIRE ENTRY FOR PROCESS_STAGES
+        "process_stages": {
+            "model": ProcessStage,
+            "fetch_all_func": lambda: ProcessStage.query.order_by(
+                ProcessStage.hierarchy_level, 
+                ProcessStage.stage_order
+            ).all(),
+            "pk_field": "stage_id",
+            "name_field": "stage_name",
         },
         "product_timelines": {
             "model": ProductTimeline,
