@@ -12,7 +12,7 @@ from backend.db import db, init_app_db
 from backend.utils import nl2br, markdown_to_html_filter, truncate_filter
 from backend.assets import js_main_bundle, css_bundle
 
-# Import blueprints (unchanged)
+# Import blueprints (updated to include process_template_routes)
 import backend.routes.auth_routes as auth_routes_mod
 import backend.routes.settings_routes as settings_routes_mod
 import backend.routes.api_routes as api_routes_mod
@@ -26,6 +26,7 @@ import backend.routes.modality_routes as modality_routes_mod
 import backend.routes.facility_routes as facility_routes_mod
 import backend.routes.analytics_routes as analytics_routes_mod
 import backend.routes.process_stage_routes as process_stage_routes_mod
+import backend.routes.process_template_routes as process_template_routes_mod  # NEW: Added process template routes
 import backend.routes.capability_routes as capability_routes_mod
 import backend.routes.llm_routes as llm_routes_mod
 
@@ -77,7 +78,7 @@ def create_app(init_session=True):
         app.config['PERMANENT_SESSION_LIFETIME'] = 3600 * 24 * 7
         Session(app)
 
-    # Register blueprints (unchanged)
+    # Register blueprints (updated to include process template routes)
     app.register_blueprint(auth_routes_mod.auth_routes)
     app.register_blueprint(settings_routes_mod.settings_routes)
     app.register_blueprint(api_routes_mod.api_bp)
@@ -91,6 +92,7 @@ def create_app(init_session=True):
     app.register_blueprint(facility_routes_mod.facility_routes)
     app.register_blueprint(analytics_routes_mod.analytics_routes)
     app.register_blueprint(process_stage_routes_mod.process_stage_routes)
+    app.register_blueprint(process_template_routes_mod.process_template_routes)  # NEW: Added process template blueprint
     app.register_blueprint(capability_routes_mod.capability_routes)
     app.register_blueprint(llm_routes_mod.llm_routes)
 

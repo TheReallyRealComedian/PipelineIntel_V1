@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="process-template-detail-page">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('process_templates.list_process_templates') }}">Process Templates</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ template_data.template.template_name }}</li>
+                </ol>
+            </nav>
+            <h1>{{ template_data.template.template_name }}</h1>
+            {% if template_data.modality %}
+            <p class="text-color-light">
+                <i class="fas fa-tag"></i> {{ template_data.modality.modality_name }}
+                {% if template_data.modality.modality_category %}
+                <span class="badge bg-secondary ms-2">{{ template_data.modality.modality_category }}</span>
+                {% endif %}
+            </p>
+            {% endif %}
+        </div>
+        <div>
+            <a href="{{ url_for('process_templates.list_process_templates') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Templates
+            </a>
+        </div>
+    </div>
+
+    <!-- Template Information -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">Template Details</h2>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th scope="row" style="width: 30%;">Template Name</th>
+                                <td>{{ template_data.template.template_name }}</td>
+                            </tr>
+                            {% if template_data.template.description %}
+                            <tr>
+                                <th scope="row">Description</th>
+                                <td>{{ template_data.template.description }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <th scope="row">Modality</th>
+                                <td>
+                                    {% if template_data.modality %}
+                                    <a href="{{ url_for('modalities.list_modalities') }}">{{ template_data.modality.modality_name }}</a>
+                                    {% else %}
+                                    <span class="text-muted">No modality assigned</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Total Stages</th>
+                                <td>
+                                    <span class="badge bg-primary">{{ template_data.stages|length }}</span>
+                                    stages
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Required Stages</th>
+                                <td>
+                                    <span class="badge bg-success">{{ template_data.stages|selectattr('is_required')|list|length }}</span>
+                                    required
+                                </td>
+                            </tr>
+                            {% if template_data.template.created_at %}
+                            <tr>
+                                <th scope="row">Created</th>
+                                <td>{{ template_data.template.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Quick Stats</h3>
+                </div>
+                <div class="card-body">
+                    {% set required_stages = template_data.stages|selectattr('is_required')|list %}
+                    {% set optional_stages = template_data.stages|rejectattr('is_required')|list %}
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Required Stages</span>
+                            <span class="text-success fw-bold">{{ required_stages|length }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Optional Stages</span>
+                            <span class="text-secondary">{{ optional_stages|length }}</span>
+                        </div>
+                    </div>
+                    
+                    {% if template_data.stages %}
+                    <div class="mb-3">
+                        <h6>Complexity Levels</h6>
+                        {% set levels = template_data.stages|map(attribute='hierarchy_level')|unique|list %}
+                        {% for level in levels|sort %}
+                        {% set level_stages = template_data.stages|selectattr('hierarchy_level', 'equalto', level)|list %}
+                        <div class="d-flex justify-content-between">
+                            <span>Level {{ level }}</span>
+                            <span class="badge bg-info">{{ level_stages|length }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Stages -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title mb-0">Process Stages</h2>
+            <p class="small text-muted mb-0">Stages in this template, ordered by sequence</p>
+        </div>
+        <div class="card-body">
+            {% if template_data.stages %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Stage Name</th>
+                            <th>Category</th>
+                            <th>Level</th>
+                            <th>Required</th>
+                            <th>Capabilities</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stage in template_data.stages %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-secondary">{{ stage.stage_order }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('process_stages.list_process_stages') }}">{{ stage.stage_name }}</a>
+                                {% if stage.process_stage.short_description %}
+                                <br><small class="text-muted">{{ stage.process_stage.short_description }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if stage.stage_category %}
+                                <span class="badge bg-outline-primary">{{ stage.stage_category }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if stage.hierarchy_level %}
+                                <span class="badge bg-info">L{{ stage.hierarchy_level }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if stage.is_required %}
+                                <span class="badge bg-success">Required</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Optional</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if stage.base_capabilities %}
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for capability in stage.base_capabilities %}
+                                    <span class="badge bg-light text-dark">{{ capability }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <span class="text-muted">No specific capabilities defined</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                This template has no stages defined. This might indicate an incomplete template.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Process Flow Visualization -->
+    {% if template_data.stages %}
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3 class="card-title mb-0">Process Flow</h3>
+            <p class="small text-muted mb-0">Visual representation of the process sequence</p>
+        </div>
+        <div class="card-body">
+            <div class="process-flow">
+                {% for stage in template_data.stages %}
+                <div class="process-step d-inline-block text-center me-3 mb-3">
+                    <div class="step-circle bg-{{ 'success' if stage.is_required else 'secondary' }} text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 40px; height: 40px;">
+                        {{ stage.stage_order }}
+                    </div>
+                    <div class="step-name small" style="max-width: 120px;">
+                        {{ stage.stage_name }}
+                    </div>
+                    {% if stage.hierarchy_level %}
+                    <div class="step-level small text-muted">L{{ stage.hierarchy_level }}</div>
+                    {% endif %}
+                </div>
+                {% if not loop.last %}
+                <div class="process-arrow d-inline-block me-3">
+                    <i class="fas fa-arrow-right text-muted"></i>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.process-flow {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 1rem 0;
+}
+
+.process-step {
+    vertical-align: top;
+}
+
+.process-arrow {
+    vertical-align: middle;
+    padding-top: 20px;
+}
+</style>
+{% endblock %}

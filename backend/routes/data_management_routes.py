@@ -6,12 +6,15 @@ from flask_login import login_required
 from ..services.data_management_service import (
     analyze_json_import,
     finalize_import,
-    analyze_json_import_with_resolution
+    analyze_json_import_with_resolution,
+    analyze_process_template_import,
+    finalize_process_template_import
 )
 from ..models import (
     Product, Indication, ManufacturingChallenge, ManufacturingTechnology,
     ProductSupplyChain, Modality, ManufacturingCapability, InternalFacility,
-    ExternalPartner, ProcessStage, ProductTimeline, ProductRegulatoryFiling, ProductManufacturingSupplier
+    ExternalPartner, ProcessStage, ProductTimeline, ProductRegulatoryFiling, 
+    ProductManufacturingSupplier, ProcessTemplate, TemplateStage
 )
 
 data_management_bp = Blueprint('data_management', __name__, url_prefix='/data-management')
@@ -22,6 +25,7 @@ ENTITY_MAP = {
     'manufacturing_challenges': {'model': ManufacturingChallenge, 'key': 'challenge_name'},
     'manufacturing_technologies': {'model': ManufacturingTechnology, 'key': 'technology_name'},
     'process_stages': {'model': ProcessStage, 'key': 'stage_name'},
+    'process_templates': {'model': ProcessTemplate, 'key': 'template_name'},  # NEW: Added process templates
     'supply_chain': {'model': ProductSupplyChain, 'key': 'id'},
     'modalities': {'model': Modality, 'key': 'modality_name'},
     'manufacturing_capabilities': {'model': ManufacturingCapability, 'key': 'capability_name'},
@@ -58,12 +62,16 @@ def analyze_json_upload():
         if not isinstance(json_data, list):
             raise ValueError("JSON file must contain a list (array) of objects.")
 
-        # Use enhanced analysis
-        analysis_result = analyze_json_import_with_resolution(
-            json_data,
-            ENTITY_MAP[entity_type]['model'],
-            ENTITY_MAP[entity_type]['key']
-        )
+        # Special handling for process templates (they have nested structure)
+        if entity_type == 'process_templates':
+            analysis_result = analyze_process_template_import(json_data)
+        else:
+            # Use enhanced analysis for regular entities
+            analysis_result = analyze_json_import_with_resolution(
+                json_data,
+                ENTITY_MAP[entity_type]['model'],
+                ENTITY_MAP[entity_type]['key']
+            )
 
         if analysis_result.get('success'):
             if analysis_result.get('needs_resolution'):
@@ -142,11 +150,14 @@ def resolve_foreign_keys():
             resolved_data.append(resolved_item)
 
         # Re-run the import analysis on the now-resolved data
-        analysis_result = analyze_json_import(
-            resolved_data,
-            ENTITY_MAP[entity_type]['model'],
-            ENTITY_MAP[entity_type]['key']
-        )
+        if entity_type == 'process_templates':
+            analysis_result = analyze_process_template_import(resolved_data)
+        else:
+            analysis_result = analyze_json_import(
+                resolved_data,
+                ENTITY_MAP[entity_type]['model'],
+                ENTITY_MAP[entity_type]['key']
+            )
 
         # Store the new preview data in the Flask session
         if analysis_result.get('success'):
@@ -224,43 +235,17 @@ def finalize_json_import():
     if not resolved_data or not entity_type or not entity_type in ENTITY_MAP:
         return jsonify(success=False, message="Invalid request data."), 400
 
-    result = finalize_import(
-        resolved_data,
-        ENTITY_MAP[entity_type]['model'],
-        ENTITY_MAP[entity_type]['key']
-    )
+    try:
+        # Special handling for process templates
+        if entity_type == 'process_templates':
+            result = finalize_process_template_import(resolved_data)
+        else:
+            # Regular entity finalization
+            result = finalize_import(resolved_data, ENTITY_MAP[entity_type]['model'], ENTITY_MAP[entity_type]['key'])
+        
+        return jsonify(result)
 
-    session.pop('import_preview_data', None)
-    session.pop('import_entity_type', None)
-
-    return jsonify(result)
-
-
-@data_management_bp.route('/api/lookup/<string:entity_name>', methods=['GET'])
-@login_required
-def lookup_entities(entity_name):
-    """
-    API endpoint to fetch existing entity names for populating
-    foreign key resolution dropdowns on the frontend.
-    """
-    results = []
-
-    if entity_name == 'modalities':
-        # For modalities, return the name as the value and a more descriptive label
-        # to prevent user confusion. e.g., "Peptides (Biologics)"
-        query = Modality.query.with_entities(
-            Modality.modality_name,
-            Modality.modality_category
-        ).order_by(Modality.modality_name).all()
-
-        results = [{'value': name, 'label': f"{name} ({category})"} for name, category in query]
-
-    # This structure can be expanded for other entities in the future
-    # elif entity_name == 'process_stages':
-    #     query = ProcessStage.query.with_entities(ProcessStage.stage_name).order_by(ProcessStage.stage_name).all()
-    #     results = [{'value': name[0], 'label': name[0]} for name in query]
-
-    else:
-        return jsonify({'success': False, 'message': 'Unknown entity type for lookup'}), 404
-
-    return jsonify({'success': True, 'data': results})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify(success=False, message=f"Import failed: {str(e)}"), 500

@@ -47,7 +47,12 @@
                                 <a href="{{ url_for('capabilities.list_capabilities') }}">
                                     <i class="fas fa-cogs"></i> Manufacturing Capabilities
                                 </a>
-                            </li>                            
+                            </li>              
+                            <li class="{% if request.blueprint == 'process_templates' %}active{% endif %}">
+                                <a href="{{ url_for('process_templates.list_process_templates') }}">
+                                    <i class="fas fa-flow-chart"></i> Process Templates
+                                </a>
+                            </li>              
                             <li class="{% if request.blueprint == 'facilities' %}active{% endif %}">
                                 <a href="{{ url_for('facilities.list_facilities') }}"><i class="fas fa-industry"></i> Facilities & Partners</a>
                             </li>

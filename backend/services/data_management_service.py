@@ -429,6 +429,7 @@ def _separate_product_data(json_data):
     return main_product_data, related_table_data
 
 
+
 def finalize_import(resolved_data: list, model_class, unique_key_field: str):
     """
     Takes user-approved changes from the preview and commits them to the DB.
@@ -625,3 +626,248 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
 
     db.session.commit()
     return {"success": True, "message": f"Import successful! Added: {added_count}, Updated: {updated_count}, Skipped: {skipped_count}."}
+
+
+# Add these two functions to the END of your existing backend/services/data_management_service.py file
+
+def analyze_process_template_import(json_data):
+    """
+    Analyze process template import data with nested stages.
+    Returns analysis with preview data for user review.
+    """
+    from ..models import ProcessTemplate, ProcessStage, Modality
+    from ..db import db
+    
+    try:
+        preview_data = []
+        missing_keys = {}
+        suggestions = {}
+        needs_resolution = False
+        
+        for index, item in enumerate(json_data):
+            preview_item = {
+                'index': index,
+                'json_item': item,
+                'identifier': item.get('template_name', f'Item {index}'),
+                'action': 'skip',  # Default to skip
+                'status': 'ready',
+                'issues': [],
+                'stage_count': 0
+            }
+            
+            # Check required fields
+            if not item.get('template_name'):
+                preview_item['issues'].append('Missing template_name')
+                preview_item['status'] = 'error'
+                preview_data.append(preview_item)
+                continue
+                
+            # Check if template already exists
+            existing_template = ProcessTemplate.query.filter_by(
+                template_name=item['template_name']
+            ).first()
+            
+            if existing_template:
+                preview_item['action'] = 'update'
+                preview_item['existing_id'] = existing_template.template_id
+            else:
+                preview_item['action'] = 'add'
+            
+            # Check modality reference
+            modality_name = item.get('modality_name')
+            if modality_name:
+                modality = Modality.query.filter_by(modality_name=modality_name).first()
+                if not modality:
+                    preview_item['issues'].append(f'Modality "{modality_name}" not found')
+                    preview_item['status'] = 'needs_resolution'
+                    needs_resolution = True
+                    
+                    # Add to missing keys for resolution UI
+                    if 'modality_name' not in missing_keys:
+                        missing_keys['modality_name'] = set()
+                    missing_keys['modality_name'].add(modality_name)
+                    
+                    # Suggest similar modalities
+                    if 'modality_name' not in suggestions:
+                        suggestions['modality_name'] = {}
+                    all_modalities = [m.modality_name for m in Modality.query.all()]
+                    suggestions['modality_name'][modality_name] = all_modalities[:5]  # Top 5 suggestions
+            
+            # Analyze stages
+            stages = item.get('stages', [])
+            preview_item['stage_count'] = len(stages)
+            stage_issues = []
+            
+            for stage_index, stage_item in enumerate(stages):
+                stage_name = stage_item.get('stage_name')
+                if not stage_name:
+                    stage_issues.append(f'Stage {stage_index + 1}: Missing stage_name')
+                    continue
+                    
+                # Check if stage exists
+                existing_stage = ProcessStage.query.filter_by(stage_name=stage_name).first()
+                if not existing_stage:
+                    stage_issues.append(f'Stage "{stage_name}" not found in system')
+                    preview_item['status'] = 'needs_resolution'
+                    needs_resolution = True
+                    
+                    # Add to missing keys
+                    if 'stage_name' not in missing_keys:
+                        missing_keys['stage_name'] = set()
+                    missing_keys['stage_name'].add(stage_name)
+                    
+                    # Suggest similar stages
+                    if 'stage_name' not in suggestions:
+                        suggestions['stage_name'] = {}
+                    all_stages = [s.stage_name for s in ProcessStage.query.all()]
+                    suggestions['stage_name'][stage_name] = all_stages[:5]
+            
+            if stage_issues:
+                preview_item['issues'].extend(stage_issues)
+                
+            # If no issues, mark as ready
+            if not preview_item['issues'] and preview_item['status'] != 'needs_resolution':
+                preview_item['status'] = 'ready'
+            
+            preview_data.append(preview_item)
+        
+        # Convert sets to lists for JSON serialization
+        for key in missing_keys:
+            missing_keys[key] = list(missing_keys[key])
+        
+        return {
+            'success': True,
+            'preview_data': preview_data,
+            'needs_resolution': needs_resolution,
+            'missing_keys': missing_keys,
+            'suggestions': suggestions,
+            'total_templates': len(json_data),
+            'total_stages': sum(len(item.get('stages', [])) for item in json_data)
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'message': f'Analysis failed: {str(e)}'
+        }
+
+
+def finalize_process_template_import(resolved_data):
+    """
+    Finalize the import of process templates with their associated template stages.
+    """
+    from ..models import ProcessTemplate, TemplateStage, ProcessStage, Modality
+    from ..db import db
+    
+    added_count = 0
+    updated_count = 0
+    skipped_count = 0
+    failed_count = 0
+    error_messages = []
+    
+    try:
+        for item in resolved_data:
+            action = item.get('action')
+            data = item.get('data')
+            
+            if action == 'skip':
+                skipped_count += 1
+                continue
+                
+            try:
+                template_name = data.get('template_name')
+                if not template_name:
+                    failed_count += 1
+                    error_messages.append(f"Template missing name: {data}")
+                    continue
+                
+                # Find or create the template
+                if action == 'update':
+                    template = ProcessTemplate.query.filter_by(template_name=template_name).first()
+                    if not template:
+                        failed_count += 1
+                        error_messages.append(f"Template not found for update: {template_name}")
+                        continue
+                else:  # action == 'add'
+                    template = ProcessTemplate()
+                
+                # Set template properties
+                template.template_name = template_name
+                template.description = data.get('description')
+                
+                # Handle modality relationship
+                modality_name = data.get('modality_name')
+                if modality_name:
+                    modality = Modality.query.filter_by(modality_name=modality_name).first()
+                    if modality:
+                        template.modality_id = modality.modality_id
+                    else:
+                        error_messages.append(f"Modality not found: {modality_name}")
+                
+                # Save template first to get ID
+                if action == 'add':
+                    db.session.add(template)
+                    db.session.flush()  # Get the template_id
+                
+                # Handle stages
+                stages_data = data.get('stages', [])
+                
+                # If updating, clear existing template stages
+                if action == 'update':
+                    TemplateStage.query.filter_by(template_id=template.template_id).delete()
+                
+                # Process each stage
+                for stage_data in stages_data:
+                    stage_name = stage_data.get('stage_name')
+                    if not stage_name:
+                        continue
+                        
+                    # Find the process stage
+                    process_stage = ProcessStage.query.filter_by(stage_name=stage_name).first()
+                    if not process_stage:
+                        error_messages.append(f"Process stage not found: {stage_name}")
+                        continue
+                    
+                    # Create template stage link
+                    template_stage = TemplateStage(
+                        template_id=template.template_id,
+                        stage_id=process_stage.stage_id,
+                        stage_order=stage_data.get('stage_order', 1),
+                        is_required=stage_data.get('is_required', True),
+                        base_capabilities=stage_data.get('base_capabilities', [])
+                    )
+                    db.session.add(template_stage)
+                
+                db.session.commit()
+                
+                if action == 'add':
+                    added_count += 1
+                else:
+                    updated_count += 1
+                    
+            except Exception as e:
+                failed_count += 1
+                error_messages.append(f"Failed to process template {data.get('template_name', 'Unknown')}: {str(e)}")
+                db.session.rollback()
+                continue
+        
+        return {
+            'success': True,
+            'added_count': added_count,
+            'updated_count': updated_count,
+            'skipped_count': skipped_count,
+            'failed_count': failed_count,
+            'error_messages': error_messages
+        }
+        
+    except Exception as e:
+        db.session.rollback()
+        return {
+            'success': False,
+            'message': f'Import failed: {str(e)}',
+            'added_count': added_count,
+            'updated_count': updated_count,
+            'skipped_count': skipped_count,
+            'failed_count': failed_count,
+            'error_messages': error_messages
+        }

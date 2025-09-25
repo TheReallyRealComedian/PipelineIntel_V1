@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% from "macros/_table_macros.html" import render_column_selector, render_dynamic_table %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="process-templates-page">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>{{ title }}</h1>
+            <p class="text-color-light">Standard process flows for different modalities</p>
+        </div>
+        <div>
+            <a href="{{ url_for('data_management.data_management_page') }}" class="btn btn-outline-primary">
+                <i class="fas fa-upload"></i> Import Templates
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title mb-0">All Process Templates</h2>
+        </div>
+        <div class="card-body">
+            {% if items %}
+                {# Use the column selector macro #}
+                {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
+
+                {# Use the dynamic table macro with custom view link #}
+                {{ render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural, view_url_prefix='process_templates.view_template_detail') }}
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Click on a template name to view detailed stage breakdown
+                    </small>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    No process templates found. <a href="{{ url_for('data_management.data_management_page') }}">Import process templates</a> to get started.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if items %}
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Templates by Modality</h3>
+                </div>
+                <div class="card-body">
+                    {% set modality_counts = items|groupby('modality_name') %}
+                    {% if modality_counts %}
+                        <div class="row">
+                            {% for modality, templates in modality_counts %}
+                            <div class="col-sm-6 mb-2">
+                                <span class="badge bg-primary me-2">{{ templates|length }}</span>
+                                {{ modality or 'No Modality' }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No modality data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Template Complexity</h3>
+                </div>
+                <div class="card-body">
+                    {% set total_templates = items|length %}
+                    {% set total_stages = items|sum(attribute='stage_count') %}
+                    {% set avg_stages = (total_stages / total_templates) if total_templates > 0 else 0 %}
+                    
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="h2 text-primary">{{ total_templates }}</div>
+                                <div class="small text-muted">Total Templates</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="h2 text-success">{{ "%.1f"|format(avg_stages) }}</div>
+                                <div class="small text-muted">Avg Stages per Template</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
