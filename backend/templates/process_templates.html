@@ -26,8 +26,8 @@
                 {# Use the column selector macro #}
                 {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
 
-                {# Use the dynamic table macro #}
-                {{ render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural) }}
+                {# Add pk_field='template_id' to the macro call #}
+                {{ render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural, pk_field='template_id') }}
                 
                 <div class="mt-3">
                     <small class="text-muted">
@@ -98,7 +98,10 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
 
+{% block scripts %}
+{{ super() }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Make template names clickable (but preserve inline editing for other fields)
@@ -108,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const templateName = cell.textContent.trim();
         
         // Replace cell content with clickable link
-        cell.innerHTML = `<a href="/process-templates/${templateId}" class="template-detail-link">${templateName}</a>`;
+        cell.innerHTML = '<a href="/process-templates/' + templateId + '" class="template-detail-link">' + templateName + '</a>';
         
         // Remove editable functionality from template name cells (since they're now links)
         cell.classList.remove('editable-cell');
@@ -116,3 +119,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+{% endblock %}

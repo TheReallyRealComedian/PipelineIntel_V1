@@ -53,9 +53,14 @@ def get_template_with_stages(template_id):
     """
     Get a process template with its associated stages for detailed view.
     """
+    print(f"DEBUG SERVICE: Looking for template with ID: {template_id}")
+    
     template = ProcessTemplate.query.get(template_id)
     if not template:
+        print(f"DEBUG SERVICE: No template found with ID: {template_id}")
         return None
+    
+    print(f"DEBUG SERVICE: Found template: {template.template_name}")
     
     # Get template stages ordered by stage_order
     template_stages = db.session.query(
@@ -65,6 +70,8 @@ def get_template_with_stages(template_id):
     ).filter(
         TemplateStage.template_id == template_id
     ).order_by(TemplateStage.stage_order).all()
+    
+    print(f"DEBUG SERVICE: Found {len(template_stages)} template stages")
     
     stages_data = []
     for template_stage, process_stage in template_stages:
@@ -79,11 +86,14 @@ def get_template_with_stages(template_id):
             'base_capabilities': template_stage.base_capabilities
         })
     
-    return {
+    result = {
         'template': template,
         'stages': stages_data,
         'modality': template.modality
     }
+    
+    print(f"DEBUG SERVICE: Returning result with {len(stages_data)} stages")
+    return result
 
 def inline_update_template_field(template_id, field_name, new_value):
     """

@@ -1,5 +1,5 @@
 # backend/routes/process_template_routes.py
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
 from flask_login import login_required
 from ..services import process_template_service
 
@@ -17,15 +17,45 @@ def list_process_templates():
         **context
     )
 
+@process_template_routes.route('/debug')
+@login_required
+def debug_templates():
+    """Debug route to check what templates exist."""
+    from ..models import ProcessTemplate
+    templates = ProcessTemplate.query.all()
+    
+    result = {
+        'total_templates': len(templates),
+        'templates': []
+    }
+    
+    for template in templates:
+        result['templates'].append({
+            'id': template.template_id,
+            'name': template.template_name,
+            'modality_id': template.modality_id,
+            'stage_count': len(template.stages)
+        })
+    
+    return f"<pre>{result}</pre>"
+
 @process_template_routes.route('/<int:template_id>')
 @login_required
 def view_template_detail(template_id):
     """Display detailed view of a specific process template with its stages."""
+    print(f"DEBUG: Accessing template detail with ID: {template_id}")
+    
     template_data = process_template_service.get_template_with_stages(template_id)
     
+    print(f"DEBUG: Template data result: {template_data}")
+    
     if not template_data:
+        print(f"DEBUG: No template data found, redirecting")
         flash('Process template not found.', 'error')
         return redirect(url_for('process_templates.list_process_templates'))
+    
+    print(f"DEBUG: Template found: {template_data['template'].template_name}")
+    print(f"DEBUG: Number of stages: {len(template_data['stages'])}")
     
     return render_template(
         'process_template_detail.html',
