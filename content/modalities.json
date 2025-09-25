@@ -1,5 +1,4 @@
-{
-  "modalities": [
+[
     {
       "modality_id": 5,
       "modality_name": "ADC",
@@ -254,5 +253,4 @@
       ],
       "created_at": "2025-09-22 07:54:32.809167+00:00"
     }
-  ]
-}
+]

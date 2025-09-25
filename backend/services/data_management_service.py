@@ -5,6 +5,8 @@ import difflib
 from collections import defaultdict
 from datetime import datetime, date
 import re
+from sqlalchemy import text
+
 
 from ..db import db
 from ..models import (
@@ -13,6 +15,70 @@ from ..models import (
     Modality, ProcessStage, ProductTimeline, ProductRegulatoryFiling,
     ProductManufacturingSupplier
 )
+
+# This order is critical. Parents must be inserted before children.
+TABLE_IMPORT_ORDER = [
+    'users', 'modalities', 'process_stages', 
+    'manufacturing_capabilities', 'manufacturing_entities', 
+    'internal_facilities', 'external_partners', 'process_templates',
+    'products', 'indications', 'manufacturing_technologies', 
+    'manufacturing_challenges', 'llm_settings',
+    # Junction/Association tables and tables with multiple FKs last
+    'template_stages', 'product_to_challenge', 'product_to_technology', 
+    'product_supply_chain', 'modality_requirements', 'product_requirements', 
+    'entity_capabilities', 'product_process_overrides', 'product_timelines', 
+    'product_regulatory_filings', 'product_manufacturing_suppliers'
+]
+
+
+def import_full_database(file_stream):
+    """
+    Wipes the current database and imports data from a full backup JSON file.
+    This is a destructive operation.
+    """
+    try:
+        data = json.load(file_stream)
+        
+        # Verify that the JSON contains expected keys (table names)
+        if not all(key in data for key in ['users', 'products', 'modalities']):
+             return False, "Invalid backup file format. Essential tables are missing."
+
+        # 1. Truncate tables in reverse order of dependencies
+        # Disabling foreign key checks is safer
+        db.session.execute(text('SET session_replication_role = replica;'))
+        
+        for table_name in reversed(TABLE_IMPORT_ORDER):
+            if table_name in data:
+                db.session.execute(text(f'TRUNCATE TABLE "{table_name}" RESTART IDENTITY CASCADE;'))
+        
+        db.session.commit()
+        
+        # 2. Insert data in order of dependencies
+        for table_name in TABLE_IMPORT_ORDER:
+            if table_name in data and data[table_name]:
+                table = db.metadata.tables.get(table_name)
+                # The data is a list of dicts, which is what bulk_insert_mappings expects
+                db.session.bulk_insert_mappings(table, data[table_name])
+
+        db.session.commit()
+        
+        # 3. Re-enable foreign key checks
+        db.session.execute(text('SET session_replication_role = DEFAULT;'))
+        db.session.commit()
+        
+        return True, "Database successfully imported."
+
+    except Exception as e:
+        db.session.rollback()
+        # Ensure FK checks are re-enabled even on failure
+        try:
+            db.session.execute(text('SET session_replication_role = DEFAULT;'))
+            db.session.commit()
+        except:
+            pass # Ignore if this fails (e.g., connection closed)
+        
+        traceback.print_exc()
+        return False, f"An error occurred during import: {e}"
 
 
 def analyze_json_import(json_data: list, model_class, unique_key_field: str):

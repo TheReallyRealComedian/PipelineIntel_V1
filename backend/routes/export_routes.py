@@ -1,7 +1,8 @@
 # backend/routes/export_routes.py
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, Response
 from flask_login import login_required
 from ..services import export_service
+import datetime
 
 
 export_bp = Blueprint('export', __name__, url_prefix='/export')
@@ -26,3 +27,17 @@ def data_export_page():
         context['total_tokens'] = total_tokens
 
     return render_template('data_export.html', **context)
+
+@export_bp.route('/full-database-export')
+@login_required
+def full_database_export():
+    """Exports the entire database as a single JSON file."""
+    json_data = export_service.export_full_database()
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"pipeline_intelligence_backup_{timestamp}.json"
+    
+    return Response(
+        json_data,
+        mimetype="application/json",
+        headers={"Content-Disposition": f"attachment;filename={filename}"}
+    )

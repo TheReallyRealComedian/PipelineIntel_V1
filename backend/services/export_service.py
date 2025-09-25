@@ -1,6 +1,8 @@
 # backend/services/export_service.py
 import json
 import tiktoken
+import datetime
+
 
 from ..db import db
 
@@ -182,3 +184,25 @@ def prepare_json_export(form_data: dict):
     total_tokens = count_tokens(json_string)
 
     return json_string, total_tokens
+
+def export_full_database():
+    """Exports all data from all tables into a structured dictionary."""
+    from .data_management_service import TABLE_IMPORT_ORDER
+    
+    all_data = {}
+    
+    def json_serializer(obj):
+        if isinstance(obj, (datetime.datetime, datetime.date)):
+            return obj.isoformat()
+        return str(obj)
+
+    for table_name in TABLE_IMPORT_ORDER:
+        table = db.metadata.tables.get(table_name)
+        if table is None or table_name == 'flask_sessions':
+            continue
+        
+        result = db.session.execute(table.select())
+        rows = [dict(row._mapping) for row in result]
+        all_data[table_name] = rows
+
+    return json.dumps(all_data, indent=2, default=json_serializer)

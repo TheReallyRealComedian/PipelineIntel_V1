@@ -8,7 +8,8 @@ from ..services.data_management_service import (
     finalize_import,
     analyze_json_import_with_resolution,
     analyze_process_template_import,
-    finalize_process_template_import
+    finalize_process_template_import,
+    import_full_database
 )
 from ..models import (
     Product, Indication, ManufacturingChallenge, ManufacturingTechnology,
@@ -41,6 +42,28 @@ ENTITY_MAP = {
 @login_required
 def data_management_page():
     return render_template('data_management.html', title="Data Management")
+
+
+@data_management_bp.route('/full-import', methods=['POST'])
+@login_required
+def full_database_import():
+    if 'full_backup_file' not in request.files:
+        flash('No file part in the request.', 'danger')
+        return redirect(url_for('data_management.data_management_page'))
+    
+    file = request.files['full_backup_file']
+    
+    if file.filename == '':
+        flash('No file selected for full import.', 'warning')
+        return redirect(url_for('data_management.data_management_page'))
+    
+    if file and file.filename.endswith('.json'):
+        success, message = import_full_database(file.stream)
+        flash(message, 'success' if success else 'danger')
+    else:
+        flash('Invalid file type. Please upload a .json backup file.', 'danger')
+        
+    return redirect(url_for('data_management.data_management_page'))
 
 
 @data_management_bp.route('/analyze', methods=['POST'])

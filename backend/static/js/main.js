@@ -188,9 +188,47 @@
         }
     }
 
+    /**
+     * Initializes sidebar collapse functionality.
+     */
+    function initializeSidebarCollapse() {
+        const sidebar = document.querySelector('.sidebar');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+        const sidebarStateKey = 'sidebarCollapsed';
+
+        if (!sidebar || !toggleBtn) {
+            return;
+        }
+
+        // Function to set the sidebar state
+        const setSidebarState = (isCollapsed) => {
+            if (isCollapsed) {
+                sidebar.classList.add('sidebar-collapsed');
+            } else {
+                sidebar.classList.remove('sidebar-collapsed');
+            }
+            // Save state to localStorage
+            localStorage.setItem(sidebarStateKey, isCollapsed ? 'true' : 'false');
+        };
+
+        // Event listener for the toggle button
+        toggleBtn.addEventListener('click', () => {
+            const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+            setSidebarState(!isCollapsed);
+        });
+
+        // Check localStorage on page load
+        const savedState = localStorage.getItem(sidebarStateKey);
+        if (savedState === 'true') {
+            setSidebarState(true);
+        }
+    }
 
     // --- Global Initializer ---
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize sidebar collapse
+        initializeSidebarCollapse();
+        
         // Find all dynamic tables on the page and initialize them
         document.querySelectorAll('table[data-entity-type]').forEach(table => {
             initializeTableSorter(table);
@@ -259,7 +297,7 @@
             const cell = event.target.closest('td.editable-cell');
             if (cell && !cell.classList.contains('is-editing')) {
                 // Pass both singular and plural names to the edit handler
-                startEdit(cell, entityType, entityPlural);
+                startEdit(cell, entityType, entityPlural); // Pass plural name
             }
         });
     };
