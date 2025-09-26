@@ -636,14 +636,19 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
                         else:
                             raise ValueError(f"Parent stage '{parent_stage_name}' not found.")
 
-                # Handle ManufacturingChallenge stage link
+                # Handle ManufacturingChallenge technology link
                 if model_class == ManufacturingChallenge:
-                    primary_stage_name = data.pop('primary_stage_name', None)
-                    if primary_stage_name:
-                        if primary_stage_name in stage_map:
-                            data['primary_stage_id'] = stage_map[primary_stage_name]
+                    technology_name = data.pop('technology_name', None)
+                    # Pre-fetch the technology map if it's the first challenge being processed
+                    if 'technology_map' not in locals():
+                        technology_map = {t.technology_name: t.technology_id for t in ManufacturingTechnology.query.with_entities(ManufacturingTechnology.technology_name, ManufacturingTechnology.technology_id).all()}
+                    
+                    if technology_name:
+                        if technology_name in technology_map:
+                            data['technology_id'] = technology_map[technology_name]
                         else:
-                            raise ValueError(f"Primary stage '{primary_stage_name}' not found.")
+                            raise ValueError(f"Technology '{technology_name}' not found for challenge link.")
+                    # The old `primary_stage_id` is now ignored for challenge imports.
 
                 if model_class == Indication:
                     product_code = data.pop('product_code', None)

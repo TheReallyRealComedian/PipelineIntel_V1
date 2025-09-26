@@ -1115,5 +1115,72 @@
         "base_capabilities": ["Refrigerated Logistics"]
       }
     ]
+  },
+  {
+    "template_name": "Standard ADC Process",
+    "modality_name": "ADC", 
+    "description": "Dual-stream manufacturing process combining monoclonal antibody production with HPAPI payload synthesis, followed by conjugation under high containment conditions",
+    "stages": [
+      {
+        "stage_name": "Cell Line Development",
+        "stage_order": 1,
+        "is_required": true,
+        "base_capabilities": ["CHO Cell Line Engineering", "Clonal Selection", "Cell Bank Development"]
+      },
+      {
+        "stage_name": "Chemical/Biological Production", 
+        "stage_order": 2,
+        "is_required": true,
+        "base_capabilities": ["Monoclonal Antibody Production", "Cell Culture", "HPAPI Synthesis"]
+      },
+      {
+        "stage_name": "Primary Recovery & Clarification",
+        "stage_order": 3,
+        "is_required": true,
+        "base_capabilities": ["Harvest Operations", "Depth Filtration", "Clarification"]
+      },
+      {
+        "stage_name": "Chromatography & Advanced Purification",
+        "stage_order": 4,
+        "is_required": true,
+        "base_capabilities": ["Protein A Chromatography", "Ion Exchange", "Viral Filtration"]
+      },
+      {
+        "stage_name": "Conjugation & Modification",
+        "stage_order": 5,
+        "is_required": true,
+        "base_capabilities": ["Antibody-Drug Conjugation", "OEB5 Containment", "DAR Control"]
+      },
+      {
+        "stage_name": "Downstream Processing",
+        "stage_order": 6,
+        "is_required": true,
+        "base_capabilities": ["Hydrophobic Interaction Chromatography", "ADC Purification", "DAR Fractionation"]
+      },
+      {
+        "stage_name": "Formulation Development",
+        "stage_order": 7,
+        "is_required": true,
+        "base_capabilities": ["Buffer Selection", "Stabilizer Optimization", "Formulation Characterization"]
+      },
+      {
+        "stage_name": "Aseptic Processing",
+        "stage_order": 8,
+        "is_required": true,
+        "base_capabilities": ["Sterile Manufacturing", "OEB5 Isolators", "Aseptic Filling"]
+      },
+      {
+        "stage_name": "Quality Control Release Testing",
+        "stage_order": 9,
+        "is_required": true,
+        "base_capabilities": ["DAR Analysis", "Aggregate Analysis", "Bioactivity Testing"]
+      },
+      {
+        "stage_name": "Cold Chain & Distribution",
+        "stage_order": 10,
+        "is_required": true,
+        "base_capabilities": ["Cold Chain Management", "Temperature Monitoring", "Distribution"]
+      }
+    ]
   }
 ]

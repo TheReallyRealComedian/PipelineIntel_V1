@@ -125,22 +125,28 @@ class Product(db.Model):
 
     def get_inherited_challenges(self):
         """
-        Get challenges inherited from the product's modality via its process template.
-        THIS IS THE CORRECTED AND MORE ROBUST VERSION.
+        Get challenges inherited from the product's modality via its process template's
+        STAGES and associated TECHNOLOGIES. THIS IS THE REFACTORED, CORRECT LOGIC.
         """
         if not self.modality or not self.modality.process_templates:
             return []
 
-        template = self.modality.process_templates[0] # Assuming one template per modality
+        # Assuming one template per modality for now
+        template = self.modality.process_templates[0] 
 
-        # 1. Get all stage_ids from the template
+        # 1. Get all stage_ids defined in the process template
         stage_ids_in_template = db.session.query(TemplateStage.stage_id).filter(
             TemplateStage.template_id == template.template_id
         ).subquery()
 
-        # 2. Get all challenges whose primary_stage_id is in that list of stages
+        # 2. Find all technologies that are linked to those specific stages
+        technology_ids_in_template = db.session.query(ManufacturingTechnology.technology_id).filter(
+            ManufacturingTechnology.stage_id.in_(stage_ids_in_template)
+        ).subquery()
+
+        # 3. Find all challenges that are directly caused by those technologies
         inherited_challenges = db.session.query(ManufacturingChallenge).filter(
-            ManufacturingChallenge.primary_stage_id.in_(stage_ids_in_template)
+            ManufacturingChallenge.technology_id.in_(technology_ids_in_template)
         ).distinct().all()
 
         return inherited_challenges
@@ -287,17 +293,19 @@ class ManufacturingChallenge(db.Model):
     related_capabilities = Column(JSONB)
     
     # NEW: Link to primary process stage where this challenge occurs
-    primary_stage_id = Column(Integer, ForeignKey('process_stages.stage_id'))
+    primary_stage_id = Column(Integer, ForeignKey('process_stages.stage_id'), nullable=True)
+    technology_id = Column(Integer, ForeignKey('manufacturing_technologies.technology_id'))
     severity_level = Column(String(50))  # 'minor', 'moderate', 'major', 'critical'
     
     # Relationships
     products = relationship("Product", secondary=product_to_challenge_association, back_populates="challenges")
-    primary_stage = relationship("ProcessStage", back_populates="challenges")  # NEW
+    primary_stage = relationship("ProcessStage", back_populates="challenges")
+    technology = relationship("ManufacturingTechnology", back_populates="challenges")  
 
     @classmethod
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
-        return [c.key for c in inspect(cls).attrs if c.key not in ['products', 'primary_stage']]
+        return [c.key for c in inspect(cls).attrs if c.key not in ['products', 'primary_stage', 'technology', 'technology_id']]
 
 class ManufacturingTechnology(db.Model):
     __tablename__ = 'manufacturing_technologies'
@@ -310,11 +318,13 @@ class ManufacturingTechnology(db.Model):
     complexity_rating = Column(Integer) # New field from Phase 3
     stage = relationship("ProcessStage", back_populates="technologies")
     products = relationship("Product", secondary=product_to_technology_association, back_populates="technologies")
+    challenges = relationship("ManufacturingChallenge", back_populates="technology")
+
 
     @classmethod
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
-        return [c.key for c in inspect(cls).attrs if c.key not in ['stage', 'products']]
+        return [c.key for c in inspect(cls).attrs if c.key not in ['stage', 'products', 'challenges']]
 
 class ProductSupplyChain(db.Model):
     __tablename__ = 'product_supply_chain'

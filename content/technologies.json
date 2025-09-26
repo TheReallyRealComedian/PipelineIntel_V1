@@ -1,0 +1,458 @@
+[
+  {
+    "technology_name": "Multi-Step Organic Synthesis",
+    "stage_name": "Chemical/Biological Production",
+    "short_description": "Sequential chemical reactions for small molecule API synthesis",
+    "description": "Complex multi-step synthetic pathways involving sequential chemical transformations to produce small molecule APIs. Requires precise control of reaction conditions, temperature, pH, and timing across multiple synthetic steps to achieve target purity and yield. Essential for most pharmaceutical active ingredients.",
+    "innovation_potential": "Medium - established technology with continuous optimization opportunities",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "Continuous Flow Chemistry",
+    "stage_name": "Process Intensification",
+    "short_description": "Continuous chemical synthesis in controlled flow systems",
+    "description": "Advanced continuous manufacturing technology enabling precise control of reaction parameters through miniaturized flow reactors. Offers improved safety, reduced reaction times, better temperature control, and enables reactions not feasible in batch mode. Key enabler for pharmaceutical process intensification.",
+    "innovation_potential": "High - transforms manufacturing paradigm with improved safety and efficiency",
+    "complexity_rating": 7
+  },
+  {
+    "technology_name": "Cryogenic Reaction Technology",
+    "stage_name": "Process Intensification",
+    "short_description": "Ultra-low temperature chemical synthesis systems",
+    "description": "Specialized reaction systems operating at extremely low temperatures (-78°C to -196°C) to enable unique chemical transformations, improve selectivity, and access reaction pathways unavailable at ambient conditions. Critical for certain stereoselective syntheses and reactive intermediate chemistry.",
+    "innovation_potential": "Medium - niche application with high impact for specific chemistries",
+    "complexity_rating": 8
+  },
+  {
+    "technology_name": "PROTAC Synthesis Platform",
+    "stage_name": "Chemical/Biological Production",
+    "short_description": "Specialized synthesis of heterobifunctional degrader molecules",
+    "description": "Sophisticated synthetic platform for assembling PROteolysis TArgeting Chimeras (PROTACs) - complex heterobifunctional molecules requiring precise conjugation of target protein ligands, linkers, and E3 ligase ligands. Demands advanced organic synthesis capabilities and specialized purification techniques.",
+    "innovation_potential": "Very High - revolutionary therapeutic modality for targeted protein degradation",
+    "complexity_rating": 9
+  },
+  {
+    "technology_name": "Large-Scale Hydrogenation",
+    "stage_name": "Chemical/Biological Production",
+    "short_description": "High-pressure catalytic reduction systems",
+    "description": "Industrial-scale catalytic hydrogenation systems for reduction reactions in pharmaceutical synthesis. Requires specialized high-pressure equipment, catalyst handling, and hydrogen safety systems. Critical for many pharmaceutical intermediates and final API synthesis steps.",
+    "innovation_potential": "Medium - mature technology with safety and efficiency improvements",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "CHO Cell Culture Platform",
+    "stage_name": "Chemical/Biological Production",
+    "short_description": "Chinese hamster ovary cell bioreactor systems",
+    "description": "Industry-standard mammalian cell culture platform using Chinese Hamster Ovary cells for recombinant protein production. Scalable from laboratory to commercial manufacturing (2L to 20,000L bioreactors) with established regulatory pathway and proven commercial success for therapeutic proteins.",
+    "innovation_potential": "Medium - mature platform with continued optimization for higher productivity",
+    "complexity_rating": 5
+  },
+  {
+    "technology_name": "HEK293 Cell Culture System",
+    "stage_name": "Chemical/Biological Production",
+    "short_description": "Human embryonic kidney cell production platform",
+    "description": "Versatile mammalian expression system using Human Embryonic Kidney 293 cells, particularly valuable for viral vector production and transient expression studies. Offers high transfection efficiency and rapid protein expression, essential for AAV and lentiviral vector manufacturing.",
+    "innovation_potential": "High - critical for emerging gene therapy and viral vector applications",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "Microbial Fermentation (E. coli)",
+    "stage_name": "Chemical/Biological Production",
+    "short_description": "Bacterial expression system for recombinant proteins",
+    "description": "High-density bacterial fermentation using engineered Escherichia coli for rapid, cost-effective production of recombinant proteins. Advantages include fast growth rates, high yields, and well-established scalability, though limited to simpler protein structures without complex post-translational modifications.",
+    "innovation_potential": "Medium - established workhorse with continued strain improvements",
+    "complexity_rating": 4
+  },
+  {
+    "technology_name": "Perfusion Cell Culture",
+    "stage_name": "Process Intensification",
+    "short_description": "Continuous cell culture with medium exchange",
+    "description": "Advanced continuous bioprocessing technology maintaining cells at high density with continuous medium perfusion and product harvest. Enables steady-state operation, higher productivity per unit volume, and reduced facility footprint compared to traditional fed-batch culture.",
+    "innovation_potential": "High - enables continuous biomanufacturing with improved economics",
+    "complexity_rating": 8
+  },
+  {
+    "technology_name": "CRISPR/Cas9 Cell Line Engineering",
+    "stage_name": "Cell Line Development",
+    "short_description": "Precise genome editing for enhanced cell lines",
+    "description": "Revolutionary gene editing technology for precise modification of production cell lines. Enables knockout of unwanted genes, knock-in of beneficial traits, and site-specific integration of transgenes. Dramatically accelerates cell line development timelines from 6-12 months to 8-12 weeks.",
+    "innovation_potential": "Very High - transformative technology enabling rapid, precise cell engineering",
+    "complexity_rating": 8
+  },
+  {
+    "technology_name": "Master Cell Bank (MCB) Generation",
+    "stage_name": "Cell Line Development",
+    "short_description": "Standardized cell bank manufacturing and qualification",
+    "description": "Systematic process for generating, characterizing, and qualifying Master Cell Banks to ensure consistent manufacturing over product lifecycle. Includes genetic stability testing, sterility, mycoplasma testing, and adventitious agent screening according to ICH Q5A/Q5B guidelines.",
+    "innovation_potential": "Low - essential regulatory requirement with established methodologies",
+    "complexity_rating": 5
+  },
+  {
+    "technology_name": "Triple Plasmid Transfection (AAV)",
+    "stage_name": "Chemical/Biological Production",
+    "short_description": "Adeno-associated virus vector production system",
+    "description": "Specialized mammalian cell transfection process using three plasmids (Rep-Cap, helper, and transfer plasmids) to produce recombinant AAV vectors for gene therapy. Requires precise plasmid ratios, transfection optimization, and careful harvest timing to maximize vector yields.",
+    "innovation_potential": "High - critical for expanding gene therapy applications",
+    "complexity_rating": 7
+  },
+  {
+    "technology_name": "Baculovirus-Sf9 System (AAV)",
+    "stage_name": "Chemical/Biological Production",
+    "short_description": "Insect cell-based AAV vector production platform",
+    "description": "Alternative AAV production platform using baculovirus-infected Spodoptera frugiperda (Sf9) insect cells. Offers potential advantages in scalability and product quality compared to mammalian systems, with growing regulatory acceptance for commercial manufacturing.",
+    "innovation_potential": "High - emerging scalable alternative for viral vector production",
+    "complexity_rating": 7
+  },
+  {
+    "technology_name": "Lentiviral Vector Production",
+    "stage_name": "Chemical/Biological Production",
+    "short_description": "HIV-based gene delivery vector manufacturing",
+    "description": "Complex four-plasmid transfection system in HEK293T cells to produce lentiviral vectors for gene therapy applications. Requires specialized containment, careful plasmid design for safety, and optimization of harvest and concentration procedures to achieve therapeutic titers.",
+    "innovation_potential": "High - essential for CAR-T cell therapy and gene therapy applications",
+    "complexity_rating": 8
+  },
+  {
+    "technology_name": "Ex-Vivo T-Cell Expansion",
+    "stage_name": "Chemical/Biological Production",
+    "short_description": "Patient-specific immune cell manufacturing",
+    "description": "Highly specialized process for expanding patient-derived T-cells ex-vivo, often following genetic modification for CAR-T therapy. Requires sterile processing, activation with CD3/CD28 beads, cytokine supplementation, and careful monitoring of cell phenotype and function throughout expansion.",
+    "innovation_potential": "Very High - cornerstone of personalized cell therapy revolution",
+    "complexity_rating": 10
+  },
+  {
+    "technology_name": "Allogeneic Cell Bank Manufacturing",
+    "stage_name": "Cell Line Development",
+    "short_description": "Off-the-shelf therapeutic cell bank production",
+    "description": "Manufacturing of standardized, donor-derived therapeutic cell banks for allogeneic cell therapy products. Involves extensive donor screening, cell isolation, genetic modification, expansion, cryopreservation, and comprehensive characterization to create treatment-ready cell products.",
+    "innovation_potential": "Very High - enables scalable, cost-effective cell therapy manufacturing",
+    "complexity_rating": 9
+  },
+  {
+    "technology_name": "High-Performance Liquid Chromatography (HPLC)",
+    "stage_name": "Chromatography & Advanced Purification",
+    "short_description": "Precision analytical and preparative separation",
+    "description": "Fundamental high-resolution separation technique essential for pharmaceutical purification and analysis. Utilizes high-pressure pumps and packed columns to achieve precise separation based on molecular interactions with stationary phase. Critical for both analytical testing and preparative purification.",
+    "innovation_potential": "Low - mature, essential technology with incremental improvements",
+    "complexity_rating": 4
+  },
+  {
+    "technology_name": "Continuous Chromatography",
+    "stage_name": "Chromatography & Advanced Purification",
+    "short_description": "Multi-column countercurrent purification systems",
+    "description": "Advanced purification technology using multiple interconnected columns operating in continuous mode with automatic fraction recycling. Offers higher yields, improved purity, reduced buffer consumption, and smaller equipment footprint compared to traditional batch chromatography.",
+    "innovation_potential": "High - next-generation technology improving purification economics",
+    "complexity_rating": 8
+  },
+  {
+    "technology_name": "Crystallization & Polymorphism Control",
+    "stage_name": "Physical Processing & Drying",
+    "short_description": "Controlled solid form and particle engineering",
+    "description": "Sophisticated process for controlling crystal formation to achieve desired polymorphic form, particle size distribution, and morphology. Critical for API bioavailability, stability, and processability. Involves precise control of supersaturation, temperature profiles, and nucleation conditions.",
+    "innovation_potential": "Medium - essential technology with advanced process understanding",
+    "complexity_rating": 7
+  },
+  {
+    "technology_name": "Spray Drying",
+    "stage_name": "Physical Processing & Drying",
+    "short_description": "Rapid solvent removal and particle formation",
+    "description": "Advanced drying technology converting liquid feed into dry powder through atomization and hot air contact. Enables formation of amorphous solid dispersions, controlled particle size, and improved bioavailability. Critical for heat-sensitive biologics and poorly soluble compounds.",
+    "innovation_potential": "Medium - established technology with formulation innovations",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "Depth Filtration",
+    "stage_name": "Primary Recovery & Clarification",
+    "short_description": "Multi-layer particle and cell removal system",
+    "description": "Initial clarification technology using graded porosity filter media to remove cells, cell debris, and particulates from bioreactor harvest. Essential first step in downstream processing, typically achieving >95% turbidity reduction while maintaining high product recovery.",
+    "innovation_potential": "Low - mature technology with incremental improvements in capacity",
+    "complexity_rating": 3
+  },
+  {
+    "technology_name": "Tangential Flow Filtration (TFF)",
+    "stage_name": "Primary Recovery & Clarification",
+    "short_description": "Cross-flow membrane concentration and diafiltration",
+    "description": "Versatile membrane-based separation technology for concentration, buffer exchange, and purification of biologics. Feed flows parallel to membrane surface minimizing fouling while achieving precise molecular weight-based separations. Essential for protein concentration and formulation.",
+    "innovation_potential": "Medium - established technology with improved membrane materials",
+    "complexity_rating": 5
+  },
+  {
+    "technology_name": "Protein A Affinity Chromatography",
+    "stage_name": "Chromatography & Advanced Purification",
+    "short_description": "Antibody-specific capture chromatography",
+    "description": "Industry-standard capture step for monoclonal antibody purification utilizing Staphylococcus Protein A ligand. Provides highly selective binding and elution of immunoglobulins, typically achieving >95% product recovery and significant impurity removal in single step.",
+    "innovation_potential": "Low - mature, essential technology for antibody manufacturing",
+    "complexity_rating": 4
+  },
+  {
+    "technology_name": "Ion Exchange Chromatography (IEX)",
+    "stage_name": "Chromatography & Advanced Purification",
+    "short_description": "Charge-based protein separation and polishing",
+    "description": "Fundamental purification technique separating proteins based on surface charge interactions with charged stationary phase. Available in cation and anion exchange formats, typically used for polishing steps to remove charge variants, host cell proteins, and process-related impurities.",
+    "innovation_potential": "Low - fundamental, established technology with ongoing resin improvements",
+    "complexity_rating": 4
+  },
+  {
+    "technology_name": "Hydrophobic Interaction Chromatography (HIC)",
+    "stage_name": "Chromatography & Advanced Purification",
+    "short_description": "Hydrophobicity-based protein purification",
+    "description": "Complementary separation technique utilizing hydrophobic interactions between proteins and hydrophobic ligands on stationary phase. Particularly effective for removing protein aggregates, host cell proteins, and other hydrophobic impurities while operating under mild, non-denaturing conditions.",
+    "innovation_potential": "Low - established polishing technology with specialized applications",
+    "complexity_rating": 5
+  },
+  {
+    "technology_name": "Mixed-Mode Chromatography",
+    "stage_name": "Chromatography & Advanced Purification",
+    "short_description": "Multi-mechanism protein purification platform",
+    "description": "Advanced chromatography utilizing multiple simultaneous interaction mechanisms (ionic, hydrophobic, hydrogen bonding) to achieve superior selectivity and resolution. Enables simplified purification schemes and effective removal of difficult-to-separate impurities.",
+    "innovation_potential": "Medium - emerging technology offering improved purification efficiency",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "Size Exclusion Chromatography (SEC)",
+    "stage_name": "Chromatography & Advanced Purification",
+    "short_description": "Molecular size-based separation and polishing",
+    "description": "Gentle separation technique based on molecular size differences, primarily used for final polishing to remove aggregates and fragments. Operates under mild conditions preserving protein structure and activity, essential for maintaining product quality in final purification steps.",
+    "innovation_potential": "Low - mature polishing technology with established applications",
+    "complexity_rating": 3
+  },
+  {
+    "technology_name": "Antibody-Drug Conjugation (ADC)",
+    "stage_name": "Conjugation & Modification",
+    "short_description": "Cytotoxic drug attachment to targeting antibodies",
+    "description": "Specialized bioconjugation process linking highly potent cytotoxic drugs to monoclonal antibodies via stable chemical linkers. Requires precise control of drug-to-antibody ratio (DAR), specialized containment for highly potent compounds, and sophisticated purification to achieve homogeneous products.",
+    "innovation_potential": "Very High - revolutionary targeted cancer therapy approach",
+    "complexity_rating": 9
+  },
+  {
+    "technology_name": "Site-Specific Conjugation",
+    "stage_name": "Conjugation & Modification",
+    "short_description": "Precise molecular attachment at defined sites",
+    "description": "Advanced bioconjugation technology enabling attachment of drugs or labels at specific, predetermined sites on proteins. Utilizes engineered amino acids, enzymatic methods, or click chemistry to achieve homogeneous, well-defined conjugates with improved therapeutic index and reduced heterogeneity.",
+    "innovation_potential": "High - next-generation conjugation enabling improved therapeutic products",
+    "complexity_rating": 8
+  },
+  {
+    "technology_name": "PEGylation",
+    "stage_name": "Conjugation & Modification",
+    "short_description": "Polyethylene glycol modification for enhanced stability",
+    "description": "Established chemical modification attaching polyethylene glycol (PEG) polymers to therapeutic proteins to improve pharmacokinetics, reduce immunogenicity, and extend half-life. Requires careful PEG selection, reaction optimization, and purification to achieve desired degree of modification.",
+    "innovation_potential": "Medium - established technology with continued optimization for new applications",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "Low pH Viral Inactivation",
+    "stage_name": "Viral Safety & Impurity Clearance",
+    "short_description": "Acid treatment for viral safety assurance",
+    "description": "Critical viral safety step utilizing low pH conditions (typically pH 3.5-4.0) to inactivate enveloped viruses during biologics manufacturing. Must balance effective viral clearance with preservation of product integrity, typically achieving >4 log reduction of model viruses.",
+    "innovation_potential": "Low - established regulatory requirement with proven effectiveness",
+    "complexity_rating": 4
+  },
+  {
+    "technology_name": "Nanofiltration (20nm)",
+    "stage_name": "Viral Safety & Impurity Clearance",
+    "short_description": "Size-based viral particle removal system",
+    "description": "Physical viral clearance method using precisely-defined 20nm pore size membranes to remove viral particles while allowing therapeutic proteins to pass through. Provides size-based viral clearance independent of viral inactivation, typically achieving >4 log reduction for appropriate size viruses.",
+    "innovation_potential": "Low - established viral safety technology with proven regulatory acceptance",
+    "complexity_rating": 5
+  },
+  {
+    "technology_name": "Solvent/Detergent Treatment",
+    "stage_name": "Viral Safety & Impurity Clearance",
+    "short_description": "Chemical viral inactivation system",
+    "description": "Viral safety step using tri-n-butyl phosphate (TNBP) and detergent treatment to disrupt viral envelopes and inactivate lipid-enveloped viruses. Requires subsequent removal of solvent/detergent to prevent product damage, typically achieving >6 log reduction of enveloped viruses.",
+    "innovation_potential": "Low - established viral safety method with proven track record",
+    "complexity_rating": 5
+  },
+  {
+    "technology_name": "Ultracentrifugation (Viral Vectors)",
+    "stage_name": "Primary Recovery & Clarification",
+    "short_description": "High-speed centrifugal viral vector purification",
+    "description": "Specialized high-speed centrifugation technique for viral vector purification and concentration utilizing density gradient separation. Critical for separating full and empty viral capsids, concentrating dilute viral preparations, and achieving high-purity viral vector products for gene therapy applications.",
+    "innovation_potential": "Medium - essential for viral vector purification with technological improvements",
+    "complexity_rating": 7
+  },
+  {
+    "technology_name": "Hot-Melt Extrusion (HME)",
+    "stage_name": "Manufacturing Operations",
+    "short_description": "Continuous thermal processing for solid dosage forms",
+    "description": "Advanced solvent-free continuous manufacturing technology that melts and combines drug substances with polymeric carriers using twin-screw extruders. Creates amorphous solid dispersions that enhance bioavailability of poorly soluble drugs, particularly BCS Class II compounds. Process enables real-time monitoring via PAT tools and aligns with FDA's continuous manufacturing initiatives.",
+    "innovation_potential": "High - enables continuous manufacturing and enhances drug solubility",
+    "complexity_rating": 7
+  },
+  {
+    "technology_name": "Twin Screw Granulation (TSG)",
+    "stage_name": "Manufacturing Operations", 
+    "short_description": "Continuous wet granulation using corotating screws",
+    "description": "Continuous granulation technology using twin-screw extruders that combines powder blending, liquid addition, and granulation in a single unit operation. Offers superior control over particle size distribution, density, and content uniformity compared to batch granulation. Critical for continuous tablet manufacturing lines with real-time process control.",
+    "innovation_potential": "High - key enabler for continuous tablet manufacturing",
+    "complexity_rating": 7
+  },
+  {
+    "technology_name": "Direct Compression",
+    "stage_name": "Manufacturing Operations",
+    "short_description": "Tablet manufacturing without wet granulation",
+    "description": "Streamlined tablet manufacturing process that combines powder blending with direct compression, eliminating granulation and drying steps. Requires specialized excipients with good flow and compaction properties. Offers reduced processing time, lower costs, and simplified manufacturing while maintaining tablet quality and performance.",
+    "innovation_potential": "Medium - simplified and cost-effective manufacturing approach", 
+    "complexity_rating": 4
+  },
+  {
+    "technology_name": "Fluid Bed Coating",
+    "stage_name": "Manufacturing Operations",
+    "short_description": "Fluidized bed particle coating technology",
+    "description": "Versatile coating technology using fluidized air to suspend particles (tablets, pellets, granules) while applying functional or aesthetic coatings. Enables taste masking, controlled release, enteric protection, and moisture protection. Particularly important for multiparticulate dosage forms and modified-release formulations with precise coating control.",
+    "innovation_potential": "Medium - established technology with consistent improvements",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "Isolator Technology (Aseptic)",
+    "stage_name": "Aseptic Processing",
+    "short_description": "Enclosed sterile processing environments",
+    "description": "Advanced barrier systems creating completely sealed, contamination-free environments for sterile pharmaceutical manufacturing. Uses HEPA filtration, VHP decontamination, and glove ports to eliminate human contamination risks. Critical for injectable manufacturing, providing higher sterility assurance than traditional cleanroom environments.",
+    "innovation_potential": "High - superior contamination control for sterile manufacturing",
+    "complexity_rating": 8
+  },
+  {
+    "technology_name": "Single-Use Systems (Biologics)",
+    "stage_name": "Aseptic Processing",
+    "short_description": "Disposable bioprocessing equipment systems",
+    "description": "Pre-sterilized, disposable systems replacing traditional stainless-steel equipment in biologics manufacturing. Eliminates cross-contamination risks, reduces cleaning/sterilization requirements, and enables flexible production. Particularly valuable for personalized medicines and smaller batch sizes with 40% lower initial investment costs.",
+    "innovation_potential": "Very High - transforms biologics manufacturing economics",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "Blow-Fill-Seal (BFS)",
+    "stage_name": "Primary Container Filling",
+    "short_description": "Automated container forming, filling, and sealing",
+    "description": "Integrated aseptic technology that forms plastic containers, fills with sterile product, and seals in one continuous operation without human intervention. Operates in ISO 5 environment with minimal contamination risk. Ideal for single-dose liquid pharmaceuticals, vaccines, and ophthalmics with enhanced sterility assurance.",
+    "innovation_potential": "High - revolutionary aseptic packaging with minimal contamination risk",
+    "complexity_rating": 8
+  },
+  {
+    "technology_name": "Pre-Filled Syringe Technology",
+    "stage_name": "Primary Container Filling", 
+    "short_description": "Automated syringe filling and assembly systems",
+    "description": "Advanced aseptic filling technology for pre-filled syringes offering superior dosing accuracy, reduced contamination risk, and enhanced patient safety. Includes automated needle assembly, visual inspection, and packaging. Critical for biologics delivery with reduced overfill requirements and improved shelf-life stability.",
+    "innovation_potential": "High - enables safe self-administration of biologics",
+    "complexity_rating": 7
+  },
+  {
+    "technology_name": "Lyophilization (Freeze-Drying)",
+    "stage_name": "Lyophilization & Stabilization",
+    "short_description": "Controlled freeze-drying for stability enhancement",
+    "description": "Sophisticated dehydration process using controlled freezing, primary drying (sublimation), and secondary drying to remove water while preserving drug substance structure. Critical for unstable biologics, vaccines, and proteins. Extends shelf-life and enables ambient storage of temperature-sensitive products.",
+    "innovation_potential": "High - essential for biologics stability and storage",
+    "complexity_rating": 9
+  },
+  {
+    "technology_name": "Controlled-Rate Freezing",
+    "stage_name": "Lyophilization & Stabilization",
+    "short_description": "Precise temperature control for biologics preservation", 
+    "description": "Advanced cryopreservation technology using programmable controlled-rate freezers to optimize ice crystal formation and minimize cellular damage. Critical for cell and gene therapies, ensuring consistent freezing profiles and maintaining product viability during storage and transport at ultra-low temperatures.",
+    "innovation_potential": "Very High - critical for advanced therapy manufacturing",
+    "complexity_rating": 8
+  },
+  {
+    "technology_name": "Auto-Injector Integration",
+    "stage_name": "Container Closure & Device Integration",
+    "short_description": "Automated self-injection device assembly",
+    "description": "Advanced combination product technology integrating drug containers with sophisticated injection devices for patient self-administration. Includes spring mechanisms, safety features, and dose verification systems. Essential for high-viscosity biologics and complex delivery requirements with enhanced patient compliance.",
+    "innovation_potential": "Very High - revolutionizes patient self-care and biologics delivery",
+    "complexity_rating": 9
+  },
+  {
+    "technology_name": "Lipid Nanoparticle (LNP) Formulation",
+    "stage_name": "Physical Form Development", 
+    "short_description": "Advanced nanoscale drug delivery systems",
+    "description": "Sophisticated nanoparticle technology using ionizable lipids, helper lipids, cholesterol, and PEGylated lipids to deliver mRNA and nucleic acid therapeutics. Critical for COVID-19 vaccines and gene therapies, enabling cellular uptake and endosomal escape for therapeutic efficacy.",
+    "innovation_potential": "Very High - enables mRNA therapeutics and personalized medicine",
+    "complexity_rating": 10
+  },
+  {
+    "technology_name": "Microfluidic Mixing",
+    "stage_name": "Physical Form Development",
+    "short_description": "Precise microscale fluid mixing and particle formation", 
+    "description": "Advanced mixing technology using microchannels to control fluid dynamics and particle formation with high precision. Enables consistent production of nanoparticles, liposomes, and other drug delivery systems with narrow size distributions. Critical for LNP manufacturing and continuous crystallization processes.",
+    "innovation_potential": "High - enables precise nanoparticle manufacturing",
+    "complexity_rating": 8
+  },
+  {
+    "technology_name": "Automated Visual Inspection (AVI)",
+    "stage_name": "Visual Inspection & Quality Verification",
+    "short_description": "Machine vision quality control systems",
+    "description": "Advanced machine vision technology using high-resolution cameras, AI algorithms, and automated defect detection for 100% pharmaceutical product inspection. Detects particles, cosmetic defects, fill levels, and packaging integrity with superior accuracy and consistency compared to manual inspection.",
+    "innovation_potential": "High - eliminates human error in critical quality inspections",
+    "complexity_rating": 7
+  },
+  {
+    "technology_name": "Track & Trace Serialization",
+    "stage_name": "Secondary Packaging & Serialization",
+    "short_description": "Product authentication and supply chain security",
+    "description": "Comprehensive serialization technology applying unique identifiers, barcodes, and aggregation data to pharmaceutical packages for anti-counterfeiting and supply chain traceability. Ensures regulatory compliance with FDA DSCSA and EU FMD requirements while enabling product authentication and recall management.",
+    "innovation_potential": "High - critical for supply chain security and regulatory compliance",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "Cold Chain Monitoring",
+    "stage_name": "Cold Chain & Distribution",
+    "short_description": "Temperature-controlled logistics tracking systems", 
+    "description": "Advanced IoT-enabled monitoring systems using sensors, data loggers, and real-time tracking to maintain temperature integrity of biologics and vaccines during storage and transport. Includes predictive analytics, automated alerts, and continuous documentation for regulatory compliance and product efficacy.",
+    "innovation_potential": "High - essential for biologics integrity and global distribution",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "Design of Experiments (DoE)",
+    "stage_name": "Quality by Design (QbD) Implementation",
+    "short_description": "Statistical experimental design methodology",
+    "description": "Systematic statistical approach for pharmaceutical development using factorial designs, response surface methodology, and optimization to understand critical process parameters and quality attributes. Enables efficient development with fewer experiments while identifying interactions and establishing design spaces.",
+    "innovation_potential": "High - core methodology for modern pharmaceutical development", 
+    "complexity_rating": 5
+  },
+  {
+    "technology_name": "Process Simulation & Digital Twin",
+    "stage_name": "Quality by Design (QbD) Implementation",
+    "short_description": "Virtual process modeling and optimization",
+    "description": "Advanced digital modeling technology creating virtual replicas of manufacturing processes for simulation, optimization, and predictive maintenance. Enables virtual commissioning, operator training, and continuous process improvement without physical constraints. Critical for modern pharmaceutical manufacturing optimization.",
+    "innovation_potential": "Very High - revolutionizes process development and manufacturing",
+    "complexity_rating": 9
+  },
+  {
+    "technology_name": "Near-Infrared Spectroscopy (NIR)",
+    "stage_name": "Process Analytical Technology (PAT)",
+    "short_description": "Real-time spectroscopic process monitoring",
+    "description": "Non-destructive spectroscopic technology enabling real-time monitoring of pharmaceutical processes including blending, granulation, drying, and tablet compression. Provides immediate feedback on critical quality attributes like content uniformity, moisture content, and particle size without sampling.",
+    "innovation_potential": "High - enables real-time process control and quality assurance",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "Raman Spectroscopy (PAT)",
+    "stage_name": "Process Analytical Technology (PAT)",
+    "short_description": "Molecular fingerprinting for process control",
+    "description": "Advanced spectroscopic technique providing molecular-specific information for real-time process monitoring and control. Offers superior chemical specificity for identifying polymorphs, monitoring reactions, and detecting impurities. Particularly valuable for biologics manufacturing and crystallization processes.",
+    "innovation_potential": "High - superior molecular specificity for process understanding",
+    "complexity_rating": 7
+  },
+  {
+    "technology_name": "Focused Beam Reflectance Measurement (FBRM)",
+    "stage_name": "Process Analytical Technology (PAT)",
+    "short_description": "Real-time particle size and count monitoring",
+    "description": "In-situ probe technology measuring chord length distributions and particle counts in real-time during crystallization, granulation, and suspension processes. Enables process optimization and control without sampling. Critical for understanding particle formation kinetics and ensuring consistent product quality.",
+    "innovation_potential": "Medium - proven PAT tool for particle characterization",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "Multi-Attribute Method (MAM)",
+    "stage_name": "Advanced Analytical Methods", 
+    "short_description": "LC-MS based multi-parameter biologics analysis",
+    "description": "Advanced liquid chromatography-mass spectrometry method enabling simultaneous monitoring of multiple critical quality attributes in biologics including sequence variants, post-translational modifications, and impurities. Offers potential to replace multiple conventional analytical methods with single, highly specific assay.",
+    "innovation_potential": "Very High - revolutionizes biologics quality control testing",
+    "complexity_rating": 9
+  },
+  {
+    "technology_name": "Capillary Electrophoresis (CE)",
+    "stage_name": "Advanced Analytical Methods",
+    "short_description": "High-resolution electrophoretic separation technique",
+    "description": "Advanced separation technology offering high-efficiency analysis of proteins, peptides, and small molecules using electric field migration in narrow-bore capillaries. Provides superior resolution for charge variants, glycoforms, and purity assessment with minimal sample requirements and high throughput capabilities.",
+    "innovation_potential": "Medium - established technique with specialized applications",
+    "complexity_rating": 6
+  }
+]
