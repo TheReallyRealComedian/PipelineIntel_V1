@@ -2,9 +2,18 @@
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required
 from ..services import product_service
-# Remove g import - we don't need g.db_session anymore!
+from ..models import Product, ManufacturingChallenge 
 
 product_routes = Blueprint('products', __name__, url_prefix='/products')
+
+@product_routes.route('/')
+@login_required
+def list_products():
+    """List products - much cleaner now!"""
+    requested_columns = request.args.get('columns')
+    context = product_service.get_product_table_context(requested_columns)
+    return render_template('products.html', title="Products", **context)
+
 
 @product_routes.route('/<int:product_id>')
 @login_required  
