@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block head_extra %}
+<style>
+    /* ... (keep existing styles from the previous step) ... */
+    .hierarchy-tree .stage-node {
+        margin-top: 8px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-left: 3px solid #0d6efd;
+        border-radius: 4px;
+    }
+    .hierarchy-tree .stage-children {
+        margin-left: 25px;
+        padding-left: 25px;
+        border-left: 2px dashed #dee2e6;
+    }
+    .stage-name { font-weight: 600; font-size: 1.1em; }
+    .stage-category { font-size: 0.8em; }
+    .challenge-list {
+        margin-top: 10px;
+        padding-left: 20px;
+    }
+    .challenge-item {
+        font-size: 0.9em;
+        padding: 4px 8px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        display: inline-block;
+        margin: 2px;
+    }
+    .no-challenges {
+        font-style: italic;
+        color: #6c757d;
+        font-size: 0.9em;
+        margin-top: 8px;
+    }
+
+    /* New styles for the modal list boxes */
+    .dual-list-container { display: flex; gap: 20px; }
+    .list-box { border: 1px solid #ccc; border-radius: 4px; height: 350px; overflow-y: auto; padding: 10px; flex: 1; }
+    .list-box-item { padding: 5px; cursor: pointer; border-radius: 3px; margin-bottom: 2px; }
+    .list-box-item:hover { background-color: #f0f0f0; }
+    .list-box-item.selected { background-color: #0d6efd; color: white; }
+    .controls { display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>{{ title }}</h1>
+        <p class="text-color-light">Hierarchical view of process stages and their directly associated manufacturing challenges.</p>
+    </div>
+    <div>
+        <a href="{{ url_for('process_stages.list_process_stages') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-table"></i> Table View
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title mb-0">Process Stage & Challenge Map</h2>
+    </div>
+    <div class="card-body">
+        <div class="hierarchy-tree">
+            {% macro render_stage_node(node) %}
+            <div class="stage-node">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        {# Link to detail page is still useful for viewing stage properties #}
+                        <a href="{{ url_for('process_stages.view_stage_detail', stage_id=node.stage.stage_id) }}" class="stage-name">{{ node.stage.stage_name }}</a>
+                        {% if node.stage.stage_category %}
+                        <span class="badge bg-secondary stage-category">{{ node.stage.stage_category }}</span>
+                        {% endif %}
+                    </div>
+                    {# CHANGE: This button now opens the modal directly #}
+                    <button class="btn btn-sm btn-outline-primary manage-associations-btn"
+                            data-stage-id="{{ node.stage.stage_id }}"
+                            data-stage-name="{{ node.stage.stage_name }}"
+                            data-associated-challenges="{{ node.challenges|map(attribute='challenge_id')|list|tojson }}">
+                        <i class="fas fa-edit"></i> Manage
+                    </button>
+                </div>
+                
+                {% if node.challenges %}
+                <div class="challenge-list">
+                    {% for challenge in node.challenges %}
+                    <span class="challenge-item">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                        {{ challenge.challenge_name }}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="no-challenges">No challenges directly associated with this stage.</div>
+                {% endif %}
+            </div>
+            {% if node.children %}
+            <div class="stage-children">
+                {% for child_node in node.children %}
+                {{ render_stage_node(child_node) }}
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endmacro %}
+
+            {% for root_node in stages_with_challenges %}
+                {{ render_stage_node(root_node) }}
+            {% else %}
+                <p>No process stages found.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Editing Associations (MOVED HERE) -->
+<div class="modal fade" id="association-editor-modal" tabindex="-1" aria-labelledby="editorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editorModalLabel">Manage Challenges</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="dual-list-container">
+                    <!-- Available Challenges -->
+                    <div style="flex: 1;">
+                        <h6>Available Challenges</h6>
+                        <input type="text" id="available-search" class="form-control mb-2" placeholder="Search...">
+                        <div id="available-challenges" class="list-box"></div>
+                    </div>
+                    <!-- Controls -->
+                    <div class="controls">
+                        <button id="add-challenge" class="btn btn-secondary" title="Associate selected">&gt;</button>
+                        <button id="remove-challenge" class="btn btn-secondary" title="Disassociate selected">&lt;</button>
+                    </div>
+                    <!-- Associated Challenges -->
+                    <div style="flex: 1;">
+                        <h6>Associated Challenges</h6>
+                         <input type="text" id="associated-search" class="form-control mb-2" placeholder="Search...">
+                        <div id="associated-challenges" class="list-box"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-associations-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modalEl = document.getElementById('association-editor-modal');
+    const modal = new bootstrap.Modal(modalEl);
+    const modalTitle = document.getElementById('editorModalLabel');
+    const saveBtn = document.getElementById('save-associations-btn');
+
+    let allChallenges = [];
+    let currentStageId = null;
+    let associatedChallengeIds = new Set();
+
+    // 1. Load all challenges once on page load for efficiency
+    async function loadAllChallenges() {
+        if (allChallenges.length > 0) return;
+        try {
+            const response = await fetch('/api/challenges/all');
+            allChallenges = await response.json();
+            allChallenges.sort((a, b) => a.name.localeCompare(b.name));
+        } catch (error) {
+            console.error("Failed to load challenges:", error);
+            alert("Could not load challenge data. Please refresh the page.");
+        }
+    }
+
+    // 2. Setup and open the modal when a manage button is clicked
+    document.querySelectorAll('.manage-associations-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            currentStageId = btn.dataset.stageId;
+            const stageName = btn.dataset.stageName;
+            const currentAssociated = JSON.parse(btn.dataset.associatedChallenges);
+            
+            associatedChallengeIds = new Set(currentAssociated);
+            modalTitle.textContent = `Manage Challenges for: ${stageName}`;
+            
+            await loadAllChallenges();
+            renderLists();
+            modal.show();
+        });
+    });
+
+    // 3. Render the available/associated lists inside the modal
+    function renderLists() {
+        const availableList = document.getElementById('available-challenges');
+        const associatedList = document.getElementById('associated-challenges');
+        availableList.innerHTML = '';
+        associatedList.innerHTML = '';
+
+        allChallenges.forEach(c => {
+            const item = document.createElement('div');
+            item.className = 'list-box-item';
+            item.dataset.id = c.id;
+            item.textContent = c.name;
+            if (associatedChallengeIds.has(c.id)) {
+                associatedList.appendChild(item);
+            } else {
+                availableList.appendChild(item);
+            }
+        });
+    }
+
+    // 4. Handle UI interactions (moving items, searching, saving)
+    document.querySelectorAll('.list-box').forEach(box => {
+        box.addEventListener('click', (e) => {
+            if (e.target.classList.contains('list-box-item')) {
+                e.target.classList.toggle('selected');
+            }
+        });
+    });
+
+    document.getElementById('add-challenge').addEventListener('click', () => {
+        document.querySelectorAll('#available-challenges .selected').forEach(item => {
+            associatedChallengeIds.add(parseInt(item.dataset.id));
+        });
+        renderLists();
+    });
+
+    document.getElementById('remove-challenge').addEventListener('click', () => {
+        document.querySelectorAll('#associated-challenges .selected').forEach(item => {
+            associatedChallengeIds.delete(parseInt(item.dataset.id));
+        });
+        renderLists();
+    });
+
+    saveBtn.addEventListener('click', async function() {
+        if (!currentStageId) return;
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+        
+        try {
+            const response = await fetch(`/api/process-stages/${currentStageId}/update-challenges`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name=csrf-token]').content
+                },
+                body: JSON.stringify({ challenge_ids: Array.from(associatedChallengeIds) })
+            });
+            const result = await response.json();
+            if (result.success) {
+                modal.hide();
+                window.location.reload(); // Easiest way to show updated state
+            } else {
+                alert('Error saving changes: ' + result.message);
+            }
+        } catch (err) {
+            alert('An unexpected network error occurred.');
+        } finally {
+            this.disabled = false;
+            this.textContent = 'Save Changes';
+        }
+    });
+
+    function filterList(inputId, listId) {
+        const filter = document.getElementById(inputId).value.toLowerCase();
+        document.getElementById(listId).querySelectorAll('.list-box-item').forEach(item => {
+            item.style.display = item.textContent.toLowerCase().includes(filter) ? '' : 'none';
+        });
+    }
+
+    document.getElementById('available-search').addEventListener('input', () => filterList('available-search', 'available-challenges'));
+    document.getElementById('associated-search').addEventListener('input', () => filterList('associated-search', 'associated-challenges'));
+});
+</script>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block head_extra %}
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('process_stages.list_process_stages') }}">Process Stages</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('process_stages.view_hierarchy_with_challenges') }}">Challenge Map</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ stage.stage_name }}</li>
+            </ol>
+        </nav>
+        <h1>{{ stage.stage_name }}</h1>
+        <p class="text-muted">Category: {{ stage.stage_category or 'N/A' }} | Hierarchy Level: {{ stage.hierarchy_level or 'N/A' }}</p>
+    </div>
+    <div>
+        <a href="{{ url_for('process_stages.export_stage_challenges', stage_id=stage.stage_id) }}" class="btn btn-outline-secondary"><i class="fas fa-download me-1"></i> Export Links</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title mb-0">Associated Manufacturing Challenges ({{ challenges|length }})</h2>
+    </div>
+    <div class="card-body">
+        {% if challenges %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Challenge Name</th>
+                    <th>Category</th>
+                    <th>Severity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for challenge in challenges %}
+                <tr>
+                    <td>{{ challenge.challenge_name }}</td>
+                    <td>{{ challenge.challenge_category }}</td>
+                    <td><span class="badge bg-warning text-dark">{{ challenge.severity_level or 'N/A' }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-info">This process stage has no associated challenges. Use the <a href="{{ url_for('process_stages.view_hierarchy_with_challenges') }}">Challenge Map</a> to manage associations.</div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{% endblock %}

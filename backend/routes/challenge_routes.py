@@ -65,3 +65,16 @@ def get_available_challenges():
             'short_description': c.short_description
         } for c in challenges
     ])
+
+@challenge_api_bp.route('/all')
+@login_required
+def get_all_challenges_for_linking():
+    """Get a simple list of all challenges for UI selectors."""
+    all_challenges = challenge_service.get_all_challenges()
+    return jsonify([
+        {
+            "id": c.challenge_id,
+            "name": c.challenge_name,
+            "category": c.challenge_category
+        } for c in all_challenges
+    ])

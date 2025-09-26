@@ -11,8 +11,13 @@
             <p class="text-color-light">Manufacturing process stages with hierarchical structure</p>
         </div>
         <div>
+            {# This is the existing button #}
             <a href="{{ url_for('process_stages.view_hierarchy') }}" class="btn btn-outline-primary">
                 <i class="fas fa-sitemap"></i> View Hierarchy
+            </a>
+            {# ADD THIS NEW BUTTON #}
+            <a href="{{ url_for('process_stages.view_hierarchy_with_challenges') }}" class="btn btn-primary ms-2">
+                <i class="fas fa-project-diagram"></i> View Challenge Map
             </a>
         </div>
     </div>
@@ -27,7 +32,19 @@
                 {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
 
                 {# Use the dynamic table macro #}
-                {{ render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural) }}
+                {# Configure actions for the process stages table #}
+                {% set actions_config = {
+                    'width': '80px',
+                    'icon': 'cogs',
+                    'title': 'Actions',
+                    'detail_url': 'process_stages.view_stage_detail',
+                    'detail_param': 'stage_id',
+                    'detail_icon': 'eye',
+                    'detail_title': 'View stage details and manage challenge associations'
+                } %}
+
+                {# Use the enhanced macro with the actions configuration #}
+                {{ render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural, pk_field='stage_id', actions_config=actions_config) }}
             {% else %}
                 <p class="text-muted text-center p-4">
                     <em>No process stages found. Import data via the <a href="{{ url_for('data_management.data_management_page') }}">Data Management</a> page.</em>
