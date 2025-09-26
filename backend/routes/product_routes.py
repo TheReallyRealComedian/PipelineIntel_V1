@@ -6,17 +6,27 @@ from ..services import product_service
 
 product_routes = Blueprint('products', __name__, url_prefix='/products')
 
-@product_routes.route('/')
-@login_required
-def list_products():
-    """List products - much cleaner now!"""
-    requested_columns = request.args.get('columns')
+@product_routes.route('/<int:product_id>')
+@login_required  
+def view_product_detail(product_id):
+    """Detailed product view with comprehensive challenge management."""
+    from ..models import Product
+    from sqlalchemy.orm import joinedload
     
-    # BEFORE: context = product_service.get_product_table_context(g.db_session, requested_columns)
-    # AFTER: Much simpler - no session passing needed
-    context = product_service.get_product_table_context(requested_columns)
+    # Load product with all related data
+    product = Product.query.options(
+        joinedload(Product.modality),
+        joinedload(Product.indications),
+        joinedload(Product.technologies),
+        joinedload(Product.supply_chain).joinedload('manufacturing_entity'),
+    ).get_or_404(product_id)
     
-    return render_template('products.html', title="Products", **context)
+    context = {
+        'title': f"{product.product_name or product.product_code}",
+        'product': product,
+    }
+    
+    return render_template('product_detail.html', **context)
 
 @product_routes.route('/api/products/<int:product_id>/inline-update', methods=['PUT'])
 @login_required
@@ -44,22 +54,115 @@ def inline_update_product(product_id):
 @product_routes.route('/<int:product_id>/details')
 @login_required
 def product_details(product_id):
-    """Detailed product view with timeline, filings, and suppliers."""
-    from ..models import Product, ProductTimeline, ProductRegulatoryFiling, ProductManufacturingSupplier
-    
+    """Legacy route - redirects to new detail view."""
+    from flask import redirect, url_for
+    return redirect(url_for('products.view_product_detail', product_id=product_id))
+
+
+@product_routes.route('/api/products/<int:product_id>/challenges', methods=['GET'])
+@login_required
+def get_product_challenges(product_id):
+    """Get all challenge information for a product."""
     product = Product.query.get_or_404(product_id)
     
-    # Get related data
-    timelines = ProductTimeline.query.filter_by(product_id=product_id).order_by(ProductTimeline.planned_date.desc()).all()
-    filings = ProductRegulatoryFiling.query.filter_by(product_id=product_id).order_by(ProductRegulatoryFiling.submission_date.desc()).all()
-    suppliers = ProductManufacturingSupplier.query.filter_by(product_id=product_id).order_by(ProductManufacturingSupplier.supply_type, ProductManufacturingSupplier.role).all()
+    try:
+        inherited = product.get_inherited_challenges()
+        explicit_relationships = product.get_explicit_challenge_relationships()
+        effective = product.get_effective_challenges()
+        
+        return jsonify({
+            'inherited': [
+                {
+                    'challenge_id': c.challenge_id,
+                    'challenge_name': c.challenge_name,
+                    'challenge_category': c.challenge_category,
+                    'severity_level': c.severity_level,
+                    'short_description': c.short_description
+                } for c in inherited
+            ],
+            'explicit_relationships': explicit_relationships,
+            'effective': [
+                {
+                    'challenge_id': item['challenge'].challenge_id,
+                    'challenge_name': item['challenge'].challenge_name,
+                    'challenge_category': item['challenge'].challenge_category,
+                    'severity_level': item['challenge'].severity_level,
+                    'source': item['source'],
+                    'notes': item['notes']
+                } for item in effective
+            ]
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@product_routes.route('/api/products/<int:product_id>/challenges/<int:challenge_id>/exclude', methods=['POST'])
+@login_required 
+def exclude_product_challenge(product_id, challenge_id):
+    """Exclude an inherited challenge from a product."""
+    product = Product.query.get_or_404(product_id)
+    data = request.json or {}
+    notes = data.get('notes', '')
     
-    context = {
-        'title': f"Product Details - {product.product_name}",
-        'product': product,
-        'timelines': timelines,
-        'regulatory_filings': filings,
-        'manufacturing_suppliers': suppliers,
-    }
+    try:
+        product.add_challenge_exclusion(challenge_id, notes)
+        return jsonify({
+            'success': True, 
+            'message': 'Challenge excluded successfully'
+        })
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@product_routes.route('/api/products/<int:product_id>/challenges/<int:challenge_id>/include', methods=['POST'])
+@login_required
+def include_product_challenge(product_id, challenge_id):
+    """Add a product-specific challenge."""
+    product = Product.query.get_or_404(product_id)
+    data = request.json or {}
+    notes = data.get('notes', '')
     
-    return render_template('product_details.html', **context)
+    try:
+        product.add_challenge_inclusion(challenge_id, notes)
+        return jsonify({
+            'success': True,
+            'message': 'Challenge included successfully'
+        })
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@product_routes.route('/api/products/<int:product_id>/challenges/<int:challenge_id>', methods=['DELETE'])
+@login_required
+def remove_product_challenge_relationship(product_id, challenge_id):
+    """Remove any explicit challenge relationship."""
+    product = Product.query.get_or_404(product_id)
+    
+    try:
+        product.remove_challenge_relationship(challenge_id)
+        return jsonify({
+            'success': True,
+            'message': 'Challenge relationship removed successfully'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@product_routes.route('/api/challenges/available')
+@login_required
+def get_available_challenges():
+    """Get all available challenges for adding to products."""
+    challenges = ManufacturingChallenge.query.order_by(
+        ManufacturingChallenge.challenge_category,
+        ManufacturingChallenge.challenge_name
+    ).all()
+    
+    return jsonify([
+        {
+            'challenge_id': c.challenge_id,
+            'challenge_name': c.challenge_name,
+            'challenge_category': c.challenge_category,
+            'severity_level': c.severity_level,
+            'short_description': c.short_description
+        } for c in challenges
+    ])

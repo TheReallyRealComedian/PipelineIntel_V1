@@ -121,6 +121,145 @@ class Product(db.Model):
             c.key for c in inspector.attrs 
             if not isinstance(c, RelationshipProperty) and not c.key.startswith('_')
         ]
+    
+
+    def get_inherited_challenges(self):
+        """Get challenges inherited from modality's process template."""
+        if not self.modality_id:
+            return []
+        
+        # Get the process template for this modality
+        template = ProcessTemplate.query.filter_by(modality_id=self.modality_id).first()
+        if not template:
+            return []
+        
+        # Get all challenges from template stages
+        inherited_challenges = db.session.query(ManufacturingChallenge).join(
+            ProcessStage, ManufacturingChallenge.primary_stage_id == ProcessStage.stage_id
+        ).join(
+            TemplateStage, ProcessStage.stage_id == TemplateStage.stage_id
+        ).filter(
+            TemplateStage.template_id == template.template_id
+        ).distinct().all()
+        
+        return inherited_challenges
+
+    def get_explicit_challenge_relationships(self):
+        """Get user-defined challenge relationships (exclusions/inclusions)."""
+        from sqlalchemy import text
+        
+        result = db.session.execute(
+            text("""
+            SELECT challenge_id, relationship_type, notes 
+            FROM product_to_challenge 
+            WHERE product_id = :product_id
+            """),
+            {'product_id': self.product_id}
+        )
+        
+        return [
+            {
+                'challenge_id': row[0],
+                'relationship_type': row[1], 
+                'notes': row[2]
+            } for row in result
+        ]
+
+    def get_effective_challenges(self):
+        """Get final list of challenges (inherited - excluded + explicit)."""
+        inherited = self.get_inherited_challenges()
+        explicit_relationships = self.get_explicit_challenge_relationships()
+        
+        # Create lookup for explicit relationships
+        explicit_lookup = {rel['challenge_id']: rel for rel in explicit_relationships}
+        
+        effective_challenges = []
+        
+        # Start with inherited challenges, exclude any marked as 'excluded'
+        for challenge in inherited:
+            if challenge.challenge_id in explicit_lookup:
+                rel = explicit_lookup[challenge.challenge_id]
+                if rel['relationship_type'] == 'excluded':
+                    continue  # Skip excluded challenges
+            
+            effective_challenges.append({
+                'challenge': challenge,
+                'source': 'inherited',
+                'notes': explicit_lookup.get(challenge.challenge_id, {}).get('notes')
+            })
+        
+        # Add explicitly included challenges that aren't already inherited
+        inherited_ids = {c.challenge_id for c in inherited}
+        
+        for rel in explicit_relationships:
+            if rel['relationship_type'] == 'explicit' and rel['challenge_id'] not in inherited_ids:
+                challenge = ManufacturingChallenge.query.get(rel['challenge_id'])
+                if challenge:
+                    effective_challenges.append({
+                        'challenge': challenge,
+                        'source': 'explicit',
+                        'notes': rel['notes']
+                    })
+        
+        return effective_challenges
+
+    def add_challenge_exclusion(self, challenge_id, notes=None):
+        """Exclude an inherited challenge."""
+        # Check if this challenge is actually inherited
+        inherited_ids = {c.challenge_id for c in self.get_inherited_challenges()}
+        if challenge_id not in inherited_ids:
+            raise ValueError("Cannot exclude a challenge that is not inherited")
+        
+        # Remove any existing relationship
+        from sqlalchemy import text
+        db.session.execute(
+            text("DELETE FROM product_to_challenge WHERE product_id = :pid AND challenge_id = :cid"),
+            {'pid': self.product_id, 'cid': challenge_id}
+        )
+        
+        # Add exclusion
+        db.session.execute(
+            text("""
+            INSERT INTO product_to_challenge (product_id, challenge_id, relationship_type, notes) 
+            VALUES (:pid, :cid, 'excluded', :notes)
+            """),
+            {'pid': self.product_id, 'cid': challenge_id, 'notes': notes}
+        )
+        
+        db.session.commit()
+
+    def add_challenge_inclusion(self, challenge_id, notes=None):
+        """Add a product-specific challenge."""
+        # Check if challenge exists
+        if not ManufacturingChallenge.query.get(challenge_id):
+            raise ValueError("Challenge does not exist")
+        
+        # Remove any existing relationship
+        from sqlalchemy import text
+        db.session.execute(
+            text("DELETE FROM product_to_challenge WHERE product_id = :pid AND challenge_id = :cid"),
+            {'pid': self.product_id, 'cid': challenge_id}
+        )
+        
+        # Add inclusion
+        db.session.execute(
+            text("""
+            INSERT INTO product_to_challenge (product_id, challenge_id, relationship_type, notes) 
+            VALUES (:pid, :cid, 'explicit', :notes)
+            """),
+            {'pid': self.product_id, 'cid': challenge_id, 'notes': notes}
+        )
+        
+        db.session.commit()
+
+    def remove_challenge_relationship(self, challenge_id):
+        """Remove any explicit relationship (exclusion or inclusion)."""
+        from sqlalchemy import text
+        db.session.execute(
+            text("DELETE FROM product_to_challenge WHERE product_id = :pid AND challenge_id = :cid"),
+            {'pid': self.product_id, 'cid': challenge_id}
+        )
+        db.session.commit()
 
 class Indication(db.Model):
     __tablename__ = 'indications'

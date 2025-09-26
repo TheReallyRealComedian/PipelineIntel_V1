@@ -1,0 +1,77 @@
+.challenge-sections {
+    margin-top: 1rem;
+}
+
+.challenge-section {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem;
+    background-color: #fafafa;
+}
+
+.section-title {
+    color: #333;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.challenge-item {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.challenge-item:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 4px rgba(0,123,255,0.1);
+}
+
+.challenge-item.excluded {
+    background-color: #f8f9fa;
+    opacity: 0.7;
+}
+
+.challenge-item.excluded .challenge-name {
+    text-decoration: line-through;
+}
+
+.challenge-item.explicit {
+    border-left: 4px solid #28a745;
+}
+
+.challenge-content {
+    padding: 1rem;
+}
+
+.challenge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.challenge-info {
+    flex: 1;
+}
+
+.challenge-controls {
+    margin-left: 1rem;
+}
+
+.challenge-description {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.challenge-notes {
+    background-color: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border-left: 3px solid #6c757d;
+}
+
+.challenge-summary {
+    margin-top: 1rem;
+}
