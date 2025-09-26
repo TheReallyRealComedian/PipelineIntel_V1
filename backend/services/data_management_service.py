@@ -13,7 +13,9 @@ from ..models import (
     Product, Indication, ManufacturingChallenge, ManufacturingTechnology,
     ProductSupplyChain, ManufacturingEntity, InternalFacility, ExternalPartner,
     Modality, ProcessStage, ProductTimeline, ProductRegulatoryFiling,
-    ProductManufacturingSupplier
+    ProductManufacturingSupplier, User, LLMSettings, ProcessTemplate, TemplateStage,
+    ModalityRequirement, ProductRequirement, EntityCapability, ProductProcessOverride,
+    ManufacturingCapability
 )
 
 # This order is critical. Parents must be inserted before children.
@@ -30,6 +32,32 @@ TABLE_IMPORT_ORDER = [
     'product_regulatory_filings', 'product_manufacturing_suppliers'
 ]
 
+# A comprehensive map from table name string to its ORM Model class
+MODEL_MAP = {
+    'users': User,
+    'modalities': Modality,
+    'process_stages': ProcessStage,
+    'manufacturing_capabilities': ManufacturingCapability,
+    'manufacturing_entities': ManufacturingEntity,
+    'internal_facilities': InternalFacility,
+    'external_partners': ExternalPartner,
+    'process_templates': ProcessTemplate,
+    'products': Product,
+    'indications': Indication,
+    'manufacturing_technologies': ManufacturingTechnology,
+    'manufacturing_challenges': ManufacturingChallenge,
+    'llm_settings': LLMSettings,
+    'template_stages': TemplateStage,
+    'product_supply_chain': ProductSupplyChain,
+    'modality_requirements': ModalityRequirement,
+    'product_requirements': ProductRequirement,
+    'entity_capabilities': EntityCapability,
+    'product_process_overrides': ProductProcessOverride,
+    'product_timelines': ProductTimeline,
+    'product_regulatory_filings': ProductRegulatoryFiling,
+    'product_manufacturing_suppliers': ProductManufacturingSupplier,
+}
+
 
 def import_full_database(file_stream):
     """
@@ -44,7 +72,6 @@ def import_full_database(file_stream):
              return False, "Invalid backup file format. Essential tables are missing."
 
         # 1. Truncate tables in reverse order of dependencies
-        # Disabling foreign key checks is safer
         db.session.execute(text('SET session_replication_role = replica;'))
         
         for table_name in reversed(TABLE_IMPORT_ORDER):
@@ -56,9 +83,19 @@ def import_full_database(file_stream):
         # 2. Insert data in order of dependencies
         for table_name in TABLE_IMPORT_ORDER:
             if table_name in data and data[table_name]:
-                table = db.metadata.tables.get(table_name)
-                # The data is a list of dicts, which is what bulk_insert_mappings expects
-                db.session.bulk_insert_mappings(table, data[table_name])
+                table_data = data[table_name]
+                model_class = MODEL_MAP.get(table_name)
+
+                if model_class:
+                    # Use bulk_insert_mappings for tables with an ORM model
+                    db.session.bulk_insert_mappings(model_class, table_data)
+                else:
+                    # For simple association tables without a dedicated model class, use raw insert
+                    table_obj = db.metadata.tables.get(table_name)
+                    if table_obj is not None:
+                        db.session.execute(table_obj.insert(), table_data)
+                    else:
+                        print(f"Warning: Could not find table or model for '{table_name}'. Skipping.")
 
         db.session.commit()
         
