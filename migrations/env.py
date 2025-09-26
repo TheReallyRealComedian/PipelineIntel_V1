@@ -28,9 +28,9 @@ app = create_app(init_session=False)
 # CHANGE THIS: Use db.metadata instead of Base.metadata
 target_metadata = db.metadata
 
-# Exclude specific tables from Alembic migrations
+# Exclude specific tables AND views from Alembic migrations
 def include_object(object, name, type_, reflected, compare_to):
-    if type_ == "table" and name == "flask_sessions":
+    if type_ == "table" and name in ["flask_sessions", "all_product_requirements", "product_complexity_summary"]:
         return False
     else:
         return True

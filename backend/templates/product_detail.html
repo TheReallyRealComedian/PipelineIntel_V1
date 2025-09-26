@@ -343,8 +343,10 @@
 </div>
 {% endblock %}
 
-{% block extra_css %}
+{# CHANGE #}
+{% block head_extra %}
 {{ super() }}
+{# CSS was previously in a non-existent block 'extra_css' #}
 <style>
 /* Challenge Management Styles */
 .challenge-sections {
@@ -511,8 +513,10 @@
 </style>
 {% endblock %}
 
-{% block extra_js %}
+{# CHANGE #}
+{% block scripts %}
 {{ super() }}
+{# JS was previously in a non-existent block 'extra_js' #}
 <script>
 // Set the product ID for the JavaScript to use
 window.PRODUCT_ID = {{ product.product_id }};

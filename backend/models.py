@@ -14,7 +14,7 @@ product_to_challenge_association = Table(
     'product_to_challenge', db.metadata,
     Column('product_id', Integer, ForeignKey('products.product_id'), primary_key=True),
     Column('challenge_id', Integer, ForeignKey('manufacturing_challenges.challenge_id'), primary_key=True),
-    Column('relationship_type', String(20), default='explicit'),  # 'explicit', 'excluded'
+    Column('relationship_type', String(20), nullable=False, default='explicit'),  # 'explicit', 'excluded'
     Column('notes', Text, nullable=True)
 )
 
@@ -124,24 +124,25 @@ class Product(db.Model):
     
 
     def get_inherited_challenges(self):
-        """Get challenges inherited from modality's process template."""
-        if not self.modality_id:
+        """
+        Get challenges inherited from the product's modality via its process template.
+        THIS IS THE CORRECTED AND MORE ROBUST VERSION.
+        """
+        if not self.modality or not self.modality.process_templates:
             return []
-        
-        # Get the process template for this modality
-        template = ProcessTemplate.query.filter_by(modality_id=self.modality_id).first()
-        if not template:
-            return []
-        
-        # Get all challenges from template stages
-        inherited_challenges = db.session.query(ManufacturingChallenge).join(
-            ProcessStage, ManufacturingChallenge.primary_stage_id == ProcessStage.stage_id
-        ).join(
-            TemplateStage, ProcessStage.stage_id == TemplateStage.stage_id
-        ).filter(
+
+        template = self.modality.process_templates[0] # Assuming one template per modality
+
+        # 1. Get all stage_ids from the template
+        stage_ids_in_template = db.session.query(TemplateStage.stage_id).filter(
             TemplateStage.template_id == template.template_id
+        ).subquery()
+
+        # 2. Get all challenges whose primary_stage_id is in that list of stages
+        inherited_challenges = db.session.query(ManufacturingChallenge).filter(
+            ManufacturingChallenge.primary_stage_id.in_(stage_ids_in_template)
         ).distinct().all()
-        
+
         return inherited_challenges
 
     def get_explicit_challenge_relationships(self):

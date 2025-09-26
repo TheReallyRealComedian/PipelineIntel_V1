@@ -1,3 +1,4 @@
+{# backend/templates/products.html #}
 {% extends "base.html" %}
 {# Import the new macros at the top #}
 {% from "macros/_table_macros.html" import render_column_selector, render_dynamic_table %}
@@ -16,8 +17,19 @@
                 {# Use the column selector macro #}
                 {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
 
-                {# Use the dynamic table macro with entity_plural parameter #}
-                {{ render_dynamic_table(products, selected_fields, entity_type, table_id, 'products') }}
+                {# Configure actions for products table #}
+                {% set actions_config = {
+                    'width': '100px',
+                    'icon': 'eye',
+                    'title': 'Actions',
+                    'detail_url': 'products.view_product_detail',
+                    'detail_param': 'product_id',
+                    'detail_icon': 'eye',
+                    'detail_title': 'View detailed product information and manage challenges'
+                } %}
+
+                {# Use enhanced macro with actions #}
+                {{ render_dynamic_table(products, selected_fields, entity_type, table_id, 'products', 'product_id', actions_config) }}
 
             {% else %}
                 <p class="text-muted text-center p-4">

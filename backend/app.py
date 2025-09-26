@@ -1,3 +1,4 @@
+# backend/app.py
 import os
 from flask import Flask, redirect, url_for
 from flask_login import LoginManager
@@ -16,8 +17,10 @@ from backend.assets import js_main_bundle, css_bundle
 import backend.routes.auth_routes as auth_routes_mod
 import backend.routes.settings_routes as settings_routes_mod
 import backend.routes.api_routes as api_routes_mod
+# MAKE SURE THIS LINE EXISTS AND IS CORRECT
 import backend.routes.product_routes as product_routes_mod
 import backend.routes.indication_routes as indication_routes_mod
+# MAKE SURE THIS LINE EXISTS AND IS CORRECT
 import backend.routes.challenge_routes as challenge_routes_mod
 import backend.routes.technology_routes as technology_routes_mod
 import backend.routes.data_management_routes as data_management_routes_mod
@@ -26,7 +29,7 @@ import backend.routes.modality_routes as modality_routes_mod
 import backend.routes.facility_routes as facility_routes_mod
 import backend.routes.analytics_routes as analytics_routes_mod
 import backend.routes.process_stage_routes as process_stage_routes_mod
-import backend.routes.process_template_routes as process_template_routes_mod  # NEW: Added process template routes
+import backend.routes.process_template_routes as process_template_routes_mod
 import backend.routes.capability_routes as capability_routes_mod
 import backend.routes.llm_routes as llm_routes_mod
 
@@ -82,9 +85,17 @@ def create_app(init_session=True):
     app.register_blueprint(auth_routes_mod.auth_routes)
     app.register_blueprint(settings_routes_mod.settings_routes)
     app.register_blueprint(api_routes_mod.api_bp)
+    
+    # Register both web and API blueprints for products
     app.register_blueprint(product_routes_mod.product_routes)
+    app.register_blueprint(product_routes_mod.product_api_bp) # <-- ADD THIS LINE
+    
     app.register_blueprint(indication_routes_mod.indication_routes)
+    
+    # Register both web and API blueprints for challenges
     app.register_blueprint(challenge_routes_mod.challenge_routes)
+    app.register_blueprint(challenge_routes_mod.challenge_api_bp) # <-- ADD THIS LINE
+    
     app.register_blueprint(technology_routes_mod.technology_routes)
     app.register_blueprint(data_management_routes_mod.data_management_bp)
     app.register_blueprint(export_routes_mod.export_bp)
@@ -92,7 +103,7 @@ def create_app(init_session=True):
     app.register_blueprint(facility_routes_mod.facility_routes)
     app.register_blueprint(analytics_routes_mod.analytics_routes)
     app.register_blueprint(process_stage_routes_mod.process_stage_routes)
-    app.register_blueprint(process_template_routes_mod.process_template_routes)  # NEW: Added process template blueprint
+    app.register_blueprint(process_template_routes_mod.process_template_routes)
     app.register_blueprint(capability_routes_mod.capability_routes)
     app.register_blueprint(llm_routes_mod.llm_routes)
 
