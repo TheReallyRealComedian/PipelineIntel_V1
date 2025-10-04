@@ -13,6 +13,7 @@ from sqlalchemy.orm import joinedload
 
 # --- SDK Imports ---
 from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -27,6 +28,13 @@ def get_apollo_client_credentials():
         if current_user.llm_settings.apollo_client_id and current_user.llm_settings.apollo_client_secret:
             return current_user.llm_settings.apollo_client_id, current_user.llm_settings.apollo_client_secret
     return current_app.config.get('APOLLO_CLIENT_ID'), current_app.config.get('APOLLO_CLIENT_SECRET')
+
+def get_anthropic_api_key():
+    """Retrieve Anthropic API key from user settings or fallback to config."""
+    if current_user.is_authenticated and current_user.llm_settings:
+        if current_user.llm_settings.anthropic_api_key:
+            return current_user.llm_settings.anthropic_api_key
+    return current_app.config.get('ANTHROPIC_API_KEY')
 
 def get_apollo_access_token():
     global _apollo_access_token, _apollo_token_expiry
@@ -87,9 +95,27 @@ def _call_apollo(model_id, messages, **kwargs):
     response = llm_model.invoke(messages)
     return response.content
 
+def _call_anthropic(model_id, messages, **kwargs):
+    """Call Anthropic API using LangChain."""
+    api_key = get_anthropic_api_key()
+    if not api_key:
+        raise ValueError("Anthropic API key not configured.")
+    
+    llm_model = ChatAnthropic(
+        model=model_id,
+        api_key=api_key,
+        temperature=0.1,
+        timeout=300
+    )
+    response = llm_model.invoke(messages)
+    return response.content
+
 # --- Main Dispatcher Function ---
 
-PROVIDER_HANDLERS = { "apollo": _call_apollo }
+PROVIDER_HANDLERS = {
+    "apollo": _call_apollo,
+    "anthropic": _call_anthropic
+}
 
 def generate_chat_response(model_name, user_message, system_prompt, chat_history):
     provider, model_id = model_name.split('-', 1) if '-' in model_name else ("unknown", model_name)
@@ -126,8 +152,29 @@ def get_available_apollo_models():
     except Exception as e:
         return [f"apollo-Error: {e.__class__.__name__}"]
 
+def get_available_anthropic_models():
+    """Return Anthropic models if API key is configured."""
+    api_key = get_anthropic_api_key()
+    if not api_key:
+        return []
+    
+    # Anthropic's popular models as of 2025
+    return [
+        "anthropic-claude-sonnet-4-20250514",
+        "anthropic-claude-3-7-sonnet-20250219",
+        "anthropic-claude-3-5-sonnet-20241022",
+        "anthropic-claude-3-5-sonnet-20240620",
+        "anthropic-claude-3-5-haiku-20241022",
+        "anthropic-claude-3-opus-20240229",
+        "anthropic-claude-3-haiku-20240307"
+    ]
+
 def get_all_available_llm_models():
-    return get_available_apollo_models()
+    """Aggregate all available models from all configured providers."""
+    all_models = []
+    all_models.extend(get_available_apollo_models())
+    all_models.extend(get_available_anthropic_models())
+    return all_models
 
 # --- User Prompt Management ---
 
