@@ -125,30 +125,20 @@ class Product(db.Model):
 
     def get_inherited_challenges(self):
         """
-        Get challenges inherited from the product's modality via its process template's
-        STAGES and associated TECHNOLOGIES. THIS IS THE REFACTORED, CORRECT LOGIC.
+        Get challenges from technologies DIRECTLY linked to this product.
+        This bypasses templates and stages entirely.
         """
-        if not self.modality or not self.modality.process_templates:
+        if not self.technologies:
             return []
-
-        # Assuming one template per modality for now
-        template = self.modality.process_templates[0] 
-
-        # 1. Get all stage_ids defined in the process template
-        stage_ids_in_template = db.session.query(TemplateStage.stage_id).filter(
-            TemplateStage.template_id == template.template_id
-        ).subquery()
-
-        # 2. Find all technologies that are linked to those specific stages
-        technology_ids_in_template = db.session.query(ManufacturingTechnology.technology_id).filter(
-            ManufacturingTechnology.stage_id.in_(stage_ids_in_template)
-        ).subquery()
-
-        # 3. Find all challenges that are directly caused by those technologies
+        
+        # Get technology IDs from directly linked technologies
+        technology_ids = [t.technology_id for t in self.technologies]
+        
+        # Get challenges that are caused by those specific technologies
         inherited_challenges = db.session.query(ManufacturingChallenge).filter(
-            ManufacturingChallenge.technology_id.in_(technology_ids_in_template)
+            ManufacturingChallenge.technology_id.in_(technology_ids)
         ).distinct().all()
-
+        
         return inherited_challenges
 
     def get_explicit_challenge_relationships(self):

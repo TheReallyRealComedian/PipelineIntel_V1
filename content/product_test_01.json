@@ -11,9 +11,8 @@
     "dosage_form": "Tablet",
     "route_of_administration": "Oral",
     "base_technology": "Organic Spray Drying; Roller Compaction",
-    "technology_elements": [
+    "technology_names": [
       "Spray Drying",
-      "Roller Compaction/Dry Granulation",
       "Direct Compression",
       "Automated Visual Inspection (AVI)"
     ],
@@ -73,7 +72,7 @@
     "dosage_form": "Tablet",
     "route_of_administration": "Oral",
     "base_technology": "Twin Screw",
-    "technology_elements": [
+    "technology_names": [
       "Twin Screw Granulation (TSG)",
       "Direct Compression",
       "Fluid Bed Coating",
@@ -134,14 +133,12 @@
     "dosage_form": "Injectable",
     "route_of_administration": "Injectable",
     "base_technology": "Single-use isolator",
-    "technology_elements": [
+    "technology_names": [
       "CHO Cell Culture Platform",
-      "Perfusion Bioreactor",
       "Protein A Affinity Chromatography",
       "Ion Exchange Chromatography (IEX)",
       "Nanofiltration (20nm)",
       "Isolator Technology (Aseptic)",
-      "Pre-Filled Syringe Manufacturing",
       "Auto-Injector Integration",
       "Cold Chain Monitoring"
     ],
@@ -199,7 +196,7 @@
     "dosage_form": "Tablet",
     "route_of_administration": "Oral",
     "base_technology": "Twin Screw",
-    "technology_elements": [
+    "technology_names": [
       "Twin Screw Granulation (TSG)",
       "Fluid Bed Coating",
       "Near-Infrared Spectroscopy (NIR)",

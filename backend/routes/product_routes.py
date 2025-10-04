@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required
 from ..services import product_service
-from ..models import Product, ManufacturingChallenge, ProductSupplyChain
+from ..db import db
+from ..models import Product, ManufacturingChallenge, ProductSupplyChain, ManufacturingTechnology, product_to_technology_association
+
 
 # Blueprint for web pages (remains unchanged)
 product_routes = Blueprint('products', __name__, url_prefix='/products')
