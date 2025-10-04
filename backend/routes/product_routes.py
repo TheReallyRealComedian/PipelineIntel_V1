@@ -157,3 +157,132 @@ def remove_product_challenge_relationship(product_id, challenge_id):
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+    
+
+
+# Add these endpoints to backend/routes/product_routes.py in the product_api_bp blueprint
+
+@product_api_bp.route('/<int:product_id>/technologies', methods=['GET'])
+@login_required
+def get_product_technologies(product_id):
+    """Get all technologies linked to a product, grouped by stage."""
+    from sqlalchemy.orm import joinedload
+    
+    product = Product.query.get_or_404(product_id)
+    
+    # Get all linked technologies with their stages
+    linked_techs = db.session.query(ManufacturingTechnology).join(
+        product_to_technology_association,
+        ManufacturingTechnology.technology_id == product_to_technology_association.c.technology_id
+    ).filter(
+        product_to_technology_association.c.product_id == product_id
+    ).options(joinedload(ManufacturingTechnology.stage)).all()
+    
+    # Group by stage
+    technologies_by_stage = {}
+    for tech in linked_techs:
+        stage_name = tech.stage.stage_name if tech.stage else "Unassigned"
+        if stage_name not in technologies_by_stage:
+            technologies_by_stage[stage_name] = []
+        technologies_by_stage[stage_name].append({
+            'technology_id': tech.technology_id,
+            'technology_name': tech.technology_name,
+            'short_description': tech.short_description,
+            'complexity_rating': tech.complexity_rating,
+            'innovation_potential': tech.innovation_potential
+        })
+    
+    return jsonify({
+        'product_code': product.product_code,
+        'product_name': product.product_name,
+        'technologies_by_stage': technologies_by_stage
+    })
+
+
+@product_api_bp.route('/<int:product_id>/technologies/available', methods=['GET'])
+@login_required
+def get_available_technologies(product_id):
+    """Get all available technologies grouped by stage, excluding already linked ones."""
+    from sqlalchemy.orm import joinedload
+    
+    product = Product.query.get_or_404(product_id)
+    
+    # Get IDs of already linked technologies
+    linked_tech_ids = db.session.query(product_to_technology_association.c.technology_id).filter(
+        product_to_technology_association.c.product_id == product_id
+    ).all()
+    linked_tech_ids = [tid[0] for tid in linked_tech_ids]
+    
+    # Get all technologies NOT linked to this product
+    available_techs = db.session.query(ManufacturingTechnology).filter(
+        ~ManufacturingTechnology.technology_id.in_(linked_tech_ids) if linked_tech_ids else True
+    ).options(joinedload(ManufacturingTechnology.stage)).order_by(
+        ManufacturingTechnology.stage_id,
+        ManufacturingTechnology.technology_name
+    ).all()
+    
+    # Group by stage
+    technologies_by_stage = {}
+    for tech in available_techs:
+        stage_name = tech.stage.stage_name if tech.stage else "Unassigned"
+        if stage_name not in technologies_by_stage:
+            technologies_by_stage[stage_name] = []
+        technologies_by_stage[stage_name].append({
+            'technology_id': tech.technology_id,
+            'technology_name': tech.technology_name,
+            'short_description': tech.short_description,
+            'complexity_rating': tech.complexity_rating,
+            'stage_name': stage_name
+        })
+    
+    return jsonify({
+        'available_technologies_by_stage': technologies_by_stage
+    })
+
+
+@product_api_bp.route('/<int:product_id>/technologies/<int:technology_id>', methods=['POST'])
+@login_required
+def add_product_technology(product_id, technology_id):
+    """Link a technology to a product."""
+    product = Product.query.get_or_404(product_id)
+    technology = ManufacturingTechnology.query.get_or_404(technology_id)
+    
+    # Check if already linked
+    if technology in product.technologies:
+        return jsonify({
+            'success': False,
+            'message': 'Technology already linked to this product'
+        }), 400
+    
+    # Add the link
+    product.technologies.append(technology)
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'Technology "{technology.technology_name}" linked successfully'
+    })
+
+
+@product_api_bp.route('/<int:product_id>/technologies/<int:technology_id>', methods=['DELETE'])
+@login_required
+def remove_product_technology(product_id, technology_id):
+    """Unlink a technology from a product."""
+    product = Product.query.get_or_404(product_id)
+    technology = ManufacturingTechnology.query.get_or_404(technology_id)
+    
+    # Check if linked
+    if technology not in product.technologies:
+        return jsonify({
+            'success': False,
+            'message': 'Technology not linked to this product'
+        }), 400
+    
+    # Remove the link
+    product.technologies.remove(technology)
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'Technology "{technology.technology_name}" unlinked successfully'
+    })

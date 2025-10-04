@@ -11,6 +11,12 @@
     "dosage_form": "Tablet",
     "route_of_administration": "Oral",
     "base_technology": "Organic Spray Drying; Roller Compaction",
+    "technology_elements": [
+      "Spray Drying",
+      "Roller Compaction/Dry Granulation",
+      "Direct Compression",
+      "Automated Visual Inspection (AVI)"
+    ],
     "biel_category": "3A",
     "current_phase": "Registration",
     "project_status": "On Track",
@@ -67,6 +73,13 @@
     "dosage_form": "Tablet",
     "route_of_administration": "Oral",
     "base_technology": "Twin Screw",
+    "technology_elements": [
+      "Twin Screw Granulation (TSG)",
+      "Direct Compression",
+      "Fluid Bed Coating",
+      "Automated Visual Inspection (AVI)",
+      "Track & Trace Serialization"
+    ],
     "biel_category": "3A",
     "current_phase": "Registration",
     "project_status": "On Track",
@@ -112,7 +125,7 @@
   {
     "product_code": "BI 456906",
     "product_name": "Survodutide",
-    "modality_name": "Biological",
+    "modality_name": "Peptides",
     "product_type": "NME",
     "therapeutic_area": "Cardiovascular-Renal-Metabolic",
     "mechanism_of_action": "Dual GLP-1 and glucagon receptor agonist",
@@ -121,6 +134,17 @@
     "dosage_form": "Injectable",
     "route_of_administration": "Injectable",
     "base_technology": "Single-use isolator",
+    "technology_elements": [
+      "CHO Cell Culture Platform",
+      "Perfusion Bioreactor",
+      "Protein A Affinity Chromatography",
+      "Ion Exchange Chromatography (IEX)",
+      "Nanofiltration (20nm)",
+      "Isolator Technology (Aseptic)",
+      "Pre-Filled Syringe Manufacturing",
+      "Auto-Injector Integration",
+      "Cold Chain Monitoring"
+    ],
     "current_phase": "Phase III",
     "project_status": "Delayed",
     "lead_indication": "Obesity",
@@ -175,6 +199,12 @@
     "dosage_form": "Tablet",
     "route_of_administration": "Oral",
     "base_technology": "Twin Screw",
+    "technology_elements": [
+      "Twin Screw Granulation (TSG)",
+      "Fluid Bed Coating",
+      "Near-Infrared Spectroscopy (NIR)",
+      "Automated Visual Inspection (AVI)"
+    ],
     "biel_category": "3A",
     "current_phase": "Phase III",
     "project_status": "On Track",
