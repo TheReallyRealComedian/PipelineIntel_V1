@@ -1,6 +1,6 @@
 # Pipeline Intelligence
 
-Pipeline Intelligence is a web application designed to track and manage a portfolio of pharmaceutical assets. It provides a centralized platform for viewing product details, clinical indications, supply chain information, manufacturing challenges and technologies, with advanced data management and export capabilities.
+Pipeline Intelligence is a web application designed to track and manage a portfolio of pharmaceutical assets. It provides a centralized platform for viewing product details, clinical indications, manufacturing processes, and supply chain information. It features advanced data management, a hierarchical modeling system for manufacturing complexity, and integrated LLM chat capabilities for data analysis.
 
 The entire application is containerized using Docker for consistent development and deployment.
 
@@ -11,8 +11,6 @@ The entire application is containerized using Docker for consistent development 
 - [Database Schema](#database-schema)
 - [Local Development Setup](#local-development-setup)
 - [Development Workflow](#development-workflow)
-- [Database Query Patterns](#database-query-patterns)
-- [Implementation Steps](#implementation-steps)
 - [Application Usage](#application-usage)
 - [Production Deployment](#production-deployment)
 - [Data Import Format](#data-import-format)
@@ -21,13 +19,16 @@ The entire application is containerized using Docker for consistent development 
 
 ## Key Features
 
-- **Dynamic Data Tables**: Interactive tables with client-side sorting, filtering, and inline editing.
-- **Flexible Column Management**: Users can customize which columns to display for each entity type.
-- **JSON Data Import**: Import data with a preview and conflict resolution before committing changes.
-- **Custom Data Export**: Generate tailored JSON exports with token counting for LLM applications.
-- **User Authentication**: Secure user registration and login system.
-- **LLM Integration Settings**: User-specific API key management for various LLM providers.
-- **Modern UI**: Responsive design with Boehringer Ingelheim branding.
+- **Hierarchical Process Modeling**: Define manufacturing processes with unlimited nesting (e.g., Phase → Stage → Operation), allowing for both high-level and granular analysis.
+- **Dynamic Data Tables**: Interactive tables with client-side sorting, filtering, and inline editing for all major data entities.
+- **Customizable Views**: Users can customize which columns to display for each entity, with preferences saved locally.
+- **Advanced Data Import**: A robust JSON import system with a preview screen, conflict resolution, and automatic foreign key resolution by name.
+- **LLM Chat Integration**: A built-in chat interface to interact with and analyze the database's content using various Large Language Models.
+- **Advanced Challenge Management**: A sophisticated system to track manufacturing challenges, distinguishing between those inherited from a process template and those added or excluded on a per-product basis.
+- **Process Templates**: Define standard manufacturing process flows for different modalities (e.g., Monoclonal Antibody, Small Molecule) to ensure consistency.
+- **Custom Data Export**: Generate tailored JSON exports with fine-grained field selection and a token counter for LLM prompt engineering.
+- **Secure User Authentication**: A complete user registration and login system.
+- **Modern UI**: A responsive design using Boehringer Ingelheim branding and a collapsible sidebar for improved navigation.
 
 ## Project Structure
 
@@ -36,7 +37,7 @@ A brief overview of the key directories and files in the project.
 ```
 PipelineIntelligence/
 ├── backend/            # Main Flask application source code
-│   ├── routes/         # Flask Blueprints for handling HTTP requests
+│   ├── routes/         # Flask Blueprints for handling HTTP requests for each entity
 │   ├── services/       # Business logic layer, decoupled from web framework
 │   ├── static/         # CSS, JavaScript, and other static assets
 │   ├── templates/      # Jinja2 templates for rendering HTML
@@ -77,78 +78,64 @@ The application is built on a Python/Flask backend with a dynamic JavaScript-pow
 
 ### Backend (Python/Flask)
 
-The backend follows a clean architecture with three main layers:
+The backend follows a clean architecture with a clear separation of concerns:
 
-1.  **Routes (`/backend/routes`)**: HTTP request handling using Flask Blueprints.
-    -   `auth_routes.py` - User authentication and registration.
-    -   `product_routes.py` - Product management and inline editing.
-    -   `modality_routes.py` - Manufacturing modalities.
-    -   `challenge_routes.py` - Manufacturing challenges.
-    -   `facility_routes.py` - Internal facilities and external partner management.
-    -   `data_management_routes.py` - JSON import with preview functionality.
-    -   `export_routes.py` - Custom data export with field selection.
-    -   `settings_routes.py` - User settings and LLM API key management.
-    -   `analytics_routes.py` - Endpoints for strategic analytics dashboards.
+1.  **Routes (`/backend/routes`)**: Handles HTTP request routing using Flask Blueprints. Each major entity has its own route file (e.g., `product_routes.py`, `modality_routes.py`, `llm_routes.py`). API endpoints are separated into their own blueprints (e.g., `product_api_bp`) for clarity.
 
-2.  **Services (`/backend/services`)**: Business logic layer.
-    -   Decoupled from the web framework for better testability.
-    -   Handles all database operations and business rules.
+2.  **Services (`/backend/services`)**: Contains the core business logic. This layer is decoupled from the web framework, handling all database operations, data validation, and business rules. It ensures the application logic is reusable and testable.
 
-3.  **Models (`/backend/models.py`)**: Data access layer using SQLAlchemy ORM.
+3.  **Models (`/backend/models.py`)**: Defines the data access layer using SQLAlchemy ORM. All database table structures and their relationships are defined here.
 
 #### Key Libraries & Components:
 
--   **Flask**: Micro web framework.
--   **Flask-SQLAlchemy & SQLAlchemy**: Object-Relational Mapping (ORM).
--   **Flask-Migrate & Alembic**: Database schema migrations.
--   **Flask-Login**: User session management.
--   **Flask-Assets**: CSS/JS bundling and minification.
--   **Gunicorn**: Production WSGI server.
--   **tiktoken**: Token counting for LLM integrations.
+-   **Flask**: Micro web framework for the application's core.
+-   **Flask-SQLAlchemy & SQLAlchemy**: Object-Relational Mapping (ORM) for database interaction.
+-   **Flask-Migrate & Alembic**: Manages database schema migrations.
+-   **Flask-Login**: Handles user session management.
+-   **Flask-Assets**: Bundles and minifies CSS/JS assets.
+-   **Gunicorn**: Production-ready WSGI server.
+-   **psycopg2-binary**: PostgreSQL adapter for Python.
+-   **tiktoken**: Used for counting tokens in the Data Export and LLM features.
+-   **LangChain**: Powers integrations with various LLM providers.
 
 ### Frontend (HTML/CSS/JavaScript)
 
--   **Templating**: Jinja2 with reusable macros for dynamic tables.
--   **Styling**: Custom CSS with Boehringer Ingelheim branding, Bootstrap 5 for the responsive grid.
--   **JavaScript**: Advanced table functionality including client-side sorting/filtering, inline editing, and column selection persistence.
+-   **Templating**: Jinja2 with reusable macros for dynamic components like sortable/filterable tables.
+-   **Styling**: Custom CSS with Boehringer Ingelheim branding, using Bootstrap 5 for the responsive grid system.
+-   **JavaScript**: Vanilla JavaScript for advanced table functionality, including client-side sorting/filtering, inline editing, column selection persistence, and the LLM chat interface.
 
 ## Database Schema
 
-The application uses PostgreSQL with a flexible, multi-table schema to model manufacturing intelligence. The schema is managed by Alembic migrations.
+The application uses a powerful PostgreSQL schema designed to model pharmaceutical manufacturing complexity. It is managed via Alembic migrations and is documented in detail in `DATABASE_SCHEME.md`.
 
-#### 1. Core Entities
+#### Core Design Principles
 
--   **Products (`products`)**: The central entity representing pharmaceutical assets. Contains details on type, phase, strategy, and links to other entities.
--   **Indications (`indications`)**: Clinical indications associated with a specific `Product`.
--   **Modalities (`modalities`)**: High-level classifications of products (e.g., "Monoclonal Antibody", "CAR-T"). Defines standard requirements.
+1.  **Hierarchical Modeling**: `Process Stages` support unlimited nesting through self-referential relationships, allowing for detailed process breakdowns (Phase → Stage → Operation).
+2.  **Dual-Path Pattern**: Critical relationships, like capability requirements, exist at both a general "pattern" level (inherited from a `Modality`) and a "specific" level (overridden by a `Product`).
+3.  **Name-Based Imports**: The data import system can resolve foreign key relationships by name (e.g., `"modality_name": "Monoclonal Antibody"`) instead of requiring IDs.
+
+#### Key Entities
+
+-   **Products (`products`)**: The central "hub" entity representing pharmaceutical assets. It contains extensive details for operational tracking, regulatory status, supply chain, and risks.
+-   **Modalities (`modalities`)**: High-level product classifications (e.g., "Small Molecule", "CAR-T") that define standard process templates and capability requirements.
+-   **Process Stages (`process_stages`)**: Represents individual steps in a manufacturing process. A self-referencing `parent_stage_id` allows for infinite hierarchical nesting.
+-   **Process Templates (`process_templates`)**: Defines a standard sequence of `Process Stages` for a given `Modality`, forming a reusable manufacturing blueprint.
 -   **Manufacturing Capabilities (`manufacturing_capabilities`)**: Granular skills or technologies required for production (e.g., "Cell Culture", "Aseptic Fill & Finish").
--   **Manufacturing Challenges (`manufacturing_challenges`)**: Potential risks or difficulties in the manufacturing process.
--   **Manufacturing Technologies (`manufacturing_technologies`)**: Specific technologies or platforms used.
+-   **Manufacturing Challenges (`manufacturing_challenges`)**: Potential risks or difficulties in the manufacturing process, which can be linked to products, technologies, or process stages.
+-   **Manufacturing Technologies (`manufacturing_technologies`)**: Specific platforms or techniques used in manufacturing (e.g., "Twin Screw Granulation").
 
-#### 2. Manufacturing Network & Supply Chain
+#### Manufacturing Network & Supply Chain
 
-This is modeled using a polymorphic-style base table (`manufacturing_entities`) with specific details in separate tables.
+-   **Manufacturing Entities (`manufacturing_entities`)**: A polymorphic base table for any manufacturing site, either `Internal` or `External`.
+-   **Internal Facilities (`internal_facilities`)** & **External Partners (`external_partners`)**: Tables containing specific details for internal sites and external CMOs, respectively.
+-   **Entity Capabilities (`entity_capabilities`)**: A junction table defining which `Manufacturing Capabilities` each facility or partner possesses.
 
--   **Manufacturing Entities (`manufacturing_entities`)**: A base table for any manufacturing location or partner. Contains `entity_id`, `entity_name`, and `entity_type` ('Internal' or 'External').
--   **Internal Facilities (`internal_facilities`)**: Stores details specific to internal sites (e.g., `facility_code`, `cost_center`).
--   **External Partners (`external_partners`)**: Stores details for external partners like CMOs (e.g., `company_name`, `relationship_type`).
--   **Product Supply Chain (`product_supply_chain`)**: Links a `Product` to a `ManufacturingEntity` for a specific manufacturing stage.
+#### Operational Tracking Tables
 
-#### 3. Requirements & Capabilities (The "Matrix")
-
--   **Modality Requirements (`modality_requirements`)**: Junction table defining which `ManufacturingCapabilities` are required by a `Modality`.
--   **Product Requirements (`product_requirements`)**: Junction table for product-specific `ManufacturingCapabilities` that override or add to the modality's standard set.
--   **Entity Capabilities (`entity_capabilities`)**: Junction table defining which `ManufacturingCapabilities` a `ManufacturingEntity` possesses.
-
-#### 4. Process Chain
-
--   **Process Stages (`process_stages`)**: Defines the steps in a manufacturing process (e.g., "Upstream", "Downstream").
--   **Process Templates (`process_templates`)**: Defines a standard sequence of `ProcessStages` for a given `Modality`.
-
-#### 5. System Tables & Views
-
--   **System Tables**: `users`, `llm_settings`, `flask_sessions` for application operation.
--   **SQL Views**: Pre-aggregated views like `all_product_requirements` and `product_complexity_summary` for efficient strategic analysis.
+The schema includes several tables linked directly to a `Product` to provide a detailed operational view:
+-   **Product Timelines (`product_timelines`)**: Tracks key project milestones (e.g., Submission, Approval, Launch).
+-   **Product Regulatory Filings (`product_regulatory_filings`)**: Manages regulatory submissions by geography and indication.
+-   **Product Manufacturing Suppliers (`product_manufacturing_suppliers`)**: Provides detailed tracking of suppliers for Drug Substance (DS), Drug Product (DP), and devices.
 
 ---
 
@@ -173,7 +160,7 @@ This is modeled using a polymorphic-style base table (`manufacturing_entities`) 
     ```bash
     cp example.env .env
     ```
-    The default values in `.env` are suitable for local development. You can customize them if needed.
+    The default values in `.env` are suitable for local development. You do not need to change them to run the application locally.
 
 3.  **Build and Run**
     ```bash
@@ -183,14 +170,17 @@ This is modeled using a polymorphic-style base table (`manufacturing_entities`) 
     -   Build the Docker images for the backend and database.
     -   Start the PostgreSQL and Flask containers.
     -   Automatically apply all database migrations on startup.
-    -   Install all Python dependencies.
+    -   Install all Python dependencies from `requirements.txt`.
 
 4.  **Access the Application**
     Open your browser to: [http://localhost:5001](http://localhost:5001)
 
 5.  **First-Time Setup**
     -   Register a new user account on the application's web interface.
-    -   You can optionally populate the database with initial sample data (see "Running Scripts" below).
+    -   To populate the database with essential seed data (like modalities and capabilities), run the following script:
+        ```bash
+        docker-compose exec backend python backend/scripts/populate_core_data.py
+        ```
 
 ### Development Workflow
 
@@ -201,53 +191,12 @@ This is modeled using a polymorphic-style base table (`manufacturing_entities`) 
         ```bash
         docker-compose exec backend flask db migrate -m "A brief description of the schema change"
         ```
-    3.  The migration will be applied automatically the next time you run `docker-compose up`.
--   **Running Scripts**: To run a one-off script within the application context (e.g., to populate data), use `docker-compose exec`:
+    3.  The new migration will be applied automatically the next time you run `docker-compose up`.
+-   **Running Scripts**: To run a one-off script within the application context, use `docker-compose exec`:
     ```bash
-    docker-compose exec backend python backend/scripts/populate_core_data.py
+    docker-compose exec backend python path/to/your/script.py
     ```
 -   **Asset Changes**: CSS and JavaScript files in `backend/static/` are automatically bundled and minified by Flask-Assets. You may need to do a hard refresh (Ctrl+Shift+R) in your browser to see changes.
-
-## Database Query Patterns
-
-### Preferred Patterns
-
-#### Standard Model Queries - Use `Model.query`
-```python
-# ✅ PREFERRED
-products = Product.query.all()
-product = Product.query.get(id)
-filtered = Product.query.filter(Product.status == 'active').all()
-```
-
-#### SQL Views - Use `db.session.query()`
-```python
-# ✅ REQUIRED for views
-requirements = db.session.query(all_product_requirements_view).all()
-```
-
-#### Complex Multi-Model Queries - Use `db.session.query()`
-```python
-# ✅ ACCEPTABLE for complex cases
-results = db.session.query(Product.name, Modality.category).join(Modality).all()
-```
-
-#### Pattern Selection Rule
-
-Default to `Model.query` for single-model operations.
-Use `db.session.query()` only when `Model.query` is insufficient.
-
-## Implementation Steps
-
-### **Step 1:** Apply the changes above to `data_management_service.py`
-
-### **Step 2:** Run verification:
-```bash
-# Check for remaining inconsistencies:
-grep -n "db\.session\.query(" backend/services/data_management_service.py
-
-# Should only show view queries and complex joins after changes
-```
 
 ---
 
@@ -255,15 +204,22 @@ grep -n "db\.session\.query(" backend/services/data_management_service.py
 
 ### Data Management
 
--   **Import**: Upload JSON files with automatic conflict detection. The system provides a detailed preview, allowing you to accept, update, or skip each record before finalizing the import.
+-   **Import**: Upload JSON files with automatic conflict detection and foreign key resolution. The system provides a detailed preview, allowing you to accept, update, or skip each record before finalizing the import.
 -   **Export**: Generate custom JSON datasets with fine-grained field selection across multiple entities. Includes a token counter for LLM prompt engineering.
--   **Inline Editing**: Edit data directly in tables. Changes are saved instantly with real-time validation.
+-   **Inline Editing**: Edit data directly in tables for most entities. Changes are saved instantly with real-time validation.
+
+### LLM Chat
+
+-   Navigate to the "LLM Chat" page to start a conversation.
+-   The chat interface has conversation memory for the current session.
+-   You can define a custom "System Prompt" to guide the AI's behavior and save it to your user profile.
+-   The system can connect to multiple LLM providers, which are configured in the backend.
 
 ### Table Features
 
 -   **Sorting**: Click column headers to sort data client-side.
--   **Filtering**: Use dropdown filters on each column to show or hide specific values.
--   **Column Selection**: Customize which columns are visible in each table.
+-   **Filtering**: Use the filter icon on each column header to show or hide specific values.
+-   **Column Selection**: Customize which columns are visible in each table via the "Columns" dropdown.
 -   **Persistence**: Your column visibility preferences are saved in your browser's local storage and applied automatically on future visits.
 
 ---
@@ -276,17 +232,15 @@ For a production environment, ensure the following steps are taken:
 2.  Update the `SECRET_KEY` in your `.env` file to a long, random string.
 3.  Use strong, unique credentials for the PostgreSQL database (`POSTGRES_USER`, `POSTGRES_PASSWORD`).
 4.  Consider using a reverse proxy like Nginx in front of Gunicorn for SSL termination, caching, and load balancing.
-5.  Implement a robust backup and recovery strategy for the PostgreSQL database volume.
+5.  Implement a robust backup and recovery strategy for the PostgreSQL database volume (`db_data`).
 
 ---
 
 ## Data Import Format
 
-The application accepts a JSON array of objects for data import.
+The application accepts a JSON array of objects for data import. The system is designed to be flexible and can resolve relationships by name.
 
 **Example 1: Importing Products and linking to a Modality by name**
-
-The system can resolve foreign key relationships by name. Provide `modality_name` instead of `modality_id`.
 
 ```json
 [
@@ -300,7 +254,25 @@ The system can resolve foreign key relationships by name. Provide `modality_name
 ]
 ```
 
-**Example 2: Importing Challenges and linking them to existing Products**
+**Example 2: Importing Hierarchical Process Stages**
+
+Use `parent_stage_name` to build the hierarchy. Parents must be defined before children.
+
+```json
+[
+  {
+    "stage_name": "Upstream", 
+    "hierarchy_level": 1
+  },
+  {
+    "stage_name": "Cell Culture", 
+    "hierarchy_level": 2, 
+    "parent_stage_name": "Upstream"
+  }
+]
+```
+
+**Example 3: Importing Challenges and linking them to existing Products**
 
 Use the `product_codes` array to establish many-to-many relationships.
 
@@ -325,267 +297,6 @@ Use the `product_codes` array to establish many-to-many relationships.
 4.  Update this README when adding new major features or changing the architecture.
 
 ---
-
-
-
-# ============================================================================
-# 3. COMPREHENSIVE JSON IMPORT TEMPLATES
-# ============================================================================
-
-# These templates show how to import the comprehensive product data
-
-# Template 1: Enhanced Product with all new fields
-ENHANCED_PRODUCT_TEMPLATE = {
-    "product_code": "BI 1810631",
-    "product_name": "Zongertinib",
-    "modality_name": "Small Molecule",
-    "product_type": "NME",
-    "therapeutic_area": "Oncology",
-    "mechanism_of_action": "Irreversible, HER2-selective Tyrosine Kinase Inhibitor (TKI)",
-    "dosage_form": "Tablet",
-    "current_phase": "Registration",
-    "lead_indication": "NSCLC (2nd Line)",
-    "expected_launch_year": 2025,
-    
-    # NEW FORMULATION FIELDS
-    "primary_packaging": "Bottle",
-    "route_of_administration": "Oral",
-    "biel_category": "3A",
-    "granulation_technology": "Organic Spray Drying; Roller Compaction",
-    
-    # NEW REGULATORY FIELDS
-    "submission_status": "Submitted",
-    "submission_date": "2025-03-15",
-    "launch_geography": "US",
-    "regulatory_details": {
-        "NSCLC_2L": ["Breakthrough Therapy", "Fast Track"],
-        "NSCLC_1L": ["Fast Track"]
-    },
-    
-    # NEW OPERATIONAL FIELDS
-    "ppq_status": "Completed",
-    "ppq_completion_date": "2025-01-30",
-    "ppq_details": {
-        "DS": {"Cambrex": "completed", "Alphora": "backup_qualified"},
-        "DP": {"Hovione": "completed", "ING": "launch_ready"}
-    },
-    "timeline_variance_days": -10,
-    "timeline_variance_baseline": "AD 2024",
-    "critical_path_item": "OPS",
-    "ds_volume_category": "Low (10-1,000 kg)",
-    "dp_volume_category": "Low (1-10 million PCS)",
-    
-    # NEW SUPPLY CHAIN FIELDS (JSONB)
-    "ds_suppliers": [
-        {"name": "Cambrex", "site": "Site A", "role": "Primary", "status": "qualified"},
-        {"name": "Alphora", "site": "Site B", "role": "Backup", "status": "qualified"}
-    ],
-    "dp_suppliers": [
-        {"name": "Hovione", "site": "Portugal", "role": "Primary", "status": "active"},
-        {"name": "ING", "site": "Ingelheim", "role": "Launch", "status": "ready"}
-    ],
-    
-    # NEW RISK FIELDS (JSONB)
-    "operational_risks": [
-        {
-            "risk": "Impact on submission/launch timeline highly likely if issues arise",
-            "severity": "high",
-            "mitigation": "Qualifying additional DS sites for supply chain resilience"
-        }
-    ],
-    "timeline_risks": [
-        {
-            "risk": "Regulatory review timeline uncertainty",
-            "severity": "medium", 
-            "mitigation": "Breakthrough Therapy pathway expedites review"
-        }
-    ],
-    
-    # NEW CLINICAL FIELDS
-    "clinical_trials": [
-        {"nct": "NCT04886804", "phase": "Phase I", "status": "completed"}
-    ],
-    "patient_population": "Patients with HER2-driven cancers / advanced solid tumors with HER2 gene alterations",
-    "development_program_name": "HER2 Targeted Therapy Program",
-    
-    # LIFECYCLE INDICATIONS (existing field, enhanced format)
-    "lifecycle_indications": [
-        {"phase": "Phase III", "indication": "NSCLC (1st Line)", "expected_launch": 2026},
-        {"indication": "Breast Cancer (1L)", "phase": "Phase I", "expected_launch": 2027},
-        {"indication": "Gastric Cancer (2L)", "phase": "Phase I", "expected_launch": 2028}
-    ],
-    
-    # RELATED TABLES DATA (processed by the enhanced import logic)
-    "timeline_milestones": [
-        {
-            "milestone_type": "Submission",
-            "milestone_name": "US NDA Submission",
-            "planned_date": "2025-03-01",
-            "actual_date": "2025-03-15",
-            "variance_days": 14,
-            "baseline_plan": "AD 2024",
-            "status": "Completed",
-            "notes": "Submitted ahead of critical path timeline"
-        },
-        {
-            "milestone_type": "Launch",
-            "milestone_name": "US Commercial Launch",
-            "planned_date": "2025-09-01",
-            "baseline_plan": "AD 2024",
-            "status": "On Track",
-            "notes": "Pending FDA approval"
-        }
-    ],
-    
-    "regulatory_filings": [
-        {
-            "indication": "NSCLC (2nd Line)",
-            "geography": "US",
-            "filing_type": "NDA",
-            "submission_date": "2025-03-15",
-            "status": "Under Review",
-            "designations": ["Breakthrough Therapy", "Fast Track"],
-            "regulatory_authority": "FDA",
-            "notes": "First indication filing"
-        }
-    ],
-    
-    "manufacturing_suppliers": [
-        {
-            "supply_type": "DS",
-            "supplier_name": "Cambrex",
-            "site_name": "Primary Manufacturing Site",
-            "site_location": "US",
-            "role": "Primary",
-            "status": "Qualified",
-            "qualification_date": "2024-12-15",
-            "notes": "PPQ completed successfully"
-        },
-        {
-            "supply_type": "DP",
-            "supplier_name": "Hovione",
-            "site_name": "Portugal Facility",
-            "site_location": "Portugal",
-            "role": "Primary",
-            "status": "Qualified",
-            "technology": "Roller Compaction",
-            "qualification_date": "2025-01-30"
-        }
-    ]
-}
-
-# Template 2: Nerandomilast with dual-formulation risk management
-NERANDOMILAST_TEMPLATE = {
-    "product_code": "BI 1015550",
-    "product_name": "Nerandomilast",
-    "modality_name": "Small Molecule",
-    "product_type": "NME",
-    "mechanism_of_action": "Oral, preferential inhibitor of phosphodiesterase 4B (PDE4B)",
-    "therapeutic_area": "Respiratory",
-    "dosage_form": "Tablet",
-    "current_phase": "Registration",
-    "lead_indication": "Idiopathic Pulmonary Fibrosis (IPF)",
-    "expected_launch_year": 2025,
-    
-    # Formulation details
-    "primary_packaging": "Blister; Bottle", 
-    "route_of_administration": "Oral",
-    "biel_category": "3A",
-    "granulation_technology": "Twin Screw",
-    
-    # Development program details
-    "development_program_name": "FIBRONEER™",
-    "patient_population": "IPF patients and broader pulmonary fibrosis indications",
-    
-    # Manufacturing strategy
-    "manufacturing_strategy": "Internal",
-    "ppq_status": "Completed",
-    "timeline_variance_days": -10,
-    "timeline_variance_baseline": "AD 2024",
-    
-    # Supply chain
-    "ds_suppliers": [{"name": "ING", "site": "Ingelheim", "role": "Primary", "status": "active"}],
-    "dp_suppliers": [
-        {"name": "ING_SoL", "site": "Ingelheim Launch Site", "role": "Launch", "status": "active"},
-        {"name": "Koropi", "site": "Greece", "role": "Commercial", "status": "planned_2025"}
-    ],
-    
-    # Risk management
-    "operational_risks": [
-        {
-            "risk": "TiO2 formulation bridging requires in-vivo BE study",
-            "severity": "major",
-            "mitigation": "Dual-path strategy: parallel development of TiO2+ and TiO2-free formulations",
-            "status": "managed"
-        }
-    ],
-    
-    "regulatory_filings": [
-        {
-            "indication": "IPF",
-            "geography": "US", 
-            "status": "Submitted",
-            "designations": ["Breakthrough Therapy", "Orphan Drug"],
-            "regulatory_authority": "FDA"
-        },
-        {
-            "indication": "IPF",
-            "geography": "China",
-            "status": "Submitted", 
-            "regulatory_authority": "NMPA"
-        }
-    ]
-}
-
-# Template 3: Survodutide (Biologics with device)
-SURVODUTIDE_TEMPLATE = {
-    "product_code": "BI 456906", 
-    "product_name": "Survodutide",
-    "modality_name": "New Biological Entity",
-    "product_type": "NBE",
-    "mechanism_of_action": "GCGR/GLP-1 dual agonist derived from oxyntomodulin",
-    "therapeutic_area": "CRM",
-    "dosage_form": "Injectable",
-    "current_phase": "Phase III",
-    "lead_indication": "Obesity",
-    "expected_launch_year": 2027,
-    
-    # Biologics-specific fields
-    "primary_packaging": "PEN Device",
-    "route_of_administration": "Subcutaneous",
-    
-    # Device partnership
-    "device_partners": [
-        {"type": "PEN", "partner": "Nemera", "status": "volume ramp-up planning"}
-    ],
-    
-    # Manufacturing network 
-    "ds_suppliers": [{"name": "PPG", "status": "PPQ_halted"}, {"name": "Thermo Fisher", "role": "backup"}],
-    "manufacturing_suppliers": [
-        {
-            "supply_type": "Device",
-            "supplier_name": "Nemera", 
-            "role": "Primary",
-            "status": "Development",
-            "technology": "PEN Device Assembly",
-            "notes": "First successful verum cartridge filling completed"
-        }
-    ],
-    
-    # Critical operational risks
-    "operational_risks": [
-        {
-            "risk": "DS PPQ at PPG sites currently stopped",
-            "severity": "critical",
-            "mitigation": "Development and implementation of formulation 2.0 at maximum speed",
-            "status": "active"
-        }
-    ],
-    
-    "timeline_variance_days": 86,
-    "timeline_variance_baseline": "AD 2024", 
-    "critical_path_item": "CMC"
-}
 
 ## License
 
