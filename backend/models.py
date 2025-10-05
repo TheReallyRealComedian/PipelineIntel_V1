@@ -1,6 +1,6 @@
 # backend/models.py
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Table, Boolean, Date
-from sqlalchemy.orm import relationship, column_property
+from sqlalchemy.orm import relationship, column_property, validates
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.inspection import inspect
@@ -54,9 +54,6 @@ class Product(db.Model):
     manufacturing_sites = Column(JSONB, nullable=True)
     volume_forecast = Column(JSONB, nullable=True)
 
-    # New Field from Phase 1
-    modality_id = Column(Integer, ForeignKey('modalities.modality_id'))
-
     # ==================== NEW FORMULATION FIELDS ====================
     primary_packaging = Column(String(100), nullable=True)
     route_of_administration = Column(String(100), nullable=True)
@@ -95,6 +92,12 @@ class Product(db.Model):
     patient_population = Column(Text, nullable=True)
     development_program_name = Column(String(255), nullable=True)
 
+    # Foreign Keys
+    modality_id = Column(Integer, ForeignKey('modalities.modality_id'))
+    # ==================== NEW FIELD ====================
+    process_template_id = Column(Integer, ForeignKey('process_templates.template_id'), nullable=True)
+    # ===================================================
+
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
@@ -106,8 +109,33 @@ class Product(db.Model):
     technologies = relationship("ManufacturingTechnology", secondary=product_to_technology_association, back_populates="products")
     process_overrides = relationship("ProductProcessOverride", back_populates="product", cascade="all, delete-orphan")
     requirements = relationship("ProductRequirement", back_populates="product")
-    # This line is correct. It points to 'products' on the Modality model.
     modality = relationship("Modality", back_populates="products")
+    # ==================== NEW RELATIONSHIP ====================
+    process_template = relationship("ProcessTemplate", backref="products")
+    # ==========================================================
+
+    # ==================== VALIDATION METHOD ====================
+    @validates('process_template_id')
+    def validate_template_matches_modality(self, key, template_id):
+        """
+        Ensure the selected process template belongs to the product's modality.
+        This prevents data integrity issues at the application level.
+        """
+        if template_id is not None and self.modality_id is not None:
+            from sqlalchemy.orm import Session
+            session = Session.object_session(self)
+            if session:
+                template = session.query(ProcessTemplate).get(template_id)
+                if template and template.modality_id != self.modality_id:
+                    # Get modality name for better error message
+                    modality = session.query(Modality).get(self.modality_id)
+                    raise ValueError(
+                        f"Template '{template.template_name}' does not belong to "
+                        f"modality '{modality.modality_name if modality else 'Unknown'}'. "
+                        f"Please select a template that matches the product's modality."
+                    )
+        return template_id
+    # ===========================================================
 
     @classmethod
     def get_all_fields(cls):
@@ -118,76 +146,123 @@ class Product(db.Model):
         inspector = inspect(cls)
         # This logic ensures only simple columns are returned, not entire related objects.
         return [
-            c.key for c in inspector.attrs 
+            c.key for c in inspector.attrs
             if not isinstance(c, RelationshipProperty) and not c.key.startswith('_')
         ]
-    
+
+    def get_all_capability_requirements(self):
+        """
+        Get complete capability requirements from the three-tier inheritance system:
+        1. Modality-level (inherited by all products of this modality)
+        2. Template-level (from process_template → template_stages → base_capabilities)
+        3. Product-level (specific overrides/additions)
+
+        Returns a dictionary with source information for each capability.
+        """
+        requirements = {
+            'modality_inherited': [],
+            'template_inherited': [],
+            'product_specific': []
+        }
+
+        # 1. Get modality-level requirements
+        if self.modality:
+            for req in self.modality.requirements:
+                requirements['modality_inherited'].append({
+                    'capability': req.capability.capability_name,
+                    'level': req.requirement_level,
+                    'is_critical': req.is_critical,
+                    'source': f"Modality: {self.modality.modality_name}"
+                })
+
+        # 2. Get template-level requirements from base_capabilities
+        if self.process_template:
+            for template_stage in self.process_template.stages:
+                if template_stage.base_capabilities:
+                    for cap_name in template_stage.base_capabilities:
+                        requirements['template_inherited'].append({
+                            'capability': cap_name,
+                            'stage': template_stage.stage.stage_name,
+                            'is_required': template_stage.is_required,
+                            'source': f"Template: {self.process_template.template_name}"
+                        })
+
+        # 3. Get product-specific requirements
+        for req in self.requirements:
+            requirements['product_specific'].append({
+                'capability': req.capability.capability_name,
+                'level': req.requirement_level,
+                'is_critical': req.is_critical,
+                'timeline_needed': req.timeline_needed,
+                'notes': req.notes,
+                'source': 'Product-specific'
+            })
+
+        return requirements
 
     def get_inherited_challenges(self):
         """
         Get challenges from technologies DIRECTLY linked to this product.
         This bypasses templates and stages entirely.
         """
-        if not self.technologies:
-            return []
-        
-        # Get technology IDs from directly linked technologies
-        technology_ids = [t.technology_id for t in self.technologies]
-        
-        # Get challenges that are caused by those specific technologies
-        inherited_challenges = db.session.query(ManufacturingChallenge).filter(
-            ManufacturingChallenge.technology_id.in_(technology_ids)
-        ).distinct().all()
-        
-        return inherited_challenges
+        inherited = []
+        for tech in self.technologies:
+            for challenge in tech.challenges:
+                if challenge not in self.challenges:  # Not explicitly linked
+                    inherited.append({
+                        'challenge': challenge,
+                        'source': f'Inherited from technology: {tech.technology_name}'
+                    })
+        return inherited
 
     def get_explicit_challenge_relationships(self):
         """Get user-defined challenge relationships (exclusions/inclusions)."""
         from sqlalchemy import text
-        
+
         result = db.session.execute(
             text("""
-            SELECT challenge_id, relationship_type, notes 
-            FROM product_to_challenge 
+            SELECT challenge_id, relationship_type, notes
+            FROM product_to_challenge
             WHERE product_id = :product_id
             """),
             {'product_id': self.product_id}
         )
-        
+
         return [
             {
                 'challenge_id': row[0],
-                'relationship_type': row[1], 
+                'relationship_type': row[1],
                 'notes': row[2]
             } for row in result
         ]
 
     def get_effective_challenges(self):
         """Get final list of challenges (inherited - excluded + explicit)."""
-        inherited = self.get_inherited_challenges()
+        inherited_challenges_info = self.get_inherited_challenges() # This now returns dicts
+        inherited = [item['challenge'] for item in inherited_challenges_info]
         explicit_relationships = self.get_explicit_challenge_relationships()
-        
+
         # Create lookup for explicit relationships
         explicit_lookup = {rel['challenge_id']: rel for rel in explicit_relationships}
-        
+
         effective_challenges = []
-        
+
         # Start with inherited challenges, exclude any marked as 'excluded'
         for challenge in inherited:
             if challenge.challenge_id in explicit_lookup:
                 rel = explicit_lookup[challenge.challenge_id]
                 if rel['relationship_type'] == 'excluded':
                     continue  # Skip excluded challenges
-            
+
             effective_challenges.append({
                 'challenge': challenge,
                 'source': 'inherited',
                 'notes': explicit_lookup.get(challenge.challenge_id, {}).get('notes')
             })
-        
+
         # Add explicitly included challenges that aren't already inherited
         inherited_ids = {c.challenge_id for c in inherited}
-        
+
         for rel in explicit_relationships:
             if rel['relationship_type'] == 'explicit' and rel['challenge_id'] not in inherited_ids:
                 challenge = ManufacturingChallenge.query.get(rel['challenge_id'])
@@ -197,32 +272,32 @@ class Product(db.Model):
                         'source': 'explicit',
                         'notes': rel['notes']
                     })
-        
+
         return effective_challenges
 
     def add_challenge_exclusion(self, challenge_id, notes=None):
         """Exclude an inherited challenge."""
         # Check if this challenge is actually inherited
-        inherited_ids = {c.challenge_id for c in self.get_inherited_challenges()}
+        inherited_ids = {c['challenge'].challenge_id for c in self.get_inherited_challenges()}
         if challenge_id not in inherited_ids:
             raise ValueError("Cannot exclude a challenge that is not inherited")
-        
+
         # Remove any existing relationship
         from sqlalchemy import text
         db.session.execute(
             text("DELETE FROM product_to_challenge WHERE product_id = :pid AND challenge_id = :cid"),
             {'pid': self.product_id, 'cid': challenge_id}
         )
-        
+
         # Add exclusion
         db.session.execute(
             text("""
-            INSERT INTO product_to_challenge (product_id, challenge_id, relationship_type, notes) 
+            INSERT INTO product_to_challenge (product_id, challenge_id, relationship_type, notes)
             VALUES (:pid, :cid, 'excluded', :notes)
             """),
             {'pid': self.product_id, 'cid': challenge_id, 'notes': notes}
         )
-        
+
         db.session.commit()
 
     def add_challenge_inclusion(self, challenge_id, notes=None):
@@ -230,23 +305,23 @@ class Product(db.Model):
         # Check if challenge exists
         if not ManufacturingChallenge.query.get(challenge_id):
             raise ValueError("Challenge does not exist")
-        
+
         # Remove any existing relationship
         from sqlalchemy import text
         db.session.execute(
             text("DELETE FROM product_to_challenge WHERE product_id = :pid AND challenge_id = :cid"),
             {'pid': self.product_id, 'cid': challenge_id}
         )
-        
+
         # Add inclusion
         db.session.execute(
             text("""
-            INSERT INTO product_to_challenge (product_id, challenge_id, relationship_type, notes) 
+            INSERT INTO product_to_challenge (product_id, challenge_id, relationship_type, notes)
             VALUES (:pid, :cid, 'explicit', :notes)
             """),
             {'pid': self.product_id, 'cid': challenge_id, 'notes': notes}
         )
-        
+
         db.session.commit()
 
     def remove_challenge_relationship(self, challenge_id):
@@ -257,6 +332,7 @@ class Product(db.Model):
             {'pid': self.product_id, 'cid': challenge_id}
         )
         db.session.commit()
+
 
 class Indication(db.Model):
     __tablename__ = 'indications'
@@ -281,16 +357,16 @@ class ManufacturingChallenge(db.Model):
     short_description = Column(Text, nullable=True)
     explanation = Column(Text, nullable=True)
     related_capabilities = Column(JSONB)
-    
+
     # NEW: Link to primary process stage where this challenge occurs
     primary_stage_id = Column(Integer, ForeignKey('process_stages.stage_id'), nullable=True)
     technology_id = Column(Integer, ForeignKey('manufacturing_technologies.technology_id'))
     severity_level = Column(String(50))  # 'minor', 'moderate', 'major', 'critical'
-    
+
     # Relationships
     products = relationship("Product", secondary=product_to_challenge_association, back_populates="challenges")
     primary_stage = relationship("ProcessStage", back_populates="challenges")
-    technology = relationship("ManufacturingTechnology", back_populates="challenges")  
+    technology = relationship("ManufacturingTechnology", back_populates="challenges")
 
     @classmethod
     def get_all_fields(cls):
@@ -461,40 +537,40 @@ class ProcessStage(db.Model):
     stage_category = Column(String(255))
     short_description = Column(Text, nullable=True)
     description = Column(Text)
-    
+
     # NEW: Hierarchical structure
     parent_stage_id = Column(Integer, ForeignKey('process_stages.stage_id'))
     hierarchy_level = Column(Integer)  # 1=Phase, 2=Stage, 3=Operation, etc.
     stage_order = Column(Integer)  # Order within parent level
-    
+
     # Relationships
     template_links = relationship("TemplateStage", back_populates="stage")
     product_overrides = relationship("ProductProcessOverride", back_populates="stage")
     technologies = relationship("ManufacturingTechnology", back_populates="stage")
     challenges = relationship("ManufacturingChallenge", back_populates="primary_stage")
-    
+
     # NEW: Self-referential hierarchy
-    parent = relationship("ProcessStage", 
+    parent = relationship("ProcessStage",
                          remote_side=[stage_id],
                          backref="children")
-    
-        
+
+
     @classmethod
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
         from sqlalchemy import inspect
         return [c.key for c in inspect(cls).attrs if c.key not in ['template_links', 'product_overrides', 'technologies', 'challenges', 'parent', 'children']]
-    
+
     @classmethod
     def get_top_level_phases(cls):
         """Get all Level 1 phases (top of hierarchy)"""
         return cls.query.filter_by(hierarchy_level=1).order_by(cls.stage_order).all()
-    
+
     @classmethod
     def get_by_level(cls, level):
         """Get all stages at a specific hierarchy level"""
         return cls.query.filter_by(hierarchy_level=level).order_by(cls.stage_order).all()
-    
+
     def get_full_path(self):
         """Get the full hierarchical path for this stage"""
         path = [self.stage_name]
@@ -540,7 +616,7 @@ class ProductProcessOverride(db.Model):
 class ProductTimeline(db.Model):
     """Track milestones and timeline changes for products"""
     __tablename__ = 'product_timelines'
-    
+
     timeline_id = Column(Integer, primary_key=True)
     product_id = Column(Integer, ForeignKey('products.product_id'), nullable=False)
     milestone_type = Column(String(100), nullable=False)  # Submission, Approval, Launch, PPQ
@@ -553,9 +629,9 @@ class ProductTimeline(db.Model):
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    
+
     product = relationship("Product", backref="timeline_milestones")
-    
+
     @classmethod
     def get_all_fields(cls):
         return [c.key for c in inspect(cls).attrs if c.key not in ['product']]
@@ -564,7 +640,7 @@ class ProductTimeline(db.Model):
 class ProductRegulatoryFiling(db.Model):
     """Track regulatory submissions by geography and indication"""
     __tablename__ = 'product_regulatory_filings'
-    
+
     filing_id = Column(Integer, primary_key=True)
     product_id = Column(Integer, ForeignKey('products.product_id'), nullable=False)
     indication = Column(String(255), nullable=False)
@@ -578,9 +654,9 @@ class ProductRegulatoryFiling(db.Model):
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    
+
     product = relationship("Product", backref="regulatory_filings")
-    
+
     @classmethod
     def get_all_fields(cls):
         return [c.key for c in inspect(cls).attrs if c.key not in ['product']]
@@ -589,7 +665,7 @@ class ProductRegulatoryFiling(db.Model):
 class ProductManufacturingSupplier(db.Model):
     """Detailed supplier tracking for DS/DP/Device partners"""
     __tablename__ = 'product_manufacturing_suppliers'
-    
+
     supplier_id = Column(Integer, primary_key=True)
     product_id = Column(Integer, ForeignKey('products.product_id'), nullable=False)
     supply_type = Column(String(50), nullable=False)  # DS, DP, Device
@@ -604,9 +680,9 @@ class ProductManufacturingSupplier(db.Model):
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    
+
     product = relationship("Product", backref="manufacturing_suppliers")
-    
+
     @classmethod
     def get_all_fields(cls):
         return [c.key for c in inspect(cls).attrs if c.key not in ['product']]

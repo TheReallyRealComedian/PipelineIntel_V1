@@ -542,7 +542,8 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
     from ..models import (
         Product, Indication, ManufacturingChallenge, ManufacturingTechnology,
         ProductSupplyChain, ProcessStage, InternalFacility, ExternalPartner,
-        ManufacturingEntity, Modality, ProductTimeline, ProductRegulatoryFiling, ProductManufacturingSupplier
+        ManufacturingEntity, Modality, ProductTimeline, ProductRegulatoryFiling,
+        ProductManufacturingSupplier, ProcessTemplate
     )
 
     added_count, updated_count, skipped_count, failed_count = 0, 0, 0, 0
@@ -553,6 +554,13 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
     modality_map = {m.modality_name: m.modality_id for m in Modality.query.with_entities(Modality.modality_name, Modality.modality_id).all()}
     stage_map = {s.stage_name: s.stage_id for s in ProcessStage.query.with_entities(ProcessStage.stage_name, ProcessStage.stage_id).all()}
     entity_map = {e.entity_name: e.entity_id for e in ManufacturingEntity.query.with_entities(ManufacturingEntity.entity_name, ManufacturingEntity.entity_id).all()}
+    template_map = {
+        t.template_name: t.template_id
+        for t in ProcessTemplate.query.with_entities(
+            ProcessTemplate.template_name,
+            ProcessTemplate.template_id
+        ).all()
+    }
 
     # Sort ProcessStage imports by hierarchy level
     if model_class == ProcessStage:
@@ -580,6 +588,25 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
                     data['modality_id'] = modality_map[modality_name]
                 elif modality_name:
                     raise ValueError(f"Modality '{modality_name}' not found.")
+
+                # Handle template lookup
+                template_name = data.pop('process_template_name', None)
+                if template_name:
+                    if template_name in template_map:
+                        template_id = template_map[template_name]
+
+                        # Validate template belongs to modality (extra safety)
+                        if data.get('modality_id'):
+                            template = ProcessTemplate.query.get(template_id)
+                            if template.modality_id != data['modality_id']:
+                                raise ValueError(
+                                    f"Template '{template_name}' does not belong to "
+                                    f"modality '{modality_name}'"
+                                )
+
+                        data['process_template_id'] = template_id
+                    else:
+                        raise ValueError(f"Process template '{template_name}' not found.")
 
                 # Handle technology names for product-technology linking
                 technology_names = data.pop('technology_names', None)
@@ -620,7 +647,7 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
                     if obj_to_update:
                         for key, value in data.items():
                             setattr(obj_to_update, key, value)
-                        
+
                         # Update technology links
                         if technology_ids_to_link:
                             obj_to_update.technologies = [ManufacturingTechnology.query.get(tech_id) for tech_id in technology_ids_to_link]
@@ -666,7 +693,7 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
                     # Pre-fetch the technology map if it's the first challenge being processed
                     if 'technology_map' not in locals():
                         technology_map = {t.technology_name: t.technology_id for t in ManufacturingTechnology.query.with_entities(ManufacturingTechnology.technology_name, ManufacturingTechnology.technology_id).all()}
-                    
+
                     if technology_name:
                         if technology_name in technology_map:
                             data['technology_id'] = technology_map[technology_name]
