@@ -15,7 +15,7 @@ from ..models import (
     Modality, ProcessStage, ProductTimeline, ProductRegulatoryFiling,
     ProductManufacturingSupplier, User, LLMSettings, ProcessTemplate, TemplateStage,
     ModalityRequirement, ProductRequirement, EntityCapability, ProductProcessOverride,
-    ManufacturingCapability
+    ManufacturingCapability, ModalityChallenge
 )
 
 # This order is critical. Parents must be inserted before children.
@@ -26,6 +26,7 @@ TABLE_IMPORT_ORDER = [
     'products', 'indications', 'manufacturing_technologies',
     'manufacturing_challenges', 'llm_settings',
     # Junction/Association tables and tables with multiple FKs last
+    'modality_challenges',
     'template_stages', 'product_to_challenge', 'product_to_technology',
     'product_supply_chain', 'modality_requirements', 'product_requirements',
     'entity_capabilities', 'product_process_overrides', 'product_timelines',
@@ -56,6 +57,7 @@ MODEL_MAP = {
     'product_timelines': ProductTimeline,
     'product_regulatory_filings': ProductRegulatoryFiling,
     'product_manufacturing_suppliers': ProductManufacturingSupplier,
+    'modality_challenges': ModalityChallenge,
 }
 
 

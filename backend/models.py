@@ -202,17 +202,38 @@ class Product(db.Model):
 
     def get_inherited_challenges(self):
         """
-        Get challenges from technologies DIRECTLY linked to this product.
-        This bypasses templates and stages entirely.
+        Get challenges from THREE sources:
+        1. Modality-level challenges (NEW - the main source)
+        2. Technology-based challenges
+        3. Process template challenges (future enhancement)
+        
+        Returns list of dicts with challenge object and source info.
         """
         inherited = []
+        seen_challenge_ids = set()
+        
+        # SOURCE 1: Modality challenges (NEW - primary inheritance)
+        if self.modality and self.modality.modality_challenges:
+            for mc in self.modality.modality_challenges:
+                if mc.challenge_id not in seen_challenge_ids:
+                    inherited.append({
+                        'challenge': mc.challenge,
+                        'source': f'Modality: {self.modality.modality_name}',
+                        'notes': mc.notes
+                    })
+                    seen_challenge_ids.add(mc.challenge_id)
+        
+        # SOURCE 2: Technology-based challenges
         for tech in self.technologies:
             for challenge in tech.challenges:
-                if challenge not in self.challenges:  # Not explicitly linked
+                if challenge.challenge_id not in seen_challenge_ids:
                     inherited.append({
                         'challenge': challenge,
-                        'source': f'Inherited from technology: {tech.technology_name}'
+                        'source': f'Technology: {tech.technology_name}',
+                        'notes': None
                     })
+                    seen_challenge_ids.add(challenge.challenge_id)
+        
         return inherited
 
     def get_explicit_challenge_relationships(self):
@@ -367,11 +388,15 @@ class ManufacturingChallenge(db.Model):
     products = relationship("Product", secondary=product_to_challenge_association, back_populates="challenges")
     primary_stage = relationship("ProcessStage", back_populates="challenges")
     technology = relationship("ManufacturingTechnology", back_populates="challenges")
+    modality_links = relationship("ModalityChallenge",
+                                 back_populates="challenge",
+                                 cascade="all, delete-orphan")
+
 
     @classmethod
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
-        return [c.key for c in inspect(cls).attrs if c.key not in ['products', 'primary_stage', 'technology', 'technology_id']]
+        return [c.key for c in inspect(cls).attrs if c.key not in ['products', 'primary_stage', 'technology', 'technology_id', 'modality_links']]
 
 class ManufacturingTechnology(db.Model):
     __tablename__ = 'manufacturing_technologies'
@@ -417,15 +442,33 @@ class Modality(db.Model):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    # THIS IS THE CORRECTED LINE. It points back to 'modality' on the Product model.
     products = relationship("Product", back_populates="modality")
     process_templates = relationship("ProcessTemplate", back_populates="modality")
     requirements = relationship("ModalityRequirement", back_populates="modality")
+    modality_challenges = relationship("ModalityChallenge",
+                                       back_populates="modality",
+                                       cascade="all, delete-orphan")
 
     @classmethod
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
-        return [c.key for c in inspect(cls).attrs if c.key not in ['products', 'process_templates', 'requirements']]
+        return [c.key for c in inspect(cls).attrs if c.key not in ['products', 'process_templates', 'requirements', 'modality_challenges']]
+
+
+class ModalityChallenge(db.Model):
+    """Links modalities to their typical manufacturing challenges"""
+    __tablename__ = 'modality_challenges'
+
+    modality_id = Column(Integer, ForeignKey('modalities.modality_id'), primary_key=True)
+    challenge_id = Column(Integer, ForeignKey('manufacturing_challenges.challenge_id'), primary_key=True)
+    is_typical = Column(Boolean, default=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    modality = relationship("Modality", back_populates="modality_challenges")
+    challenge = relationship("ManufacturingChallenge", back_populates="modality_links")
+
 
 class ManufacturingCapability(db.Model):
     __tablename__ = 'manufacturing_capabilities'
