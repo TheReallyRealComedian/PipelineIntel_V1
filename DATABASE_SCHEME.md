@@ -1,24 +1,311 @@
 # Database Schema Documentation
+**Pipeline Intelligence - Manufacturing Process Modeling System**
 
-## Overview
+> **Purpose**: This document explains HOW and WHY the database is structured to model pharmaceutical manufacturing complexity. It's written for developers, data analysts, and anyone trying to understand the system's design philosophy.
 
-The Pipeline Intelligence database is designed to model pharmaceutical manufacturing complexity across multiple dimensions: products, modalities, processes, capabilities, and manufacturing networks. The schema follows a **hub-and-spoke** architecture with products at the center, connected to various reference entities.
+---
 
-## Core Design Principles
+## Table of Contents
 
-### 1. **Hierarchical Modeling**
-Process stages support unlimited nesting (Phase → Stage → Operation → Detail) through self-referential relationships.
+1. [Design Philosophy](#design-philosophy)
+2. [Core Concepts Explained](#core-concepts-explained)
+3. [Entity Reference Guide](#entity-reference-guide)
+4. [Data Flow Examples](#data-flow-examples)
+5. [Common Patterns](#common-patterns)
+6. [Import Guidelines](#import-guidelines)
+7. [Troubleshooting & FAQs](#troubleshooting--faqs)
 
-### 2. **Dual-Path Pattern**
-Critical relationships exist at both **pattern level** (modality-based inheritance) and **specific level** (product overrides):
-- Modality Requirements + Product Requirements
-- Stage-based Challenges + Product-tagged Challenges
+---
 
-### 3. **Name-Based Imports**
-All foreign key relationships can be specified by name in JSON imports (e.g., `"modality_name": "Monoclonal Antibody"` instead of `"modality_id": 5`).
+## Design Philosophy
 
-### 4. **Flexible Categorization**
-Entities use category fields for grouping while maintaining flexibility (no rigid enum constraints).
+### The Central Problem
+
+Pharmaceutical manufacturing is complex and hierarchical:
+- Different **product types** (small molecules, antibodies, cell therapies) have fundamentally different manufacturing processes
+- The same **process step** (like "lyophilization") has different requirements depending on what you're making
+- Individual **products** may have unique requirements beyond their product type
+
+Traditional flat database structures can't capture this complexity without massive redundancy.
+
+### The Solution: Multi-Level Inheritance
+
+This database uses a **three-tier inheritance system** to avoid redundancy while maintaining flexibility:
+
+```
+TIER 1: MODALITY (Category-Wide Requirements)
+  "All Monoclonal Antibodies need cell culture"
+  ↓ inherits to all products in this category
+  
+TIER 2: PROCESS TEMPLATE (Process-Specific Requirements)
+  "Fed-Batch mAbs need Fed-Batch Bioreactors"
+  "Perfusion mAbs need Perfusion Bioreactors"
+  ↓ inherits to products using this specific process
+  
+TIER 3: PRODUCT (Asset-Specific Requirements)
+  "This specific mAb also needs Novel Purification Tech"
+  ↓ applies only to this product
+```
+
+**Result**: A complete picture = Inherited (Tier 1) + Inherited (Tier 2) + Specific (Tier 3)
+
+---
+
+## Core Concepts Explained
+
+### 1. Modalities: Product Categories
+
+**What they are**: High-level product classifications that share fundamental manufacturing characteristics.
+
+**Examples**:
+- Small Molecule (traditional chemical drugs)
+- Monoclonal Antibody (protein-based biologics)
+- Cell & Gene Therapy (living cell products)
+- Viral Vector (gene delivery vehicles)
+
+**Why they exist**: Products in the same modality share ~70-80% of their manufacturing requirements. Defining requirements at this level avoids repeating the same data for hundreds of products.
+
+**Concrete Example**:
+```
+Modality: "Monoclonal Antibody"
+  ├─ Requires: Cell Culture (Mammalian)
+  ├─ Requires: Protein Purification
+  ├─ Requires: Fill & Finish (Aseptic)
+  └─ Standard Challenges: High Titer Production, Aggregation Control
+  
+All 150+ mAb products inherit these requirements automatically.
+```
+
+---
+
+### 2. Process Templates: Manufacturing Blueprints
+
+**What they are**: Standard process flows for a specific manufacturing approach within a modality.
+
+**Why they exist**: Not all products in a modality are made the same way. Modern manufacturing offers choices (e.g., batch vs continuous), and these choices affect what capabilities you need.
+
+**Concrete Example - The Fed-Batch vs Perfusion Scenario**:
+
+Both are Monoclonal Antibodies, but different processes:
+
+```
+Modality: Monoclonal Antibody
+  ├─ Template A: "Fed-Batch mAb Process" (Traditional)
+  │   └─ Upstream Processing stage needs:
+  │       - Fed-Batch Bioreactor Operation
+  │       - 14-day culture cycle management
+  │   
+  └─ Template B: "Perfusion mAb Process" (Continuous)
+      └─ Upstream Processing stage needs:
+          - Perfusion Bioreactor Operation
+          - Continuous harvest systems
+          - Real-time analytics
+```
+
+**Without templates**: You'd have to manually specify bioreactor type for every single product.
+
+**With templates**: Assign product to template once, inherits all stage-specific requirements.
+
+---
+
+### 3. Template Stages: The Bridge
+
+**What they are**: Junction table linking templates to process stages, WITH process-specific metadata.
+
+**Why they exist**: This is where the "magic" happens - same stage, different requirements per template.
+
+**Schema**:
+```python
+template_id (FK → process_templates)
+stage_id (FK → process_stages)
+stage_order (sequence)
+is_required (boolean)
+base_capabilities (JSONB) # ← This is key!
+```
+
+**The `base_capabilities` Field Explained**:
+
+This JSONB array stores capability names needed for THIS stage in THIS template.
+
+**Concrete Example**:
+```json
+// Template: "Fed-Batch mAb Process"
+// Stage: "Upstream Processing"
+{
+  "template_id": 1,
+  "stage_id": 3,
+  "stage_order": 1,
+  "is_required": true,
+  "base_capabilities": [
+    "Fed-Batch Bioreactor Operation",
+    "CHO Cell Culture",
+    "Batch Monitoring Systems"
+  ]
+}
+
+// Template: "Perfusion mAb Process"  
+// Stage: "Upstream Processing" (SAME STAGE!)
+{
+  "template_id": 2,
+  "stage_id": 3,
+  "stage_order": 1,
+  "is_required": true,
+  "base_capabilities": [
+    "Perfusion Bioreactor Operation",
+    "CHO Cell Culture",
+    "Continuous Process Analytics"
+  ]
+}
+```
+
+**Why not just put this in modality_requirements?** Because it varies by PROCESS, not by modality. Both are mAbs, but need different equipment.
+
+---
+
+### 4. Process Stages: Hierarchical Process Steps
+
+**What they are**: Reusable, hierarchical definitions of manufacturing steps.
+
+**Key Feature**: Self-referential hierarchy - stages can contain sub-stages to any depth.
+
+**Schema**:
+```python
+stage_id (PK)
+stage_name (unique)
+parent_stage_id (FK → process_stages.stage_id) # Self-reference!
+hierarchy_level (1=Phase, 2=Stage, 3=Operation, etc.)
+stage_order (within parent)
+```
+
+**Concrete Example**:
+```
+Level 1 (Phase): "Upstream Processing"
+  │
+  ├─ Level 2 (Stage): "Cell Culture"
+  │   ├─ Level 3 (Operation): "Seed Train"
+  │   │   ├─ Level 4 (Activity): "Vial Thaw"
+  │   │   └─ Level 4 (Activity): "Inoculation"
+  │   │
+  │   └─ Level 3 (Operation): "Production Bioreactor"
+  │       ├─ Level 4 (Activity): "Media Preparation"
+  │       └─ Level 4 (Activity): "Culture Monitoring"
+  │
+  └─ Level 2 (Stage): "Harvest"
+      └─ Level 3 (Operation): "Centrifugation"
+```
+
+**Why hierarchical?** 
+- High-level view: "How many products use Upstream Processing?" 
+- Detailed view: "Which products need specific vial thaw protocols?"
+- Same data structure, different query granularity.
+
+---
+
+### 5. Manufacturing Technologies: Specific Platforms
+
+**What they are**: Specific techniques or equipment platforms used in manufacturing.
+
+**Relationship to Stages**: Technologies belong to ONE primary stage where they're used.
+
+**Schema**:
+```python
+technology_id (PK)
+technology_name (unique)
+stage_id (FK → process_stages.stage_id)
+innovation_potential (text)
+complexity_rating (1-10)
+```
+
+**Concrete Example**:
+```json
+{
+  "technology_name": "Twin Screw Granulation (TSG)",
+  "stage_name": "Granulation",
+  "innovation_potential": "High - enables continuous manufacturing",
+  "complexity_rating": 7,
+  "description": "Continuous wet granulation using twin screw extruder..."
+}
+```
+
+**Links to Products**: Many-to-many (products can use multiple technologies).
+
+---
+
+### 6. Manufacturing Challenges: Risks and Complexities
+
+**What they are**: Difficulties, risks, or specialized requirements associated with manufacturing.
+
+**Critical Design Decision**: Challenges link to TECHNOLOGIES, not directly to stages.
+
+**Schema**:
+```python
+challenge_id (PK)
+challenge_name (unique)
+technology_id (FK → manufacturing_technologies)
+severity_level ('minor', 'moderate', 'major', 'critical')
+related_capabilities (JSONB)
+```
+
+**Why link to technology instead of stage?**
+- Challenges are specific to HOW you do something, not WHERE
+- Example: "Sterility Assurance" is a challenge of "Aseptic Fill-Finish Technology", not just the "Fill & Finish" stage in general
+
+**Challenge → Stage Connection (Derived)**:
+```
+Challenge → Technology → Stage
+```
+You can always find which stage a challenge occurs in via the technology.
+
+**Concrete Example**:
+```json
+{
+  "challenge_name": "High Titer Production (>5g/L)",
+  "technology_name": "Fed-Batch Bioreactor Operation",
+  "severity_level": "major",
+  "related_capabilities": [
+    "Advanced Cell Line Development",
+    "Process Optimization Expertise",
+    "High-Density Culture Management"
+  ]
+}
+```
+
+**Links to Products**: Many-to-many with metadata (relationship_type: 'explicit' or 'excluded').
+
+---
+
+### 7. Products: The Central Hub
+
+**What they are**: Individual pharmaceutical assets (drugs in development or production).
+
+**Key Foreign Keys**:
+```python
+modality_id (FK → modalities)           # What TYPE of product
+process_template_id (FK → process_templates)  # Which PROCESS it follows
+```
+
+**Why both?**
+- `modality_id` defines what the product IS
+- `process_template_id` defines HOW it's made
+- The template MUST belong to the modality (enforced by validation)
+
+**Concrete Example**:
+```json
+{
+  "product_code": "BI 1015550",
+  "product_name": "Nerandomilast",
+  "modality_name": "Small Molecule",
+  "process_template_name": "Continuous Small Molecule Process",
+  "base_technology": "Twin Screw Granulation",
+  "dosage_form": "Tablet",
+  "current_phase": "Registration"
+}
+```
+
+**What this product inherits**:
+1. Modality requirements (all small molecules need X)
+2. Template stage capabilities (continuous process needs Y)
+3. Plus its own specific requirements (Nerandomilast also needs Z)
 
 ---
 
@@ -26,316 +313,312 @@ Entities use category fields for grouping while maintaining flexibility (no rigi
 
 ### Foundation Entities
 
-#### **Modalities**
-Defines high-level product categories (e.g., Small Molecule, mAb, CAR-T).
-
-**Schema:**
+#### Modalities
 ```python
+# Schema
 modality_id (PK)
-modality_name (unique)
-modality_category
-short_description
-description
-standard_challenges (JSONB)
+modality_name (unique) # "Monoclonal Antibody", "Small Molecule"
+modality_category # "Biologics", "NCE"
+short_description # Brief overview
+description # Detailed explanation
+standard_challenges (JSONB) # Legacy field
 created_at
 ```
 
-**JSON Import Example:**
+**Relationships**:
+- Has many: Products (`products.modality_id`)
+- Has many: Process Templates (`process_templates.modality_id`)
+- Has many: Modality Requirements (to Capabilities)
+
+**JSON Import Example**:
 ```json
 {
   "modality_name": "Monoclonal Antibody",
   "modality_category": "Biologics",
-  "short_description": "Standard therapeutic antibodies targeting specific antigens",
-  "description": "Well-established biologics class with proven manufacturing processes...",
-  "standard_challenges": ["High Titer Production", "Downstream Purification", "Cold Chain"]
+  "short_description": "Therapeutic antibodies targeting specific antigens",
+  "description": "Well-established biologics class with proven CHO-based manufacturing processes..."
 }
 ```
 
-**Relationships:**
-- Has many: Products
-- Has many: Process Templates
-- Has many: Modality Requirements (to Capabilities)
-
 ---
 
-#### **Process Stages** (Hierarchical)
-Represents manufacturing process steps with unlimited nesting depth.
-
-**Schema:**
+#### Process Stages (Hierarchical)
 ```python
+# Schema
 stage_id (PK)
-stage_name (unique)
-stage_category
-short_description
-description
-parent_stage_id (FK → process_stages.stage_id)  # Self-referential
-hierarchy_level (1=Phase, 2=Stage, 3=Operation, etc.)
-stage_order (order within parent level)
+stage_name (unique) # "Upstream Processing", "Cell Culture"
+stage_category # "Production", "Quality Control"
+parent_stage_id (FK → process_stages.stage_id) # NULL for top-level
+hierarchy_level # 1=Phase, 2=Stage, 3=Operation
+stage_order # Order within siblings
 ```
 
-**JSON Import Examples:**
+**Relationships**:
+- Has many: Child Stages (self-referential)
+- Has many: Technologies (`technologies.stage_id`)
+- Has many: Template Stage Links (`template_stages.stage_id`)
+- Belongs to: Parent Stage (self-referential, nullable)
 
-**Level 1 - Phase:**
+**JSON Import Examples**:
+
+Level 1 - Phase:
 ```json
 {
-  "stage_name": "Chemical Synthesis",
-  "stage_category": "API Production",
+  "stage_name": "Upstream Processing",
+  "stage_category": "Production",
   "hierarchy_level": 1,
   "stage_order": 1,
-  "short_description": "Complete chemical synthesis and API production"
+  "short_description": "Cell culture and biomass production"
 }
 ```
 
-**Level 2 - Stage (child of phase):**
+Level 2 - Stage (child):
 ```json
 {
-  "stage_name": "Raw Material Management",
-  "stage_category": "Upstream",
+  "stage_name": "Cell Culture",
+  "stage_category": "Production",
   "hierarchy_level": 2,
   "stage_order": 1,
-  "parent_stage_name": "Chemical Synthesis",
-  "short_description": "Qualification and management of starting materials"
+  "parent_stage_name": "Upstream Processing",
+  "short_description": "Main bioreactor operation"
 }
 ```
-
-**Level 3 - Operation (child of stage):**
-```json
-{
-  "stage_name": "Sourcing and Qualification",
-  "stage_category": "Quality Assurance",
-  "hierarchy_level": 3,
-  "stage_order": 1,
-  "parent_stage_name": "Raw Material Management",
-  "short_description": "Vendor qualification and material testing protocols"
-}
-```
-
-**Relationships:**
-- Has many: Technologies (primary_stage_id)
-- Has many: Challenges (primary_stage_id)
-- Has many: Children (self-referential)
-- Belongs to: Parent Stage (self-referential)
 
 ---
 
-#### **Manufacturing Capabilities**
-Specific skills/technologies required for production.
-
-**Schema:**
+#### Manufacturing Capabilities
 ```python
+# Schema
 capability_id (PK)
-capability_name (unique)
-capability_category
-approach_category
+capability_name (unique) # "Fed-Batch Bioreactor Operation"
+capability_category # "Biologics Production"
+approach_category # "Upstream"
 description
-complexity_weight (1-10 scale)
+complexity_weight (1-10) # Difficulty/cost indicator
+```
+
+**Relationships**:
+- Referenced by: Modality Requirements (pattern level)
+- Referenced by: Product Requirements (specific level)
+- Referenced by: Template Stages (via base_capabilities JSONB)
+- Referenced by: Entity Capabilities (what facilities can do)
+
+**JSON Import Example**:
+```json
+{
+  "capability_name": "Perfusion Bioreactor Operation",
+  "capability_category": "Biologics Production",
+  "approach_category": "Upstream - Continuous",
+  "description": "Continuous cell culture with constant harvest and media perfusion",
+  "complexity_weight": 8
+}
+```
+
+---
+
+### Process Flow Entities
+
+#### Process Templates
+```python
+# Schema
+template_id (PK)
+modality_id (FK → modalities.modality_id)
+template_name (unique) # "Fed-Batch mAb Process"
+description
 created_at
 ```
 
-**JSON Import Example:**
+**Relationships**:
+- Belongs to: Modality (`modality_id`)
+- Has many: Template Stages (junction table)
+- Has many: Products using this template (`products.process_template_id`)
+
+**JSON Import Example**:
 ```json
 {
-  "capability_name": "Cell Culture (Mammalian)",
-  "capability_category": "Biologics Production",
-  "approach_category": "Upstream",
-  "description": "Mammalian cell culture in bioreactors for protein expression",
-  "complexity_weight": 7
+  "template_name": "Fed-Batch Monoclonal Antibody Process",
+  "modality_name": "Monoclonal Antibody",
+  "description": "Standard CHO cell-based production using fed-batch bioreactors",
+  "stages": [
+    {
+      "stage_name": "Upstream Processing",
+      "stage_order": 1,
+      "is_required": true,
+      "base_capabilities": [
+        "Fed-Batch Bioreactor Operation",
+        "CHO Cell Culture",
+        "Batch Monitoring Systems"
+      ]
+    },
+    {
+      "stage_name": "Downstream Processing",
+      "stage_order": 2,
+      "is_required": true,
+      "base_capabilities": [
+        "Protein A Chromatography",
+        "Viral Inactivation",
+        "Ultrafiltration/Diafiltration"
+      ]
+    }
+  ]
 }
 ```
 
-**Relationships:**
-- Referenced by: Modality Requirements
-- Referenced by: Product Requirements
-- Referenced by: Entity Capabilities
-- Referenced by: Challenges (via JSONB related_capabilities)
+---
+
+#### Template Stages (Junction)
+```python
+# Schema
+template_id (PK, FK)
+stage_id (PK, FK)
+stage_order # Sequence in this template
+is_required (boolean)
+base_capabilities (JSONB) # Array of capability names
+```
+
+**Purpose**: Links templates to stages with process-specific metadata.
+
+**The base_capabilities field**: Stores capability names needed for this stage WHEN using this template.
+
+**Relationships**:
+- Belongs to: Process Template
+- Belongs to: Process Stage
+
+**Why it's a composite key**: One template can use the same stage multiple times? No. But it ensures uniqueness of the (template, stage) pair.
 
 ---
 
 ### Manufacturing Context Entities
 
-#### **Manufacturing Technologies**
-Specific platforms or techniques used in manufacturing.
-
-**Schema:**
+#### Manufacturing Technologies
 ```python
+# Schema
 technology_id (PK)
-technology_name (unique)
-short_description
-description
+technology_name (unique) # "Twin Screw Granulation"
 stage_id (FK → process_stages.stage_id)
-innovation_potential
-complexity_rating
+innovation_potential (text)
+complexity_rating (1-10)
 ```
 
-**JSON Import Example:**
+**Relationships**:
+- Belongs to: Process Stage (primary stage of use)
+- Has many: Challenges (`challenges.technology_id`)
+- Links to: Products (many-to-many via product_to_technology)
+
+**JSON Import Example**:
 ```json
 {
-  "technology_name": "Twin Screw Granulation (TSG)",
-  "stage_name": "Granulation",
-  "short_description": "Continuous granulation process",
-  "description": "Advanced continuous manufacturing technology...",
-  "innovation_potential": "High - enables continuous manufacturing paradigm",
-  "complexity_rating": 7
+  "technology_name": "Perfusion Bioreactor System",
+  "stage_name": "Cell Culture",
+  "innovation_potential": "High - enables intensified bioprocessing",
+  "complexity_rating": 8,
+  "description": "Continuous cell culture system with cell retention..."
 }
 ```
-
-**Relationships:**
-- Belongs to: Process Stage (stage_id)
-- Links to: Products (many-to-many via product_to_technology)
 
 ---
 
-#### **Manufacturing Challenges**
-Risks, difficulties, or specialized requirements.
-
-**Schema:**
+#### Manufacturing Challenges
 ```python
+# Schema
 challenge_id (PK)
 challenge_name (unique)
-challenge_category
-short_description
-explanation
-related_capabilities (JSONB - array of capability names)
-primary_stage_id (FK → process_stages.stage_id)
-severity_level ('minor', 'moderate', 'major', 'critical')
+challenge_category # "Safety", "Quality", "Scale-up"
+technology_id (FK → manufacturing_technologies.technology_id)
+severity_level # 'minor', 'moderate', 'major', 'critical'
+related_capabilities (JSONB) # Capabilities that help address this
 ```
 
-**JSON Import Example:**
+**Relationships**:
+- Belongs to: Technology (where it occurs)
+- Links to: Products (many-to-many with relationship_type)
+- Implicit: Belongs to Stage (via technology)
+
+**Product Linking Logic**:
+- `relationship_type = 'explicit'`: Product faces this challenge
+- `relationship_type = 'excluded'`: Product explicitly DOESN'T face this (overrides inheritance)
+
+**JSON Import Example**:
 ```json
 {
-  "challenge_name": "BSL-2+ Containment Facilities Required",
-  "challenge_category": "Safety & Containment",
-  "short_description": "Requires specialized biosafety infrastructure",
-  "explanation": "Live viral vectors require BSL-2+ facilities with negative pressure...",
-  "primary_stage_name": "Upstream Processing",
-  "severity_level": "critical",
-  "related_capabilities": ["BSL-2+ Containment", "Viral Vector Handling"],
-  "product_codes": ["BI 3720931", "BI 1831169"]
+  "challenge_name": "Cell Line Stability at High Density",
+  "challenge_category": "Production",
+  "technology_name": "Perfusion Bioreactor System",
+  "severity_level": "major",
+  "related_capabilities": [
+    "Advanced Cell Line Engineering",
+    "Real-Time Cell Viability Monitoring",
+    "Perfusion Process Control"
+  ],
+  "product_codes": ["BI 456789"] # Products that face this
 }
 ```
-
-**Relationships:**
-- Belongs to: Process Stage (primary_stage_id)
-- Links to: Products (many-to-many via product_to_challenge)
 
 ---
 
 ### Product Entities
 
-#### **Products**
-Central entity representing pharmaceutical assets.
-
-**Schema:**
+#### Products
 ```python
+# Schema (Key Fields)
 product_id (PK)
 product_code (unique)
 product_name
-product_type
-short_description
-description
-base_technology
-mechanism_of_action
-dosage_form
+modality_id (FK → modalities.modality_id)
+process_template_id (FK → process_templates.template_id)
+product_type # "NCE", "NBE", etc.
 therapeutic_area
 current_phase
-project_status
-lead_indication
 expected_launch_year
-lifecycle_indications (JSONB)
-regulatory_designations (JSONB)
-manufacturing_strategy
-manufacturing_sites (JSONB)
-volume_forecast (JSONB)
-modality_id (FK → modalities.modality_id)
-created_at
-updated_at
+# ... many more fields
 ```
 
-**JSON Import Example:**
-```json
-{
-  "product_code": "BI 1015550",
-  "product_name": "Nerandomilast",
-  "modality_name": "Small Molecule",
-  "product_type": "NCE",
-  "short_description": "PDE4B inhibitor for pulmonary fibrosis",
-  "base_technology": "Twin Screw Granulation (TSG)",
-  "mechanism_of_action": "Preferential PDE4B inhibitor halting disease progression in IPF",
-  "dosage_form": "Tablet",
-  "therapeutic_area": "Respiratory",
-  "current_phase": "Registration",
-  "project_status": "On Track",
-  "lead_indication": "Idiopathic Pulmonary Fibrosis (IPF)",
-  "expected_launch_year": 2025,
-  "lifecycle_indications": [
-    {"phase": "Phase 3", "indication": "Progressive Pulmonary Fibrosis (PPF)"},
-    {"phase": "Phase 2", "indication": "Systemic Sclerosis (SSc)"}
-  ],
-  "regulatory_designations": ["Breakthrough Therapy", "Orphan Drug"],
-  "manufacturing_strategy": "Internal",
-  "manufacturing_sites": {
-    "DP": ["ING_SoL", "Koropi"],
-    "DS": ["ING"]
-  },
-  "volume_forecast": {
-    "DP": "Medium (10-100M PCS)",
-    "DS": "Low (10-1000 kg)"
-  }
-}
-```
+**Critical Foreign Keys**:
+- `modality_id`: Links to category (WHAT it is)
+- `process_template_id`: Links to process (HOW it's made)
 
-**Relationships:**
-- Belongs to: Modality (modality_id)
+**Validation Rule**: If both are set, template MUST belong to modality.
+
+**Relationships**:
+- Belongs to: Modality
+- Belongs to: Process Template (nullable)
 - Has many: Indications
-- Has many: Product Supply Chain entries
-- Has many: Product Requirements (to Capabilities)
-- Has many: Product Process Overrides
-- Links to: Challenges (many-to-many)
+- Has many: Product Requirements (specific capabilities)
+- Has many: Product Process Overrides (process deviations)
+- Links to: Challenges (many-to-many with metadata)
 - Links to: Technologies (many-to-many)
 
----
-
-#### **Indications**
-Clinical indications for products.
-
-**Schema:**
-```python
-indication_id (PK)
-product_id (FK → products.product_id)
-indication_name
-therapeutic_area
-development_phase
-expected_launch_year
-```
-
-**JSON Import Example:**
+**JSON Import Example**:
 ```json
 {
-  "product_code": "BI 1015550",
-  "indication_name": "Progressive Pulmonary Fibrosis (PPF)",
-  "therapeutic_area": "Respiratory",
-  "development_phase": "Phase 3",
-  "expected_launch_year": 2026
+  "product_code": "BI 456789",
+  "product_name": "Example mAb",
+  "modality_name": "Monoclonal Antibody",
+  "process_template_name": "Perfusion mAb Process",
+  "product_type": "NBE",
+  "therapeutic_area": "Oncology",
+  "current_phase": "Phase 2",
+  "expected_launch_year": 2028
 }
 ```
 
 ---
 
-### Requirements System (Dual-Path Pattern)
+### Requirements System (Dual-Path)
 
-#### **Modality Requirements** (Pattern Level)
-Standard capabilities required by a modality.
-
-**Schema:**
+#### Modality Requirements (Pattern Level)
 ```python
+# Schema
 modality_id (PK, FK)
 required_capability_id (PK, FK)
-requirement_level ('essential', 'preferred', 'optional')
+requirement_level # 'essential', 'preferred', 'optional'
 is_critical (boolean)
-timeline_context
+timeline_context # When it's needed
 ```
 
-**JSON Import Example:**
+**Purpose**: Define standard capabilities for ALL products in a modality.
+
+**JSON Import Example**:
 ```json
 {
   "modality_name": "Monoclonal Antibody",
@@ -348,422 +631,397 @@ timeline_context
 
 ---
 
-#### **Product Requirements** (Specific Level)
-Product-specific capability needs (overrides or additions to modality).
-
-**Schema:**
+#### Product Requirements (Specific Level)
 ```python
+# Schema
 product_id (PK, FK)
 required_capability_id (PK, FK)
-requirement_level
-is_critical
+requirement_level # 'essential', 'preferred', 'optional'
+is_critical (boolean)
 timeline_needed (date)
 notes
 ```
 
-**JSON Import Example:**
+**Purpose**: Define product-specific capabilities (additions or overrides).
+
+**JSON Import Example**:
 ```json
 {
-  "product_code": "BI 456906",
-  "required_capability_name": "Device Assembly & Integration",
+  "product_code": "BI 456789",
+  "required_capability_name": "Novel ADC Conjugation",
   "requirement_level": "essential",
   "is_critical": true,
   "timeline_needed": "2026-06-01",
-  "notes": "Specific to pen injector device for peptide delivery"
+  "notes": "Unique to this antibody-drug conjugate"
 }
 ```
 
 ---
 
-### Manufacturing Network
+## Data Flow Examples
 
-#### **Manufacturing Entities** (Base Table)
-Polymorphic base for facilities and partners.
+### Example 1: Complete Capability Requirements for a Product
 
-**Schema:**
+**Product**: BI 456789 (Perfusion mAb for Oncology)
+
 ```python
-entity_id (PK)
-entity_name
-entity_type ('Internal' or 'External')
-location
-operational_status
-created_at
-```
+# Query the product's complete requirements
+product = Product.query.filter_by(product_code="BI 456789").first()
+requirements = product.get_all_capability_requirements()
 
-**Used as base for:**
-- Internal Facilities (extends with facility_code, cost_center, etc.)
-- External Partners (extends with company_name, relationship_type, etc.)
-
----
-
-#### **Internal Facilities**
-Company-owned manufacturing sites.
-
-**Schema:**
-```python
-entity_id (PK, FK → manufacturing_entities)
-facility_code
-cost_center
-facility_type
-compatible_product_types (JSONB)
-internal_capacity (JSONB)
-```
-
-**JSON Import Example:**
-```json
+# Result Structure:
 {
-  "facility_code": "ING",
-  "entity_name": "Ingelheim Site",
-  "location": "Germany",
-  "facility_type": "Integrated Biologics & Small Molecule",
-  "operational_status": "Active",
-  "compatible_product_types": ["NCE", "NBE"],
-  "internal_capacity": {
-    "API_synthesis_kg_per_year": 5000,
-    "tablet_production_million_units": 200
-  }
-}
-```
-
----
-
-#### **External Partners**
-Contract manufacturing organizations (CMOs).
-
-**Schema:**
-```python
-entity_id (PK, FK → manufacturing_entities)
-company_name
-relationship_type
-contract_terms
-exclusivity_level
-capacity_allocation
-specialization
-```
-
-**JSON Import Example:**
-```json
-{
-  "company_name": "Vetter Pharma",
-  "entity_name": "Vetter Pharma",
-  "location": "Ravensburg, Germany",
-  "relationship_type": "CMO - Fill & Finish",
-  "operational_status": "Active",
-  "contract_terms": "Master Service Agreement through 2027",
-  "exclusivity_level": "Preferred Partner",
-  "specialization": "Aseptic fill-finish for biologics and pre-filled syringes"
-}
-```
-
----
-
-#### **Entity Capabilities**
-What each facility/partner can do.
-
-**Schema:**
-```python
-entity_id (PK, FK)
-capability_id (PK, FK)
-capability_level ('basic', 'intermediate', 'advanced', 'expert')
-implementation_date
-upgrade_planned (boolean)
-notes
-```
-
-**JSON Import Example:**
-```json
-{
-  "entity_name": "Biberach",
-  "capability_name": "Cell Culture (Mammalian)",
-  "capability_level": "expert",
-  "implementation_date": "2015-03-01",
-  "upgrade_planned": false,
-  "notes": "20,000L single-use bioreactor capacity"
-}
-```
-
----
-
-#### **Product Supply Chain**
-Maps products to manufacturing entities.
-
-**Schema:**
-```python
-id (PK)
-product_id (FK)
-entity_id (FK)
-manufacturing_stage
-supply_model ('Internal', 'External', 'Hybrid')
-internal_site_name
-```
-
-**JSON Import Example:**
-```json
-{
-  "product_code": "BI 764532",
-  "entity_name": "Vetter",
-  "manufacturing_stage": "Fill & Finish",
-  "supply_model": "External"
-}
-```
-
----
-
-### Process Templates
-
-#### **Process Templates**
-Standard process flow for each modality.
-
-**Schema:**
-```python
-template_id (PK)
-modality_id (FK)
-template_name
-description
-created_at
-```
-
-**JSON Import Example:**
-```json
-{
-  "template_name": "Standard Monoclonal Antibody Process",
-  "modality_name": "Monoclonal Antibody",
-  "description": "Typical CHO cell-based mAb production process",
-  "stages": [
-    {
-      "stage_name": "Upstream Processing",
-      "stage_order": 1,
-      "is_required": true,
-      "base_capabilities": ["Cell Culture (Mammalian)", "Bioreactor Operation"]
-    },
-    {
-      "stage_name": "Downstream Processing",
-      "stage_order": 2,
-      "is_required": true,
-      "base_capabilities": ["Protein Purification", "Chromatography"]
-    }
+  'modality_inherited': [
+    # From Modality: "Monoclonal Antibody"
+    {'capability': 'Cell Culture (Mammalian)', 'source': 'Modality: Monoclonal Antibody'},
+    {'capability': 'Protein Purification', 'source': 'Modality: Monoclonal Antibody'},
+    {'capability': 'Fill & Finish (Aseptic)', 'source': 'Modality: Monoclonal Antibody'}
+  ],
+  
+  'template_inherited': [
+    # From Template: "Perfusion mAb Process" → Template Stages
+    {'capability': 'Perfusion Bioreactor Operation', 'stage': 'Cell Culture'},
+    {'capability': 'Continuous Harvest Systems', 'stage': 'Cell Culture'},
+    {'capability': 'Real-Time Analytics', 'stage': 'Cell Culture'},
+    {'capability': 'Protein A Chromatography', 'stage': 'Purification'}
+  ],
+  
+  'product_specific': [
+    # Product-specific additions
+    {'capability': 'Novel ADC Conjugation', 'notes': 'Unique to this ADC'}
   ]
 }
 ```
 
+**Total Requirements**: Union of all three tiers.
+
 ---
 
-## Key Concepts
+### Example 2: Challenge Inheritance
 
-### 1. Hierarchical Process Stages
+**Scenario**: Product uses "Perfusion Bioreactor System" technology.
 
-Process stages can nest to any depth:
-
-```
-Chemical Synthesis (Level 1: Phase)
-  └─ Raw Material Management (Level 2: Stage)
-      ├─ Sourcing & Qualification (Level 3: Operation)
-      │   ├─ Vendor Audits (Level 4: Activity)
-      │   └─ Material Testing (Level 4: Activity)
-      └─ Supply Chain Management (Level 3: Operation)
-```
-
-**Benefits:**
-- Query at any level of granularity
-- Challenges and technologies link at appropriate level
-- Support both high-level and detailed analysis
-
-**Usage:**
 ```python
-# Get top-level phases
-phases = ProcessStage.get_top_level_phases()
+# Technology has associated challenges
+technology = ManufacturingTechnology.query.filter_by(
+    technology_name="Perfusion Bioreactor System"
+).first()
 
-# Get full hierarchical path
+# Challenges linked to this technology:
+technology.challenges
+# Returns:
+# - "Cell Line Stability at High Density"
+# - "Perfusion Process Control Complexity"
+# - "Equipment Fouling Risk"
+
+# Product inherits these challenges automatically
+product.get_inherited_challenges()
+# Returns all challenges from linked technologies
+
+# Product can exclude inherited challenges
+product.add_challenge_exclusion(
+    challenge_id=15,  # "Equipment Fouling Risk"
+    notes="Using novel anti-fouling membrane technology"
+)
+
+# Product can add explicit challenges
+product.add_challenge_inclusion(
+    challenge_id=42,  # "Regulatory Uncertainty - Novel Process"
+    notes="First-in-class perfusion approval pathway"
+)
+
+# Final effective challenges
+product.get_effective_challenges()
+# Returns: Inherited - Excluded + Explicit
+```
+
+---
+
+### Example 3: Hierarchical Stage Navigation
+
+```python
+# Find all operations under Upstream Processing
+upstream = ProcessStage.query.filter_by(
+    stage_name="Upstream Processing"
+).first()
+
+# Get all child stages
+upstream.children
+# Returns: Cell Culture, Media Preparation, Inoculation, etc.
+
+# Get full path for a detailed operation
+operation = ProcessStage.query.filter_by(
+    stage_name="Vial Thaw"
+).first()
+
 operation.get_full_path()
-# Returns: "Chemical Synthesis > Raw Material Management > Sourcing & Qualification"
+# Returns: "Upstream Processing > Cell Culture > Seed Train > Vial Thaw"
+
+# Query products by stage at any level
+products_using_perfusion = Product.query.join(
+    product_to_technology_association
+).join(ManufacturingTechnology).join(ProcessStage).filter(
+    ProcessStage.stage_name == "Cell Culture"
+).all()
 ```
-
----
-
-### 2. Dual-Path Requirements Pattern
-
-Requirements exist at both pattern and specific levels:
-
-```
-PATTERN LEVEL (Inherited):
-Modality "mAb" → requires "Cell Culture"
-  ↓ (all mAb products inherit this)
-Product "mAb-123" → gets Cell Culture requirement
-
-SPECIFIC LEVEL (Override/Addition):
-Product "mAb-123" → also requires "Novel Purification"
-  ↑ (product-specific need not in modality)
-```
-
-**Benefits:**
-- Define once at modality level (DRY principle)
-- Override for special cases at product level
-- Complete picture = inherited + specific
-
----
-
-### 3. Challenge Anchoring
-
-Challenges connect at multiple levels:
-
-```
-Challenge: "BSL-2+ Containment"
-  ├─ Primary Stage: "Upstream Processing" (context)
-  ├─ Products: [specific products facing this] (facts)
-  └─ Related Capabilities: ["BSL-2+ Facilities"] (solutions)
-```
-
-**Benefits:**
-- Know WHERE challenges occur (stage)
-- Know WHICH products face them (direct link)
-- Know HOW to address them (capabilities)
-
----
-
-## Data Population Strategy
-
-### Phase 1: Foundation (Start Here)
-1. **Modalities** (5-10 entries) - Already complete
-2. **Process Stages** (10-15 Level 1 phases)
-3. **Manufacturing Capabilities** (20-30 core capabilities)
-
-### Phase 2: Context
-4. **Manufacturing Technologies** (15-20 entries)
-5. **Manufacturing Challenges** (extract from modalities.json)
-
-### Phase 3: Products & Patterns
-6. **Process Templates** (one per modality)
-7. **Products** (import from failsafe.json)
-8. **Modality Requirements** (pattern-level)
-
-### Phase 4: Manufacturing Network
-9. **Manufacturing Entities** (facilities + partners)
-10. **Entity Capabilities** (what each can do)
-11. **Product Supply Chain** (product-to-entity mapping)
-
-### Phase 5: Details
-12. **Product Requirements** (specific overrides)
-13. **Indications** (clinical details)
-
----
-
-## Import Workflow
-
-### Step 1: Prepare JSON File
-Create file in `content/` directory (e.g., `process_stages.json`)
-
-### Step 2: Navigate to Data Management
-Go to **Data Management** page in application
-
-### Step 3: Select Entity Type & Upload
-- Choose entity type from dropdown
-- Upload JSON file
-- Click "Analyze File"
-
-### Step 4: Review Preview
-- See proposed adds/updates/skips
-- Use bulk actions or individual controls
-- Validate relationships resolve correctly
-
-### Step 5: Finalize Import
-- Click "Finalize Import"
-- System commits changes to database
-- Check logs for any errors
 
 ---
 
 ## Common Patterns
 
-### Product with Full Context
+### Pattern 1: Adding a New Modality
+
+1. Create the modality
+2. Define modality requirements (common capabilities)
+3. Create at least one process template
+4. Define template stages with base_capabilities
+5. Products can now use this modality + template
+
 ```json
+// Step 1: Modality
 {
-  "product_code": "EXAMPLE-001",
-  "product_name": "Example Product",
-  "modality_name": "Monoclonal Antibody",
-  "therapeutic_area": "Oncology",
-  "current_phase": "Phase 2",
-  "expected_launch_year": 2028
+  "modality_name": "Oligonucleotide",
+  "modality_category": "Nucleic Acid Therapeutics"
+}
+
+// Step 2: Modality Requirements
+{
+  "modality_name": "Oligonucleotide",
+  "required_capability_name": "Solid-Phase Synthesis",
+  "requirement_level": "essential"
+}
+
+// Step 3: Template
+{
+  "template_name": "Standard Oligo Process",
+  "modality_name": "Oligonucleotide",
+  "stages": [...]
+}
+
+// Step 4: Products
+{
+  "product_code": "OLIGO-001",
+  "modality_name": "Oligonucleotide",
+  "process_template_name": "Standard Oligo Process"
 }
 ```
 
-Then separately link challenges:
+---
+
+### Pattern 2: Process Variations
+
+When a modality has multiple process approaches:
+
 ```json
+// Same modality, different templates
+{
+  "modality_name": "Small Molecule",
+  "templates": [
+    {
+      "template_name": "Batch Small Molecule",
+      "stages": [
+        {
+          "stage_name": "API Synthesis",
+          "base_capabilities": ["Batch Reactor Operation"]
+        }
+      ]
+    },
+    {
+      "template_name": "Continuous Small Molecule",
+      "stages": [
+        {
+          "stage_name": "API Synthesis",
+          "base_capabilities": ["Continuous Flow Reactor", "Twin Screw Granulation"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+Products choose which template based on their manufacturing approach.
+
+---
+
+### Pattern 3: Challenge Management
+
+```json
+// Define challenge (linked to technology, not stage directly)
+{
+  "challenge_name": "High Containment Requirements",
+  "technology_name": "Live Viral Vector Production",
+  "severity_level": "critical",
+  "related_capabilities": ["BSL-2+ Facilities", "Viral Safety Protocols"]
+}
+
+// Products inherit from technologies
+Product "GENE-001" uses "Live Viral Vector Production"
+  → Automatically inherits "High Containment Requirements"
+
+// Product can exclude if not applicable
+{
+  "product_code": "GENE-001",
+  "excluded_challenge_name": "High Containment Requirements",
+  "notes": "Using inactivated vector"
+}
+```
+
+---
+
+## Import Guidelines
+
+### Import Order (Critical!)
+
+Dependencies must be imported in this order:
+
+1. **Foundation**: Modalities, Process Stages, Manufacturing Capabilities
+2. **Context**: Manufacturing Technologies, Manufacturing Challenges
+3. **Templates**: Process Templates (with stages)
+4. **Products**: Products (references modalities + templates)
+5. **Requirements**: Modality Requirements, Product Requirements
+6. **Mappings**: Product-Technology links, Product-Challenge links
+
+### Name-Based Foreign Key Resolution
+
+The import system resolves foreign keys by name:
+
+```json
+// Instead of this (error-prone):
+{"modality_id": 5}
+
+// Use this (human-readable):
+{"modality_name": "Monoclonal Antibody"}
+
+// System automatically looks up:
+modality_id = Modality.query.filter_by(modality_name="Monoclonal Antibody").first().modality_id
+```
+
+### Nested vs Separate Imports
+
+**Nested Import** (Template with Stages):
+```json
+{
+  "template_name": "Fed-Batch mAb",
+  "modality_name": "Monoclonal Antibody",
+  "stages": [
+    {"stage_name": "Upstream", "stage_order": 1, "base_capabilities": [...]},
+    {"stage_name": "Downstream", "stage_order": 2, "base_capabilities": [...]}
+  ]
+}
+```
+
+**Separate Imports** (Product and Challenges):
+```json
+// First: Product
+{"product_code": "BI 123", "product_name": "..."}
+
+// Then: Link to Challenges
 {
   "challenge_name": "High Titer Production",
-  "product_codes": ["EXAMPLE-001"]
+  "product_codes": ["BI 123", "BI 456"]
 }
 ```
 
-### Hierarchical Stage Definition
-```json
-[
-  {"stage_name": "Upstream", "hierarchy_level": 1, "stage_order": 1},
-  {"stage_name": "Cell Culture", "hierarchy_level": 2, "parent_stage_name": "Upstream", "stage_order": 1},
-  {"stage_name": "Seed Train", "hierarchy_level": 3, "parent_stage_name": "Cell Culture", "stage_order": 1}
-]
-```
+---
 
-### Capability Requirement Chain
-```json
-// 1. Define capability
-{"capability_name": "Continuous Manufacturing", "complexity_weight": 9}
+## Troubleshooting & FAQs
 
-// 2. Link to modality
-{"modality_name": "Small Molecule", "required_capability_name": "Continuous Manufacturing", "is_critical": true}
+### Q: Why can't I add a check constraint for template-modality matching?
 
-// 3. Optionally override at product level
-{"product_code": "SM-001", "required_capability_name": "Advanced Continuous (TSG)", "is_critical": true}
+**A**: PostgreSQL doesn't support subqueries in CHECK constraints. Validation is handled at the application level via the `@validates` decorator in the Product model.
+
+**Solution**: The model automatically validates on insert/update. If you need database-level enforcement, use a trigger (see optional trigger migration).
+
+---
+
+### Q: Can a product have no template?
+
+**A**: Yes. `process_template_id` is nullable. Some products may have completely bespoke processes that don't fit standard templates.
+
+---
+
+### Q: Why are challenges linked to technologies instead of stages?
+
+**A**: Because challenges are specific to HOW you do something, not just WHERE. 
+
+**Example**: "Upstream Processing" stage might use:
+- Fed-Batch Technology → Challenge: "Long cycle times"
+- Perfusion Technology → Challenge: "Membrane fouling"
+
+Same stage, different challenges based on technology choice.
+
+---
+
+### Q: What's the difference between modality_requirements and template_stages.base_capabilities?
+
+**A**: 
+- **Modality Requirements**: Capabilities needed for ALL products in that category (stored in database table)
+- **Template Base Capabilities**: Capabilities needed for a specific PROCESS APPROACH (stored in JSONB field)
+
+**Example**:
+- Modality Requirement: "All mAbs need cell culture" (applies to 100+ products)
+- Template Capability: "Fed-batch mAbs need fed-batch bioreactors" (applies to ~60 products)
+
+---
+
+### Q: Can a template belong to multiple modalities?
+
+**A**: No. Each template belongs to exactly one modality. If two modalities share the same process, create separate templates (can duplicate the stages).
+
+---
+
+### Q: How do I query all capabilities for a product?
+
+**A**: Use the built-in method:
+
+```python
+product = Product.query.get(product_id)
+all_requirements = product.get_all_capability_requirements()
+# Returns dict with modality_inherited, template_inherited, product_specific
 ```
 
 ---
 
-## Validation Rules
+### Q: Can I modify a template after products are using it?
 
-### Unique Constraints
-- `product_code` must be unique
-- `modality_name` must be unique
-- `stage_name` must be unique (even across hierarchy levels)
-- `capability_name` must be unique
-- `challenge_name` must be unique
-
-### Required Fields
-- Products must have: `product_code`, `product_name`
-- Stages must have: `stage_name`, `hierarchy_level`
-- Capabilities must have: `capability_name`
-
-### Referential Integrity
-- All `*_name` fields in JSON must resolve to existing entities
-- System will error if referenced entity doesn't exist
-- Create parent entities before children (modality before products)
+**A**: Yes, but be careful. Changes to `template_stages.base_capabilities` will affect ALL products using that template. If you need to change requirements for one product, use `product_requirements` instead.
 
 ---
 
-## Querying Examples
+## Appendix: Database Diagram Legend
 
-### Find all challenges for a product
-```python
-product = Product.query.filter_by(product_code="BI 1015550").first()
-challenges = product.challenges  # Direct link
+When viewing the schema diagram:
+
+- **Solid lines**: Foreign key relationships
+- **Dotted lines**: Logical/derived relationships
+- **Bold tables**: Central hub entities (Products, Modalities)
+- **Grouped boxes**: Related entity clusters
+
+**Key Relationships**:
 ```
+Products (central hub)
+  ├─── modality_id → Modalities
+  ├─── process_template_id → Process Templates
+  ├─── many-to-many → Technologies
+  ├─── many-to-many → Challenges
+  └─── one-to-many → Product Requirements
 
-### Get product complexity score
-```python
-from sqlalchemy import func
-complexity = db.session.query(
-    func.sum(ManufacturingCapability.complexity_weight)
-).join(ProductRequirement).filter(
-    ProductRequirement.product_id == product.id
-).scalar()
-```
+Process Templates
+  ├─── modality_id → Modalities
+  └─── many-to-many → Process Stages (via Template Stages)
 
-### Navigate stage hierarchy
-```python
-stage = ProcessStage.query.filter_by(stage_name="Sourcing & Qualification").first()
-path = stage.get_full_path()  # "Chemical Synthesis > Raw Material > Sourcing & Qualification"
-children = stage.children  # All sub-operations
-parent = stage.parent  # Parent stage
+Manufacturing Technologies
+  ├─── stage_id → Process Stages
+  └─── one-to-many → Challenges
 ```
 
 ---
 
-This schema provides a comprehensive foundation for modeling pharmaceutical manufacturing complexity while maintaining flexibility for future enhancements.
+## Version History
+
+- **v2.0** (2025-10-05): Added process_template_id to products, clarified three-tier inheritance, removed primary_stage_id redundancy
+- **v1.0** (2025-07-15): Initial schema design
+
+---
+
+**Questions?** Check the code comments in `backend/models.py` or the migration files in `migrations/versions/` for implementation details.
