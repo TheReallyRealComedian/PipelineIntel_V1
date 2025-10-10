@@ -554,6 +554,7 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
     # Pre-fetch maps for foreign key lookups
     product_map = {p.product_code: p for p in Product.query.all()}
     modality_map = {m.modality_name: m.modality_id for m in Modality.query.with_entities(Modality.modality_name, Modality.modality_id).all()}
+    challenge_map = {c.challenge_name: c.challenge_id for c in ManufacturingChallenge.query.with_entities(ManufacturingChallenge.challenge_name, ManufacturingChallenge.challenge_id).all()}
     stage_map = {s.stage_name: s.stage_id for s in ProcessStage.query.with_entities(ProcessStage.stage_name, ProcessStage.stage_id).all()}
     entity_map = {e.entity_name: e.entity_id for e in ManufacturingEntity.query.with_entities(ManufacturingEntity.entity_name, ManufacturingEntity.entity_id).all()}
     template_map = {
@@ -578,8 +579,42 @@ def finalize_import(resolved_data: list, model_class, unique_key_field: str):
             continue
 
         try:
+            # ==================== NEW BLOCK FOR MODALITY CHALLENGES ====================
+            if model_class == ModalityChallenge:
+                modality_name = data_dict.get('modality_name')
+                challenge_name = data_dict.get('challenge_name')
+
+                if not modality_name or not challenge_name:
+                    raise ValueError("Missing modality_name or challenge_name")
+
+                if modality_name not in modality_map:
+                    raise ValueError(f"Modality '{modality_name}' not found.")
+
+                if challenge_name not in challenge_map:
+                    raise ValueError(f"Challenge '{challenge_name}' not found.")
+
+                # Check if the relationship already exists to prevent duplicates
+                exists = ModalityChallenge.query.filter_by(
+                    modality_id=modality_map[modality_name],
+                    challenge_id=challenge_map[challenge_name]
+                ).first()
+
+                if not exists and action == 'add':
+                    new_obj = ModalityChallenge(
+                        modality_id=modality_map[modality_name],
+                        challenge_id=challenge_map[challenge_name],
+                        is_typical=data_dict.get('is_typical', True),
+                        notes=data_dict.get('notes')
+                    )
+                    db.session.add(new_obj)
+                    added_count += 1
+                elif exists:
+                    skipped_count += 1 # Already exists, so we skip it
+                else:
+                    skipped_count += 1
+
             # ==================== SPECIAL HANDLING FOR PRODUCTS ====================
-            if model_class == Product:
+            elif model_class == Product:
                 # Separate main product data from related table data
                 main_data, related_data = _separate_product_data(data_dict)
                 data = main_data.copy()

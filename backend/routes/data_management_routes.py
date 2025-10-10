@@ -15,7 +15,7 @@ from ..models import (
     Product, Indication, ManufacturingChallenge, ManufacturingTechnology,
     ProductSupplyChain, Modality, ManufacturingCapability, InternalFacility,
     ExternalPartner, ProcessStage, ProductTimeline, ProductRegulatoryFiling, 
-    ProductManufacturingSupplier, ProcessTemplate, TemplateStage
+    ProductManufacturingSupplier, ProcessTemplate, TemplateStage, ModalityChallenge
 )
 
 data_management_bp = Blueprint('data_management', __name__, url_prefix='/data-management')
@@ -35,6 +35,7 @@ ENTITY_MAP = {
     'product_timelines': {'model': ProductTimeline, 'key': 'timeline_id'},
     'product_regulatory_filings': {'model': ProductRegulatoryFiling, 'key': 'filing_id'},
     'product_manufacturing_suppliers': {'model': ProductManufacturingSupplier, 'key': 'supplier_id'},
+    'modality_challenges': {'model': ModalityChallenge, 'key': 'modality_id'}
 }
 
 

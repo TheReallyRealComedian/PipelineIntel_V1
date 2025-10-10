@@ -400,5 +400,29 @@
     "parent_stage_name": "Regulatory Framework & Compliance",
     "short_description": "Global regulatory alignment",
     "description": "Implementation of harmonized international standards (ICH Q7, Q8-Q13, Q2(R2), Q14) enabling consistent requirements across regions. Includes participation in regulatory working groups, adoption of new guidelines, and leveraging mutual recognition agreements to streamline global development."
+  },
+  {
+    "stage_name": "mAb Purification",
+    "stage_category": "Purification",
+    "hierarchy_level": 4,
+    "stage_order": 1,
+    "parent_stage_name": "Chromatography & Advanced Purification",
+    "short_description": "Purification of the monoclonal antibody prior to conjugation."
+  },
+  {
+    "stage_name": "Payload/Linker Purification",
+    "stage_category": "Purification",
+    "hierarchy_level": 4,
+    "stage_order": 2,
+    "parent_stage_name": "Chromatography & Advanced Purification",
+    "short_description": "Purification of the cytotoxic payload and linker components."
+  },
+  {
+    "stage_name": "ADC Purification",
+    "stage_category": "Purification",
+    "hierarchy_level": 4,
+    "stage_order": 3,
+    "parent_stage_name": "Chromatography & Advanced Purification",
+    "short_description": "Purification of the final conjugated Antibody-Drug Conjugate."
   }
 ]

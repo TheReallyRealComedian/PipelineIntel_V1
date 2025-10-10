@@ -1,0 +1,182 @@
+[
+  {
+    "modality_name": "ADC",
+    "challenge_name": "ADC Dual-Stream Manufacturing",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "ADC",
+    "challenge_name": "High-Potency API (HPAPI) Handling",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Gene Therapy",
+    "challenge_name": "Viral Vector Production Complexity",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Gene Therapy",
+    "challenge_name": "BSL-2+ Containment Facilities Required",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Gene Therapy",
+    "challenge_name": "Viral Safety Testing",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Monoclonal Antibody",
+    "challenge_name": "High Titer Production (>5g/L)",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Monoclonal Antibody",
+    "challenge_name": "Downstream Purification",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Monoclonal Antibody",
+    "challenge_name": "Cold Chain Logistics",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "PROTAC",
+    "challenge_name": "PROTAC Manufacturing",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "PROTAC",
+    "challenge_name": "Complex Synthesis",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "PROTAC",
+    "challenge_name": "Advanced Formulation",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Oligonucleotides",
+    "challenge_name": "Specialized Solid-Phase Synthesis",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Oligonucleotides",
+    "challenge_name": "Complex Purification",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Oligonucleotides",
+    "challenge_name": "Delivery System Integration",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Oligonucleotides",
+    "challenge_name": "Stability Management",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Peptides",
+    "challenge_name": "Advanced Peptide Manufacturing",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Peptides",
+    "challenge_name": "Device & Combination Product Manufacturing",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Peptides",
+    "challenge_name": "Cold Chain Logistics",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Recombinant Proteins",
+    "challenge_name": "Complex Biologics Manufacturing",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Recombinant Proteins",
+    "challenge_name": "Advanced Purification",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Small Molecule",
+    "challenge_name": "High-Selectivity Synthesis Requirements",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Small Molecule",
+    "challenge_name": "Covalent Inhibitor Stability Control",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "Small Molecule",
+    "challenge_name": "Amorphous Solid Dispersion (ASD) Manufacturing",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "T-cell Engager",
+    "challenge_name": "Bispecific Antibody Chain Pairing",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "T-cell Engager",
+    "challenge_name": "Complex Biologics Manufacturing",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "CAR-T",
+    "challenge_name": "Personalized Manufacturing",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "CAR-T",
+    "challenge_name": "Autologous Cell Processing",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "CAR-T",
+    "challenge_name": "Viral Transduction",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "CAR-T",
+    "challenge_name": "Cryopreservation",
+    "is_typical": true,
+    "notes": null
+  },
+  {
+    "modality_name": "CAR-T",
+    "challenge_name": "Patient-Specific Logistics",
+    "is_typical": true,
+    "notes": null
+  }
+]

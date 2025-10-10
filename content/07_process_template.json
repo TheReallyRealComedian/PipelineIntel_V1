@@ -8,67 +8,101 @@
         "stage_name": "Cell Line Development",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["mAb Cell Line Engineering", "Cell Bank Manufacturing"]
+        "base_capabilities": [
+          "mAb Cell Line Engineering",
+          "Cell Bank Manufacturing"
+        ]
       },
       {
         "stage_name": "Chemical/Biological Production",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Mammalian Cell Culture (mAb)", "Chemical Synthesis (Payload/Linker)", "HPAPI Handling"]
+        "base_capabilities": [
+          "Mammalian Cell Culture (mAb)",
+          "Chemical Synthesis (Payload/Linker)",
+          "HPAPI Handling"
+        ]
       },
       {
-        "stage_name": "Chromatography & Advanced Purification",
+        "stage_name": "mAb Purification",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["mAb Purification", "Payload/Linker Purification"]
+        "base_capabilities": [
+          "mAb Purification",
+          "Payload/Linker Purification"
+        ]
       },
       {
         "stage_name": "Conjugation & Modification",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Bioconjugation Chemistry", "Drug-to-Antibody Ratio (DAR) Control"]
+        "base_capabilities": [
+          "Bioconjugation Chemistry",
+          "Drug-to-Antibody Ratio (DAR) Control"
+        ]
       },
       {
-        "stage_name": "Chromatography & Advanced Purification",
+        "stage_name": "ADC Purification",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["ADC Purification", "Impurity Removal"]
+        "base_capabilities": [
+          "ADC Purification",
+          "Impurity Removal"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Liquid Formulation", "Stability Enhancement"]
+        "base_capabilities": [
+          "Liquid Formulation",
+          "Stability Enhancement"
+        ]
       },
       {
         "stage_name": "Aseptic Processing",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Sterile Filtration", "Aseptic Filling"]
+        "base_capabilities": [
+          "Sterile Filtration",
+          "Aseptic Filling"
+        ]
       },
       {
         "stage_name": "Lyophilization & Stabilization",
         "stage_order": 8,
         "is_required": false,
-        "base_capabilities": ["Freeze-Drying Cycle Development", "Product Stabilization"]
+        "base_capabilities": [
+          "Freeze-Drying Cycle Development",
+          "Product Stabilization"
+        ]
       },
       {
         "stage_name": "Primary Container Filling",
         "stage_order": 9,
         "is_required": true,
-        "base_capabilities": ["Vial Filling", "Container Closure Integrity"]
+        "base_capabilities": [
+          "Vial Filling",
+          "Container Closure Integrity"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 10,
         "is_required": true,
-        "base_capabilities": ["2-8C Storage & Shipping", "Temperature Monitoring"]
+        "base_capabilities": [
+          "2-8C Storage & Shipping",
+          "Temperature Monitoring"
+        ]
       },
       {
         "stage_name": "Current Good Manufacturing Practice (cGMP)",
         "stage_order": 11,
         "is_required": true,
-        "base_capabilities": ["Quality Management Systems", "Regulatory Compliance"]
+        "base_capabilities": [
+          "Quality Management Systems",
+          "Regulatory Compliance"
+        ]
       }
     ]
   },
@@ -81,55 +115,82 @@
         "stage_name": "Cell Line Development",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Bacterial Strain Development", "Master/Working Cell Bank Creation"]
+        "base_capabilities": [
+          "Bacterial Strain Development",
+          "Master/Working Cell Bank Creation"
+        ]
       },
       {
         "stage_name": "Chemical/Biological Production",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Bacterial Fermentation", "Anaerobic/Aerobic Culture"]
+        "base_capabilities": [
+          "Bacterial Fermentation",
+          "Anaerobic/Aerobic Culture"
+        ]
       },
       {
         "stage_name": "Primary Recovery & Clarification",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Centrifugation", "Cell Harvest"]
+        "base_capabilities": [
+          "Centrifugation",
+          "Cell Harvest"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Cryoprotectant Selection", "Buffer Optimization"]
+        "base_capabilities": [
+          "Cryoprotectant Selection",
+          "Buffer Optimization"
+        ]
       },
       {
         "stage_name": "Lyophilization & Stabilization",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Viability Preservation", "Freeze-Drying"]
+        "base_capabilities": [
+          "Viability Preservation",
+          "Freeze-Drying"
+        ]
       },
       {
         "stage_name": "Solid Dosage Manufacturing",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Blending", "Encapsulation"]
+        "base_capabilities": [
+          "Blending",
+          "Encapsulation"
+        ]
       },
       {
         "stage_name": "Quality Control Release Testing",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Cell Viability Assays", "Strain Identity Testing"]
+        "base_capabilities": [
+          "Cell Viability Assays",
+          "Strain Identity Testing"
+        ]
       },
       {
         "stage_name": "Storage & Stability Management",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Controlled Storage", "Long-term Stability Programs"]
+        "base_capabilities": [
+          "Controlled Storage",
+          "Long-term Stability Programs"
+        ]
       },
       {
         "stage_name": "Current Good Manufacturing Practice (cGMP)",
         "stage_order": 9,
         "is_required": true,
-        "base_capabilities": ["BSL-2 Containment", "Quality Systems"]
+        "base_capabilities": [
+          "BSL-2 Containment",
+          "Quality Systems"
+        ]
       }
     ]
   },
@@ -142,49 +203,74 @@
         "stage_name": "Chemical/Biological Production",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["In Vitro Transcription (IVT)", "Plasmid DNA Production"]
+        "base_capabilities": [
+          "In Vitro Transcription (IVT)",
+          "Plasmid DNA Production"
+        ]
       },
       {
         "stage_name": "Chromatography & Advanced Purification",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["mRNA Purification", "Oligo Purification"]
+        "base_capabilities": [
+          "mRNA Purification",
+          "Oligo Purification"
+        ]
       },
       {
         "stage_name": "Physical Form Development",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Lipid Nanoparticle (LNP) Formulation", "Microfluidics Mixing"]
+        "base_capabilities": [
+          "Lipid Nanoparticle (LNP) Formulation",
+          "Microfluidics Mixing"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Buffer Exchange", "Concentration"]
+        "base_capabilities": [
+          "Buffer Exchange",
+          "Concentration"
+        ]
       },
       {
         "stage_name": "Aseptic Processing",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Sterile Filtration", "Aseptic Environment Control"]
+        "base_capabilities": [
+          "Sterile Filtration",
+          "Aseptic Environment Control"
+        ]
       },
       {
         "stage_name": "Primary Container Filling",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Vial Filling", "Aseptic Technique"]
+        "base_capabilities": [
+          "Vial Filling",
+          "Aseptic Technique"
+        ]
       },
       {
         "stage_name": "Quality Control Release Testing",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["RNA Integrity", "Particle Size Analysis", "Encapsulation Efficiency"]
+        "base_capabilities": [
+          "RNA Integrity",
+          "Particle Size Analysis",
+          "Encapsulation Efficiency"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Ultra-Cold Storage (-70C)", "Cryogenic Shipping"]
+        "base_capabilities": [
+          "Ultra-Cold Storage (-70C)",
+          "Cryogenic Shipping"
+        ]
       }
     ]
   },
@@ -197,61 +283,92 @@
         "stage_name": "Personalized/Autologous Manufacturing",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Apheresis Collection", "NK Cell Isolation"]
+        "base_capabilities": [
+          "Apheresis Collection",
+          "NK Cell Isolation"
+        ]
       },
-       {
+      {
         "stage_name": "Cell Line Development",
         "stage_order": 2,
         "is_required": false,
-        "base_capabilities": ["Allogeneic Master Cell Banking (for off-the-shelf)", "Donor Screening"]
+        "base_capabilities": [
+          "Allogeneic Master Cell Banking (for off-the-shelf)",
+          "Donor Screening"
+        ]
       },
       {
         "stage_name": "Chemical/Biological Production",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Gene Transfer (e.g., mRNA electroporation)", "CAR Construct Engineering"]
+        "base_capabilities": [
+          "Gene Transfer (e.g., mRNA electroporation)",
+          "CAR Construct Engineering"
+        ]
       },
       {
         "stage_name": "Upstream Processing",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["NK Cell Expansion", "Bioreactor Culture"]
+        "base_capabilities": [
+          "NK Cell Expansion",
+          "Bioreactor Culture"
+        ]
       },
       {
         "stage_name": "Downstream Processing",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Cell Harvest", "Washing & Concentration"]
+        "base_capabilities": [
+          "Cell Harvest",
+          "Washing & Concentration"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Cryopreservation Media Formulation", "Final Product Formulation"]
+        "base_capabilities": [
+          "Cryopreservation Media Formulation",
+          "Final Product Formulation"
+        ]
       },
       {
         "stage_name": "Primary Container Filling",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Cryobag Filling", "Aseptic Transfer"]
+        "base_capabilities": [
+          "Cryobag Filling",
+          "Aseptic Transfer"
+        ]
       },
       {
         "stage_name": "Container Closure & Device Integration",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Controlled-Rate Freezing", "Cryogenic Storage"]
+        "base_capabilities": [
+          "Controlled-Rate Freezing",
+          "Cryogenic Storage"
+        ]
       },
       {
         "stage_name": "Quality Control Release Testing",
         "stage_order": 9,
         "is_required": true,
-        "base_capabilities": ["Potency Assays", "Flow Cytometry", "Sterility Testing"]
+        "base_capabilities": [
+          "Potency Assays",
+          "Flow Cytometry",
+          "Sterility Testing"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 10,
         "is_required": true,
-        "base_capabilities": ["Cryogenic Logistics", "Chain of Identity Management"]
+        "base_capabilities": [
+          "Cryogenic Logistics",
+          "Chain of Identity Management"
+        ]
       }
     ]
   },
@@ -264,55 +381,84 @@
         "stage_name": "Personalized/Autologous Manufacturing",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Leukapheresis", "T-Cell Isolation & Activation"]
+        "base_capabilities": [
+          "Leukapheresis",
+          "T-Cell Isolation & Activation"
+        ]
       },
       {
         "stage_name": "Chemical/Biological Production",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Viral Transduction (Lentivirus/Retrovirus)", "Gene Transfer"]
+        "base_capabilities": [
+          "Viral Transduction (Lentivirus/Retrovirus)",
+          "Gene Transfer"
+        ]
       },
       {
         "stage_name": "Upstream Processing",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["T-Cell Expansion", "Closed System Bioreactor Operation"]
+        "base_capabilities": [
+          "T-Cell Expansion",
+          "Closed System Bioreactor Operation"
+        ]
       },
       {
         "stage_name": "Downstream Processing",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Cell Harvest", "Washing & Formulation"]
+        "base_capabilities": [
+          "Cell Harvest",
+          "Washing & Formulation"
+        ]
       },
       {
         "stage_name": "Primary Container Filling",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Final Product Formulation", "Cryobag Filling"]
+        "base_capabilities": [
+          "Final Product Formulation",
+          "Cryobag Filling"
+        ]
       },
       {
         "stage_name": "Container Closure & Device Integration",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Controlled-Rate Freezing", "Cryogenic Storage"]
+        "base_capabilities": [
+          "Controlled-Rate Freezing",
+          "Cryogenic Storage"
+        ]
       },
       {
         "stage_name": "Quality Control Release Testing",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Potency Assay", "Transduction Efficiency", "Sterility"]
+        "base_capabilities": [
+          "Potency Assay",
+          "Transduction Efficiency",
+          "Sterility"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Cryogenic Logistics", "Chain of Custody", "Patient Scheduling"]
+        "base_capabilities": [
+          "Cryogenic Logistics",
+          "Chain of Custody",
+          "Patient Scheduling"
+        ]
       },
       {
         "stage_name": "Current Good Manufacturing Practice (cGMP)",
         "stage_order": 9,
         "is_required": true,
-        "base_capabilities": ["Aseptic Processing", "Quality Systems"]
+        "base_capabilities": [
+          "Aseptic Processing",
+          "Quality Systems"
+        ]
       }
     ]
   },
@@ -325,55 +471,84 @@
         "stage_name": "Cell Line Development",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Producer/Packaging Cell Line Creation", "Cell Banking"]
+        "base_capabilities": [
+          "Producer/Packaging Cell Line Creation",
+          "Cell Banking"
+        ]
       },
       {
         "stage_name": "Chemical/Biological Production",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Plasmid Production", "Cell Culture & Transfection/Infection"]
+        "base_capabilities": [
+          "Plasmid Production",
+          "Cell Culture & Transfection/Infection"
+        ]
       },
       {
         "stage_name": "Primary Recovery & Clarification",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Cell Lysis", "Depth Filtration", "Microfiltration"]
+        "base_capabilities": [
+          "Cell Lysis",
+          "Depth Filtration",
+          "Microfiltration"
+        ]
       },
       {
         "stage_name": "Chromatography & Advanced Purification",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Affinity Chromatography", "Ion-Exchange Chromatography", "Empty/Full Capsid Separation"]
+        "base_capabilities": [
+          "Affinity Chromatography",
+          "Ion-Exchange Chromatography",
+          "Empty/Full Capsid Separation"
+        ]
       },
       {
         "stage_name": "Viral Safety & Impurity Clearance",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Adventitious Agent Testing", "Impurity Profiling"]
+        "base_capabilities": [
+          "Adventitious Agent Testing",
+          "Impurity Profiling"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Buffer Formulation", "Excipient Selection"]
+        "base_capabilities": [
+          "Buffer Formulation",
+          "Excipient Selection"
+        ]
       },
       {
         "stage_name": "Aseptic Processing",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Sterile Filtration", "Aseptic Filling Operations"]
+        "base_capabilities": [
+          "Sterile Filtration",
+          "Aseptic Filling Operations"
+        ]
       },
       {
         "stage_name": "Primary Container Filling",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Vial Filling", "Container Closure"]
+        "base_capabilities": [
+          "Vial Filling",
+          "Container Closure"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 9,
         "is_required": true,
-        "base_capabilities": ["Frozen Storage & Shipping", "Temperature Control"]
+        "base_capabilities": [
+          "Frozen Storage & Shipping",
+          "Temperature Control"
+        ]
       }
     ]
   },
@@ -386,49 +561,75 @@
         "stage_name": "Chemical/Biological Production",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Complex Organic Synthesis", "API Production"]
+        "base_capabilities": [
+          "Complex Organic Synthesis",
+          "API Production"
+        ]
       },
       {
         "stage_name": "Chromatography & Advanced Purification",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Impurity Profiling", "High-Performance Liquid Chromatography (HPLC)"]
+        "base_capabilities": [
+          "Impurity Profiling",
+          "High-Performance Liquid Chromatography (HPLC)"
+        ]
       },
       {
         "stage_name": "Physical Processing & Drying",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Crystallization", "Drying", "Milling"]
+        "base_capabilities": [
+          "Crystallization",
+          "Drying",
+          "Milling"
+        ]
       },
       {
         "stage_name": "Physical Form Development",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Polymorph Screening", "Amorphous Solid Dispersion (ASD)"]
+        "base_capabilities": [
+          "Polymorph Screening",
+          "Amorphous Solid Dispersion (ASD)"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Excipient Compatibility", "Bioavailability Enhancement"]
+        "base_capabilities": [
+          "Excipient Compatibility",
+          "Bioavailability Enhancement"
+        ]
       },
       {
         "stage_name": "Solid Dosage Manufacturing",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Blending", "Tablet Compression", "Capsule Filling"]
+        "base_capabilities": [
+          "Blending",
+          "Tablet Compression",
+          "Capsule Filling"
+        ]
       },
       {
         "stage_name": "Quality Control Release Testing",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Analytical Method Development", "Release Specification Testing"]
+        "base_capabilities": [
+          "Analytical Method Development",
+          "Release Specification Testing"
+        ]
       },
       {
         "stage_name": "Secondary Packaging & Serialization",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Blister/Bottle Packaging", "Track and Trace"]
+        "base_capabilities": [
+          "Blister/Bottle Packaging",
+          "Track and Trace"
+        ]
       }
     ]
   },
@@ -441,61 +642,95 @@
         "stage_name": "Cell Line Development",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["CHO Cell Line Engineering", "Clonal Selection", "Cell Banking"]
+        "base_capabilities": [
+          "CHO Cell Line Engineering",
+          "Clonal Selection",
+          "Cell Banking"
+        ]
       },
       {
         "stage_name": "Chemical/Biological Production",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Upstream Processing", "Fed-Batch/Perfusion Bioreactors"]
+        "base_capabilities": [
+          "Upstream Processing",
+          "Fed-Batch/Perfusion Bioreactors"
+        ]
       },
       {
         "stage_name": "Primary Recovery & Clarification",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Centrifugation", "Depth Filtration"]
+        "base_capabilities": [
+          "Centrifugation",
+          "Depth Filtration"
+        ]
       },
       {
         "stage_name": "Chromatography & Advanced Purification",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Protein A Chromatography", "Ion-Exchange Chromatography", "Viral Filtration"]
+        "base_capabilities": [
+          "Protein A Chromatography",
+          "Ion-Exchange Chromatography",
+          "Viral Filtration"
+        ]
       },
       {
         "stage_name": "Viral Safety & Impurity Clearance",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Low pH Viral Inactivation", "Viral Filtration", "Adventitious Agent Testing"]
+        "base_capabilities": [
+          "Low pH Viral Inactivation",
+          "Viral Filtration",
+          "Adventitious Agent Testing"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Buffer Screening", "Excipient Selection", "High Concentration Formulation"]
+        "base_capabilities": [
+          "Buffer Screening",
+          "Excipient Selection",
+          "High Concentration Formulation"
+        ]
       },
       {
         "stage_name": "Aseptic Processing",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Sterile Filtration", "Cleanroom Operations"]
+        "base_capabilities": [
+          "Sterile Filtration",
+          "Cleanroom Operations"
+        ]
       },
       {
         "stage_name": "Primary Container Filling",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Vial/Syringe Filling", "Stopper/Plunger Placement"]
+        "base_capabilities": [
+          "Vial/Syringe Filling",
+          "Stopper/Plunger Placement"
+        ]
       },
       {
         "stage_name": "Lyophilization & Stabilization",
         "stage_order": 9,
         "is_required": false,
-        "base_capabilities": ["Freeze-Drying", "Product Stability Enhancement"]
+        "base_capabilities": [
+          "Freeze-Drying",
+          "Product Stability Enhancement"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 10,
         "is_required": true,
-        "base_capabilities": ["Refrigerated Storage (2-8C)", "Qualified Shippers"]
+        "base_capabilities": [
+          "Refrigerated Storage (2-8C)",
+          "Qualified Shippers"
+        ]
       }
     ]
   },
@@ -508,49 +743,72 @@
         "stage_name": "Chemical/Biological Production",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Solid-Phase Oligonucleotide Synthesis", "Amidite Chemistry"]
+        "base_capabilities": [
+          "Solid-Phase Oligonucleotide Synthesis",
+          "Amidite Chemistry"
+        ]
       },
       {
         "stage_name": "Primary Recovery & Clarification",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Cleavage & Deprotection", "Crude Product Isolation"]
+        "base_capabilities": [
+          "Cleavage & Deprotection",
+          "Crude Product Isolation"
+        ]
       },
       {
         "stage_name": "Chromatography & Advanced Purification",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Reverse Phase HPLC", "Ion-Exchange HPLC"]
+        "base_capabilities": [
+          "Reverse Phase HPLC",
+          "Ion-Exchange HPLC"
+        ]
       },
       {
         "stage_name": "Physical Form Development",
         "stage_order": 4,
         "is_required": false,
-        "base_capabilities": ["LNP Formulation", "GalNAc Conjugation"]
+        "base_capabilities": [
+          "LNP Formulation",
+          "GalNAc Conjugation"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Buffer Exchange", "Salt Removal"]
+        "base_capabilities": [
+          "Buffer Exchange",
+          "Salt Removal"
+        ]
       },
       {
         "stage_name": "Aseptic Processing",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Sterile Filtration", "Aseptic Filling"]
+        "base_capabilities": [
+          "Sterile Filtration",
+          "Aseptic Filling"
+        ]
       },
       {
         "stage_name": "Lyophilization & Stabilization",
         "stage_order": 7,
         "is_required": false,
-        "base_capabilities": ["Freeze-Drying"]
+        "base_capabilities": [
+          "Freeze-Drying"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Refrigerated or Frozen Storage", "Temperature-Controlled Shipping"]
+        "base_capabilities": [
+          "Refrigerated or Frozen Storage",
+          "Temperature-Controlled Shipping"
+        ]
       }
     ]
   },
@@ -563,49 +821,74 @@
         "stage_name": "Chemical/Biological Production",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Multi-Component Synthesis", "Linker Chemistry", "API Production"]
+        "base_capabilities": [
+          "Multi-Component Synthesis",
+          "Linker Chemistry",
+          "API Production"
+        ]
       },
       {
         "stage_name": "Chromatography & Advanced Purification",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Preparative HPLC", "Impurity Isolation and Characterization"]
+        "base_capabilities": [
+          "Preparative HPLC",
+          "Impurity Isolation and Characterization"
+        ]
       },
       {
         "stage_name": "Physical Processing & Drying",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Drying", "Milling"]
+        "base_capabilities": [
+          "Drying",
+          "Milling"
+        ]
       },
       {
         "stage_name": "Physical Form Development",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Amorphous Solid Dispersion (ASD)", "Solubility Enhancement Techniques"]
+        "base_capabilities": [
+          "Amorphous Solid Dispersion (ASD)",
+          "Solubility Enhancement Techniques"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Excipient Selection", "Oral Formulation Design"]
+        "base_capabilities": [
+          "Excipient Selection",
+          "Oral Formulation Design"
+        ]
       },
       {
         "stage_name": "Solid Dosage Manufacturing",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Tablet Compression", "Capsule Filling"]
+        "base_capabilities": [
+          "Tablet Compression",
+          "Capsule Filling"
+        ]
       },
       {
         "stage_name": "Quality Control Release Testing",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Complex Analytical Testing", "Stability Testing"]
+        "base_capabilities": [
+          "Complex Analytical Testing",
+          "Stability Testing"
+        ]
       },
       {
         "stage_name": "Secondary Packaging & Serialization",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Packaging", "Track and Trace"]
+        "base_capabilities": [
+          "Packaging",
+          "Track and Trace"
+        ]
       }
     ]
   },
@@ -618,49 +901,72 @@
         "stage_name": "Chemical/Biological Production",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Solid-Phase Peptide Synthesis (SPPS)", "Solution Phase Synthesis"]
+        "base_capabilities": [
+          "Solid-Phase Peptide Synthesis (SPPS)",
+          "Solution Phase Synthesis"
+        ]
       },
       {
         "stage_name": "Chromatography & Advanced Purification",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Reverse Phase HPLC Purification", "Purity Analysis"]
+        "base_capabilities": [
+          "Reverse Phase HPLC Purification",
+          "Purity Analysis"
+        ]
       },
       {
         "stage_name": "Lyophilization & Stabilization",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Freeze-Drying", "API Isolation"]
+        "base_capabilities": [
+          "Freeze-Drying",
+          "API Isolation"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Sterile Liquid Formulation", "Stability Optimization"]
+        "base_capabilities": [
+          "Sterile Liquid Formulation",
+          "Stability Optimization"
+        ]
       },
       {
         "stage_name": "Aseptic Processing",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Sterile Filtration", "Aseptic Filling"]
+        "base_capabilities": [
+          "Sterile Filtration",
+          "Aseptic Filling"
+        ]
       },
       {
         "stage_name": "Primary Container Filling",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Vial Filling", "Cartridge Filling"]
+        "base_capabilities": [
+          "Vial Filling",
+          "Cartridge Filling"
+        ]
       },
       {
         "stage_name": "Container Closure & Device Integration",
         "stage_order": 7,
         "is_required": false,
-        "base_capabilities": ["Auto-injector Assembly", "Pen Device Integration"]
+        "base_capabilities": [
+          "Auto-injector Assembly",
+          "Pen Device Integration"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Refrigerated Storage and Shipping"]
+        "base_capabilities": [
+          "Refrigerated Storage and Shipping"
+        ]
       }
     ]
   },
@@ -673,49 +979,78 @@
         "stage_name": "Quality by Design (QbD) Implementation",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["User Needs Definition", "Software Requirements Specification", "Design Controls"]
+        "base_capabilities": [
+          "User Needs Definition",
+          "Software Requirements Specification",
+          "Design Controls"
+        ]
       },
       {
         "stage_name": "Technology Transfer & Scale-Up",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Software Architecture Design", "Coding and Unit Testing", "Agile/Waterfall Development"]
+        "base_capabilities": [
+          "Software Architecture Design",
+          "Coding and Unit Testing",
+          "Agile/Waterfall Development"
+        ]
       },
       {
         "stage_name": "Visual Inspection & Quality Verification",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Software Verification & Validation (V&V)", "Integration Testing", "Usability Testing"]
+        "base_capabilities": [
+          "Software Verification & Validation (V&V)",
+          "Integration Testing",
+          "Usability Testing"
+        ]
       },
       {
         "stage_name": "Supply Chain Risk Management",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Cybersecurity Management", "Third-Party Software (SOUP) Management"]
+        "base_capabilities": [
+          "Cybersecurity Management",
+          "Third-Party Software (SOUP) Management"
+        ]
       },
       {
         "stage_name": "Quality Control Release Testing",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Final Release Testing", "Deployment to Production Environment"]
+        "base_capabilities": [
+          "Final Release Testing",
+          "Deployment to Production Environment"
+        ]
       },
       {
         "stage_name": "CMC Regulatory Submissions",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["SaMD Regulatory Documentation (e.g., FDA 510(k))", "CE Marking"]
+        "base_capabilities": [
+          "SaMD Regulatory Documentation (e.g., FDA 510(k))",
+          "CE Marking"
+        ]
       },
       {
         "stage_name": "Regulatory Inspections & Compliance",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Quality Management System (QMS) Audits", "Post-Market Surveillance", "Complaint Handling"]
+        "base_capabilities": [
+          "Quality Management System (QMS) Audits",
+          "Post-Market Surveillance",
+          "Complaint Handling"
+        ]
       },
       {
         "stage_name": "International Harmonization & Standards",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Compliance with IEC 62304", "Compliance with ISO 13485", "HIPAA/GDPR Compliance"]
+        "base_capabilities": [
+          "Compliance with IEC 62304",
+          "Compliance with ISO 13485",
+          "HIPAA/GDPR Compliance"
+        ]
       }
     ]
   },
@@ -728,49 +1063,74 @@
         "stage_name": "Chemical/Biological Production",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Radioisotope Production (Cyclotron/Generator)", "Ligand/Precursor Synthesis"]
+        "base_capabilities": [
+          "Radioisotope Production (Cyclotron/Generator)",
+          "Ligand/Precursor Synthesis"
+        ]
       },
       {
         "stage_name": "Conjugation & Modification",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Automated Radiosynthesis", "Radiolabeling"]
+        "base_capabilities": [
+          "Automated Radiosynthesis",
+          "Radiolabeling"
+        ]
       },
       {
         "stage_name": "Chromatography & Advanced Purification",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Rapid HPLC Purification", "Radiochemical Purity Assessment"]
+        "base_capabilities": [
+          "Rapid HPLC Purification",
+          "Radiochemical Purity Assessment"
+        ]
       },
       {
         "stage_name": "Aseptic Processing",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Sterile Filtration", "Hot Cell Operations"]
+        "base_capabilities": [
+          "Sterile Filtration",
+          "Hot Cell Operations"
+        ]
       },
       {
         "stage_name": "Quality Control Release Testing",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Rapid Sterility/Endotoxin Testing", "Half-life Confirmation", "Dose Calibration"]
+        "base_capabilities": [
+          "Rapid Sterility/Endotoxin Testing",
+          "Half-life Confirmation",
+          "Dose Calibration"
+        ]
       },
       {
         "stage_name": "Primary Container Filling",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Dispensing into Shielded Vials", "Aseptic Filling"]
+        "base_capabilities": [
+          "Dispensing into Shielded Vials",
+          "Aseptic Filling"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Just-in-Time Logistics", "Radioactive Material Transport"]
+        "base_capabilities": [
+          "Just-in-Time Logistics",
+          "Radioactive Material Transport"
+        ]
       },
       {
         "stage_name": "Current Good Manufacturing Practice (cGMP)",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Radiation Safety", "Specialized Facility Compliance"]
+        "base_capabilities": [
+          "Radiation Safety",
+          "Specialized Facility Compliance"
+        ]
       }
     ]
   },
@@ -783,55 +1143,80 @@
         "stage_name": "Cell Line Development",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Expression System Selection (Mammalian/Microbial)", "Cell Banking"]
+        "base_capabilities": [
+          "Expression System Selection (Mammalian/Microbial)",
+          "Cell Banking"
+        ]
       },
       {
         "stage_name": "Chemical/Biological Production",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Cell Culture / Fermentation", "Bioreactor Operation"]
+        "base_capabilities": [
+          "Cell Culture / Fermentation",
+          "Bioreactor Operation"
+        ]
       },
       {
         "stage_name": "Primary Recovery & Clarification",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Cell Harvest / Lysis", "Filtration"]
+        "base_capabilities": [
+          "Cell Harvest / Lysis",
+          "Filtration"
+        ]
       },
       {
         "stage_name": "Chromatography & Advanced Purification",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Multi-column Purification", "Refolding (if applicable)"]
+        "base_capabilities": [
+          "Multi-column Purification",
+          "Refolding (if applicable)"
+        ]
       },
       {
         "stage_name": "Viral Safety & Impurity Clearance",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Impurity Profiling", "Viral Clearance Studies"]
+        "base_capabilities": [
+          "Impurity Profiling",
+          "Viral Clearance Studies"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Protein Stabilization", "Buffer Selection"]
+        "base_capabilities": [
+          "Protein Stabilization",
+          "Buffer Selection"
+        ]
       },
       {
         "stage_name": "Aseptic Processing",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Sterile Manufacturing", "Aseptic Filling"]
+        "base_capabilities": [
+          "Sterile Manufacturing",
+          "Aseptic Filling"
+        ]
       },
       {
         "stage_name": "Primary Container Filling",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Vial/Syringe Filling"]
+        "base_capabilities": [
+          "Vial/Syringe Filling"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 9,
         "is_required": true,
-        "base_capabilities": ["Refrigerated/Frozen Logistics"]
+        "base_capabilities": [
+          "Refrigerated/Frozen Logistics"
+        ]
       }
     ]
   },
@@ -844,49 +1229,79 @@
         "stage_name": "Chemical/Biological Production",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Chemical Synthesis", "API Production", "Crystallization"]
+        "base_capabilities": [
+          "Chemical Synthesis",
+          "API Production",
+          "Crystallization"
+        ]
       },
       {
         "stage_name": "Physical Processing & Drying",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Drying", "Milling", "Particle Size Control"]
+        "base_capabilities": [
+          "Drying",
+          "Milling",
+          "Particle Size Control"
+        ]
       },
       {
         "stage_name": "Physical Form Development",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Salt Selection", "Polymorph Control"]
+        "base_capabilities": [
+          "Salt Selection",
+          "Polymorph Control"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Excipient Selection", "Tablet/Capsule Formulation"]
+        "base_capabilities": [
+          "Excipient Selection",
+          "Tablet/Capsule Formulation"
+        ]
       },
       {
         "stage_name": "Solid Dosage Manufacturing",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Blending", "Granulation", "Tablet Compression", "Capsule Filling"]
+        "base_capabilities": [
+          "Blending",
+          "Granulation",
+          "Tablet Compression",
+          "Capsule Filling"
+        ]
       },
       {
         "stage_name": "Quality Control Release Testing",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Analytical Testing", "Dissolution Testing", "Release Testing"]
+        "base_capabilities": [
+          "Analytical Testing",
+          "Dissolution Testing",
+          "Release Testing"
+        ]
       },
       {
         "stage_name": "Secondary Packaging & Serialization",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Packaging", "Serialization", "Track and Trace"]
+        "base_capabilities": [
+          "Packaging",
+          "Serialization",
+          "Track and Trace"
+        ]
       },
       {
         "stage_name": "Continuous Manufacturing Integration",
         "stage_order": 8,
         "is_required": false,
-        "base_capabilities": ["Continuous Processing", "Process Analytical Technology (PAT)"]
+        "base_capabilities": [
+          "Continuous Processing",
+          "Process Analytical Technology (PAT)"
+        ]
       }
     ]
   },
@@ -899,55 +1314,83 @@
         "stage_name": "Personalized/Autologous Manufacturing",
         "stage_order": 1,
         "is_required": false,
-        "base_capabilities": ["Autologous Cell Sourcing", "Patient Material Handling"]
+        "base_capabilities": [
+          "Autologous Cell Sourcing",
+          "Patient Material Handling"
+        ]
       },
       {
         "stage_name": "Cell Line Development",
         "stage_order": 2,
         "is_required": false,
-        "base_capabilities": ["Allogeneic Master Cell Bank Creation", "Donor Qualification"]
+        "base_capabilities": [
+          "Allogeneic Master Cell Bank Creation",
+          "Donor Qualification"
+        ]
       },
       {
         "stage_name": "Upstream Processing",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Stem Cell Expansion", "Cell Differentiation Protocols", "Bioreactor Culture"]
+        "base_capabilities": [
+          "Stem Cell Expansion",
+          "Cell Differentiation Protocols",
+          "Bioreactor Culture"
+        ]
       },
       {
         "stage_name": "Downstream Processing",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Cell Harvest", "Washing & Concentration"]
+        "base_capabilities": [
+          "Cell Harvest",
+          "Washing & Concentration"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Cryopreservation Media Development", "Final Product Formulation"]
+        "base_capabilities": [
+          "Cryopreservation Media Development",
+          "Final Product Formulation"
+        ]
       },
       {
         "stage_name": "Primary Container Filling",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Aseptic Filling into Vials/Bags"]
+        "base_capabilities": [
+          "Aseptic Filling into Vials/Bags"
+        ]
       },
       {
         "stage_name": "Container Closure & Device Integration",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Controlled-Rate Freezing", "Cryogenic Storage"]
+        "base_capabilities": [
+          "Controlled-Rate Freezing",
+          "Cryogenic Storage"
+        ]
       },
       {
         "stage_name": "Quality Control Release Testing",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Cell Viability", "Identity Markers", "Potency Assays"]
+        "base_capabilities": [
+          "Cell Viability",
+          "Identity Markers",
+          "Potency Assays"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 9,
         "is_required": true,
-        "base_capabilities": ["Cryogenic Logistics", "Chain of Identity"]
+        "base_capabilities": [
+          "Cryogenic Logistics",
+          "Chain of Identity"
+        ]
       }
     ]
   },
@@ -960,49 +1403,73 @@
         "stage_name": "Cell Line Development",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Advanced Protein Engineering", "Stable Cell Line Generation", "Chain Pairing Control"]
+        "base_capabilities": [
+          "Advanced Protein Engineering",
+          "Stable Cell Line Generation",
+          "Chain Pairing Control"
+        ]
       },
       {
         "stage_name": "Chemical/Biological Production",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Controlled Expression Culture", "Bioreactor Operation"]
+        "base_capabilities": [
+          "Controlled Expression Culture",
+          "Bioreactor Operation"
+        ]
       },
       {
         "stage_name": "Primary Recovery & Clarification",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Cell Harvest", "Filtration"]
+        "base_capabilities": [
+          "Cell Harvest",
+          "Filtration"
+        ]
       },
       {
         "stage_name": "Chromatography & Advanced Purification",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Multi-step Purification", "Mispairing/Aggregate Removal"]
+        "base_capabilities": [
+          "Multi-step Purification",
+          "Mispairing/Aggregate Removal"
+        ]
       },
       {
         "stage_name": "Advanced Analytical Methods",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Mass Spectrometry", "Product Variant Characterization"]
+        "base_capabilities": [
+          "Mass Spectrometry",
+          "Product Variant Characterization"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Stability Enhancement", "High Concentration Formulation"]
+        "base_capabilities": [
+          "Stability Enhancement",
+          "High Concentration Formulation"
+        ]
       },
       {
         "stage_name": "Aseptic Processing",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Sterile Filling", "Cleanroom Management"]
+        "base_capabilities": [
+          "Sterile Filling",
+          "Cleanroom Management"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Refrigerated Logistics"]
+        "base_capabilities": [
+          "Refrigerated Logistics"
+        ]
       }
     ]
   },
@@ -1015,49 +1482,72 @@
         "stage_name": "Personalized/Autologous Manufacturing",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Apheresis Collection", "T-Cell Isolation"]
+        "base_capabilities": [
+          "Apheresis Collection",
+          "T-Cell Isolation"
+        ]
       },
       {
         "stage_name": "Chemical/Biological Production",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["TCR Gene Transfer", "Viral Transduction"]
+        "base_capabilities": [
+          "TCR Gene Transfer",
+          "Viral Transduction"
+        ]
       },
       {
         "stage_name": "Upstream Processing",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["T-Cell Expansion", "Bioreactor Culture"]
+        "base_capabilities": [
+          "T-Cell Expansion",
+          "Bioreactor Culture"
+        ]
       },
       {
         "stage_name": "Downstream Processing",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Cell Harvest", "Washing and Formulation"]
+        "base_capabilities": [
+          "Cell Harvest",
+          "Washing and Formulation"
+        ]
       },
       {
         "stage_name": "Primary Container Filling",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Cryobag Filling"]
+        "base_capabilities": [
+          "Cryobag Filling"
+        ]
       },
       {
         "stage_name": "Container Closure & Device Integration",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Controlled-Rate Freezing"]
+        "base_capabilities": [
+          "Controlled-Rate Freezing"
+        ]
       },
       {
         "stage_name": "Quality Control Release Testing",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Potency Assay", "TCR Expression Analysis", "Sterility Testing"]
+        "base_capabilities": [
+          "Potency Assay",
+          "TCR Expression Analysis",
+          "Sterility Testing"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Cryogenic Logistics", "Chain of Identity"]
+        "base_capabilities": [
+          "Cryogenic Logistics",
+          "Chain of Identity"
+        ]
       }
     ]
   },
@@ -1070,116 +1560,71 @@
         "stage_name": "Cell Line Development",
         "stage_order": 1,
         "is_required": true,
-        "base_capabilities": ["Multi-Chain Protein Engineering", "Clonal Selection for Correct Assembly"]
+        "base_capabilities": [
+          "Multi-Chain Protein Engineering",
+          "Clonal Selection for Correct Assembly"
+        ]
       },
       {
         "stage_name": "Chemical/Biological Production",
         "stage_order": 2,
         "is_required": true,
-        "base_capabilities": ["Complex Bioreactor Process Control", "Upstream Production"]
+        "base_capabilities": [
+          "Complex Bioreactor Process Control",
+          "Upstream Production"
+        ]
       },
       {
         "stage_name": "Primary Recovery & Clarification",
         "stage_order": 3,
         "is_required": true,
-        "base_capabilities": ["Harvesting", "Clarification"]
+        "base_capabilities": [
+          "Harvesting",
+          "Clarification"
+        ]
       },
       {
         "stage_name": "Chromatography & Advanced Purification",
         "stage_order": 4,
         "is_required": true,
-        "base_capabilities": ["Sophisticated Multi-Step Purification", "Product-Related Impurity Removal"]
+        "base_capabilities": [
+          "Sophisticated Multi-Step Purification",
+          "Product-Related Impurity Removal"
+        ]
       },
       {
         "stage_name": "Advanced Analytical Methods",
         "stage_order": 5,
         "is_required": true,
-        "base_capabilities": ["Extensive Characterization", "Binding Assays for all Targets"]
+        "base_capabilities": [
+          "Extensive Characterization",
+          "Binding Assays for all Targets"
+        ]
       },
       {
         "stage_name": "Formulation Development",
         "stage_order": 6,
         "is_required": true,
-        "base_capabilities": ["Aggregation Prevention", "Long-Term Stability Formulation"]
+        "base_capabilities": [
+          "Aggregation Prevention",
+          "Long-Term Stability Formulation"
+        ]
       },
       {
         "stage_name": "Aseptic Processing",
         "stage_order": 7,
         "is_required": true,
-        "base_capabilities": ["Sterile Filling Operations"]
+        "base_capabilities": [
+          "Sterile Filling Operations"
+        ]
       },
       {
         "stage_name": "Cold Chain & Distribution",
         "stage_order": 8,
         "is_required": true,
-        "base_capabilities": ["Refrigerated Logistics"]
-      }
-    ]
-  },
-  {
-    "template_name": "Standard ADC Process",
-    "modality_name": "ADC", 
-    "description": "Dual-stream manufacturing process combining monoclonal antibody production with HPAPI payload synthesis, followed by conjugation under high containment conditions",
-    "stages": [
-      {
-        "stage_name": "Cell Line Development",
-        "stage_order": 1,
-        "is_required": true,
-        "base_capabilities": ["CHO Cell Line Engineering", "Clonal Selection", "Cell Bank Development"]
-      },
-      {
-        "stage_name": "Chemical/Biological Production", 
-        "stage_order": 2,
-        "is_required": true,
-        "base_capabilities": ["Monoclonal Antibody Production", "Cell Culture", "HPAPI Synthesis"]
-      },
-      {
-        "stage_name": "Primary Recovery & Clarification",
-        "stage_order": 3,
-        "is_required": true,
-        "base_capabilities": ["Harvest Operations", "Depth Filtration", "Clarification"]
-      },
-      {
-        "stage_name": "Chromatography & Advanced Purification",
-        "stage_order": 4,
-        "is_required": true,
-        "base_capabilities": ["Protein A Chromatography", "Ion Exchange", "Viral Filtration"]
-      },
-      {
-        "stage_name": "Conjugation & Modification",
-        "stage_order": 5,
-        "is_required": true,
-        "base_capabilities": ["Antibody-Drug Conjugation", "OEB5 Containment", "DAR Control"]
-      },
-      {
-        "stage_name": "Downstream Processing",
-        "stage_order": 6,
-        "is_required": true,
-        "base_capabilities": ["Hydrophobic Interaction Chromatography", "ADC Purification", "DAR Fractionation"]
-      },
-      {
-        "stage_name": "Formulation Development",
-        "stage_order": 7,
-        "is_required": true,
-        "base_capabilities": ["Buffer Selection", "Stabilizer Optimization", "Formulation Characterization"]
-      },
-      {
-        "stage_name": "Aseptic Processing",
-        "stage_order": 8,
-        "is_required": true,
-        "base_capabilities": ["Sterile Manufacturing", "OEB5 Isolators", "Aseptic Filling"]
-      },
-      {
-        "stage_name": "Quality Control Release Testing",
-        "stage_order": 9,
-        "is_required": true,
-        "base_capabilities": ["DAR Analysis", "Aggregate Analysis", "Bioactivity Testing"]
-      },
-      {
-        "stage_name": "Cold Chain & Distribution",
-        "stage_order": 10,
-        "is_required": true,
-        "base_capabilities": ["Cold Chain Management", "Temperature Monitoring", "Distribution"]
+        "base_capabilities": [
+          "Refrigerated Logistics"
+        ]
       }
     ]
   }
