@@ -1,0 +1,130 @@
+/* Column-based layout for stepped flow */
+.traceability-container {
+    display: flex;
+    gap: 2rem;
+    overflow-x: auto;
+    padding: 2rem 1rem;
+    min-height: 600px;
+}
+
+.traceability-column {
+    min-width: 200px;
+    flex-shrink: 0;
+}
+
+.column-header {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    color: var(--bi-primary-500);
+}
+
+/* Node styling */
+.trace-node {
+    background: white;
+    border: 2px solid var(--bi-neutral-300);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.trace-node:hover {
+    border-color: var(--bi-primary-500);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateX(5px);
+}
+
+.trace-node.selected {
+    background: var(--bi-primary-100);
+    border-color: var(--bi-primary-700);
+    border-width: 3px;
+}
+
+.trace-node.dimmed {
+    opacity: 0.3;
+}
+
+.node-name {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.node-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: var(--bi-info-100);
+    color: var(--bi-info-700);
+}
+
+/* Connection lines (SVG overlay) */
+#connectionsSvg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.connection-line {
+    fill: none;
+    stroke: var(--bi-neutral-400);
+    stroke-width: 2;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+}
+
+.connection-line.pathway-direct {
+    stroke: var(--bi-warning-500);
+    stroke-dasharray: 5, 5;
+    stroke-width: 3;
+}
+
+.connection-line.highlighted {
+    stroke: var(--bi-primary-600);
+    stroke-width: 4;
+    opacity: 1;
+}
+
+/* Legend */
+.pathway-legend {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem;
+    background: var(--bi-neutral-100);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-line {
+    width: 40px;
+    height: 3px;
+}
+
+.legend-line.process-derived {
+    background: var(--bi-neutral-400);
+}
+
+.legend-line.direct {
+    background: var(--bi-warning-500);
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 5px,
+        var(--bi-warning-500) 5px,
+        var(--bi-warning-500) 10px
+    );
+}

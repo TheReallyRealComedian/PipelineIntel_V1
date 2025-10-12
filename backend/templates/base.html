@@ -11,6 +11,7 @@
         <link rel="stylesheet" href="{{ ASSET_URL }}">
     {% endassets %}
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/challenge_traceability.css') }}">
     {% block head_extra %}{% endblock %}
 </head>
 <body>
@@ -66,6 +67,12 @@
                         <li class="{% if request.blueprint == 'analytics' %}active{% endif %}">
                             <a href="{{ url_for('analytics.manufacturing_forecast') }}"><i class="fas fa-chart-line"></i> <span class="sidebar-text">Strategic Analytics</span></a>
                         </li>
+                            <li class="{% if request.blueprint == 'challenge_traceability' %}active{% endif %}">
+                                <a href="{{ url_for('challenge_traceability.explorer_page') }}">
+                                    <i class="fas fa-project-diagram"></i>
+                                    <span class="sidebar-text">Challenge Explorer</span>
+                                </a>
+                            </li>
                     <li class="sidebar-menu-header">SYSTEM</li>
                         <li class="{% if request.blueprint == 'settings' and 'database-schema' in request.path %}active{% endif %}">
                             <a href="{{ url_for('settings.database_schema') }}">
