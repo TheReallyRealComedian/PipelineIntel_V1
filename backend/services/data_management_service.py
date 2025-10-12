@@ -865,20 +865,27 @@ def analyze_process_template_import(json_data):
             ).first()
 
             if existing_template:
-                preview_item['action'] = 'update'
-                preview_item['status'] = 'update'
-                preview_item['db_item'] = existing_template
-                preview_item['messages'].append(f'Template exists - will update existing template')
-                # Add diff information for updates
-                preview_item['diff']['description'] = {
-                    'old': existing_template.description or '',
-                    'new': item.get('description', '')
-                }
-                if item.get('modality_name') != (existing_template.modality.modality_name if existing_template.modality else None):
-                    preview_item['diff']['modality'] = {
-                        'old': existing_template.modality.modality_name if existing_template.modality else 'None',
-                        'new': item.get('modality_name', 'None')
-                    }
+                            preview_item['action'] = 'update'
+                            preview_item['status'] = 'update'
+                            
+                            # FIX: Convert the SQLAlchemy object to a simple dictionary
+                            preview_item['db_item'] = {
+                                'template_name': existing_template.template_name,
+                                'description': existing_template.description,
+                                'modality_name': existing_template.modality.modality_name if existing_template.modality else None
+                            }
+                            
+                            preview_item['messages'].append(f'Template exists - will update existing template')
+                            # Add diff information for updates
+                            preview_item['diff']['description'] = {
+                                'old': existing_template.description or '',
+                                'new': item.get('description', '')
+                            }
+                            if item.get('modality_name') != (existing_template.modality.modality_name if existing_template.modality else None):
+                                preview_item['diff']['modality'] = {
+                                    'old': existing_template.modality.modality_name if existing_template.modality else 'None',
+                                    'new': item.get('modality_name', 'None')
+                                }
             else:
                 preview_item['action'] = 'add'
                 preview_item['status'] = 'new'
