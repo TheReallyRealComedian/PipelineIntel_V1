@@ -9,8 +9,10 @@ from ..services.data_management_service import (
     analyze_json_import_with_resolution,
     analyze_process_template_import,
     finalize_process_template_import,
-    import_full_database
+    import_full_database,
+    _resolve_foreign_keys_for_technology
 )
+
 from ..models import (
     Product, Indication, ManufacturingChallenge, ManufacturingTechnology,
     ProductSupplyChain, Modality, ManufacturingCapability, InternalFacility,
@@ -24,7 +26,10 @@ ENTITY_MAP = {
     'products': {'model': Product, 'key': 'product_code'},
     'indications': {'model': Indication, 'key': 'indication_name'},
     'manufacturing_challenges': {'model': ManufacturingChallenge, 'key': 'challenge_name'},
-    'manufacturing_technologies': {'model': ManufacturingTechnology, 'key': 'technology_name','resolver': _resolve_foreign_keys_for_technology},
+        'manufacturing_technologies': {
+        'model': ManufacturingTechnology, 
+        'key': 'technology_name',
+        'resolver': _resolve_foreign_keys_for_technology},
     'process_stages': {'model': ProcessStage, 'key': 'stage_name'},
     'process_templates': {'model': ProcessTemplate, 'key': 'template_name'},  # NEW: Added process templates
     'supply_chain': {'model': ProductSupplyChain, 'key': 'id'},
