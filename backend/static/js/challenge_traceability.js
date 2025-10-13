@@ -1,33 +1,131 @@
 // Global state
 let traceabilityData = null;
 let selectedNode = null;
-let activeFilters = {
-    modality: null,
-    template: null,
-    challenge: null
-};
-let pathwayView = 'both'; // 'both', 'process_derived', 'direct'
+let currentModality = null;
+let currentTemplate = null;
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     initializeFilters();
-    loadTraceabilityData();
     setupEventListeners();
 });
+
+// Initialize filter dropdowns
+async function initializeFilters() {
+    try {
+        const response = await fetch('/challenge-traceability/api/filters');
+        const filters = await response.json();
+        
+        populateFilterDropdown('modalityFilter', filters.modalities);
+        // Template will be populated when modality is selected
+    } catch (error) {
+        console.error('Error loading filters:', error);
+    }
+}
+
+function populateFilterDropdown(elementId, items) {
+    const select = document.getElementById(elementId);
+    // Clear existing options except the first placeholder
+    while (select.options.length > 1) {
+        select.remove(1);
+    }
+    
+    items.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.name;
+        select.appendChild(option);
+    });
+}
+
+// Setup all event listeners
+function setupEventListeners() {
+    // Modality change - cascade to template dropdown
+    document.getElementById('modalityFilter').addEventListener('change', async (e) => {
+        const modalityId = e.target.value;
+        const templateSelect = document.getElementById('templateFilter');
+        const visualizeBtn = document.getElementById('visualizeButton');
+        
+        if (modalityId) {
+            // Enable template dropdown and fetch templates for this modality
+            templateSelect.disabled = false;
+            
+            try {
+                const response = await fetch(`/challenge-traceability/api/templates-by-modality/${modalityId}`);
+                const templates = await response.json();
+                
+                populateFilterDropdown('templateFilter', templates);
+                
+                // Update stored modality
+                currentModality = {
+                    id: modalityId,
+                    name: e.target.options[e.target.selectedIndex].text
+                };
+            } catch (error) {
+                console.error('Error loading templates:', error);
+            }
+        } else {
+            // Reset template dropdown
+            templateSelect.disabled = true;
+            templateSelect.value = '';
+            visualizeBtn.disabled = true;
+            currentModality = null;
+            currentTemplate = null;
+            clearVisualization();
+        }
+    });
+    
+    // Template change - enable visualize button
+    document.getElementById('templateFilter').addEventListener('change', (e) => {
+        const templateId = e.target.value;
+        const visualizeBtn = document.getElementById('visualizeButton');
+        
+        if (templateId && currentModality) {
+            visualizeBtn.disabled = false;
+            currentTemplate = {
+                id: templateId,
+                name: e.target.options[e.target.selectedIndex].text
+            };
+        } else {
+            visualizeBtn.disabled = true;
+            currentTemplate = null;
+        }
+    });
+    
+    // Visualize button - load and render data
+    document.getElementById('visualizeButton').addEventListener('click', () => {
+        if (currentModality && currentTemplate) {
+            loadTraceabilityData();
+        }
+    });
+    
+    // Close details panel
+    const closeBtn = document.getElementById('closeDetails');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', clearSelection);
+    }
+}
 
 // Fetch data from API
 async function loadTraceabilityData() {
     try {
         showLoading(true);
         
-        // Build query string from active filters
-        const params = new URLSearchParams();
-        if (activeFilters.modality) params.append('modality_id', activeFilters.modality);
-        if (activeFilters.template) params.append('template_id', activeFilters.template);
-        if (activeFilters.challenge) params.append('challenge_id', activeFilters.challenge);
+        const params = new URLSearchParams({
+            modality_id: currentModality.id,
+            template_id: currentTemplate.id
+        });
         
         const response = await fetch(`/challenge-traceability/api/data?${params}`);
         traceabilityData = await response.json();
+        
+        if (traceabilityData.error) {
+            showError(traceabilityData.error);
+            return;
+        }
+        
+        // Show context display
+        updateContextDisplay();
         
         renderVisualization();
         showLoading(false);
@@ -37,28 +135,11 @@ async function loadTraceabilityData() {
     }
 }
 
-// Initialize filter dropdowns
-async function initializeFilters() {
-    try {
-        const response = await fetch('/challenge-traceability/api/filters');
-        const filters = await response.json();
-        
-        populateFilterDropdown('modalityFilter', filters.modalities);
-        populateFilterDropdown('templateFilter', filters.templates);
-        populateFilterDropdown('challengeFilter', filters.challenges);
-    } catch (error) {
-        console.error('Error loading filters:', error);
-    }
-}
-
-function populateFilterDropdown(elementId, items) {
-    const select = document.getElementById(elementId);
-    items.forEach(item => {
-        const option = document.createElement('option');
-        option.value = item.id;
-        option.textContent = item.name;
-        select.appendChild(option);
-    });
+function updateContextDisplay() {
+    const display = document.getElementById('contextDisplay');
+    document.getElementById('selectedModalityName').textContent = currentModality.name;
+    document.getElementById('selectedTemplateName').textContent = currentTemplate.name;
+    display.style.display = 'block';
 }
 
 // Main rendering function
@@ -66,17 +147,31 @@ function renderVisualization() {
     const container = document.getElementById('traceabilityVisualization');
     container.innerHTML = '';
     
-    // Create column structure
-    const columns = createColumnStructure();
+    if (!traceabilityData || !traceabilityData.nodes || traceabilityData.nodes.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h5>No Data Available</h5>
+                <p>No challenge traceability data found for this selection.</p>
+            </div>
+        `;
+        return;
+    }
     
-    // Group nodes by level
+    // Create wrapper with horizontal layout
+    const wrapper = document.createElement('div');
+    wrapper.className = 'traceability-container';
+    
+    // Create three columns: Stage, Technology, Challenge
+    const columns = createColumnStructure();
     const nodesByLevel = groupNodesByLevel(traceabilityData.nodes);
     
-    // Render each column
-    columns.forEach((columnConfig, index) => {
-        const column = createColumn(columnConfig, nodesByLevel[index] || []);
-        container.appendChild(column);
+    columns.forEach((columnConfig) => {
+        const column = createColumn(columnConfig, nodesByLevel[columnConfig.level] || []);
+        wrapper.appendChild(column);
     });
+    
+    container.appendChild(wrapper);
     
     // Render connections as SVG overlay
     renderConnections();
@@ -84,11 +179,9 @@ function renderVisualization() {
 
 function createColumnStructure() {
     return [
-        { id: 'modality', title: 'Modality', level: 0 },
-        { id: 'template', title: 'Process Template', level: 1 },
-        { id: 'stage', title: 'Process Stage', level: 2 },
-        { id: 'technology', title: 'Manufacturing Technology', level: 3 },
-        { id: 'challenge', title: 'Manufacturing Challenge', level: 4 }
+        { id: 'stage', title: 'Process Stage', level: 0 },
+        { id: 'technology', title: 'Manufacturing Technology', level: 1 },
+        { id: 'challenge', title: 'Manufacturing Challenge', level: 2 }
     ];
 }
 
@@ -96,19 +189,9 @@ function groupNodesByLevel(nodes) {
     const grouped = {};
     nodes.forEach(node => {
         if (!grouped[node.level]) grouped[node.level] = [];
-        
-        // Filter by pathway view
-        if (shouldShowNode(node)) {
-            grouped[node.level].push(node);
-        }
+        grouped[node.level].push(node);
     });
     return grouped;
-}
-
-function shouldShowNode(node) {
-    if (pathwayView === 'both') return true;
-    // Add logic to filter nodes based on pathway type
-    return true; // Simplified for now
 }
 
 function createColumn(config, nodes) {
@@ -141,8 +224,7 @@ function createNodeElement(node) {
     
     nodeEl.innerHTML = `
         <div class="node-name">${node.name}</div>
-        ${node.badge ? `<span class="node-badge">${node.badge}</span>` : ''}
-        ${node.count ? `<div class="node-count text-muted small">${node.count} connections</div>` : ''}
+        ${node.badge ? `<div class="node-badge">${node.badge}</div>` : ''}
     `;
     
     nodeEl.addEventListener('click', () => handleNodeClick(node));
@@ -150,41 +232,21 @@ function createNodeElement(node) {
     return nodeEl;
 }
 
+// Connection rendering (horizontal flow)
 function renderConnections() {
-    const container = document.getElementById('traceabilityVisualization');
-    const containerRect = container.getBoundingClientRect();
+    const container = document.querySelector('.traceability-container');
+    if (!container) return;
     
-    // Remove existing SVG if present
     const existingSvg = document.getElementById('connectionsSvg');
     if (existingSvg) existingSvg.remove();
     
-    // Create SVG overlay
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.id = 'connectionsSvg';
-    svg.style.position = 'absolute';
-    svg.style.top = '0';
-    svg.style.left = '0';
-    svg.style.width = '100%';
-    svg.style.height = '100%';
-    svg.style.pointerEvents = 'none';
-    container.style.position = 'relative';
     container.appendChild(svg);
     
-    // Draw connections
     traceabilityData.links.forEach(link => {
-        if (shouldShowLink(link)) {
-            drawConnection(svg, link);
-        }
+        drawConnection(svg, link);
     });
-}
-
-function shouldShowLink(link) {
-    if (pathwayView === 'process_derived') {
-        return link.pathway === 'process_derived';
-    } else if (pathwayView === 'direct') {
-        return link.pathway === 'direct';
-    }
-    return true; // 'both'
 }
 
 function drawConnection(svg, link) {
@@ -193,31 +255,30 @@ function drawConnection(svg, link) {
     
     if (!sourceEl || !targetEl) return;
     
+    const containerRect = svg.parentElement.getBoundingClientRect();
     const sourceRect = sourceEl.getBoundingClientRect();
     const targetRect = targetEl.getBoundingClientRect();
-    const containerRect = svg.parentElement.getBoundingClientRect();
     
-    // Calculate connection points
+    // Calculate connection points (horizontal flow: right side of source to left side of target)
     const sourceX = sourceRect.right - containerRect.left;
     const sourceY = sourceRect.top + sourceRect.height / 2 - containerRect.top;
     const targetX = targetRect.left - containerRect.left;
     const targetY = targetRect.top + targetRect.height / 2 - containerRect.top;
     
-    // Create curved path (cubic bezier)
+    // Create horizontal curved path
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     const midX = (sourceX + targetX) / 2;
     const d = `M ${sourceX} ${sourceY} C ${midX} ${sourceY}, ${midX} ${targetY}, ${targetX} ${targetY}`;
     
     path.setAttribute('d', d);
     path.classList.add('connection-line');
-    path.classList.add(`pathway-${link.pathway}`);
     path.dataset.linkId = `${link.source}-${link.target}`;
     
     svg.appendChild(path);
 }
 
+// Node interaction
 function handleNodeClick(node) {
-    // Toggle selection
     if (selectedNode && selectedNode.id === node.id) {
         clearSelection();
         return;
@@ -229,16 +290,13 @@ function handleNodeClick(node) {
 }
 
 function highlightConnectedPaths(node) {
-    // Dim all nodes
     document.querySelectorAll('.trace-node').forEach(el => {
         el.classList.add('dimmed');
         el.classList.remove('selected');
     });
     
-    // Find all connected nodes
     const connectedNodes = findConnectedNodes(node.id);
     
-    // Highlight connected nodes
     connectedNodes.forEach(nodeId => {
         const nodeEl = document.querySelector(`[data-node-id="${nodeId}"]`);
         if (nodeEl) {
@@ -249,7 +307,6 @@ function highlightConnectedPaths(node) {
         }
     });
     
-    // Highlight relevant connections
     document.querySelectorAll('.connection-line').forEach(line => {
         const linkId = line.dataset.linkId;
         const [source, target] = linkId.split('-');
@@ -265,40 +322,21 @@ function highlightConnectedPaths(node) {
 function findConnectedNodes(nodeId) {
     const connected = new Set([nodeId]);
     
-    // Find all nodes connected upstream and downstream
-    const findConnections = (currentId, direction = 'both') => {
+    const findConnections = (currentId) => {
         traceabilityData.links.forEach(link => {
-            if (direction !== 'upstream' && link.source === currentId && !connected.has(link.target)) {
+            if (link.source === currentId && !connected.has(link.target)) {
                 connected.add(link.target);
-                findConnections(link.target, 'downstream');
+                findConnections(link.target);
             }
-            if (direction !== 'downstream' && link.target === currentId && !connected.has(link.source)) {
+            if (link.target === currentId && !connected.has(link.source)) {
                 connected.add(link.source);
-                findConnections(link.source, 'upstream');
+                findConnections(link.source);
             }
         });
     };
     
     findConnections(nodeId);
     return Array.from(connected);
-}
-
-function clearSelection() {
-    selectedNode = null;
-    
-    // Remove dimmed state from all nodes
-    document.querySelectorAll('.trace-node').forEach(el => {
-        el.classList.remove('dimmed', 'selected');
-    });
-    
-    // Reset all connections
-    document.querySelectorAll('.connection-line').forEach(line => {
-        line.classList.remove('highlighted');
-        line.style.opacity = '';
-    });
-    
-    // Hide details panel
-    document.getElementById('detailsPanel').style.display = 'none';
 }
 
 async function showNodeDetails(node) {
@@ -309,7 +347,8 @@ async function showNodeDetails(node) {
     content.innerHTML = '<div class="spinner-border"></div>';
     
     try {
-        const response = await fetch(`/challenge-traceability/api/node-details/${node.type}/${node.id.split('_')[1]}`);
+        const nodeIdNum = node.id.split('_')[1];
+        const response = await fetch(`/challenge-traceability/api/node-details/${node.type}/${nodeIdNum}`);
         const details = await response.json();
         
         content.innerHTML = renderNodeDetails(node, details);
@@ -319,116 +358,46 @@ async function showNodeDetails(node) {
 }
 
 function renderNodeDetails(node, details) {
-    let html = `
+    return `
         <h4>${node.name}</h4>
         <p class="text-muted">${node.type}</p>
         <hr>
+        <pre>${JSON.stringify(details, null, 2)}</pre>
     `;
-    
-    // Type-specific details
-    switch(node.type) {
-        case 'modality':
-            html += `
-                <div class="row">
-                    <div class="col-md-6">
-                        <strong>Category:</strong> ${details.category || 'N/A'}
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Process Templates:</strong> ${details.template_count || 0}
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <strong>Description:</strong>
-                    <p>${details.description || 'No description available'}</p>
-                </div>
-            `;
-            break;
-        
-        case 'template':
-            html += `
-                <div class="row">
-                    <div class="col-md-6">
-                        <strong>Modality:</strong> ${details.modality_name}
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Number of Stages:</strong> ${details.stage_count}
-                    </div>
-                </div>
-            `;
-            break;
-        
-        case 'challenge':
-            html += `
-                <div class="row">
-                    <div class="col-md-6">
-                        <strong>Category:</strong> ${details.category}
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Severity:</strong> ${details.severity_level}
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <strong>Affected Products:</strong> ${details.product_count || 0}
-                </div>
-            `;
-            break;
-        
-        // Add cases for other node types
-    }
-    
-    return html;
 }
 
-function setupEventListeners() {
-    // Filter change handlers
-    document.getElementById('modalityFilter').addEventListener('change', (e) => {
-        activeFilters.modality = e.target.value || null;
-        loadTraceabilityData();
+function clearSelection() {
+    selectedNode = null;
+    
+    document.querySelectorAll('.trace-node').forEach(el => {
+        el.classList.remove('dimmed', 'selected');
     });
     
-    document.getElementById('templateFilter').addEventListener('change', (e) => {
-        activeFilters.template = e.target.value || null;
-        loadTraceabilityData();
+    document.querySelectorAll('.connection-line').forEach(line => {
+        line.classList.remove('highlighted');
+        line.style.opacity = '';
     });
     
-    document.getElementById('challengeFilter').addEventListener('change', (e) => {
-        activeFilters.challenge = e.target.value || null;
-        loadTraceabilityData();
-    });
-    
-    // Reset filters
-    document.getElementById('resetFilters').addEventListener('click', () => {
-        activeFilters = { modality: null, template: null, challenge: null };
-        document.querySelectorAll('.form-select').forEach(select => select.value = '');
-        loadTraceabilityData();
-    });
-    
-    // Pathway view switcher
-    document.querySelectorAll('input[name="pathwayView"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            pathwayView = e.target.id.replace('view', '').toLowerCase()
-                .replace('processderived', 'process_derived')
-                .replace('direct', 'direct')
-                .replace('both', 'both');
-            renderVisualization();
-        });
-    });
-    
-    // Close details panel
-    document.getElementById('closeDetails').addEventListener('click', clearSelection);
+    document.getElementById('detailsPanel').style.display = 'none';
 }
 
-// Helper functions
+function clearVisualization() {
+    const container = document.getElementById('traceabilityVisualization');
+    container.innerHTML = '';
+    document.getElementById('contextDisplay').style.display = 'none';
+}
+
 function showLoading(show) {
-    const spinner = document.getElementById('loadingSpinner');
-    const viz = document.getElementById('traceabilityVisualization');
-    
+    const container = document.getElementById('traceabilityVisualization');
     if (show) {
-        spinner.style.display = 'block';
-        viz.style.opacity = '0.5';
-    } else {
-        spinner.style.display = 'none';
-        viz.style.opacity = '1';
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Loading traceability data...</p>
+            </div>
+        `;
     }
 }
 

@@ -78,3 +78,10 @@ def get_all_challenges_for_linking():
             "category": c.challenge_category
         } for c in all_challenges
     ])
+
+@challenge_traceability_bp.route('/api/templates-by-modality/<int:modality_id>')
+@login_required
+def get_templates_by_modality_api(modality_id):
+    """Returns templates filtered by modality for cascade filtering."""
+    templates = service.get_templates_by_modality(modality_id)
+    return jsonify(templates)

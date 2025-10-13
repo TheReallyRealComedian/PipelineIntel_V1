@@ -11,51 +11,49 @@
     <!-- Filter Panel -->
     <div class="card mb-4">
         <div class="card-header">
-            <h5>Filters</h5>
+            <h5>Select Context</h5>
+            <p class="small text-muted mb-0">Choose a Modality and Process Template to visualize the challenge pathway</p>
         </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <label>Modality</label>
-                    <select id="modalityFilter" class="form-select">
-                        <option value="">All Modalities</option>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="modalityFilter" class="form-label fw-bold">
+                        Modality <span class="text-danger">*</span>
+                    </label>
+                    <select id="modalityFilter" class="form-select" required>
+                        <option value="">-- Select Modality --</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label>Template</label>
-                    <select id="templateFilter" class="form-select">
-                        <option value="">All Templates</option>
+                <div class="col-md-4">
+                    <label for="templateFilter" class="form-label fw-bold">
+                        Process Template <span class="text-danger">*</span>
+                    </label>
+                    <select id="templateFilter" class="form-select" disabled>
+                        <option value="">-- Select Template --</option>
                     </select>
+                    <small class="form-text text-muted">First select a modality</small>
                 </div>
-                <div class="col-md-3">
-                    <label>Challenge Category</label>
-                    <select id="challengeFilter" class="form-select">
-                        <option value="">All Challenges</option>
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button id="resetFilters" class="btn btn-outline-secondary">
-                        Reset Filters
+                <div class="col-md-4">
+                    <button id="visualizeButton" class="btn btn-primary w-100" disabled>
+                        <i class="fas fa-chart-network"></i> Visualize Pathway
                     </button>
                 </div>
+            </div>
+
+            <!-- Context Display (shows selected modality/template) -->
+            <div id="contextDisplay" class="alert alert-info mt-3" style="display: none;">
+                <strong>Viewing:</strong>
+                <span id="selectedModalityName"></span> →
+                <span id="selectedTemplateName"></span>
             </div>
         </div>
     </div>
 
+
     <!-- Visualization Container -->
     <div class="card">
-        <div class="card-header d-flex justify-content-between">
+        <div class="card-header">
             <h5>Traceability Flow</h5>
-            <div class="btn-group" role="group">
-                <input type="radio" class="btn-check" name="pathwayView" id="viewBoth" checked>
-                <label class="btn btn-outline-primary" for="viewBoth">Both Pathways</label>
-                
-                <input type="radio" class="btn-check" name="pathwayView" id="viewProcessDerived">
-                <label class="btn btn-outline-primary" for="viewProcessDerived">Process-Derived</label>
-                
-                <input type="radio" class="btn-check" name="pathwayView" id="viewDirect">
-                <label class="btn btn-outline-primary" for="viewDirect">Direct Only</label>
-            </div>
         </div>
         <div class="card-body">
             <!-- The main visualization will be rendered here -->
