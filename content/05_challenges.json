@@ -119,129 +119,113 @@
   {
     "challenge_name": "Viral Safety Testing",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Nanofiltration (20nm)",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Downstream Purification",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Ion Exchange Chromatography (IEX)",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "PROTAC Manufacturing",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "PROTAC Synthesis Platform",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Complex Synthesis",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "PROTAC Synthesis Platform",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Advanced Formulation",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Spray Drying",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Specialized Solid-Phase Synthesis",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Multi-Step Organic Synthesis",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Complex Purification",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "High-Performance Liquid Chromatography (HPLC)",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Delivery System Integration",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Lipid Nanoparticle (LNP) Formulation",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Stability Management",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Lyophilization (Freeze-Drying)",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Device & Combination Product Manufacturing",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Auto-Injector Integration",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Advanced Purification",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Mixed-Mode Chromatography",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Personalized Manufacturing",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Ex-Vivo T-Cell Expansion",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Autologous Cell Processing",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Ex-Vivo T-Cell Expansion",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Viral Transduction",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Lentiviral Vector Production",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Cryopreservation",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Controlled-Rate Freezing",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   },
   {
     "challenge_name": "Patient-Specific Logistics",
     "challenge_category": "Manufacturing",
-    "technology_name": null,
+    "technology_name": "Cold Chain Monitoring",
     "severity_level": "moderate",
-    "related_capabilities": [],
-    "product_codes": []
+    "related_capabilities": []
   }
 ]

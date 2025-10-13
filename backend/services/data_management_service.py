@@ -367,6 +367,28 @@ def _resolve_foreign_keys_for_technology(item, existing_technologies):
     
     return resolved_item
 
+def _resolve_foreign_keys_for_challenge(item, existing_challenges):
+    """
+    Resolves foreign keys for manufacturing challenges.
+    Converts technology_name to technology_id.
+    """
+    from ..models import ManufacturingTechnology
+    
+    resolved_item = item.copy()
+    
+    # Resolve technology_name → technology_id (OPTIONAL - some challenges may not have a technology)
+    if 'technology_name' in resolved_item:
+        technology = ManufacturingTechnology.query.filter_by(
+            technology_name=resolved_item['technology_name']
+        ).first()
+        if technology:
+            resolved_item['technology_id'] = technology.technology_id
+            resolved_item.pop('technology_name')
+        else:
+            raise ValueError(f"Technology '{resolved_item['technology_name']}' not found. Make sure to import technologies first.")
+    
+    return resolved_item
+
 def _parse_date(date_string):
     """Helper function to parse date strings into date objects."""
     if not date_string:
@@ -592,8 +614,14 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
     error_count = 0
     errors = []
 
+    print(f"\n{'='*60}")
+    print(f"Starting import for {model_class.__name__}")
+    print(f"Total items to process: {len(resolved_data)}")
+    print(f"Resolver function: {'Yes' if resolver_func else 'No'}")
+    print(f"{'='*60}\n")
+
     try:
-        for entry in resolved_data:
+        for idx, entry in enumerate(resolved_data):
             try:
                 # Get the data from the entry
                 if 'data' in entry:
@@ -604,11 +632,18 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
                     raise ValueError("Entry missing 'data' or 'json_item' field")
                 
                 identifier = data.get(unique_key_field)
+                print(f"[{idx+1}/{len(resolved_data)}] Processing: {identifier}")
 
                 # CRITICAL: Call resolver if it exists
                 if resolver_func:
-                    existing_instances = model_class.query.all()
-                    data = resolver_func(data, existing_instances)
+                    print(f"  → Calling resolver for: {identifier}")
+                    try:
+                        existing_instances = model_class.query.all()
+                        data = resolver_func(data, existing_instances)
+                        print(f"  ✓ Resolver completed successfully")
+                    except Exception as resolve_error:
+                        print(f"  ✗ Resolver failed: {str(resolve_error)}")
+                        raise resolve_error
 
                 # Check if record already exists
                 existing_record = model_class.query.filter(
@@ -616,27 +651,44 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
                 ).first()
 
                 if existing_record:
+                    print(f"  → Updating existing record")
                     # Update existing record
                     for key, value in data.items():
                         if hasattr(existing_record, key):
                             setattr(existing_record, key, value)
                     success_count += 1
+                    print(f"  ✓ Updated successfully")
                 else:
+                    print(f"  → Creating new record")
                     # Create new record
                     new_obj = model_class(**data)
                     db.session.add(new_obj)
                     success_count += 1
+                    print(f"  ✓ Created successfully")
 
             except Exception as e:
                 error_count += 1
                 error_msg = f"Failed to process '{identifier}': {str(e)}"
                 errors.append(error_msg)
-                print(f"Import error for {identifier}: {str(e)}")  # Log to console
+                print(f"  ✗ ERROR: {str(e)}")
+                print(f"  → Data keys: {list(data.keys())}")
                 db.session.rollback()
                 continue
 
         # Commit all changes
         db.session.commit()
+        
+        print(f"\n{'='*60}")
+        print(f"Import Summary for {model_class.__name__}")
+        print(f"Success: {success_count}")
+        print(f"Errors: {error_count}")
+        print(f"{'='*60}\n")
+        
+        if errors:
+            print("Error Details:")
+            for error in errors:
+                print(f"  - {error}")
+            print()
 
         return {
             "success": True,
@@ -648,6 +700,7 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
 
     except Exception as e:
         db.session.rollback()
+        print(f"\n✗ CRITICAL ERROR: {str(e)}\n")
         return {
             "success": False,
             "message": f"Import failed: {str(e)}",

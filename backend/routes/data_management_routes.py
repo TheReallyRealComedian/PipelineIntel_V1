@@ -10,7 +10,8 @@ from ..services.data_management_service import (
     analyze_process_template_import,
     finalize_process_template_import,
     import_full_database,
-    _resolve_foreign_keys_for_technology
+    _resolve_foreign_keys_for_technology,
+    _resolve_foreign_keys_for_challenge
 )
 
 from ..models import (
@@ -25,11 +26,16 @@ data_management_bp = Blueprint('data_management', __name__, url_prefix='/data-ma
 ENTITY_MAP = {
     'products': {'model': Product, 'key': 'product_code'},
     'indications': {'model': Indication, 'key': 'indication_name'},
-    'manufacturing_challenges': {'model': ManufacturingChallenge, 'key': 'challenge_name'},
-        'manufacturing_technologies': {
+    'manufacturing_challenges': {
+        'model': ManufacturingChallenge, 
+        'key': 'challenge_name',
+        'resolver': _resolve_foreign_keys_for_challenge
+    },
+    'manufacturing_technologies': {
         'model': ManufacturingTechnology, 
         'key': 'technology_name',
-        'resolver': _resolve_foreign_keys_for_technology},
+        'resolver': _resolve_foreign_keys_for_technology
+    },
     'process_stages': {'model': ProcessStage, 'key': 'stage_name'},
     'process_templates': {'model': ProcessTemplate, 'key': 'template_name'},  # NEW: Added process templates
     'supply_chain': {'model': ProductSupplyChain, 'key': 'id'},
