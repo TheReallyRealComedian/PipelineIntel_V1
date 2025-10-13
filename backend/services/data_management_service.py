@@ -20,12 +20,19 @@ from ..models import (
 
 # This order is critical. Parents must be inserted before children.
 TABLE_IMPORT_ORDER = [
-    'users', 'modalities', 'process_stages',
-    'manufacturing_capabilities', 'manufacturing_entities',
-    'internal_facilities', 'external_partners', 'process_templates',
-    'products', 'indications', 'manufacturing_technologies',
-    'manufacturing_challenges', 'llm_settings',
-    # Junction/Association tables and tables with multiple FKs last
+    'users', 
+    'modalities', 
+    'process_stages',
+    'manufacturing_capabilities', 
+    'manufacturing_entities',
+    'internal_facilities', 
+    'external_partners', 
+    'process_templates',
+    'products', 
+    'indications', 
+    'manufacturing_technologies',
+    'manufacturing_challenges', 
+    'llm_settings',
     'modality_challenges',
     'template_stages', 'product_to_challenge', 'product_to_technology',
     'product_supply_chain', 'modality_requirements', 'product_requirements',
@@ -318,6 +325,47 @@ def generate_suggestions(missing_value, existing_values, max_suggestions=3):
 
     return suggestions
 
+
+def _resolve_foreign_keys_for_technology(item, existing_technologies):
+    """
+    Resolves foreign keys for manufacturing technologies.
+    Supports both name-based and ID-based lookups.
+    """
+    from ..models import ProcessStage, Modality, ProcessTemplate
+    
+    resolved_item = item.copy()
+    
+    # Resolve stage_id (REQUIRED)
+    if 'stage_id' not in resolved_item and 'stage_name' in resolved_item:
+        stage = ProcessStage.query.filter_by(stage_name=resolved_item['stage_name']).first()
+        if stage:
+            resolved_item['stage_id'] = stage.stage_id
+            del resolved_item['stage_name']
+        else:
+            raise ValueError(f"Stage '{resolved_item['stage_name']}' not found")
+    
+    # Resolve modality_id (OPTIONAL)
+    if 'modality_id' not in resolved_item and 'modality_name' in resolved_item:
+        modality = Modality.query.filter_by(modality_name=resolved_item['modality_name']).first()
+        if modality:
+            resolved_item['modality_id'] = modality.modality_id
+            del resolved_item['modality_name']
+        else:
+            raise ValueError(f"Modality '{resolved_item['modality_name']}' not found")
+    
+    # Resolve template_id (OPTIONAL)
+    if 'template_id' not in resolved_item and 'template_name' in resolved_item:
+        template = ProcessTemplate.query.filter_by(template_name=resolved_item['template_name']).first()
+        if template:
+            resolved_item['template_id'] = template.template_id
+            # Auto-set modality_id if not already set
+            if 'modality_id' not in resolved_item:
+                resolved_item['modality_id'] = template.modality_id
+            del resolved_item['template_name']
+        else:
+            raise ValueError(f"Template '{resolved_item['template_name']}' not found")
+    
+    return resolved_item
 
 def _parse_date(date_string):
     """Helper function to parse date strings into date objects."""

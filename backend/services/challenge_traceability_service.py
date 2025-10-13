@@ -8,6 +8,9 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
     """
     Fetches traceability data for ONLY Stage → Technology → Challenge.
     Requires both modality_id and template_id to be set.
+    
+    Now uses the new modality_id and template_id fields on technologies
+    for accurate filtering.
     """
     nodes = []
     links = []
@@ -17,7 +20,7 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
     if not modality_id or not template_id:
         return {"nodes": [], "links": [], "error": "Please select both Modality and Template"}
     
-    # Query only the relevant chain: Template → Stages → Technologies → Challenges
+    # Query the chain with proper technology filtering
     query = db.session.query(
         ProcessStage, ManufacturingTechnology, ManufacturingChallenge
     ).join(TemplateStage, ProcessStage.stage_id == TemplateStage.stage_id)\
@@ -25,30 +28,54 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
      .join(ManufacturingTechnology, ProcessStage.stage_id == ManufacturingTechnology.stage_id)\
      .join(ManufacturingChallenge, ManufacturingTechnology.technology_id == ManufacturingChallenge.technology_id)\
      .filter(ProcessTemplate.template_id == template_id)\
-     .filter(ProcessTemplate.modality_id == modality_id)
+     .filter(ProcessTemplate.modality_id == modality_id)\
+     .filter(
+         db.or_(
+             # Technology is template-specific and matches our template
+             ManufacturingTechnology.template_id == template_id,
+             # OR technology is modality-wide (applies to all templates in modality)
+             db.and_(
+                 ManufacturingTechnology.modality_id == modality_id,
+                 ManufacturingTechnology.template_id.is_(None)
+             ),
+             # OR technology is legacy/stage-only (no modality/template specified)
+             # Note: You may want to remove this clause after migration is complete
+             db.and_(
+                 ManufacturingTechnology.modality_id.is_(None),
+                 ManufacturingTechnology.template_id.is_(None)
+             )
+         )
+     )
     
     results = query.all()
     
     for stage, tech, chal in results:
-        # Add Stage node (level 0 in new visualization)
+        # Add Stage node (level 0)
         if f"stage_{stage.stage_id}" not in node_ids:
             nodes.append({
                 "id": f"stage_{stage.stage_id}",
                 "type": "stage",
                 "name": stage.stage_name,
-                "level": 0,  # First column
+                "level": 0,
                 "badge": stage.stage_category
             })
             node_ids.add(f"stage_{stage.stage_id}")
         
         # Add Technology node (level 1)
         if f"technology_{tech.technology_id}" not in node_ids:
+            badge = f"Complexity: {tech.complexity_rating}/10" if tech.complexity_rating else None
+            # Add scope indicator
+            if tech.template_id:
+                badge = f"{badge} • Template-Specific" if badge else "Template-Specific"
+            elif tech.modality_id:
+                badge = f"{badge} • Modality-Wide" if badge else "Modality-Wide"
+            
             nodes.append({
                 "id": f"technology_{tech.technology_id}",
                 "type": "technology",
                 "name": tech.technology_name,
-                "level": 1,  # Second column
-                "badge": f"Complexity: {tech.complexity_rating}/10" if tech.complexity_rating else None
+                "level": 1,
+                "badge": badge
             })
             node_ids.add(f"technology_{tech.technology_id}")
         
@@ -58,7 +85,7 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
                 "id": f"challenge_{chal.challenge_id}",
                 "type": "challenge",
                 "name": chal.challenge_name,
-                "level": 2,  # Third column
+                "level": 2,
                 "badge": chal.challenge_category
             })
             node_ids.add(f"challenge_{chal.challenge_id}")

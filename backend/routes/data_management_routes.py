@@ -24,7 +24,7 @@ ENTITY_MAP = {
     'products': {'model': Product, 'key': 'product_code'},
     'indications': {'model': Indication, 'key': 'indication_name'},
     'manufacturing_challenges': {'model': ManufacturingChallenge, 'key': 'challenge_name'},
-    'manufacturing_technologies': {'model': ManufacturingTechnology, 'key': 'technology_name'},
+    'manufacturing_technologies': {'model': ManufacturingTechnology, 'key': 'technology_name','resolver': _resolve_foreign_keys_for_technology},
     'process_stages': {'model': ProcessStage, 'key': 'stage_name'},
     'process_templates': {'model': ProcessTemplate, 'key': 'template_name'},  # NEW: Added process templates
     'supply_chain': {'model': ProductSupplyChain, 'key': 'id'},

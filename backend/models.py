@@ -400,22 +400,58 @@ class ManufacturingChallenge(db.Model):
 
 class ManufacturingTechnology(db.Model):
     __tablename__ = 'manufacturing_technologies'
+    
     technology_id = Column(Integer, primary_key=True)
     technology_name = Column(String(255), unique=True, nullable=False)
-    short_description = Column(Text, nullable=True)
-    description = Column(Text, nullable=True)
-    stage_id = Column(Integer, ForeignKey('process_stages.stage_id')) # New field from Phase 3
-    innovation_potential = Column(Text) # New field from Phase 3
-    complexity_rating = Column(Integer) # New field from Phase 3
-    stage = relationship("ProcessStage", back_populates="technologies")
-    products = relationship("Product", secondary=product_to_technology_association, back_populates="technologies")
-    challenges = relationship("ManufacturingChallenge", back_populates="technology")
+    stage_id = Column(Integer, ForeignKey('process_stages.stage_id'), nullable=False, index=True)
+    
+    # ==================== NEW FIELDS ====================
+    modality_id = Column(Integer, ForeignKey('modalities.modality_id'), nullable=True, index=True)
+    template_id = Column(Integer, ForeignKey('process_templates.template_id'), nullable=True, index=True)
+    # ===================================================
+    
+    short_description = Column(Text)
+    description = Column(Text)
+    innovation_potential = Column(Text)
+    complexity_rating = Column(Integer)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    # ==================== UPDATED RELATIONSHIPS ====================
+    stage = relationship("ProcessStage", back_populates="technologies")
+    modality = relationship("Modality", backref="technologies")  # NEW
+    template = relationship("ProcessTemplate", backref="technologies")  # NEW
+    # ==============================================================
+    
+    challenges = relationship("ManufacturingChallenge", back_populates="technology", cascade="all, delete-orphan")
+    products = relationship("Product", secondary=product_to_technology_association, back_populates="technologies")
+
+    # ==================== NEW VALIDATION ====================
+    @validates('modality_id', 'template_id')
+    def validate_scope(self, key, value):
+        """
+        Ensure logical consistency:
+        - Can have BOTH modality_id and template_id (template-specific)
+        - Can have ONLY modality_id (modality-wide)
+        - Can have NEITHER (legacy or stage-only, will appear everywhere)
+        - CANNOT have ONLY template_id without modality_id
+        """
+        if key == 'template_id' and value is not None:
+            if self.modality_id is None:
+                # When template_id is set, we need to get the template's modality
+                from sqlalchemy.orm import Session
+                session = Session.object_session(self)
+                if session:
+                    template = session.query(ProcessTemplate).get(value)
+                    if template:
+                        self.modality_id = template.modality_id
+                    else:
+                        raise ValueError("Invalid template_id: template not found")
+        return value
+    # =======================================================
 
     @classmethod
     def get_all_fields(cls):
-        """Returns a list of all column names for the model."""
-        return [c.key for c in inspect(cls).attrs if c.key not in ['stage', 'products', 'challenges']]
+        return [c.key for c in inspect(cls).attrs if c.key not in ['stage', 'challenges', 'products', 'modality', 'template']]
 
 class ProductSupplyChain(db.Model):
     __tablename__ = 'product_supply_chain'
