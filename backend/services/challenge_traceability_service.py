@@ -2,191 +2,120 @@
 
 from ..models import Modality, ProcessTemplate, TemplateStage, ProcessStage, ManufacturingTechnology, ManufacturingChallenge
 from ..db import db
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, contains_eager
+from collections import defaultdict
+
+def get_full_process_hierarchy_for_template(template_id):
+    """
+    Gets all stages for a template and organizes them under their top-level phases,
+    respecting the template's specified order.
+    """
+    template_stages_query = db.session.query(TemplateStage).filter(
+        TemplateStage.template_id == template_id
+    ).order_by(TemplateStage.stage_order).options(
+        joinedload(TemplateStage.stage).joinedload(ProcessStage.parent)
+    ).all()
+
+    # This dictionary will be ordered by stage_order from the template
+    phases = {}
+    
+    for ts in template_stages_query:
+        stage = ts.stage
+        if not stage:
+            continue
+
+        # Find the top-level parent (the Phase)
+        current = stage
+        while current.parent:
+            current = current.parent
+        
+        phase_name = current.stage_name
+        
+        if phase_name not in phases:
+            phases[phase_name] = {
+                "phase_name": phase_name,
+                "phase_id": current.stage_id,
+                "stages": []
+            }
+        
+        # Add the actual stage from the template to this phase
+        phases[phase_name]["stages"].append({
+            "stage_obj": stage,
+            "technologies": []
+        })
+        
+    return list(phases.values())
+
 
 def get_traceability_data(modality_id=None, template_id=None, challenge_id=None):
     """
-    Fetches traceability data for ONLY Stage → Technology → Challenge.
-    Requires both modality_id and template_id to be set.
-    
-    Now uses the new modality_id and template_id fields on technologies
-    for accurate filtering.
+    Fetches traceability data as a hierarchical structure: Phase -> Stage -> Technology -> Challenge.
+    Requires both modality_id and template_id.
     """
-    nodes = []
-    links = []
-    node_ids = set()
-    
-    # Validation: Both modality and template must be selected
     if not modality_id or not template_id:
-        return {"nodes": [], "links": [], "error": "Please select both Modality and Template"}
-    
-    # Query the chain with proper technology filtering
-    query = db.session.query(
-        ProcessStage, ManufacturingTechnology, ManufacturingChallenge
-    ).join(TemplateStage, ProcessStage.stage_id == TemplateStage.stage_id)\
-     .join(ProcessTemplate, TemplateStage.template_id == ProcessTemplate.template_id)\
-     .join(ManufacturingTechnology, ProcessStage.stage_id == ManufacturingTechnology.stage_id)\
-     .join(ManufacturingChallenge, ManufacturingTechnology.technology_id == ManufacturingChallenge.technology_id)\
-     .filter(ProcessTemplate.template_id == template_id)\
-     .filter(ProcessTemplate.modality_id == modality_id)\
-     .filter(
-         db.or_(
-             # Technology is template-specific and matches our template
-             ManufacturingTechnology.template_id == template_id,
-             # OR technology is modality-wide (applies to all templates in modality)
-             db.and_(
-                 ManufacturingTechnology.modality_id == modality_id,
-                 ManufacturingTechnology.template_id.is_(None)
-             ),
-             # OR technology is legacy/stage-only (no modality/template specified)
-             # Note: You may want to remove this clause after migration is complete
-             db.and_(
-                 ManufacturingTechnology.modality_id.is_(None),
-                 ManufacturingTechnology.template_id.is_(None)
-             )
-         )
-     )
-    
-    results = query.all()
-    
-    for stage, tech, chal in results:
-        # Add Stage node (level 0)
-        if f"stage_{stage.stage_id}" not in node_ids:
-            nodes.append({
-                "id": f"stage_{stage.stage_id}",
-                "type": "stage",
-                "name": stage.stage_name,
-                "level": 0,
-                "badge": stage.stage_category
-            })
-            node_ids.add(f"stage_{stage.stage_id}")
-        
-        # Add Technology node (level 1)
-        if f"technology_{tech.technology_id}" not in node_ids:
-            badge = f"Complexity: {tech.complexity_rating}/10" if tech.complexity_rating else None
-            # Add scope indicator
-            if tech.template_id:
-                badge = f"{badge} • Template-Specific" if badge else "Template-Specific"
-            elif tech.modality_id:
-                badge = f"{badge} • Modality-Wide" if badge else "Modality-Wide"
-            
-            nodes.append({
-                "id": f"technology_{tech.technology_id}",
-                "type": "technology",
-                "name": tech.technology_name,
-                "level": 1,
-                "badge": badge
-            })
-            node_ids.add(f"technology_{tech.technology_id}")
-        
-        # Add Challenge node (level 2)
-        if f"challenge_{chal.challenge_id}" not in node_ids:
-            nodes.append({
-                "id": f"challenge_{chal.challenge_id}",
-                "type": "challenge",
-                "name": chal.challenge_name,
-                "level": 2,
-                "badge": chal.challenge_category
-            })
-            node_ids.add(f"challenge_{chal.challenge_id}")
-        
-        # Add links
-        links.append({
-            "source": f"stage_{stage.stage_id}",
-            "target": f"technology_{tech.technology_id}",
-            "pathway": "process_derived"
-        })
-        links.append({
-            "source": f"technology_{tech.technology_id}",
-            "target": f"challenge_{chal.challenge_id}",
-            "pathway": "process_derived"
-        })
-    
-    # Deduplicate links
-    unique_links = [dict(t) for t in {tuple(d.items()) for d in links}]
-    
-    return {"nodes": nodes, "links": unique_links}
+        return {"error": "Please select both a Modality and a Process Template."}
 
-def get_pathway_a_data(modality_id=None):
-    """
-    Returns process-derived pathway:
-    Modality → Templates → Stages → Technologies → Challenges
-    """
-    nodes = []
-    links = []
-    node_ids = set()
+    # 1. Get the ordered hierarchical structure for the template
+    structured_process = get_full_process_hierarchy_for_template(template_id)
+    
+    # Create a quick lookup map: stage_id -> stage_dict
+    stage_map = {}
+    for phase in structured_process:
+        for stage_dict in phase['stages']:
+            stage_map[stage_dict['stage_obj'].stage_id] = stage_dict
 
-    query = db.session.query(
-        Modality, ProcessTemplate, TemplateStage, ProcessStage, ManufacturingTechnology, ManufacturingChallenge
-    ).join(ProcessTemplate, Modality.modality_id == ProcessTemplate.modality_id)\
-     .join(TemplateStage, ProcessTemplate.template_id == TemplateStage.template_id)\
-     .join(ProcessStage, TemplateStage.stage_id == ProcessStage.stage_id)\
-     .join(ManufacturingTechnology, ProcessStage.stage_id == ManufacturingTechnology.stage_id)\
-     .join(ManufacturingChallenge, ManufacturingTechnology.technology_id == ManufacturingChallenge.technology_id)
-
-    if modality_id:
-        query = query.filter(Modality.modality_id == modality_id)
+    # 2. Get all technologies and challenges linked to the stages in this template
+    query = db.session.query(ManufacturingTechnology, ManufacturingChallenge)\
+        .join(ManufacturingChallenge, ManufacturingTechnology.technology_id == ManufacturingChallenge.technology_id)\
+        .filter(ManufacturingTechnology.stage_id.in_(stage_map.keys()))\
+        .options(contains_eager(ManufacturingTechnology.challenges))
 
     results = query.all()
 
-    for mod, tmpl, t_stage, stage, tech, chal in results:
-        # Add nodes if they don't exist
-        if f"modality_{mod.modality_id}" not in node_ids:
-            nodes.append({"id": f"modality_{mod.modality_id}", "type": "modality", "name": mod.modality_name, "level": 0})
-            node_ids.add(f"modality_{mod.modality_id}")
-        if f"template_{tmpl.template_id}" not in node_ids:
-            nodes.append({"id": f"template_{tmpl.template_id}", "type": "template", "name": tmpl.template_name, "level": 1})
-            node_ids.add(f"template_{tmpl.template_id}")
-        if f"stage_{stage.stage_id}" not in node_ids:
-            nodes.append({"id": f"stage_{stage.stage_id}", "type": "stage", "name": stage.stage_name, "level": 2})
-            node_ids.add(f"stage_{stage.stage_id}")
-        if f"technology_{tech.technology_id}" not in node_ids:
-            nodes.append({"id": f"technology_{tech.technology_id}", "type": "technology", "name": tech.technology_name, "level": 3})
-            node_ids.add(f"technology_{tech.technology_id}")
-        if f"challenge_{chal.challenge_id}" not in node_ids:
-            nodes.append({"id": f"challenge_{chal.challenge_id}", "type": "challenge", "name": chal.challenge_name, "level": 4})
-            node_ids.add(f"challenge_{chal.challenge_id}")
-
-        # Add links
-        links.append({"source": f"modality_{mod.modality_id}", "target": f"template_{tmpl.template_id}", "pathway": "process_derived"})
-        links.append({"source": f"template_{tmpl.template_id}", "target": f"stage_{stage.stage_id}", "pathway": "process_derived"})
-        links.append({"source": f"stage_{stage.stage_id}", "target": f"technology_{tech.technology_id}", "pathway": "process_derived"})
-        links.append({"source": f"technology_{tech.technology_id}", "target": f"challenge_{chal.challenge_id}", "pathway": "process_derived"})
-    
-    # Deduplicate links
-    unique_links = [dict(t) for t in {tuple(d.items()) for d in links}]
-    return {"nodes": nodes, "links": unique_links}
-
-
-def get_pathway_b_data(modality_id=None):
-    """
-    Returns direct pathway: Modality → Challenges (direct links)
-    This uses your `modality_challenges` association table.
-    """
-    nodes = []
-    links = []
-    node_ids = set()
-
-    query = db.session.query(Modality, ManufacturingChallenge)\
-        .join(Modality.modality_challenges)\
-        .join(ManufacturingChallenge)
-
-    if modality_id:
-        query = query.filter(Modality.modality_id == modality_id)
-    
-    results = query.all()
-
-    for mod, chal in results:
-        if f"modality_{mod.modality_id}" not in node_ids:
-            nodes.append({"id": f"modality_{mod.modality_id}", "type": "modality", "name": mod.modality_name, "level": 0})
-            node_ids.add(f"modality_{mod.modality_id}")
-        if f"challenge_{chal.challenge_id}" not in node_ids:
-            nodes.append({"id": f"challenge_{chal.challenge_id}", "type": "challenge", "name": chal.challenge_name, "level": 4})
-            node_ids.add(f"challenge_{chal.challenge_id}")
+    # 3. Populate the structure with technologies and challenges
+    tech_map = {}
+    for tech, chal in results:
+        if tech.technology_id not in tech_map:
+            tech_map[tech.technology_id] = {
+                "tech_obj": tech,
+                "challenges": []
+            }
+            # Add this technology to the correct stage
+            if tech.stage_id in stage_map:
+                stage_map[tech.stage_id]["technologies"].append(tech_map[tech.technology_id])
         
-        links.append({"source": f"modality_{mod.modality_id}", "target": f"challenge_{chal.challenge_id}", "pathway": "direct"})
+        tech_map[tech.technology_id]["challenges"].append(chal)
 
-    return {"nodes": nodes, "links": links}
+    # 4. Convert SQLAlchemy objects to JSON-serializable dictionaries for the frontend
+    final_output = []
+    for phase in structured_process:
+        phase_data = {
+            "phase_name": phase["phase_name"],
+            "stages": []
+        }
+        for stage_dict in phase["stages"]:
+            stage_data = {
+                "stage_name": stage_dict["stage_obj"].stage_name,
+                "stage_description": stage_dict["stage_obj"].short_description,
+                "technologies": []
+            }
+            for tech_dict in stage_dict["technologies"]:
+                tech_data = {
+                    "tech_name": tech_dict["tech_obj"].technology_name,
+                    "complexity": tech_dict["tech_obj"].complexity_rating,
+                    "challenges": [
+                        {
+                            "challenge_name": c.challenge_name,
+                            "challenge_category": c.challenge_category,
+                        } for c in tech_dict["challenges"]
+                    ]
+                }
+                stage_data["technologies"].append(tech_data)
+            phase_data["stages"].append(stage_data)
+        final_output.append(phase_data)
+
+    return final_output
+
 
 def get_available_filters():
     """

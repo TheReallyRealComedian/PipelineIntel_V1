@@ -1,118 +1,90 @@
-/* Horizontal layout for stepped flow */
-.traceability-container {
-    display: flex;
-    flex-direction: row; /* CHANGED: was column-based, now horizontal */
-    gap: 3rem;
-    overflow-x: auto;
-    padding: 2rem 1rem;
-    min-height: 500px;
-    position: relative;
-}
-
-.traceability-column {
-    display: flex;
-    flex-direction: column; /* Items within column stack vertically */
-    min-width: 250px;
-    max-width: 300px;
-    flex-shrink: 0;
-}
-
-.column-header {
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.2rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 3px solid var(--bi-primary-500);
-    color: var(--bi-primary-700);
-    background: var(--bi-primary-50);
-    border-radius: 8px 8px 0 0;
-    padding: 1rem;
-}
-
-.nodes-container {
+.traceability-flow-container {
     display: flex;
     flex-direction: column;
+    gap: 2rem;
+}
+
+.process-phase {
+    border: 1px solid var(--bi-neutral-200);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--bi-neutral-050);
+}
+
+.phase-header {
+    background-color: var(--bi-dark-green-800);
+    color: var(--bi-white);
+    padding: 1rem 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 500;
+    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+    display: flex;
+    align-items: center;
+}
+
+.phase-header i {
+    margin-right: 1rem;
+    opacity: 0.7;
+}
+
+.phase-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.stage-group {
+    background-color: var(--bi-white);
+    border: 1px solid var(--bi-neutral-200);
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+.stage-title {
+    padding: 0.75rem 1rem;
+    font-weight: bold;
+    font-size: 1.1rem;
+    background-color: var(--bi-neutral-100);
+    border-bottom: 1px solid var(--bi-neutral-200);
+    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+}
+
+.tech-challenge-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr; /* Fixed width for tech, remaining for challenges */
     gap: 1rem;
-}
-
-/* Node styling - updated for horizontal flow */
-.trace-node {
-    background: white;
-    border: 2px solid var(--bi-neutral-300);
-    border-radius: 8px;
     padding: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
+    align-items: start;
 }
 
-.trace-node:hover {
-    border-color: var(--bi-primary-500);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: scale(1.02); /* CHANGED: scale instead of translateX for horizontal */
-}
-
-.trace-node.selected {
-    background: var(--bi-primary-100);
-    border-color: var(--bi-primary-700);
-    border-width: 3px;
-}
-
-.trace-node.dimmed {
-    opacity: 0.3;
-}
-
-.node-name {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
-}
-
-.node-badge {
-    display: inline-block;
-    font-size: 0.7rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    background: var(--bi-info-100);
-    color: var(--bi-info-700);
-    margin-top: 0.5rem;
-}
-
-/* Connection lines - adapted for horizontal flow */
-#connectionsSvg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.connection-line {
-    fill: none;
-    stroke: var(--bi-primary-400);
-    stroke-width: 2;
-    opacity: 0.6;
-    transition: all 0.3s ease;
-}
-
-.connection-line.highlighted {
-    stroke: var(--bi-primary-600);
-    stroke-width: 4;
-    opacity: 1;
-}
-
-/* Empty state message */
-.empty-state {
+.tech-card {
+    background-color: var(--bi-info-100);
+    color: var(--bi-info-800);
+    padding: 0.75rem;
+    border-radius: var(--border-radius-xs);
+    font-weight: 500;
     text-align: center;
-    padding: 4rem 2rem;
-    color: var(--bi-neutral-500);
+    border: 1px solid var(--bi-info-500);
 }
 
-.empty-state i {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    opacity: 0.3;
+.challenges-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.challenge-card {
+    background-color: var(--bi-warning-100);
+    color: var(--bi-warning-800);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius-xs);
+    font-size: 0.9rem;
+    border: 1px solid var(--bi-warning-500);
+}
+
+.empty-state {
+    color: var(--bi-neutral-500);
+    font-style: italic;
+    padding: 1rem;
+    text-align: center;
 }
