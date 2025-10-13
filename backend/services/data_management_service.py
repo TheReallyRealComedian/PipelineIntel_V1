@@ -340,7 +340,7 @@ def _resolve_foreign_keys_for_technology(item, existing_technologies):
         stage = ProcessStage.query.filter_by(stage_name=resolved_item['stage_name']).first()
         if stage:
             resolved_item['stage_id'] = stage.stage_id
-            del resolved_item['stage_name']
+            resolved_item.pop('stage_name')  # Use pop instead of del
         else:
             raise ValueError(f"Stage '{resolved_item['stage_name']}' not found")
     
@@ -349,7 +349,7 @@ def _resolve_foreign_keys_for_technology(item, existing_technologies):
         modality = Modality.query.filter_by(modality_name=resolved_item['modality_name']).first()
         if modality:
             resolved_item['modality_id'] = modality.modality_id
-            del resolved_item['modality_name']
+            resolved_item.pop('modality_name')  # Use pop instead of del
         else:
             raise ValueError(f"Modality '{resolved_item['modality_name']}' not found. Make sure to import modalities first.")
     
@@ -361,7 +361,7 @@ def _resolve_foreign_keys_for_technology(item, existing_technologies):
             # Auto-set modality_id if not already set (template knows its modality)
             if 'modality_id' not in resolved_item:
                 resolved_item['modality_id'] = template.modality_id
-            del resolved_item['template_name']
+            resolved_item.pop('template_name')  # Use pop instead of del
         else:
             raise ValueError(f"Template '{resolved_item['template_name']}' not found. Make sure to import process templates first.")
     
@@ -583,43 +583,32 @@ def _separate_product_data(json_data):
 
 
 
-def finalize_import(resolved_data, model_class, unique_key_field):
+def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=None):
     """
     Finalizes the import by creating or updating database entries.
-    Now calls the custom resolver if one is defined in ENTITY_MAP.
+    Now accepts an optional resolver function.
     """
-    from ..db import db
     success_count = 0
     error_count = 0
     errors = []
 
     try:
-        # Get the resolver function if it exists (from ENTITY_MAP in routes)
-        # We need to import ENTITY_MAP here or pass resolver as parameter
-        from ..routes.data_management_routes import ENTITY_MAP
-
-        # Find which entity this model_class belongs to
-        resolver_func = None
-        for entity_type, config in ENTITY_MAP.items():
-            if config['model'] == model_class:
-                resolver_func = config.get('resolver')
-                break
-
         for entry in resolved_data:
-            identifier = None
             try:
-                data = entry['json_item'].copy()
+                # Get the data from the entry
+                if 'data' in entry:
+                    data = entry['data'].copy()
+                elif 'json_item' in entry:
+                    data = entry['json_item'].copy()
+                else:
+                    raise ValueError("Entry missing 'data' or 'json_item' field")
+                
                 identifier = data.get(unique_key_field)
 
                 # CRITICAL: Call resolver if it exists
                 if resolver_func:
-                    # Get existing instances for the resolver
                     existing_instances = model_class.query.all()
                     data = resolver_func(data, existing_instances)
-
-                # The resolver should return None if the item should be skipped
-                if data is None:
-                    continue
 
                 # Check if record already exists
                 existing_record = model_class.query.filter(
@@ -640,8 +629,9 @@ def finalize_import(resolved_data, model_class, unique_key_field):
 
             except Exception as e:
                 error_count += 1
-                error_id = f"'{identifier}'" if identifier else "an unknown record"
-                errors.append(f"Failed to process {error_id}: {str(e)}")
+                error_msg = f"Failed to process '{identifier}': {str(e)}"
+                errors.append(error_msg)
+                print(f"Import error for {identifier}: {str(e)}")  # Log to console
                 db.session.rollback()
                 continue
 

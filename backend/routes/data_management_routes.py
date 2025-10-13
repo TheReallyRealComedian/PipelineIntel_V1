@@ -261,7 +261,7 @@ def finalize_json_import():
     resolved_data = request.json.get('resolved_data')
     entity_type = request.json.get('entity_type')
 
-    if not resolved_data or not entity_type or not entity_type in ENTITY_MAP:
+    if not resolved_data or not entity_type or entity_type not in ENTITY_MAP:
         return jsonify(success=False, message="Invalid request data."), 400
 
     try:
@@ -269,8 +269,17 @@ def finalize_json_import():
         if entity_type == 'process_templates':
             result = finalize_process_template_import(resolved_data)
         else:
-            # Regular entity finalization
-            result = finalize_import(resolved_data, ENTITY_MAP[entity_type]['model'], ENTITY_MAP[entity_type]['key'])
+            # Get the resolver if it exists
+            entity_config = ENTITY_MAP[entity_type]
+            resolver = entity_config.get('resolver')  # NEW: Get the resolver
+            
+            # Regular entity finalization - NOW PASS THE RESOLVER
+            result = finalize_import(
+                resolved_data, 
+                entity_config['model'], 
+                entity_config['key'],
+                resolver  # NEW: Pass resolver as 4th argument
+            )
         
         return jsonify(result)
 
