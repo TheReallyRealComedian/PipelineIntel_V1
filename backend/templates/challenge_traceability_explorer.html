@@ -1,3 +1,4 @@
+{# C:\Users\glutholi\CODE\PipelineIntelligence\backend\templates\challenge_traceability_explorer.html #}
 {% extends "base.html" %}
 
 {% block head_extra %}
@@ -9,8 +10,8 @@
 <div class="container-fluid">
     <!-- Page Header -->
     <div class="page-header">
-        <h1>Challenge Traceability Explorer</h1>
-        <p class="text-muted">Trace manufacturing challenges from product category to process steps</p>
+        <h1>Challenge Explorer</h1>
+        <p class="text-muted">Trace manufacturing challenges from modality to process steps</p>
     </div>
 
     <!-- Filter Panel -->
@@ -53,19 +54,11 @@
     </div>
 
 
-    <!-- Visualization Container -->
-    <div class="card">
-        <div class="card-header">
-            <h5>Traceability Flow</h5>
-        </div>
-        <div class="card-body">
-            <!-- The new hierarchical visualization will be rendered here -->
-            <div id="traceabilityVisualization">
-                 <div class="empty-state">
-                    <i class="fas fa-info-circle fa-2x"></i>
-                    <p class="mt-2">Please select a Modality and Process Template to begin.</p>
-                </div>
-            </div>
+    <!-- Visualization Container - NO LONGER WRAPPED IN A CARD -->
+    <div id="traceabilityVisualization" class="mt-4">
+         <div class="empty-state card card-body">
+            <i class="fas fa-info-circle fa-2x"></i>
+            <p class="mt-2">Please select a Modality and Process Template to begin.</p>
         </div>
     </div>
 </div>

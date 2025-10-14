@@ -1,4 +1,4 @@
-# /backend/services/challenge_traceability_service.py
+# C:\Users\glutholi\CODE\PipelineIntelligence\backend\services\challenge_traceability_service.py
 
 from ..models import Modality, ProcessTemplate, TemplateStage, ProcessStage, ManufacturingTechnology, ManufacturingChallenge
 from ..db import db
@@ -64,15 +64,31 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
         for stage_dict in phase['stages']:
             stage_map[stage_dict['stage_obj'].stage_id] = stage_dict
 
-    # 2. Get all technologies and challenges linked to the stages in this template
+    # 2. Get technologies and challenges, CORRECTLY FILTERED by modality and template context.
     query = db.session.query(ManufacturingTechnology, ManufacturingChallenge)\
         .join(ManufacturingChallenge, ManufacturingTechnology.technology_id == ManufacturingChallenge.technology_id)\
         .filter(ManufacturingTechnology.stage_id.in_(stage_map.keys()))\
+        .filter( # <<< THIS IS THE CRITICAL FIX TO SCOPE TECHNOLOGIES
+            db.or_(
+                # Tech is specific to this template
+                ManufacturingTechnology.template_id == template_id,
+                # Tech is for this modality in general (but not for a different template)
+                db.and_(
+                    ManufacturingTechnology.modality_id == modality_id,
+                    ManufacturingTechnology.template_id.is_(None)
+                ),
+                # Tech is generic and not scoped to any modality/template
+                db.and_(
+                    ManufacturingTechnology.modality_id.is_(None),
+                    ManufacturingTechnology.template_id.is_(None)
+                )
+            )
+        )\
         .options(contains_eager(ManufacturingTechnology.challenges))
 
     results = query.all()
 
-    # 3. Populate the structure with technologies and challenges
+    # 3. Populate the structure with the correctly filtered technologies and challenges
     tech_map = {}
     for tech, chal in results:
         if tech.technology_id not in tech_map:
@@ -99,7 +115,13 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
                 "stage_description": stage_dict["stage_obj"].short_description,
                 "technologies": []
             }
-            for tech_dict in stage_dict["technologies"]:
+            # Sort technologies alphabetically for consistent display
+            sorted_technologies = sorted(stage_dict["technologies"], key=lambda t: t['tech_obj'].technology_name)
+
+            for tech_dict in sorted_technologies:
+                # Sort challenges alphabetically
+                sorted_challenges = sorted(tech_dict["challenges"], key=lambda c: c.challenge_name)
+                
                 tech_data = {
                     "tech_name": tech_dict["tech_obj"].technology_name,
                     "complexity": tech_dict["tech_obj"].complexity_rating,
@@ -107,7 +129,7 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
                         {
                             "challenge_name": c.challenge_name,
                             "challenge_category": c.challenge_category,
-                        } for c in tech_dict["challenges"]
+                        } for c in sorted_challenges
                     ]
                 }
                 stage_data["technologies"].append(tech_data)

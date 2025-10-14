@@ -1,7 +1,9 @@
+/* C:\Users\glutholi\CODE\PipelineIntelligence\backend\static\css\challenge_traceability.css */
+
 .traceability-flow-container {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 0.25rem; /* REDUCED: Was 2rem */
 }
 
 .process-phase {
@@ -13,8 +15,8 @@
 .phase-header {
     background-color: var(--bi-dark-green-800);
     color: var(--bi-white);
-    padding: 1rem 1.5rem;
-    font-size: 1.5rem;
+    padding: 0.25rem 1.25rem; /* REDUCED: Was 1rem 1.5rem */
+    font-size: 1.2rem;       /* REDUCED: Was 1.5rem */
     font-weight: 500;
     border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
     display: flex;
@@ -22,45 +24,51 @@
 }
 
 .phase-header i {
-    margin-right: 1rem;
+    margin-right: 0.75rem; /* REDUCED */
     opacity: 0.7;
 }
 
 .phase-content {
-    padding: 1.5rem;
+    padding: 0.25rem; /* REDUCED: Was 1.5rem */
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0.1rem;     /* REDUCED: Was 1.5rem */
 }
 
 .stage-group {
     background-color: var(--bi-white);
     border: 1px solid var(--bi-neutral-200);
     border-radius: var(--border-radius-sm);
-    box-shadow: var(--shadow-sm);
+    /* REMOVED box-shadow for a flatter, denser look */
 }
 
 .stage-title {
-    padding: 0.75rem 1rem;
+    padding: 0.25rem 0.6rem; /* REDUCED: Was 0.75rem 1rem */
     font-weight: bold;
-    font-size: 1.1rem;
-    background-color: var(--bi-neutral-100);
+    font-size: 1.05rem; /* REDUCED */
+    background-color: var(--bi-neutral-200);
     border-bottom: 1px solid var(--bi-neutral-200);
     border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
 }
 
 .tech-challenge-grid {
     display: grid;
-    grid-template-columns: 300px 1fr; /* Fixed width for tech, remaining for challenges */
-    gap: 1rem;
-    padding: 1rem;
+    grid-template-columns: 280px 1fr; /* REDUCED width for tech */
+    gap: 0.75rem; /* REDUCED */
+    padding: 0.75rem; /* REDUCED */
     align-items: start;
 }
+
+/* Add a separator line between technologies for clarity */
+.tech-challenge-grid:not(:first-of-type) {
+    border-top: 1px dashed var(--bi-neutral-200);
+}
+
 
 .tech-card {
     background-color: var(--bi-info-100);
     color: var(--bi-info-800);
-    padding: 0.75rem;
+    padding: 0.5rem; /* REDUCED */
     border-radius: var(--border-radius-xs);
     font-weight: 500;
     text-align: center;
@@ -70,21 +78,21 @@
 .challenges-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.4rem; /* REDUCED */
 }
 
 .challenge-card {
     background-color: var(--bi-warning-100);
     color: var(--bi-warning-800);
-    padding: 0.5rem 0.75rem;
+    padding: 0.25rem 0.6rem; /* REDUCED */
     border-radius: var(--border-radius-xs);
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* REDUCED */
     border: 1px solid var(--bi-warning-500);
 }
 
 .empty-state {
     color: var(--bi-neutral-500);
     font-style: italic;
-    padding: 1rem;
+    padding: 0.5rem; /* Increased padding slightly for standalone message */
     text-align: center;
 }
