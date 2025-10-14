@@ -2,7 +2,7 @@
 
 from ..models import Modality, ProcessTemplate, TemplateStage, ProcessStage, ManufacturingTechnology, ManufacturingChallenge
 from ..db import db
-from sqlalchemy.orm import joinedload, contains_eager
+from sqlalchemy.orm import joinedload
 from collections import defaultdict
 
 def get_full_process_hierarchy_for_template(template_id):
@@ -16,15 +16,12 @@ def get_full_process_hierarchy_for_template(template_id):
         joinedload(TemplateStage.stage).joinedload(ProcessStage.parent)
     ).all()
 
-    # This dictionary will be ordered by stage_order from the template
     phases = {}
-    
     for ts in template_stages_query:
         stage = ts.stage
         if not stage:
             continue
 
-        # Find the top-level parent (the Phase)
         current = stage
         while current.parent:
             current = current.parent
@@ -38,7 +35,6 @@ def get_full_process_hierarchy_for_template(template_id):
                 "stages": []
             }
         
-        # Add the actual stage from the template to this phase
         phases[phase_name]["stages"].append({
             "stage_obj": stage,
             "technologies": []
@@ -46,63 +42,58 @@ def get_full_process_hierarchy_for_template(template_id):
         
     return list(phases.values())
 
-
 def get_traceability_data(modality_id=None, template_id=None, challenge_id=None):
     """
-    Fetches traceability data as a hierarchical structure: Phase -> Stage -> Technology -> Challenge.
-    Requires both modality_id and template_id.
+    Fetches traceability data using a corrected, stricter filtering logic that
+    prevents generic technologies from appearing out of context.
     """
     if not modality_id or not template_id:
         return {"error": "Please select both a Modality and a Process Template."}
 
-    # 1. Get the ordered hierarchical structure for the template
+    # Step 1: Identify the Process Stages in Scope
     structured_process = get_full_process_hierarchy_for_template(template_id)
-    
-    # Create a quick lookup map: stage_id -> stage_dict
-    stage_map = {}
-    for phase in structured_process:
-        for stage_dict in phase['stages']:
-            stage_map[stage_dict['stage_obj'].stage_id] = stage_dict
+    stage_map = {
+        stage_dict['stage_obj'].stage_id: stage_dict
+        for phase in structured_process
+        for stage_dict in phase['stages']
+    }
+    stage_ids_in_template = list(stage_map.keys())
+    if not stage_ids_in_template:
+        return structured_process
 
-    # 2. Get technologies and challenges, CORRECTLY FILTERED by modality and template context.
-    query = db.session.query(ManufacturingTechnology, ManufacturingChallenge)\
-        .join(ManufacturingChallenge, ManufacturingTechnology.technology_id == ManufacturingChallenge.technology_id)\
-        .filter(ManufacturingTechnology.stage_id.in_(stage_map.keys()))\
-        .filter( # <<< THIS IS THE CRITICAL FIX TO SCOPE TECHNOLOGIES
-            db.or_(
-                # Tech is specific to this template
-                ManufacturingTechnology.template_id == template_id,
-                # Tech is for this modality in general (but not for a different template)
-                db.and_(
-                    ManufacturingTechnology.modality_id == modality_id,
-                    ManufacturingTechnology.template_id.is_(None)
-                ),
-                # Tech is generic and not scoped to any modality/template
-                db.and_(
-                    ManufacturingTechnology.modality_id.is_(None),
-                    ManufacturingTechnology.template_id.is_(None)
-                )
-            )
-        )\
-        .options(contains_eager(ManufacturingTechnology.challenges))
-
-    results = query.all()
-
-    # 3. Populate the structure with the correctly filtered technologies and challenges
-    tech_map = {}
-    for tech, chal in results:
-        if tech.technology_id not in tech_map:
-            tech_map[tech.technology_id] = {
-                "tech_obj": tech,
-                "challenges": []
-            }
-            # Add this technology to the correct stage
-            if tech.stage_id in stage_map:
-                stage_map[tech.stage_id]["technologies"].append(tech_map[tech.technology_id])
+    # Step 2 & 3: Find and strictly filter technologies
+    technologies_query = db.session.query(ManufacturingTechnology).options(
+        joinedload(ManufacturingTechnology.challenges)
+    ).filter(
+        # Condition 1: Must belong to one of the template's stages
+        ManufacturingTechnology.stage_id.in_(stage_ids_in_template),
         
-        tech_map[tech.technology_id]["challenges"].append(chal)
+        # Condition 2: Must be relevant to the selected template OR its parent modality.
+        # This stricter logic EXCLUDES purely generic (modality_id=NULL) technologies.
+        db.or_(
+            # Rule 1: Template-Specific Match
+            ManufacturingTechnology.template_id == template_id,
+            
+            # Rule 2: Modality-Specific Match
+            db.and_(
+                ManufacturingTechnology.modality_id == modality_id,
+                ManufacturingTechnology.template_id.is_(None)
+            )
+        )
+    )
+    
+    technologies = technologies_query.all()
 
-    # 4. Convert SQLAlchemy objects to JSON-serializable dictionaries for the frontend
+    # Populate the structure with the correctly filtered technologies
+    for tech in technologies:
+        if tech.stage_id in stage_map:
+            tech_data = {
+                "tech_obj": tech,
+                "challenges": tech.challenges
+            }
+            stage_map[tech.stage_id]["technologies"].append(tech_data)
+
+    # Step 4: Convert to JSON-serializable format for the frontend
     final_output = []
     for phase in structured_process:
         phase_data = {
@@ -115,11 +106,9 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
                 "stage_description": stage_dict["stage_obj"].short_description,
                 "technologies": []
             }
-            # Sort technologies alphabetically for consistent display
             sorted_technologies = sorted(stage_dict["technologies"], key=lambda t: t['tech_obj'].technology_name)
 
             for tech_dict in sorted_technologies:
-                # Sort challenges alphabetically
                 sorted_challenges = sorted(tech_dict["challenges"], key=lambda c: c.challenge_name)
                 
                 tech_data = {
@@ -137,7 +126,6 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
         final_output.append(phase_data)
 
     return final_output
-
 
 def get_available_filters():
     """

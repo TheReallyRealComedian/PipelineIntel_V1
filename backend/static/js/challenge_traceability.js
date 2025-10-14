@@ -172,9 +172,11 @@ function renderVisualization(data) {
         const phaseEl = document.createElement('div');
         phaseEl.className = 'process-phase';
         
+        const phaseName = phase.phase_name || 'Unnamed Phase';
+        
         phaseEl.innerHTML = `
             <div class="phase-header">
-                <i class="fas fa-layer-group"></i> ${phase.phase_name}
+                <i class="fas fa-layer-group"></i> ${phaseName}
             </div>
             <div class="phase-content"></div>
         `;
@@ -186,29 +188,52 @@ function renderVisualization(data) {
                 const stageGroup = document.createElement('div');
                 stageGroup.className = 'stage-group';
                 
-                let stageHTML = `<div class="stage-title">${stage.stage_name}</div>`;
+                const stageName = stage.stage_name || 'Unnamed Stage';
+                
+                // Create stage title
+                const stageTitleDiv = document.createElement('div');
+                stageTitleDiv.className = 'stage-title';
+                stageTitleDiv.textContent = stageName;
+                stageGroup.appendChild(stageTitleDiv);
                 
                 if (stage.technologies && stage.technologies.length > 0) {
                     stage.technologies.forEach(tech => {
                         const techChallengeDiv = document.createElement('div');
                         techChallengeDiv.className = 'tech-challenge-grid';
                         
-                        techChallengeDiv.innerHTML = `
-                            <div class="tech-card">${tech.technology_name}</div>
-                            <div class="challenges-container">
-                                ${tech.challenges && tech.challenges.length > 0
-                                    ? tech.challenges.map(ch => 
-                                        `<div class="challenge-card">${ch.challenge_name}</div>`
-                                    ).join('')
-                                    : '<span class="empty-state">No challenges</span>'
-                                }
-                            </div>
-                        `;
+                        // Backend returns 'tech_name', not 'technology_name'
+                        const techName = tech.tech_name || 'Unnamed Technology';
                         
-                        stageGroup.innerHTML += techChallengeDiv.outerHTML;
+                        const techCard = document.createElement('div');
+                        techCard.className = 'tech-card';
+                        techCard.textContent = techName;
+                        
+                        const challengesContainer = document.createElement('div');
+                        challengesContainer.className = 'challenges-container';
+                        
+                        if (tech.challenges && tech.challenges.length > 0) {
+                            tech.challenges.forEach(ch => {
+                                const challengeCard = document.createElement('div');
+                                challengeCard.className = 'challenge-card';
+                                challengeCard.textContent = ch.challenge_name || 'Unnamed Challenge';
+                                challengesContainer.appendChild(challengeCard);
+                            });
+                        } else {
+                            const emptyState = document.createElement('span');
+                            emptyState.className = 'empty-state';
+                            emptyState.textContent = 'No challenges';
+                            challengesContainer.appendChild(emptyState);
+                        }
+                        
+                        techChallengeDiv.appendChild(techCard);
+                        techChallengeDiv.appendChild(challengesContainer);
+                        stageGroup.appendChild(techChallengeDiv);
                     });
                 } else {
-                    stageGroup.innerHTML += '<div class="empty-state">No technologies defined for this stage</div>';
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'empty-state';
+                    emptyDiv.textContent = 'No technologies defined for this stage';
+                    stageGroup.appendChild(emptyDiv);
                 }
                 
                 phaseContent.appendChild(stageGroup);

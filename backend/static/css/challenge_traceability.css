@@ -20,12 +20,12 @@
 
 .selection-boxes {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.5rem;
 }
 
 .selection-box {
-    padding: 1rem;
+    padding: 0.5rem 0.75rem;
     background-color: var(--bi-dark-green-800);
     color: var(--bi-white);
     border: 2px solid var(--bi-dark-green-800);
@@ -33,12 +33,19 @@
     cursor: pointer;
     text-align: center;
     font-weight: 500;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     transition: all 0.2s ease;
-    min-height: 60px;
+    height: 55px;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    line-height: 1.3;
+    /* Text truncation with 3 lines max */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
 }
 
 .selection-box:hover {
@@ -48,8 +55,8 @@
 }
 
 .selection-box.selected {
-    background-color: var(--bi-bright-green);
-    border-color: var(--bi-bright-green);
+    background-color: var(--bi-accent-green-500);
+    border-color: var(--bi-accent-green-500);
     color: var(--bi-dark-green-800);
     font-weight: 600;
 }
@@ -66,18 +73,18 @@
 
 /* Special styling for templates */
 .template-box {
-    background-color: var(--bi-info-100);
-    color: var(--bi-info-800);
-    border-color: var(--bi-info-500);
+    background-color: var(--bi-dark-green-800);
+    color: var(--bi-white);
+    border-color: var(--bi-dark-green-800);
 }
 
 .template-box:hover {
-    background-color: var(--bi-info-200);
+    background-color: var(--bi-dark-green-600);
 }
 
 .template-box.selected {
-    background-color: var(--bi-bright-green);
-    border-color: var(--bi-bright-green);
+    background-color: var(--bi-accent-green-500);
+    border-color: var(--bi-accent-green-500);
     color: var(--bi-dark-green-800);
 }
 
