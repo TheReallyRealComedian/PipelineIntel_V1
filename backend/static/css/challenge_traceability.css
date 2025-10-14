@@ -1,9 +1,114 @@
-/* C:\Users\glutholi\CODE\PipelineIntelligence\backend\static\css\challenge_traceability.css */
+/* backend/static/css/challenge_traceability.css */
 
+/* ===== NEW: Selection Container Styles ===== */
+.selection-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.selection-section {
+    min-height: 200px;
+}
+
+.selection-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--bi-dark-green-800);
+}
+
+.selection-boxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+}
+
+.selection-box {
+    padding: 1rem;
+    background-color: var(--bi-dark-green-800);
+    color: var(--bi-white);
+    border: 2px solid var(--bi-dark-green-800);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    text-align: center;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.selection-box:hover {
+    background-color: var(--bi-dark-green-600);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.selection-box.selected {
+    background-color: var(--bi-bright-green);
+    border-color: var(--bi-bright-green);
+    color: var(--bi-dark-green-800);
+    font-weight: 600;
+}
+
+.selection-box.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.selection-box.disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Special styling for templates */
+.template-box {
+    background-color: var(--bi-info-100);
+    color: var(--bi-info-800);
+    border-color: var(--bi-info-500);
+}
+
+.template-box:hover {
+    background-color: var(--bi-info-200);
+}
+
+.template-box.selected {
+    background-color: var(--bi-bright-green);
+    border-color: var(--bi-bright-green);
+    color: var(--bi-dark-green-800);
+}
+
+/* Loading and placeholder messages */
+.loading-message,
+.placeholder-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: var(--bi-neutral-500);
+    font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .selection-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .selection-boxes {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+
+/* ===== EXISTING: Visualization Styles ===== */
 .traceability-flow-container {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem; /* REDUCED: Was 2rem */
+    gap: 0.25rem;
 }
 
 .process-phase {
@@ -15,8 +120,8 @@
 .phase-header {
     background-color: var(--bi-dark-green-800);
     color: var(--bi-white);
-    padding: 0.25rem 1.25rem; /* REDUCED: Was 1rem 1.5rem */
-    font-size: 1.2rem;       /* REDUCED: Was 1.5rem */
+    padding: 0.25rem 1.25rem;
+    font-size: 1.2rem;
     font-weight: 500;
     border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
     display: flex;
@@ -24,28 +129,27 @@
 }
 
 .phase-header i {
-    margin-right: 0.75rem; /* REDUCED */
+    margin-right: 0.75rem;
     opacity: 0.7;
 }
 
 .phase-content {
-    padding: 0.25rem; /* REDUCED: Was 1.5rem */
+    padding: 0.25rem;
     display: flex;
     flex-direction: column;
-    gap: 0.1rem;     /* REDUCED: Was 1.5rem */
+    gap: 0.1rem;
 }
 
 .stage-group {
     background-color: var(--bi-white);
     border: 1px solid var(--bi-neutral-200);
     border-radius: var(--border-radius-sm);
-    /* REMOVED box-shadow for a flatter, denser look */
 }
 
 .stage-title {
-    padding: 0.25rem 0.6rem; /* REDUCED: Was 0.75rem 1rem */
+    padding: 0.25rem 0.6rem;
     font-weight: bold;
-    font-size: 1.05rem; /* REDUCED */
+    font-size: 1.05rem;
     background-color: var(--bi-neutral-200);
     border-bottom: 1px solid var(--bi-neutral-200);
     border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
@@ -53,22 +157,20 @@
 
 .tech-challenge-grid {
     display: grid;
-    grid-template-columns: 280px 1fr; /* REDUCED width for tech */
-    gap: 0.75rem; /* REDUCED */
-    padding: 0.75rem; /* REDUCED */
+    grid-template-columns: 280px 1fr;
+    gap: 0.75rem;
+    padding: 0.75rem;
     align-items: start;
 }
 
-/* Add a separator line between technologies for clarity */
 .tech-challenge-grid:not(:first-of-type) {
     border-top: 1px dashed var(--bi-neutral-200);
 }
 
-
 .tech-card {
     background-color: var(--bi-info-100);
     color: var(--bi-info-800);
-    padding: 0.5rem; /* REDUCED */
+    padding: 0.5rem;
     border-radius: var(--border-radius-xs);
     font-weight: 500;
     text-align: center;
@@ -78,21 +180,21 @@
 .challenges-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem; /* REDUCED */
+    gap: 0.4rem;
 }
 
 .challenge-card {
     background-color: var(--bi-warning-100);
     color: var(--bi-warning-800);
-    padding: 0.25rem 0.6rem; /* REDUCED */
+    padding: 0.25rem 0.6rem;
     border-radius: var(--border-radius-xs);
-    font-size: 0.85rem; /* REDUCED */
+    font-size: 0.85rem;
     border: 1px solid var(--bi-warning-500);
 }
 
 .empty-state {
     color: var(--bi-neutral-500);
     font-style: italic;
-    padding: 0.5rem; /* Increased padding slightly for standalone message */
+    padding: 0.5rem;
     text-align: center;
 }

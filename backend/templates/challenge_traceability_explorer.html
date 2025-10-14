@@ -14,51 +14,32 @@
         <p class="text-muted">Trace manufacturing challenges from modality to process steps</p>
     </div>
 
-    <!-- Filter Panel -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>Select Context</h5>
-            <p class="small text-muted mb-0">Choose a Modality and Process Template to visualize the challenge pathway</p>
-        </div>
-        <div class="card-body">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label for="modalityFilter" class="form-label fw-bold">
-                        Modality <span class="text-danger">*</span>
-                    </label>
-                    <select id="modalityFilter" class="form-select" required>
-                        <option value="">-- Select Modality --</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label for="templateFilter" class="form-label fw-bold">
-                        Process Template <span class="text-danger">*</span>
-                    </label>
-                    <select id="templateFilter" class="form-select" disabled>
-                        <option value="">-- First select a modality --</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <button id="visualizeButton" class="btn btn-primary w-100" disabled>
-                        <i class="fas fa-sitemap"></i> Visualize Pathway
-                    </button>
-                </div>
+    <!-- Selection Panel with Box Layout -->
+    <div class="selection-panel mb-4">
+        <!-- Modality Selection -->
+        <div class="selection-section">
+            <h5 class="selection-title">Select Modality</h5>
+            <div id="modalityBoxes" class="selection-boxes">
+                <!-- Modality boxes will be populated by JavaScript -->
+                <div class="loading-message">Loading modalities...</div>
             </div>
+        </div>
 
-            <!-- Context Display (shows selected modality/template) -->
-            <div id="contextDisplay" class="alert alert-info mt-3" style="display: none;">
-                <strong>Viewing:</strong>
-                <span id="selectedModalityName"></span> &mdash; <span id="selectedTemplateName"></span>
+        <!-- Template Selection -->
+        <div class="selection-section">
+            <h5 class="selection-title">Select Template</h5>
+            <div id="templateBoxes" class="selection-boxes">
+                <!-- Template boxes will be populated after modality selection -->
+                <div class="placeholder-message">Please select a modality first</div>
             </div>
         </div>
     </div>
 
-
-    <!-- Visualization Container - NO LONGER WRAPPED IN A CARD -->
+    <!-- Visualization Container -->
     <div id="traceabilityVisualization" class="mt-4">
-         <div class="empty-state card card-body">
+        <div class="empty-state card card-body">
             <i class="fas fa-info-circle fa-2x"></i>
-            <p class="mt-2">Please select a Modality and Process Template to begin.</p>
+            <p class="mt-2">Please select a Modality to begin.</p>
         </div>
     </div>
 </div>

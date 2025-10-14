@@ -1,88 +1,137 @@
+// backend/static/js/challenge_traceability.js
+
 // Global state
+let allModalities = [];
+let allTemplates = [];
 let currentModality = null;
 let currentTemplate = null;
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    initializeFilters();
-    setupEventListeners();
+    initializeModalities();
 });
 
-// Initialize filter dropdowns
-async function initializeFilters() {
+// Initialize modality boxes
+async function initializeModalities() {
     try {
         const response = await fetch('/challenge-traceability/api/filters');
         const filters = await response.json();
-        populateFilterDropdown('modalityFilter', filters.modalities);
+        allModalities = filters.modalities;
+        renderModalityBoxes();
     } catch (error) {
-        console.error('Error loading filters:', error);
+        console.error('Error loading modalities:', error);
+        showModalityError();
     }
 }
 
-function populateFilterDropdown(elementId, items) {
-    const select = document.getElementById(elementId);
-    while (select.options.length > 1) {
-        select.remove(1);
+// Render modality boxes
+function renderModalityBoxes() {
+    const container = document.getElementById('modalityBoxes');
+    
+    if (!allModalities || allModalities.length === 0) {
+        container.innerHTML = '<div class="loading-message">No modalities available</div>';
+        return;
     }
-    items.forEach(item => {
-        const option = new Option(item.name, item.id);
-        select.appendChild(option);
+    
+    container.innerHTML = '';
+    
+    allModalities.forEach(modality => {
+        const box = document.createElement('div');
+        box.className = 'selection-box';
+        box.textContent = modality.name;
+        box.dataset.modalityId = modality.id;
+        box.dataset.modalityName = modality.name;
+        
+        box.addEventListener('click', () => selectModality(modality.id, modality.name));
+        
+        container.appendChild(box);
     });
 }
 
-// Setup all event listeners
-function setupEventListeners() {
-    document.getElementById('modalityFilter').addEventListener('change', async (e) => {
-        const modalityId = e.target.value;
-        const templateSelect = document.getElementById('templateFilter');
-        const visualizeBtn = document.getElementById('visualizeButton');
-        
-        if (modalityId) {
-            templateSelect.disabled = false;
-            templateSelect.options[0].textContent = 'Loading templates...';
-            try {
-                const response = await fetch(`/challenge-traceability/api/templates-by-modality/${modalityId}`);
-                const templates = await response.json();
-                templateSelect.options[0].textContent = '-- Select Template --';
-                populateFilterDropdown('templateFilter', templates);
-                currentModality = { id: modalityId, name: e.target.options[e.target.selectedIndex].text };
-            } catch (error) {
-                console.error('Error loading templates:', error);
-            }
-        } else {
-            templateSelect.disabled = true;
-            templateSelect.value = '';
-            templateSelect.options[0].textContent = '-- First select a modality --';
-            visualizeBtn.disabled = true;
-            currentModality = null;
-            currentTemplate = null;
-        }
+// Handle modality selection
+async function selectModality(modalityId, modalityName) {
+    // Update selected state
+    document.querySelectorAll('#modalityBoxes .selection-box').forEach(box => {
+        box.classList.remove('selected');
     });
     
-    document.getElementById('templateFilter').addEventListener('change', (e) => {
-        const templateId = e.target.value;
-        const visualizeBtn = document.getElementById('visualizeButton');
+    const selectedBox = document.querySelector(`#modalityBoxes .selection-box[data-modality-id="${modalityId}"]`);
+    if (selectedBox) {
+        selectedBox.classList.add('selected');
+    }
+    
+    currentModality = { id: modalityId, name: modalityName };
+    
+    // Load templates for this modality
+    await loadTemplates(modalityId);
+}
+
+// Load templates for selected modality
+async function loadTemplates(modalityId) {
+    const container = document.getElementById('templateBoxes');
+    container.innerHTML = '<div class="loading-message">Loading templates...</div>';
+    
+    try {
+        const response = await fetch(`/challenge-traceability/api/templates-by-modality/${modalityId}`);
+        allTemplates = await response.json();
         
-        if (templateId && currentModality) {
-            visualizeBtn.disabled = false;
-            currentTemplate = { id: templateId, name: e.target.options[e.target.selectedIndex].text };
-        } else {
-            visualizeBtn.disabled = true;
-            currentTemplate = null;
+        renderTemplateBoxes();
+        
+        // Auto-select first template if available
+        if (allTemplates && allTemplates.length > 0) {
+            selectTemplate(allTemplates[0].id, allTemplates[0].name);
         }
+    } catch (error) {
+        console.error('Error loading templates:', error);
+        container.innerHTML = '<div class="loading-message">Error loading templates</div>';
+    }
+}
+
+// Render template boxes
+function renderTemplateBoxes() {
+    const container = document.getElementById('templateBoxes');
+    
+    if (!allTemplates || allTemplates.length === 0) {
+        container.innerHTML = '<div class="placeholder-message">No templates available for this modality</div>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    allTemplates.forEach(template => {
+        const box = document.createElement('div');
+        box.className = 'selection-box template-box';
+        box.textContent = template.name;
+        box.dataset.templateId = template.id;
+        box.dataset.templateName = template.name;
+        
+        box.addEventListener('click', () => selectTemplate(template.id, template.name));
+        
+        container.appendChild(box);
+    });
+}
+
+// Handle template selection
+function selectTemplate(templateId, templateName) {
+    // Update selected state
+    document.querySelectorAll('#templateBoxes .selection-box').forEach(box => {
+        box.classList.remove('selected');
     });
     
-    document.getElementById('visualizeButton').addEventListener('click', () => {
-        if (currentModality && currentTemplate) {
-            loadTraceabilityData();
-        }
-    });
+    const selectedBox = document.querySelector(`#templateBoxes .selection-box[data-template-id="${templateId}"]`);
+    if (selectedBox) {
+        selectedBox.classList.add('selected');
+    }
+    
+    currentTemplate = { id: templateId, name: templateName };
+    
+    // Automatically visualize the pathway
+    loadTraceabilityData();
 }
 
 // Fetch data from API
 async function loadTraceabilityData() {
     showLoading(true);
-    updateContextDisplay();
 
     try {
         const params = new URLSearchParams({
@@ -106,14 +155,7 @@ async function loadTraceabilityData() {
     }
 }
 
-function updateContextDisplay() {
-    const display = document.getElementById('contextDisplay');
-    document.getElementById('selectedModalityName').textContent = currentModality.name;
-    document.getElementById('selectedTemplateName').textContent = currentTemplate.name;
-    display.style.display = 'block';
-}
-
-// Main rendering function for the new hierarchical view
+// Main rendering function for the hierarchical view
 function renderVisualization(data) {
     const container = document.getElementById('traceabilityVisualization');
     container.innerHTML = '';
@@ -148,56 +190,65 @@ function renderVisualization(data) {
                 
                 if (stage.technologies && stage.technologies.length > 0) {
                     stage.technologies.forEach(tech => {
-                        let challengesHTML = tech.challenges.map(chal => 
-                            `<div class="challenge-card">${chal.challenge_name}</div>`
-                        ).join('');
-
-                        if (tech.challenges.length === 0) {
-                           challengesHTML = `<div class="text-muted small">No challenges for this technology.</div>`
-                        }
-
-                        stageHTML += `
-                            <div class="tech-challenge-grid">
-                                <div class="tech-card">${tech.tech_name}</div>
-                                <div class="challenges-container">${challengesHTML}</div>
+                        const techChallengeDiv = document.createElement('div');
+                        techChallengeDiv.className = 'tech-challenge-grid';
+                        
+                        techChallengeDiv.innerHTML = `
+                            <div class="tech-card">${tech.technology_name}</div>
+                            <div class="challenges-container">
+                                ${tech.challenges && tech.challenges.length > 0
+                                    ? tech.challenges.map(ch => 
+                                        `<div class="challenge-card">${ch.challenge_name}</div>`
+                                    ).join('')
+                                    : '<span class="empty-state">No challenges</span>'
+                                }
                             </div>
                         `;
+                        
+                        stageGroup.innerHTML += techChallengeDiv.outerHTML;
                     });
                 } else {
-                    stageHTML += `<div class="empty-state">No manufacturing technologies defined for this stage in the template.</div>`;
+                    stageGroup.innerHTML += '<div class="empty-state">No technologies defined for this stage</div>';
                 }
-                stageGroup.innerHTML = stageHTML;
+                
                 phaseContent.appendChild(stageGroup);
             });
-        } else {
-            phaseContent.innerHTML = `<div class="empty-state">No process stages defined for this phase in the template.</div>`;
         }
-
+        
         flowContainer.appendChild(phaseEl);
     });
 
     container.appendChild(flowContainer);
 }
 
+// Show loading state
 function showLoading(isLoading) {
     const container = document.getElementById('traceabilityVisualization');
     if (isLoading) {
         container.innerHTML = `
-            <div class="text-center py-5">
+            <div class="card card-body text-center">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
-                <p class="mt-3">Building traceability flow...</p>
+                <p class="mt-2">Loading traceability data...</p>
             </div>
         `;
-    } 
+    }
 }
 
+// Show error message
 function showError(message) {
     const container = document.getElementById('traceabilityVisualization');
     container.innerHTML = `
         <div class="alert alert-warning">
-            <i class="fas fa-exclamation-triangle me-2"></i> ${message}
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Notice:</strong> ${message}
         </div>
     `;
+}
+
+// Show modality loading error
+function showModalityError() {
+    const container = document.getElementById('modalityBoxes');
+    container.innerHTML = '<div class="loading-message">Error loading modalities. Please refresh the page.</div>';
 }
