@@ -15,7 +15,7 @@ from ..models import (
     Modality, ProcessStage, ProductTimeline, ProductRegulatoryFiling,
     ProductManufacturingSupplier, User, LLMSettings, ProcessTemplate, TemplateStage,
     ModalityRequirement, ProductRequirement, EntityCapability, ProductProcessOverride,
-    ManufacturingCapability, ModalityChallenge
+    ManufacturingCapability, ModalityChallenge, TechnologyModality
 )
 
 # This order is critical. Parents must be inserted before children.
@@ -65,6 +65,7 @@ MODEL_MAP = {
     'product_regulatory_filings': ProductRegulatoryFiling,
     'product_manufacturing_suppliers': ProductManufacturingSupplier,
     'modality_challenges': ModalityChallenge,
+    'technology_modalities': TechnologyModality,
 }
 
 
@@ -330,6 +331,7 @@ def _resolve_foreign_keys_for_technology(item, existing_technologies):
     """
     Resolves foreign keys for manufacturing technologies.
     Converts name-based references to ID-based references.
+    NOW SUPPORTS MULTIPLE MODALITIES.
     """
     from ..models import ProcessStage, Modality, ProcessTemplate
     
@@ -340,30 +342,44 @@ def _resolve_foreign_keys_for_technology(item, existing_technologies):
         stage = ProcessStage.query.filter_by(stage_name=resolved_item['stage_name']).first()
         if stage:
             resolved_item['stage_id'] = stage.stage_id
-            resolved_item.pop('stage_name')  # Use pop instead of del
+            resolved_item.pop('stage_name')
         else:
             raise ValueError(f"Stage '{resolved_item['stage_name']}' not found")
     
-    # Resolve modality_name → modality_id (OPTIONAL)
-    if 'modality_name' in resolved_item:
-        modality = Modality.query.filter_by(modality_name=resolved_item['modality_name']).first()
-        if modality:
-            resolved_item['modality_id'] = modality.modality_id
-            resolved_item.pop('modality_name')  # Use pop instead of del
-        else:
-            raise ValueError(f"Modality '{resolved_item['modality_name']}' not found. Make sure to import modalities first.")
+    # NEW: Handle multiple modalities (modality_names as array)
+    if 'modality_names' in resolved_item:
+        modality_names = resolved_item.pop('modality_names')
+        if not isinstance(modality_names, list):
+            raise ValueError(f"'modality_names' must be a list, got: {type(modality_names)}")
+        
+        # Resolve all modality names to IDs
+        modality_ids = []
+        for modality_name in modality_names:
+            modality = Modality.query.filter_by(modality_name=modality_name).first()
+            if not modality:
+                raise ValueError(f"Modality '{modality_name}' not found. Make sure to import modalities first.")
+            modality_ids.append(modality.modality_id)
+        
+        resolved_item['modality_ids'] = modality_ids
+    
+    # DEPRECATED: Handle single modality_name (backward compatibility during transition)
+    elif 'modality_name' in resolved_item:
+        modality_name = resolved_item.pop('modality_name')
+        if modality_name:  # Only process if not None/empty
+            modality = Modality.query.filter_by(modality_name=modality_name).first()
+            if modality:
+                resolved_item['modality_ids'] = [modality.modality_id]
+            else:
+                raise ValueError(f"Modality '{modality_name}' not found. Make sure to import modalities first.")
     
     # Resolve template_name → template_id (OPTIONAL)
     if 'template_name' in resolved_item:
         template = ProcessTemplate.query.filter_by(template_name=resolved_item['template_name']).first()
         if template:
             resolved_item['template_id'] = template.template_id
-            # Auto-set modality_id if not already set (template knows its modality)
-            if 'modality_id' not in resolved_item:
-                resolved_item['modality_id'] = template.modality_id
-            resolved_item.pop('template_name')  # Use pop instead of del
+            resolved_item.pop('template_name')
         else:
-            raise ValueError(f"Template '{resolved_item['template_name']}' not found. Make sure to import process templates first.")
+            raise ValueError(f"Template '{resolved_item['template_name']}' not found.")
     
     return resolved_item
 
@@ -660,9 +676,29 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
                     print(f"  ✓ Updated successfully")
                 else:
                     print(f"  → Creating new record")
-                    # Create new record
-                    new_obj = model_class(**data)
-                    db.session.add(new_obj)
+                    # Special handling for technologies with many-to-many modality relationship
+                    if model_class == ManufacturingTechnology:
+                        # Extract modality_ids if present (for junction table)
+                        modality_ids = data.pop('modality_ids', [])
+                        
+                        # Create the technology object (without modality_id)
+                        obj = model_class(**data)
+                        db.session.add(obj)
+                        db.session.flush()  # Get the technology_id
+                        
+                        # Create junction table entries for each modality
+                        from ..models import TechnologyModality
+                        for modality_id in modality_ids:
+                            tech_mod = TechnologyModality(
+                                technology_id=obj.technology_id,
+                                modality_id=modality_id
+                            )
+                            db.session.add(tech_mod)
+                    else:
+                        # Regular entity creation (existing code)
+                        obj = model_class(**data)
+                        db.session.add(obj)
+                    
                     success_count += 1
                     print(f"  ✓ Created successfully")
 

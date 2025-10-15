@@ -405,10 +405,7 @@ class ManufacturingTechnology(db.Model):
     technology_name = Column(String(255), unique=True, nullable=False)
     stage_id = Column(Integer, ForeignKey('process_stages.stage_id'), nullable=False, index=True)
     
-    # ==================== NEW FIELDS ====================
-    modality_id = Column(Integer, ForeignKey('modalities.modality_id'), nullable=True, index=True)
     template_id = Column(Integer, ForeignKey('process_templates.template_id'), nullable=True, index=True)
-    # ===================================================
     
     short_description = Column(Text)
     description = Column(Text)
@@ -416,42 +413,41 @@ class ManufacturingTechnology(db.Model):
     complexity_rating = Column(Integer)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # ==================== UPDATED RELATIONSHIPS ====================
+    # UPDATED RELATIONSHIPS
     stage = relationship("ProcessStage", back_populates="technologies")
-    modality = relationship("Modality", backref="technologies")  # NEW
-    template = relationship("ProcessTemplate", backref="technologies")  # NEW
-    # ==============================================================
+    template = relationship("ProcessTemplate", backref="technologies")
     
     challenges = relationship("ManufacturingChallenge", back_populates="technology", cascade="all, delete-orphan")
     products = relationship("Product", secondary=product_to_technology_association, back_populates="technologies")
-
-    # ==================== NEW VALIDATION ====================
-    @validates('modality_id', 'template_id')
-    def validate_scope(self, key, value):
-        """
-        Ensure logical consistency:
-        - Can have BOTH modality_id and template_id (template-specific)
-        - Can have ONLY modality_id (modality-wide)
-        - Can have NEITHER (legacy or stage-only, will appear everywhere)
-        - CANNOT have ONLY template_id without modality_id
-        """
-        if key == 'template_id' and value is not None:
-            if self.modality_id is None:
-                # When template_id is set, we need to get the template's modality
-                from sqlalchemy.orm import Session
-                session = Session.object_session(self)
-                if session:
-                    template = session.query(ProcessTemplate).get(value)
-                    if template:
-                        self.modality_id = template.modality_id
-                    else:
-                        raise ValueError("Invalid template_id: template not found")
-        return value
-    # =======================================================
+    
+    # ADD THIS NEW RELATIONSHIP (many-to-many via junction table):
+    modality_links = relationship(
+        "TechnologyModality",
+        back_populates="technology",
+        cascade="all, delete-orphan"
+    )
 
     @classmethod
     def get_all_fields(cls):
-        return [c.key for c in inspect(cls).attrs if c.key not in ['stage', 'challenges', 'products', 'modality', 'template']]
+        """Returns a list of all column names for the model."""
+        # Update to exclude 'modality_links' instead of 'modality'
+        return [c.key for c in inspect(cls).attrs if c.key not in [
+            'stage', 'template', 'challenges', 'products', 'modality_links'
+        ]]
+
+class TechnologyModality(db.Model):
+    """Junction table for many-to-many relationship between technologies and modalities."""
+    __tablename__ = 'technology_modalities'
+    
+    technology_id = Column(Integer, ForeignKey('manufacturing_technologies.technology_id'), primary_key=True)
+    modality_id = Column(Integer, ForeignKey('modalities.modality_id'), primary_key=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relationships
+    technology = relationship("ManufacturingTechnology", back_populates="modality_links")
+    modality = relationship("Modality", back_populates="technology_links")
+
 
 class ProductSupplyChain(db.Model):
     __tablename__ = 'product_supply_chain'
@@ -484,11 +480,21 @@ class Modality(db.Model):
     modality_challenges = relationship("ModalityChallenge",
                                        back_populates="modality",
                                        cascade="all, delete-orphan")
+    
+    # ADD THIS NEW RELATIONSHIP:
+    technology_links = relationship(
+        "TechnologyModality",
+        back_populates="modality",
+        cascade="all, delete-orphan"
+    )
 
     @classmethod
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
-        return [c.key for c in inspect(cls).attrs if c.key not in ['products', 'process_templates', 'requirements', 'modality_challenges']]
+        # Update to exclude 'technology_links'
+        return [c.key for c in inspect(cls).attrs if c.key not in [
+            'products', 'process_templates', 'requirements', 'modality_challenges', 'technology_links'
+        ]]
 
 
 class ModalityChallenge(db.Model):

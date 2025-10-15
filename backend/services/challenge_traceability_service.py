@@ -46,8 +46,8 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
     """
     Fetches traceability data using the correct three-tier filtering logic:
     1. Template-specific technologies (template_id matches)
-    2. Modality-specific technologies (modality_id matches AND template_id is NULL)
-    3. Generic technologies (both modality_id AND template_id are NULL)
+    2. Modality-specific technologies (ANY linked modality_id matches)
+    3. Generic technologies (NO modality links)
     """
     if not modality_id or not template_id:
         return {"error": "Please select both a Modality and a Process Template."}
@@ -64,31 +64,34 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
         return structured_process
 
     # Step 2 & 3: Find and correctly filter technologies using three-tier logic
+    # NEW: Use subquery to check junction table for modality membership
+    from ..models import TechnologyModality
+    from sqlalchemy.orm import joinedload
+
     technologies_query = db.session.query(ManufacturingTechnology).options(
         joinedload(ManufacturingTechnology.challenges)
     ).filter(
         # Condition 1: Must belong to one of the template's stages
         ManufacturingTechnology.stage_id.in_(stage_ids_in_template),
-        
+
         # Condition 2: Must match one of three inheritance patterns
         db.or_(
             # Rule 1: Template-Specific Match
             ManufacturingTechnology.template_id == template_id,
-            
-            # Rule 2: Modality-Specific Match
-            db.and_(
-                ManufacturingTechnology.modality_id == modality_id,
-                ManufacturingTechnology.template_id.is_(None)
+
+            # Rule 2: Modality-Specific Match (check junction table)
+            ManufacturingTechnology.technology_id.in_(
+                db.session.query(TechnologyModality.technology_id)
+                .filter(TechnologyModality.modality_id == modality_id)
             ),
-            
-            # Rule 3: Generic Match (applicable to all templates/modalities)
-            db.and_(
-                ManufacturingTechnology.modality_id.is_(None),
-                ManufacturingTechnology.template_id.is_(None)
-            )
+
+            # Rule 3: Generic Match (NO modality links at all)
+            ~db.session.query(TechnologyModality).filter(
+                TechnologyModality.technology_id == ManufacturingTechnology.technology_id
+            ).exists()
         )
     )
-    
+
     technologies = technologies_query.all()
 
     # Populate the structure with the correctly filtered technologies
@@ -117,7 +120,7 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
 
             for tech_dict in sorted_technologies:
                 sorted_challenges = sorted(tech_dict["challenges"], key=lambda c: c.challenge_name)
-                
+
                 tech_data = {
                     "tech_name": tech_dict["tech_obj"].technology_name,
                     "complexity": tech_dict["tech_obj"].complexity_rating,
