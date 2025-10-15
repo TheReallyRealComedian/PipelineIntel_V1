@@ -383,6 +383,28 @@ def _resolve_foreign_keys_for_technology(item, existing_technologies):
     
     return resolved_item
 
+def _resolve_foreign_keys_for_process_stage(item, existing_stages):
+    """
+    Resolves foreign keys for process stages.
+    Converts parent_stage_name to parent_stage_id.
+    """
+    from ..models import ProcessStage
+    
+    resolved_item = item.copy()
+    
+    # Resolve parent_stage_name → parent_stage_id (OPTIONAL)
+    if 'parent_stage_name' in resolved_item:
+        parent_stage_name = resolved_item.pop('parent_stage_name')
+        if parent_stage_name:  # Only process if not None/empty
+            parent = ProcessStage.query.filter_by(stage_name=parent_stage_name).first()
+            if parent:
+                resolved_item['parent_stage_id'] = parent.stage_id
+            else:
+                raise ValueError(f"Parent stage '{parent_stage_name}' not found. Make sure parent stages are imported before child stages.")
+    
+    return resolved_item
+
+
 def _resolve_foreign_keys_for_challenge(item, existing_challenges):
     """
     Resolves foreign keys for manufacturing challenges.
@@ -624,17 +646,17 @@ def _separate_product_data(json_data):
 def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=None):
     """
     Finalizes the import by creating or updating database entries.
-    Now accepts an optional resolver function.
+    Now accepts an optional resolver function and collects detailed logs.
     """
     success_count = 0
     error_count = 0
     errors = []
+    detailed_logs = []  # NEW: Collect logs for frontend
 
-    print(f"\n{'='*60}")
-    print(f"Starting import for {model_class.__name__}")
-    print(f"Total items to process: {len(resolved_data)}")
-    print(f"Resolver function: {'Yes' if resolver_func else 'No'}")
-    print(f"{'='*60}\n")
+    # Collect logs
+    header = f"{'='*60}\nStarting import for {model_class.__name__}\nTotal items to process: {len(resolved_data)}\nResolver function: {'Yes' if resolver_func else 'No'}\n{'='*60}"
+    print(header)
+    detailed_logs.append(header)
 
     try:
         for idx, entry in enumerate(resolved_data):
@@ -648,17 +670,25 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
                     raise ValueError("Entry missing 'data' or 'json_item' field")
                 
                 identifier = data.get(unique_key_field)
-                print(f"[{idx+1}/{len(resolved_data)}] Processing: {identifier}")
+                log_msg = f"[{idx+1}/{len(resolved_data)}] Processing: {identifier}"
+                print(log_msg)
+                detailed_logs.append(log_msg)
 
                 # CRITICAL: Call resolver if it exists
                 if resolver_func:
-                    print(f"  → Calling resolver for: {identifier}")
+                    log_msg = f"  → Calling resolver for: {identifier}"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
                     try:
                         existing_instances = model_class.query.all()
                         data = resolver_func(data, existing_instances)
-                        print(f"  ✓ Resolver completed successfully")
+                        log_msg = f"  ✓ Resolver completed successfully"
+                        print(log_msg)
+                        detailed_logs.append(log_msg)
                     except Exception as resolve_error:
-                        print(f"  ✗ Resolver failed: {str(resolve_error)}")
+                        log_msg = f"  ✗ Resolver failed: {str(resolve_error)}"
+                        print(log_msg)
+                        detailed_logs.append(log_msg)
                         raise resolve_error
 
                 # Check if record already exists
@@ -666,27 +696,41 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
                     getattr(model_class, unique_key_field) == identifier
                 ).first()
 
-                if existing_record:
-                    print(f"  → Updating existing record")
-                    # Update existing record
+                action = entry.get('action', 'add')
+
+                if action == 'skip':
+                    log_msg = f"  → Skipped by user"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
+                    continue
+
+                if action == 'update' and existing_record:
+                    log_msg = f"  → Updating existing record"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
+                    
                     for key, value in data.items():
                         if hasattr(existing_record, key):
                             setattr(existing_record, key, value)
+                    
                     success_count += 1
-                    print(f"  ✓ Updated successfully")
-                else:
-                    print(f"  → Creating new record")
-                    # Special handling for technologies with many-to-many modality relationship
-                    if model_class == ManufacturingTechnology:
-                        # Extract modality_ids if present (for junction table)
+                    log_msg = f"  ✓ Updated successfully"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
+
+                elif action == 'add':
+                    log_msg = f"  → Creating new record"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
+                    
+                    # Handle special case for technologies with many-to-many modalities
+                    if model_class.__name__ == 'ManufacturingTechnology':
                         modality_ids = data.pop('modality_ids', [])
-                        
-                        # Create the technology object (without modality_id)
                         obj = model_class(**data)
                         db.session.add(obj)
-                        db.session.flush()  # Get the technology_id
+                        db.session.flush()
                         
-                        # Create junction table entries for each modality
+                        # Create junction table entries
                         from ..models import TechnologyModality
                         for modality_id in modality_ids:
                             tech_mod = TechnologyModality(
@@ -694,54 +738,70 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
                                 modality_id=modality_id
                             )
                             db.session.add(tech_mod)
+                        
+                        if modality_ids:
+                            log_msg = f"  → Linked to {len(modality_ids)} modality/modalities"
+                            print(log_msg)
+                            detailed_logs.append(log_msg)
                     else:
-                        # Regular entity creation (existing code)
                         obj = model_class(**data)
                         db.session.add(obj)
                     
                     success_count += 1
-                    print(f"  ✓ Created successfully")
+                    log_msg = f"  ✓ Created successfully"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
 
             except Exception as e:
                 error_count += 1
                 error_msg = f"Failed to process '{identifier}': {str(e)}"
                 errors.append(error_msg)
-                print(f"  ✗ ERROR: {str(e)}")
-                print(f"  → Data keys: {list(data.keys())}")
+                log_msg = f"  ✗ ERROR: {str(e)}"
+                print(log_msg)
+                detailed_logs.append(log_msg)
+                log_msg = f"  → Data keys: {list(data.keys())}"
+                print(log_msg)
+                detailed_logs.append(log_msg)
                 db.session.rollback()
                 continue
 
         # Commit all changes
         db.session.commit()
         
-        print(f"\n{'='*60}")
-        print(f"Import Summary for {model_class.__name__}")
-        print(f"Success: {success_count}")
-        print(f"Errors: {error_count}")
-        print(f"{'='*60}\n")
+        summary = f"\n{'='*60}\nImport Summary for {model_class.__name__}\nSuccess: {success_count}\nErrors: {error_count}\n{'='*60}"
+        print(summary)
+        detailed_logs.append(summary)
         
         if errors:
-            print("Error Details:")
+            error_detail = "\nError Details:"
+            print(error_detail)
+            detailed_logs.append(error_detail)
             for error in errors:
-                print(f"  - {error}")
-            print()
+                log_msg = f"  - {error}"
+                print(log_msg)
+                detailed_logs.append(log_msg)
 
         return {
             "success": True,
             "message": f"Import completed: {success_count} records processed, {error_count} errors",
             "success_count": success_count,
             "error_count": error_count,
-            "errors": errors
+            "errors": errors,
+            "detailed_logs": detailed_logs  # NEW: Return logs
         }
 
     except Exception as e:
         db.session.rollback()
-        print(f"\n✗ CRITICAL ERROR: {str(e)}\n")
+        log_msg = f"\n✗ CRITICAL ERROR: {str(e)}"
+        print(log_msg)
+        detailed_logs.append(log_msg)
         return {
             "success": False,
             "message": f"Import failed: {str(e)}",
-            "errors": [str(e)]
+            "errors": [str(e)],
+            "detailed_logs": detailed_logs  # NEW: Return logs even on failure
         }
+
 
 def analyze_process_template_import(json_data):
     """
@@ -897,89 +957,124 @@ def finalize_process_template_import(resolved_data):
     """
     Finalize the import of process templates with their associated template stages.
     """
-    from ..models import ProcessTemplate, TemplateStage, ProcessStage, Modality
-    from ..db import db
-
     added_count = 0
     updated_count = 0
     skipped_count = 0
     failed_count = 0
     error_messages = []
+    detailed_logs = []  # Collect logs for frontend
+
+    log_msg = f"\n{'='*60}\nStarting import for Process Templates\nTotal templates to process: {len(resolved_data)}\n{'='*60}"
+    print(log_msg)
+    detailed_logs.append(log_msg)
 
     try:
-        for item in resolved_data:
-            action = item.get('action')
-            data = item.get('data')
+        for idx, entry in enumerate(resolved_data):
+            action = entry.get('action')
+            data = entry.get('data', {})
+            template_name = data.get('template_name', 'Unknown')
+            
+            log_msg = f"[{idx+1}/{len(resolved_data)}] Processing: {template_name}"
+            print(log_msg)
+            detailed_logs.append(log_msg)
 
             if action == 'skip':
                 skipped_count += 1
+                log_msg = f"  → Skipped by user"
+                print(log_msg)
+                detailed_logs.append(log_msg)
                 continue
 
             try:
-                template_name = data.get('template_name')
-                if not template_name:
-                    failed_count += 1
-                    error_messages.append(f"Template missing name: {data}")
-                    continue
-
-                # Find or create the template
-                if action == 'update':
-                    template = ProcessTemplate.query.filter_by(template_name=template_name).first()
-                    if not template:
-                        failed_count += 1
-                        error_messages.append(f"Template not found for update: {template_name}")
-                        continue
-                else:  # action == 'add'
-                    template = ProcessTemplate()
-
-                # Set template properties
-                template.template_name = template_name
-                template.description = data.get('description')
-
-                # Handle modality relationship
                 modality_name = data.get('modality_name')
-                if modality_name:
-                    modality = Modality.query.filter_by(modality_name=modality_name).first()
-                    if modality:
-                        template.modality_id = modality.modality_id
-                    else:
-                        error_messages.append(f"Modality not found: {modality_name}")
+                if not modality_name:
+                    raise ValueError("modality_name is required")
 
-                # Save template first to get ID
-                if action == 'add':
+                log_msg = f"  → Resolving modality: {modality_name}"
+                print(log_msg)
+                detailed_logs.append(log_msg)
+
+                modality = Modality.query.filter_by(modality_name=modality_name).first()
+                if not modality:
+                    raise ValueError(f"Modality '{modality_name}' not found")
+
+                log_msg = f"  ✓ Modality resolved: {modality.modality_name} (ID: {modality.modality_id})"
+                print(log_msg)
+                detailed_logs.append(log_msg)
+
+                existing_template = ProcessTemplate.query.filter_by(
+                    template_name=template_name
+                ).first()
+
+                if action == 'update' and existing_template:
+                    log_msg = f"  → Updating existing template"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
+
+                    template = existing_template
+                    template.modality_id = modality.modality_id
+                    template.description = data.get('description', '')
+
+                    old_stage_count = TemplateStage.query.filter_by(
+                        template_id=template.template_id
+                    ).delete()
+
+                    log_msg = f"  → Removed {old_stage_count} old stages"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
+
+                elif action == 'add':
+                    log_msg = f"  → Creating new template"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
+                    
+                    template = ProcessTemplate(
+                        template_name=template_name,
+                        modality_id=modality.modality_id,
+                        description=data.get('description', '')
+                    )
                     db.session.add(template)
-                    db.session.flush()  # Get the template_id
+                    db.session.flush()
 
-                # Handle stages
-                stages_data = data.get('stages', [])
+                    log_msg = f"  ✓ Template created (ID: {template.template_id})"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
 
-                # If updating, clear existing template stages
-                if action == 'update':
-                    TemplateStage.query.filter_by(template_id=template.template_id).delete()
-
-                # Process each stage
-                for stage_data in stages_data:
+                stages = data.get('stages', [])
+                log_msg = f"  → Processing {len(stages)} stages"
+                print(log_msg)
+                detailed_logs.append(log_msg)
+                
+                for stage_idx, stage_data in enumerate(stages):
                     stage_name = stage_data.get('stage_name')
-                    if not stage_name:
-                        continue
-
-                    # Find the process stage
-                    process_stage = ProcessStage.query.filter_by(stage_name=stage_name).first()
+                    log_msg = f"    [{stage_idx+1}/{len(stages)}] Stage: {stage_name}"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
+                    
+                    process_stage = ProcessStage.query.filter_by(
+                        stage_name=stage_name
+                    ).first()
+                    
                     if not process_stage:
-                        error_messages.append(f"Process stage not found: {stage_name}")
-                        continue
-
-                    # Create template stage link
+                        raise ValueError(f"Stage '{stage_name}' not found")
+                    
                     template_stage = TemplateStage(
                         template_id=template.template_id,
                         stage_id=process_stage.stage_id,
-                        stage_order=stage_data.get('stage_order', 1),
+                        stage_order=stage_data.get('stage_order', stage_idx + 1),
                         is_required=stage_data.get('is_required', True),
                         base_capabilities=stage_data.get('base_capabilities', [])
                     )
                     db.session.add(template_stage)
+                    
+                    log_msg = f"      ✓ Stage linked (Order: {template_stage.stage_order})"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
 
                 db.session.commit()
+                log_msg = f"  ✓ Template completed successfully"
+                print(log_msg)
+                detailed_logs.append(log_msg)
 
                 if action == 'add':
                     added_count += 1
@@ -988,21 +1083,44 @@ def finalize_process_template_import(resolved_data):
 
             except Exception as e:
                 failed_count += 1
-                error_messages.append(f"Failed to process template {data.get('template_name', 'Unknown')}: {str(e)}")
+                error_msg = f"Failed to process template '{template_name}': {str(e)}"
+                error_messages.append(error_msg)
+                log_msg = f"  ✗ ERROR: {str(e)}"
+                print(log_msg)
+                detailed_logs.append(log_msg)
                 db.session.rollback()
                 continue
 
+        summary = f"\n{'='*60}\nImport Summary for Process Templates\nAdded: {added_count}\nUpdated: {updated_count}\nSkipped: {skipped_count}\nFailed: {failed_count}\n{'='*60}"
+        print(summary)
+        detailed_logs.append(summary)
+        
+        if error_messages:
+            error_details_header = "\nError Details:"
+            print(error_details_header)
+            detailed_logs.append(error_details_header)
+            for error in error_messages:
+                log_msg = f"  - {error}"
+                print(log_msg)
+                detailed_logs.append(log_msg)
+
         return {
             'success': True,
+            'message': f"Import completed: {added_count} added, {updated_count} updated, {failed_count} errors",
             'added_count': added_count,
             'updated_count': updated_count,
             'skipped_count': skipped_count,
             'failed_count': failed_count,
-            'error_messages': error_messages
+            'error_messages': error_messages,
+            'success_count': added_count + updated_count,
+            'detailed_logs': detailed_logs
         }
 
     except Exception as e:
         db.session.rollback()
+        log_msg = f"\n✗ CRITICAL ERROR: {str(e)}"
+        print(log_msg)
+        detailed_logs.append(log_msg)
         return {
             'success': False,
             'message': f'Import failed: {str(e)}',
@@ -1010,5 +1128,6 @@ def finalize_process_template_import(resolved_data):
             'updated_count': updated_count,
             'skipped_count': skipped_count,
             'failed_count': failed_count,
-            'error_messages': error_messages
+            'error_messages': error_messages + [str(e)],
+            'detailed_logs': detailed_logs
         }

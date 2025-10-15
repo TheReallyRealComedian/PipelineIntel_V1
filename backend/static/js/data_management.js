@@ -276,25 +276,41 @@ class ImportPreview {
         const logOutput = $('#log-output');
         
         if (response.success) {
-            logOutput.append(`\nImport completed successfully!\n`);
-            logOutput.append(`Added: ${response.added_count} items\n`);
-            logOutput.append(`Updated: ${response.updated_count} items\n`);
-            logOutput.append(`Skipped: ${response.skipped_count} items\n`);
-            
-            if (response.failed_count > 0) {
-                logOutput.append(`Failed: ${response.failed_count} items\n`);
-                logOutput.append(`Errors:\n${response.error_messages.join('\n')}\n`);
+            // Show detailed logs if available
+            if (response.detailed_logs && response.detailed_logs.length > 0) {
+                logOutput.append('\n' + response.detailed_logs.join('\n') + '\n');
+            } else {
+                // Fallback to summary
+                logOutput.append(`\nImport completed successfully!\n`);
+                logOutput.append(`Added: ${response.added_count || response.success_count} items\n`);
+                logOutput.append(`Updated: ${response.updated_count || 0} items\n`);
+                logOutput.append(`Skipped: ${response.skipped_count || 0} items\n`);
             }
             
-            // Show success message
-            showAlert(`Import completed! Added: ${response.added_count}, Updated: ${response.updated_count}, Skipped: ${response.skipped_count}`, 'success');
+            if (response.failed_count > 0 || response.error_count > 0) {
+                logOutput.append(`Failed: ${response.failed_count || response.error_count} items\n`);
+                if (response.error_messages || response.errors) {
+                    logOutput.append(`Errors:\n${(response.error_messages || response.errors).join('\n')}\n`);
+                }
+            }
             
-            // Redirect after short delay
-            setTimeout(() => {
+            // Add completion message with navigation hint
+            logOutput.append(`\n${'='*60}\nImport completed! You can review the logs above.\n${'='*60}\n`);
+            
+            // Show success message
+            showAlert(`Import completed! Added: ${response.added_count || response.success_count}, Updated: ${response.updated_count || 0}, Skipped: ${response.skipped_count || 0}`, 'success');
+            
+            // REMOVED: Auto-redirect - let user review logs
+            // Instead, re-enable the button and change its text
+            $('#finalize-import-btn').prop('disabled', false).text('Back to Data Management').off('click').on('click', function() {
                 window.location.href = '/data-management';
-            }, 3000);
+            });
             
         } else {
+            // Show detailed logs for failures too
+            if (response.detailed_logs && response.detailed_logs.length > 0) {
+                logOutput.append('\n' + response.detailed_logs.join('\n') + '\n');
+            }
             logOutput.append(`\nImport failed: ${response.message}\n`);
             showAlert('Import failed: ' + response.message, 'danger');
             $('#finalize-import-btn').prop('disabled', false).text('Finalize Import');

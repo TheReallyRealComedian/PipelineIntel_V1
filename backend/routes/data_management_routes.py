@@ -11,7 +11,8 @@ from ..services.data_management_service import (
     finalize_process_template_import,
     import_full_database,
     _resolve_foreign_keys_for_technology,
-    _resolve_foreign_keys_for_challenge
+    _resolve_foreign_keys_for_challenge,
+    _resolve_foreign_keys_for_process_stage
 )
 
 from ..models import (
@@ -36,7 +37,7 @@ ENTITY_MAP = {
         'key': 'technology_name',
         'resolver': _resolve_foreign_keys_for_technology
     },
-    'process_stages': {'model': ProcessStage, 'key': 'stage_name'},
+    'process_stages': {'model': ProcessStage, 'key': 'stage_name', 'resolver': _resolve_foreign_keys_for_process_stage},
     'process_templates': {'model': ProcessTemplate, 'key': 'template_name'},  # NEW: Added process templates
     'supply_chain': {'model': ProductSupplyChain, 'key': 'id'},
     'modalities': {'model': Modality, 'key': 'modality_name'},
