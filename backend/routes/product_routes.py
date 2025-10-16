@@ -167,22 +167,25 @@ def remove_product_challenge_relationship(product_id, challenge_id):
 @product_api_bp.route('/<int:product_id>/technologies', methods=['GET'])
 @login_required
 def get_product_technologies(product_id):
-    """Get all technologies linked to a product, grouped by stage."""
+    """
+    Get all technologies for a product using the correct inheritance logic
+    from the model.
+    """
     from sqlalchemy.orm import joinedload
-    
+    from ..models import Product, ManufacturingTechnology
+
     product = Product.query.get_or_404(product_id)
     
-    # Get all linked technologies with their stages
-    linked_techs = db.session.query(ManufacturingTechnology).join(
-        product_to_technology_association,
-        ManufacturingTechnology.technology_id == product_to_technology_association.c.technology_id
-    ).filter(
-        product_to_technology_association.c.product_id == product_id
-    ).options(joinedload(ManufacturingTechnology.stage)).all()
+    # Use the new, correct method from the model
+    all_product_techs = product.get_inherited_technologies()
     
-    # Group by stage
+    # Group all unique technologies by stage for display
     technologies_by_stage = {}
-    for tech in linked_techs:
+    for tech in sorted(all_product_techs, key=lambda t: t.technology_name):
+        # Eager load stage if not already loaded to prevent N+1 queries
+        if 'stage' not in tech.__dict__:
+             tech = ManufacturingTechnology.query.options(joinedload(ManufacturingTechnology.stage)).get(tech.technology_id)
+
         stage_name = tech.stage.stage_name if tech.stage else "Unassigned"
         if stage_name not in technologies_by_stage:
             technologies_by_stage[stage_name] = []

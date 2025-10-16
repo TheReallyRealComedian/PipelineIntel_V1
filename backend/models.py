@@ -201,40 +201,40 @@ class Product(db.Model):
         return requirements
 
     def get_inherited_challenges(self):
-        """
-        Get challenges from THREE sources:
-        1. Modality-level challenges (NEW - the main source)
-        2. Technology-based challenges
-        3. Process template challenges (future enhancement)
-        
-        Returns list of dicts with challenge object and source info.
-        """
-        inherited = []
-        seen_challenge_ids = set()
-        
-        # SOURCE 1: Modality challenges (NEW - primary inheritance)
-        if self.modality and self.modality.modality_challenges:
-            for mc in self.modality.modality_challenges:
-                if mc.challenge_id not in seen_challenge_ids:
-                    inherited.append({
-                        'challenge': mc.challenge,
-                        'source': f'Modality: {self.modality.modality_name}',
-                        'notes': mc.notes
-                    })
-                    seen_challenge_ids.add(mc.challenge_id)
-        
-        # SOURCE 2: Technology-based challenges
-        for tech in self.technologies:
-            for challenge in tech.challenges:
-                if challenge.challenge_id not in seen_challenge_ids:
-                    inherited.append({
-                        'challenge': challenge,
-                        'source': f'Technology: {tech.technology_name}',
-                        'notes': None
-                    })
-                    seen_challenge_ids.add(challenge.challenge_id)
-        
-        return inherited
+            """
+            Get challenges from THREE sources:
+            1. Modality-level challenges (direct)
+            2. Technology-based challenges (inherited via template OR direct link)
+            3. Process template challenges (future enhancement)
+            
+            Returns list of dicts with challenge object and source info.
+            """
+            inherited = []
+            seen_challenge_ids = set()
+            
+            # SOURCE 1: Modality challenges (direct links for modality-wide issues)
+            if self.modality and self.modality.modality_challenges:
+                for mc in self.modality.modality_challenges:
+                    if mc.challenge_id not in seen_challenge_ids:
+                        inherited.append({
+                            'challenge': mc.challenge,
+                            'source': f'Modality: {self.modality.modality_name}',
+                            'notes': mc.notes
+                        })
+                        seen_challenge_ids.add(mc.challenge_id)
+            
+            # SOURCE 2: Technology-based challenges (NOW USES THE CORRECT INHERITANCE LOGIC)
+            for tech in self.get_inherited_technologies(): # <--- THIS IS THE FIX
+                for challenge in tech.challenges:
+                    if challenge.challenge_id not in seen_challenge_ids:
+                        inherited.append({
+                            'challenge': challenge,
+                            'source': f'Technology: {tech.technology_name}',
+                            'notes': None
+                        })
+                        seen_challenge_ids.add(challenge.challenge_id)
+            
+            return inherited
 
     def get_explicit_challenge_relationships(self):
         """Get user-defined challenge relationships (exclusions/inclusions)."""
@@ -353,6 +353,60 @@ class Product(db.Model):
             {'pid': self.product_id, 'cid': challenge_id}
         )
         db.session.commit()
+
+    def get_inherited_technologies(self):
+        """
+        Gets all technologies for a product using the correct three-tier filtering logic:
+        1. Template-Specific
+        2. Modality-Specific
+        3. Generic
+        This also includes any technologies directly linked to the product itself.
+        """
+        from .models import ManufacturingTechnology, TechnologyModality
+        
+        # Start with technologies directly linked to the product (for overrides)
+        all_techs = {tech.technology_id: tech for tech in self.technologies}
+
+        # The inheritance logic requires a template and modality
+        if not self.process_template or not self.modality_id:
+            return list(all_techs.values())
+
+        # Get all stage IDs used by this product's template
+        template_stage_ids = {ts.stage_id for ts in self.process_template.stages if ts.stage_id}
+        
+        if not template_stage_ids:
+            return list(all_techs.values())
+
+        # --- THIS IS THE CORRECT, SIMPLIFIED LOGIC ---
+        
+        # 1. Get IDs of all technologies linked to this modality
+        modality_tech_ids = {
+            res[0] for res in db.session.query(TechnologyModality.technology_id).filter_by(modality_id=self.modality_id)
+        }
+        
+        # 2. Get IDs of all technologies that are generic (have no modality links at all)
+        generic_tech_ids = {
+            res[0] for res in db.session.query(ManufacturingTechnology.technology_id).filter(
+                ~ManufacturingTechnology.modality_links.any()
+            )
+        }
+
+        # 3. Get all technologies that are in the right stages
+        candidate_techs = db.session.query(ManufacturingTechnology).filter(
+            ManufacturingTechnology.stage_id.in_(template_stage_ids)
+        ).all()
+
+        # 4. Filter the candidates based on our three-tier logic
+        for tech in candidate_techs:
+            is_template_specific = (tech.template_id == self.process_template_id)
+            is_modality_specific = tech.technology_id in modality_tech_ids
+            is_generic = tech.technology_id in generic_tech_ids
+
+            if is_template_specific or is_modality_specific or is_generic:
+                if tech.technology_id not in all_techs:
+                    all_techs[tech.technology_id] = tech
+        
+        return list(all_techs.values())
 
 
 class Indication(db.Model):

@@ -3,6 +3,7 @@
     "product_code": "BI 1810631",
     "product_name": "Zongertinib",
     "modality_name": "Small Molecule",
+    "process_template_name": "Standard Small Molecule Process",
     "product_type": "NME",
     "therapeutic_area": "Oncology",
     "mechanism_of_action": "Irreversible, HER2-selective Tyrosine Kinase Inhibitor (TKI)",
@@ -11,11 +12,6 @@
     "dosage_form": "Tablet",
     "route_of_administration": "Oral",
     "base_technology": "Organic Spray Drying; Roller Compaction",
-    "technology_names": [
-      "Spray Drying",
-      "Direct Compression",
-      "Automated Visual Inspection (AVI)"
-    ],
     "biel_category": "3A",
     "current_phase": "Registration",
     "project_status": "On Track",
@@ -26,31 +22,64 @@
     "submission_status": "Submitted",
     "launch_geography": "US",
     "regulatory_details": {
-      "NSCLC_2L": ["Breakthrough Therapy", "Fast Track"]
+      "NSCLC_2L": [
+        "Breakthrough Therapy",
+        "Fast Track"
+      ]
     },
     "ppq_status": "Completed",
     "critical_path_item": "OPS",
     "timeline_variance_days": 0,
     "timeline_variance_baseline": "AD 2024",
     "ppq_details": {
-      "DS": { "Cambrex": "completed", "Alphora": "backup_qualified" },
-      "DP": { "Hovione": "completed", "ING": "launch_ready" }
+      "DS": {
+        "Cambrex": "completed",
+        "Alphora": "backup_qualified"
+      },
+      "DP": {
+        "Hovione": "completed",
+        "ING": "launch_ready"
+      }
     },
     "ds_volume_category": "Low (10-1,000 kg)",
     "dp_volume_category": "Low (1-10 million PCS)",
     "ds_suppliers": [
-      { "name": "Cambrex", "site": "N/A", "role": "Primary", "status": "qualified" },
-      { "name": "Alphora", "site": "N/A", "role": "Backup", "status": "qualified" }
+      {
+        "name": "Cambrex",
+        "site": "N/A",
+        "role": "Primary",
+        "status": "qualified"
+      },
+      {
+        "name": "Alphora",
+        "site": "N/A",
+        "role": "Backup",
+        "status": "qualified"
+      }
     ],
     "dp_suppliers": [
-      { "name": "Hovione", "site": "Portugal", "role": "Launch", "status": "launch_ready" },
-      { "name": "ING", "site": "Ingelheim", "role": "Launch", "status": "launch_ready" }
+      {
+        "name": "Hovione",
+        "site": "Portugal",
+        "role": "Launch",
+        "status": "launch_ready"
+      },
+      {
+        "name": "ING",
+        "site": "Ingelheim",
+        "role": "Launch",
+        "status": "launch_ready"
+      }
     ],
     "operational_risks": {
-      "high": ["If something goes wrong, impact on submission/launch timepoint highly likely"]
+      "high": [
+        "If something goes wrong, impact on submission/launch timepoint highly likely"
+      ]
     },
     "timeline_risks": {
-      "critical": ["Slight shift due to clinical activities"]
+      "critical": [
+        "Slight shift due to clinical activities"
+      ]
     },
     "clinical_trials": {
       "phase_1": {
@@ -64,6 +93,7 @@
     "product_code": "BI 1015550",
     "product_name": "Nerandomilast",
     "modality_name": "Small Molecule",
+    "process_template_name": "Standard Small Molecule Process",
     "product_type": "NME",
     "therapeutic_area": "Respiratory",
     "mechanism_of_action": "Preferential PDE4B inhibitor",
@@ -72,13 +102,6 @@
     "dosage_form": "Tablet",
     "route_of_administration": "Oral",
     "base_technology": "Twin Screw",
-    "technology_names": [
-      "Twin Screw Granulation (TSG)",
-      "Direct Compression",
-      "Fluid Bed Coating",
-      "Automated Visual Inspection (AVI)",
-      "Track & Trace Serialization"
-    ],
     "biel_category": "3A",
     "current_phase": "Registration",
     "project_status": "On Track",
@@ -89,29 +112,50 @@
     "submission_status": "Submitted",
     "launch_geography": "Global",
     "regulatory_details": {
-      "IPF": ["Breakthrough Therapy", "Orphan Drug"]
+      "IPF": [
+        "Breakthrough Therapy",
+        "Orphan Drug"
+      ]
     },
     "ppq_status": "Completed",
     "critical_path_item": "Regulatory",
     "timeline_variance_days": -10,
     "timeline_variance_baseline": "AD 2024",
     "ppq_details": {
-      "DS": { "ING": "completed" },
-      "DP": { "ING_SoL": "completed" }
+      "DS": {
+        "ING": "completed"
+      },
+      "DP": {
+        "ING_SoL": "completed"
+      }
     },
     "ds_volume_category": "Low (10-1,000 kg)",
     "dp_volume_category": "Medium (10-100 million PCS)",
     "ds_suppliers": [
-      { "name": "ING", "site": "Ingelheim", "role": "Primary", "status": "qualified" }
+      {
+        "name": "ING",
+        "site": "Ingelheim",
+        "role": "Primary",
+        "status": "qualified"
+      }
     ],
     "dp_suppliers": [
-      { "name": "ING_SoL", "site": "Ingelheim", "role": "Launch", "status": "qualified" }
+      {
+        "name": "ING_SoL",
+        "site": "Ingelheim",
+        "role": "Launch",
+        "status": "qualified"
+      }
     ],
     "operational_risks": {
-      "high": ["Formulation risk due to TiO2 bridging requirement"]
+      "high": [
+        "Formulation risk due to TiO2 bridging requirement"
+      ]
     },
     "timeline_risks": {
-      "critical": ["Potential delay due to BE study requirement"]
+      "critical": [
+        "Potential delay due to BE study requirement"
+      ]
     },
     "clinical_trials": {
       "phase_3": {
@@ -125,6 +169,7 @@
     "product_code": "BI 456906",
     "product_name": "Survodutide",
     "modality_name": "Peptides",
+    "process_template_name": "Standard Peptides Process",
     "product_type": "NME",
     "therapeutic_area": "Cardiovascular-Renal-Metabolic",
     "mechanism_of_action": "Dual GLP-1 and glucagon receptor agonist",
@@ -133,15 +178,6 @@
     "dosage_form": "Injectable",
     "route_of_administration": "Injectable",
     "base_technology": "Single-use isolator",
-    "technology_names": [
-      "CHO Cell Culture Platform",
-      "Protein A Affinity Chromatography",
-      "Ion Exchange Chromatography (IEX)",
-      "Nanofiltration (20nm)",
-      "Isolator Technology (Aseptic)",
-      "Auto-Injector Integration",
-      "Cold Chain Monitoring"
-    ],
     "current_phase": "Phase III",
     "project_status": "Delayed",
     "lead_indication": "Obesity",
@@ -150,31 +186,64 @@
     "submission_status": "In Progress",
     "launch_geography": "Global",
     "regulatory_details": {
-      "Obesity": ["Breakthrough Therapy", "Fast Track"]
+      "Obesity": [
+        "Breakthrough Therapy",
+        "Fast Track"
+      ]
     },
     "ppq_status": "At Risk",
     "critical_path_item": "CMC",
     "timeline_variance_days": 86,
     "timeline_variance_baseline": "AD 2024",
     "ppq_details": {
-      "DS": { "PPG": "halted" },
-      "DP": { "Thermo Fisher": "ongoing", "Nemera": "device ramp-up" }
+      "DS": {
+        "PPG": "halted"
+      },
+      "DP": {
+        "Thermo Fisher": "ongoing",
+        "Nemera": "device ramp-up"
+      }
     },
     "ds_suppliers": [
-      { "name": "PPG", "site": "N/A", "role": "Primary", "status": "halted" }
+      {
+        "name": "PPG",
+        "site": "N/A",
+        "role": "Primary",
+        "status": "halted"
+      }
     ],
     "dp_suppliers": [
-      { "name": "Thermo Fisher", "site": "N/A", "role": "Manufacturing", "status": "ongoing" },
-      { "name": "Nemera", "site": "N/A", "role": "Device", "status": "ramp-up" }
+      {
+        "name": "Thermo Fisher",
+        "site": "N/A",
+        "role": "Manufacturing",
+        "status": "ongoing"
+      },
+      {
+        "name": "Nemera",
+        "site": "N/A",
+        "role": "Device",
+        "status": "ramp-up"
+      }
     ],
     "device_partners": [
-      { "name": "Nemera", "device_type": "PEN", "role": "Primary" }
+      {
+        "name": "Nemera",
+        "device_type": "PEN",
+        "role": "Primary"
+      }
     ],
     "operational_risks": {
-      "high": ["DS PPQ halted", "High-risk formulation 2.0 development"]
+      "high": [
+        "DS PPQ halted",
+        "High-risk formulation 2.0 development"
+      ]
     },
     "timeline_risks": {
-      "critical": ["+86 day delay for Obesity", "+91 day delay for MASH"]
+      "critical": [
+        "+86 day delay for Obesity",
+        "+91 day delay for MASH"
+      ]
     },
     "clinical_trials": {
       "phase_3": {
@@ -188,6 +257,7 @@
     "product_code": "BI 690517",
     "product_name": "Vicadrostat",
     "modality_name": "Small Molecule",
+    "process_template_name": "Standard Small Molecule Process",
     "product_type": "NME",
     "therapeutic_area": "Cardiovascular-Renal-Metabolic",
     "mechanism_of_action": "Selective aldosterone synthase inhibitor",
@@ -196,12 +266,6 @@
     "dosage_form": "Tablet",
     "route_of_administration": "Oral",
     "base_technology": "Twin Screw",
-    "technology_names": [
-      "Twin Screw Granulation (TSG)",
-      "Fluid Bed Coating",
-      "Near-Infrared Spectroscopy (NIR)",
-      "Automated Visual Inspection (AVI)"
-    ],
     "biel_category": "3A",
     "current_phase": "Phase III",
     "project_status": "On Track",
@@ -216,16 +280,30 @@
     "timeline_variance_days": 0,
     "timeline_variance_baseline": "AD 2024",
     "ppq_details": {
-      "DS": { "ING": "transfer ongoing" },
-      "DP": { "ING_SoL": "transfer ongoing" }
+      "DS": {
+        "ING": "transfer ongoing"
+      },
+      "DP": {
+        "ING_SoL": "transfer ongoing"
+      }
     },
     "ds_volume_category": "High (>10 tn)",
     "dp_volume_category": "High (>100 million PCS)",
     "ds_suppliers": [
-      { "name": "ING", "site": "Ingelheim", "role": "Primary", "status": "transfer ongoing" }
+      {
+        "name": "ING",
+        "site": "Ingelheim",
+        "role": "Primary",
+        "status": "transfer ongoing"
+      }
     ],
     "dp_suppliers": [
-      { "name": "ING_SoL", "site": "Ingelheim", "role": "Primary", "status": "transfer ongoing" }
+      {
+        "name": "ING_SoL",
+        "site": "Ingelheim",
+        "role": "Primary",
+        "status": "transfer ongoing"
+      }
     ],
     "clinical_trials": {
       "phase_3": {

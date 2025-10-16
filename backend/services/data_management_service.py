@@ -427,6 +427,66 @@ def _resolve_foreign_keys_for_challenge(item, existing_challenges):
     
     return resolved_item
 
+
+def _resolve_foreign_keys_for_product(item, existing_products):
+    """
+    Resolves foreign keys for products.
+    Converts name-based references to ID-based references.
+    Handles: modality_name, process_template_name, technology_names
+    """
+    from ..models import Modality, ProcessTemplate, ManufacturingTechnology
+    
+    resolved_item = item.copy()
+    product_code = resolved_item.get('product_code', 'UNKNOWN')
+    
+    # ==== RESOLVE MODALITY ====
+    if 'modality_name' in resolved_item:
+        modality_name = resolved_item.pop('modality_name')
+        if modality_name:
+            modality = Modality.query.filter_by(modality_name=modality_name).first()
+            if modality:
+                resolved_item['modality_id'] = modality.modality_id
+                print(f"  ✓ Resolved modality '{modality_name}' → ID {modality.modality_id}")
+            else:
+                raise ValueError(
+                    f"Product '{product_code}': Modality '{modality_name}' not found. "
+                    f"Available modalities: {[m.modality_name for m in Modality.query.all()]}"
+                )
+    
+    # ==== RESOLVE PROCESS TEMPLATE ====
+    if 'process_template_name' in resolved_item:
+        template_name = resolved_item.pop('process_template_name')
+        if template_name:
+            template = ProcessTemplate.query.filter_by(template_name=template_name).first()
+            if template:
+                resolved_item['process_template_id'] = template.template_id
+                print(f"  ✓ Resolved template '{template_name}' → ID {template.template_id}")
+                
+                # Validate template matches modality
+                if 'modality_id' in resolved_item and template.modality_id != resolved_item['modality_id']:
+                    modality = Modality.query.get(resolved_item['modality_id'])
+                    raise ValueError(
+                        f"Product '{product_code}': Template '{template_name}' "
+                        f"(modality: {template.modality.modality_name}) does not match "
+                        f"product modality '{modality.modality_name if modality else 'Unknown'}'"
+                    )
+            else:
+                available_templates = [t.template_name for t in ProcessTemplate.query.all()]
+                raise ValueError(
+                    f"Product '{product_code}': Template '{template_name}' not found. "
+                    f"Available templates: {available_templates}"
+                )
+    
+    # ==== HANDLE TECHNOLOGY_NAMES (store for later processing) ====
+    if 'technology_names' in resolved_item:
+        tech_names = resolved_item.pop('technology_names')
+        if tech_names and isinstance(tech_names, list):
+            # Store as metadata for later processing (can't link M2M until product is created)
+            resolved_item['_technology_names_to_link'] = tech_names
+            print(f"  → Found {len(tech_names)} technologies to link after product creation")
+    
+    return resolved_item
+
 def _parse_date(date_string):
     """Helper function to parse date strings into date objects."""
     if not date_string:
@@ -646,22 +706,34 @@ def _separate_product_data(json_data):
 def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=None):
     """
     Finalizes the import by creating or updating database entries.
-    Now accepts an optional resolver function and collects detailed logs.
+    Enhanced with detailed logging and product-specific technology linking.
     """
+    from ..models import Product, ManufacturingTechnology, product_to_technology_association
+    
     success_count = 0
     error_count = 0
     errors = []
-    detailed_logs = []  # NEW: Collect logs for frontend
-
-    # Collect logs
-    header = f"{'='*60}\nStarting import for {model_class.__name__}\nTotal items to process: {len(resolved_data)}\nResolver function: {'Yes' if resolver_func else 'No'}\n{'='*60}"
+    detailed_logs = []
+    
+    # === HEADER ===
+    header = f"""
+                {'='*70}
+                IMPORT PROCESS STARTED
+                {'='*70}
+                Entity Type: {model_class.__name__}
+                Total Items: {len(resolved_data)}
+                Resolver: {'✓ Enabled' if resolver_func else '✗ None'}
+                Unique Key: {unique_key_field}
+                {'='*70}
+                """
     print(header)
     detailed_logs.append(header)
-
+    
     try:
-        for idx, entry in enumerate(resolved_data):
+        for idx, entry in enumerate(resolved_data, 1):
+            item_log = []
             try:
-                # Get the data from the entry
+                # === GET DATA ===
                 if 'data' in entry:
                     data = entry['data'].copy()
                 elif 'json_item' in entry:
@@ -669,139 +741,193 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
                 else:
                     raise ValueError("Entry missing 'data' or 'json_item' field")
                 
-                identifier = data.get(unique_key_field)
-                log_msg = f"[{idx+1}/{len(resolved_data)}] Processing: {identifier}"
-                print(log_msg)
-                detailed_logs.append(log_msg)
-
-                # CRITICAL: Call resolver if it exists
+                identifier = data.get(unique_key_field, f"Item {idx}")
+                
+                # === ITEM HEADER ===
+                item_header = f"\n[{idx}/{len(resolved_data)}] Processing: {identifier}"
+                print(item_header)
+                item_log.append(item_header)
+                detailed_logs.append(item_header)
+                
+                # === APPLY RESOLVER ===
+                tech_names_to_link = []
                 if resolver_func:
-                    log_msg = f"  → Calling resolver for: {identifier}"
+                    log_msg = f"  → Applying resolver function..."
                     print(log_msg)
-                    detailed_logs.append(log_msg)
+                    item_log.append(log_msg)
                     try:
                         existing_instances = model_class.query.all()
                         data = resolver_func(data, existing_instances)
-                        log_msg = f"  ✓ Resolver completed successfully"
+                        
+                        # Extract technology names for later linking
+                        tech_names_to_link = data.pop('_technology_names_to_link', [])
+                        
+                        log_msg = f"  ✓ Resolver completed"
                         print(log_msg)
-                        detailed_logs.append(log_msg)
+                        item_log.append(log_msg)
                     except Exception as resolve_error:
-                        log_msg = f"  ✗ Resolver failed: {str(resolve_error)}"
+                        log_msg = f"  ✗ RESOLVER ERROR: {str(resolve_error)}"
                         print(log_msg)
-                        detailed_logs.append(log_msg)
+                        item_log.append(log_msg)
                         raise resolve_error
-
-                # Check if record already exists
-                existing_record = model_class.query.filter(
-                    getattr(model_class, unique_key_field) == identifier
-                ).first()
-
-                action = entry.get('action', 'add')
-
-                if action == 'skip':
-                    log_msg = f"  → Skipped by user"
+                
+                # === CHECK IF EXISTS ===
+                existing_item = model_class.query.filter_by(**{unique_key_field: identifier}).first()
+                
+                if existing_item:
+                    # Get the ID field name (e.g., 'product_id' for 'products' table)
+                    id_field_name = f"{model_class.__tablename__.rstrip('s')}_id"
+                    record_id = getattr(existing_item, id_field_name, 'N/A')
+                    log_msg = f"  → Updating existing record (ID: {record_id})"
                     print(log_msg)
-                    detailed_logs.append(log_msg)
-                    continue
-
-                if action == 'update' and existing_record:
-                    log_msg = f"  → Updating existing record"
-                    print(log_msg)
-                    detailed_logs.append(log_msg)
+                    item_log.append(log_msg)
                     
+                    # Update fields
+                    updated_fields = []
                     for key, value in data.items():
-                        if hasattr(existing_record, key):
-                            setattr(existing_record, key, value)
+                        if hasattr(existing_item, key) and getattr(existing_item, key) != value:
+                            setattr(existing_item, key, value)
+                            updated_fields.append(key)
                     
-                    success_count += 1
-                    log_msg = f"  ✓ Updated successfully"
-                    print(log_msg)
-                    detailed_logs.append(log_msg)
-
-                elif action == 'add':
+                    if updated_fields:
+                        log_msg = f"  ✓ Updated {len(updated_fields)} fields: {', '.join(updated_fields[:5])}"
+                        if len(updated_fields) > 5:
+                            log_msg += f" (and {len(updated_fields) - 5} more)"
+                        print(log_msg)
+                        item_log.append(log_msg)
+                    else:
+                        log_msg = f"  → No changes needed"
+                        print(log_msg)
+                        item_log.append(log_msg)
+                    
+                    item_to_process = existing_item
+                else:
                     log_msg = f"  → Creating new record"
                     print(log_msg)
-                    detailed_logs.append(log_msg)
+                    item_log.append(log_msg)
                     
-                    # Handle special case for technologies with many-to-many modalities
-                    if model_class.__name__ == 'ManufacturingTechnology':
-                        modality_ids = data.pop('modality_ids', [])
-                        obj = model_class(**data)
-                        db.session.add(obj)
-                        db.session.flush()
-                        
-                        # Create junction table entries
-                        from ..models import TechnologyModality
-                        for modality_id in modality_ids:
-                            tech_mod = TechnologyModality(
-                                technology_id=obj.technology_id,
-                                modality_id=modality_id
-                            )
-                            db.session.add(tech_mod)
-                        
-                        if modality_ids:
-                            log_msg = f"  → Linked to {len(modality_ids)} modality/modalities"
-                            print(log_msg)
-                            detailed_logs.append(log_msg)
-                    else:
-                        obj = model_class(**data)
-                        db.session.add(obj)
-                    
-                    success_count += 1
-                    log_msg = f"  ✓ Created successfully"
+                    item_to_process = model_class(**data)
+                    db.session.add(item_to_process)
+                
+                # === FLUSH TO GET ID ===
+                db.session.flush()
+                
+                # === PRODUCT-SPECIFIC: LINK TECHNOLOGIES ===
+                if model_class == Product and tech_names_to_link:
+                    log_msg = f"  → Linking {len(tech_names_to_link)} technologies..."
                     print(log_msg)
-                    detailed_logs.append(log_msg)
-
-            except Exception as e:
+                    item_log.append(log_msg)
+                    
+                    linked_count = 0
+                    missing_techs = []
+                    
+                    for tech_name in tech_names_to_link:
+                        technology = ManufacturingTechnology.query.filter_by(
+                            technology_name=tech_name
+                        ).first()
+                        
+                        if technology:
+                            # Check if link already exists
+                            existing_link = db.session.execute(
+                                product_to_technology_association.select().where(
+                                    product_to_technology_association.c.product_id == item_to_process.product_id
+                                ).where(
+                                    product_to_technology_association.c.technology_id == technology.technology_id
+                                )
+                            ).first()
+                            
+                            if not existing_link:
+                                db.session.execute(
+                                    product_to_technology_association.insert().values(
+                                        product_id=item_to_process.product_id,
+                                        technology_id=technology.technology_id
+                                    )
+                                )
+                                linked_count += 1
+                        else:
+                            missing_techs.append(tech_name)
+                    
+                    if linked_count > 0:
+                        log_msg = f"  ✓ Linked {linked_count} technologies"
+                        print(log_msg)
+                        item_log.append(log_msg)
+                    
+                    if missing_techs:
+                        log_msg = f"  ⚠ Warning: {len(missing_techs)} technologies not found: {', '.join(missing_techs[:3])}"
+                        if len(missing_techs) > 3:
+                            log_msg += f" (and {len(missing_techs) - 3} more)"
+                        print(log_msg)
+                        item_log.append(log_msg)
+                        errors.append(f"{identifier}: Missing technologies: {', '.join(missing_techs)}")
+                        error_count += 1
+                
+                # === SUCCESS ===
+                success_count += 1
+                log_msg = f"  ✓ SUCCESS"
+                print(log_msg)
+                item_log.append(log_msg)
+                detailed_logs.extend(item_log)
+                
+            except Exception as item_error:
                 error_count += 1
-                error_msg = f"Failed to process '{identifier}': {str(e)}"
-                errors.append(error_msg)
-                log_msg = f"  ✗ ERROR: {str(e)}"
-                print(log_msg)
-                detailed_logs.append(log_msg)
-                log_msg = f"  → Data keys: {list(data.keys())}"
-                print(log_msg)
-                detailed_logs.append(log_msg)
+                error_msg = f"  ✗ ERROR: {str(item_error)}"
+                print(error_msg)
+                item_log.append(error_msg)
+                item_log.append(f"  → Data keys: {list(data.keys())}")
+                detailed_logs.extend(item_log)
+                errors.append(f"{identifier}: {str(item_error)}")
                 db.session.rollback()
                 continue
-
-        # Commit all changes
+        
+        # === COMMIT ALL ===
         db.session.commit()
         
-        summary = f"\n{'='*60}\nImport Summary for {model_class.__name__}\nSuccess: {success_count}\nErrors: {error_count}\n{'='*60}"
+        # === SUMMARY ===
+        summary = f"""
+                    {'='*70}
+                    IMPORT SUMMARY - {model_class.__name__}
+                    {'='*70}
+                    ✓ Success: {success_count}
+                    ✗ Errors:  {error_count}
+                    Total:     {len(resolved_data)}
+                    {'='*70}
+                    """
         print(summary)
         detailed_logs.append(summary)
         
         if errors:
-            error_detail = "\nError Details:"
+            error_detail = "\nERROR DETAILS:"
             print(error_detail)
             detailed_logs.append(error_detail)
             for error in errors:
-                log_msg = f"  - {error}"
+                log_msg = f"  • {error}"
                 print(log_msg)
                 detailed_logs.append(log_msg)
-
+        
         return {
             "success": True,
-            "message": f"Import completed: {success_count} records processed, {error_count} errors",
+            "message": f"Import completed: {success_count} success, {error_count} errors",
             "success_count": success_count,
             "error_count": error_count,
             "errors": errors,
-            "detailed_logs": detailed_logs  # NEW: Return logs
+            "detailed_logs": detailed_logs
         }
-
+    
     except Exception as e:
         db.session.rollback()
-        log_msg = f"\n✗ CRITICAL ERROR: {str(e)}"
-        print(log_msg)
-        detailed_logs.append(log_msg)
+        critical_error = f"\n{'='*70}\n✗ CRITICAL ERROR\n{'='*70}\n{str(e)}\n{'='*70}"
+        print(critical_error)
+        detailed_logs.append(critical_error)
+        
+        import traceback
+        traceback.print_exc()
+        
         return {
             "success": False,
             "message": f"Import failed: {str(e)}",
             "errors": [str(e)],
-            "detailed_logs": detailed_logs  # NEW: Return logs even on failure
+            "detailed_logs": detailed_logs
         }
-
 
 def analyze_process_template_import(json_data):
     """

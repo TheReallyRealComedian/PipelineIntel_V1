@@ -12,7 +12,8 @@ from ..services.data_management_service import (
     import_full_database,
     _resolve_foreign_keys_for_technology,
     _resolve_foreign_keys_for_challenge,
-    _resolve_foreign_keys_for_process_stage
+    _resolve_foreign_keys_for_process_stage,
+    _resolve_foreign_keys_for_product
 )
 
 from ..models import (
@@ -25,7 +26,11 @@ from ..models import (
 data_management_bp = Blueprint('data_management', __name__, url_prefix='/data-management')
 
 ENTITY_MAP = {
-    'products': {'model': Product, 'key': 'product_code'},
+    'products': {
+        'model': Product, 
+        'key': 'product_code',
+        'resolver': _resolve_foreign_keys_for_product  # ADD THIS LINE
+    },
     'indications': {'model': Indication, 'key': 'indication_name'},
     'manufacturing_challenges': {
         'model': ManufacturingChallenge, 
@@ -37,8 +42,12 @@ ENTITY_MAP = {
         'key': 'technology_name',
         'resolver': _resolve_foreign_keys_for_technology
     },
-    'process_stages': {'model': ProcessStage, 'key': 'stage_name', 'resolver': _resolve_foreign_keys_for_process_stage},
-    'process_templates': {'model': ProcessTemplate, 'key': 'template_name'},  # NEW: Added process templates
+    'process_stages': {
+        'model': ProcessStage, 
+        'key': 'stage_name', 
+        'resolver': _resolve_foreign_keys_for_process_stage
+    },
+    'process_templates': {'model': ProcessTemplate, 'key': 'template_name'},
     'supply_chain': {'model': ProductSupplyChain, 'key': 'id'},
     'modalities': {'model': Modality, 'key': 'modality_name'},
     'manufacturing_capabilities': {'model': ManufacturingCapability, 'key': 'capability_name'},
