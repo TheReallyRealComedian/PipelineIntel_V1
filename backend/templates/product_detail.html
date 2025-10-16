@@ -584,6 +584,12 @@ document.addEventListener('challengesLoaded', function(event) {
 </script>
 <script src="{{ url_for('static', filename='js/challenge_management.js') }}"></script>
 <script>
+// Helper function to get CSRF token
+function getCSRFToken() {
+    const token = document.querySelector('meta[name="csrf-token"]');
+    return token ? token.getAttribute('content') : '';
+}
+
 // Product Technology Management
 const productId = {{ product.product_id }};
 
@@ -755,6 +761,7 @@ async function addTechnology(technologyId, technologyName) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
             }
         });
         
@@ -793,7 +800,10 @@ async function removeTechnology(technologyId, technologyName) {
     
     try {
         const response = await fetch(`/api/products/${productId}/technologies/${technologyId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': getCSRFToken()
+            }
         });
         
         const data = await response.json();
