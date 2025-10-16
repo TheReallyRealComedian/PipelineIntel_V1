@@ -205,13 +205,21 @@ Level 1 (Phase): "Upstream Processing"
 
 **What they are**: Specific techniques or equipment platforms used in manufacturing.
 
-**Relationship to Stages**: Technologies belong to ONE primary stage where they're used.
+**Key Design Change**: Technologies can now be linked to multiple modalities (e.g., "Spray Drying" can be used for both "Small Molecule" and "Peptides"). This is managed via a many-to-many relationship.
+
+**Relationship Logic (Three-Tier Filtering)**:
+When querying for a specific modality, the system finds technologies that are:
+1.  **Template-Specific**: Directly linked to the selected process template.
+2.  **Modality-Specific**: Linked to the selected modality via the `technology_modalities` junction table.
+3.  **Generic**: Not linked to **any** modality in the `technology_modalities` table.
 
 **Schema**:
 ```python
+# Schema for manufacturing_technologies
 technology_id (PK)
 technology_name (unique)
 stage_id (FK → process_stages.stage_id)
+template_id (FK → process_templates.template_id, nullable)
 innovation_potential (text)
 complexity_rating (1-10)
 ```
@@ -219,11 +227,11 @@ complexity_rating (1-10)
 **Concrete Example**:
 ```json
 {
-  "technology_name": "Twin Screw Granulation (TSG)",
-  "stage_name": "Granulation",
-  "innovation_potential": "High - enables continuous manufacturing",
-  "complexity_rating": 7,
-  "description": "Continuous wet granulation using twin screw extruder..."
+  "technology_name": "Spray Drying",
+  "stage_name": "Physical Processing & Drying",
+  "modality_names": ["Small Molecule", "Peptides", "Oligonucleotides"],
+  "innovation_potential": "High",
+  "complexity_rating": 6
 }
 ```
 
@@ -329,6 +337,7 @@ created_at
 - Has many: Products (`products.modality_id`)
 - Has many: Process Templates (`process_templates.modality_id`)
 - Has many: Modality Requirements (to Capabilities)
+- **Links to**: Technologies (many-to-many via `technology_modalities`)
 
 **JSON Import Example**:
 ```json
@@ -496,6 +505,7 @@ base_capabilities (JSONB) # Array of capability names
 technology_id (PK)
 technology_name (unique) # "Twin Screw Granulation"
 stage_id (FK → process_stages.stage_id)
+template_id (FK → process_templates.template_id, nullable)
 innovation_potential (text)
 complexity_rating (1-10)
 ```
@@ -503,18 +513,48 @@ complexity_rating (1-10)
 **Relationships**:
 - Belongs to: Process Stage (primary stage of use)
 - Has many: Challenges (`challenges.technology_id`)
-- Links to: Products (many-to-many via product_to_technology)
+- Links to: Products (many-to-many via `product_to_technology`)
+- **Links to**: Modalities (many-to-many via `technology_modalities`)
 
-**JSON Import Example**:
+**JSON Import Examples**:
 ```json
+// Single modality
 {
-  "technology_name": "Perfusion Bioreactor System",
-  "stage_name": "Cell Culture",
-  "innovation_potential": "High - enables intensified bioprocessing",
-  "complexity_rating": 8,
-  "description": "Continuous cell culture system with cell retention..."
+  "technology_name": "Ex-Vivo T-Cell Expansion",
+  "stage_name": "Chemical/Biological Production",
+  "modality_names": ["CAR-T"],
+  "complexity_rating": 10
+}
+
+// Multiple modalities
+{
+  "technology_name": "Spray Drying",
+  "stage_name": "Physical Processing & Drying",
+  "modality_names": ["Small Molecule", "Peptides", "Oligonucleotides"],
+  "complexity_rating": 6
+}
+
+// Generic (no modalities)
+{
+  "technology_name": "Track & Trace Serialization",
+  "stage_name": "Secondary Packaging & Serialization",
+  "modality_names": [],
+  "complexity_rating": 3
 }
 ```
+
+---
+
+#### Technology-Modality Junction Table
+```python
+# Schema for technology_modalities
+technology_id (PK, FK → manufacturing_technologies)
+modality_id (PK, FK → modalities)
+notes (Text, nullable)
+created_at (Timestamp)
+```
+
+**Purpose**: Enables the many-to-many relationship between `manufacturing_technologies` and `modalities`. An entry in this table signifies that a technology is relevant to a specific modality. A technology's absence from this table entirely means it is "Generic" and applies to all modalities.
 
 ---
 
@@ -660,40 +700,33 @@ notes
 
 ## Data Flow Examples
 
-### Example 1: Complete Capability Requirements for a Product
+### Example 1: Finding Relevant Technologies for a Modality/Template
 
-**Product**: BI 456789 (Perfusion mAb for Oncology)
+**Scenario**: The Challenge Explorer needs to find all technologies for a "Monoclonal Antibody" modality using the "Fed-Batch mAb Process" template.
 
-```python
-# Query the product's complete requirements
-product = Product.query.filter_by(product_code="BI 456789").first()
-requirements = product.get_all_capability_requirements()
-
-# Result Structure:
-{
-  'modality_inherited': [
-    # From Modality: "Monoclonal Antibody"
-    {'capability': 'Cell Culture (Mammalian)', 'source': 'Modality: Monoclonal Antibody'},
-    {'capability': 'Protein Purification', 'source': 'Modality: Monoclonal Antibody'},
-    {'capability': 'Fill & Finish (Aseptic)', 'source': 'Modality: Monoclonal Antibody'}
-  ],
-  
-  'template_inherited': [
-    # From Template: "Perfusion mAb Process" → Template Stages
-    {'capability': 'Perfusion Bioreactor Operation', 'stage': 'Cell Culture'},
-    {'capability': 'Continuous Harvest Systems', 'stage': 'Cell Culture'},
-    {'capability': 'Real-Time Analytics', 'stage': 'Cell Culture'},
-    {'capability': 'Protein A Chromatography', 'stage': 'Purification'}
-  ],
-  
-  'product_specific': [
-    # Product-specific additions
-    {'capability': 'Novel ADC Conjugation', 'notes': 'Unique to this ADC'}
-  ]
-}
+**Query Logic**:
+The application runs a query equivalent to:
+```sql
+SELECT * FROM manufacturing_technologies tech
+WHERE 
+    -- 1. Must be in a stage used by the template
+    tech.stage_id IN (SELECT stage_id FROM template_stages WHERE template_id = [template_id])
+AND (
+    -- 2. OR Template-specific match
+    tech.template_id = [template_id]
+    
+    -- 3. OR Modality-specific match (via junction table)
+    OR tech.technology_id IN (
+        SELECT technology_id FROM technology_modalities WHERE modality_id = [modality_id]
+    )
+    
+    -- 4. OR Generic (no modality links at all)
+    OR NOT EXISTS (
+        SELECT 1 FROM technology_modalities tm WHERE tm.technology_id = tech.technology_id
+    )
+);
 ```
-
-**Total Requirements**: Union of all three tiers.
+This ensures the correct three-tier filtering is applied.
 
 ---
 
@@ -881,6 +914,8 @@ Dependencies must be imported in this order:
 5. **Requirements**: Modality Requirements, Product Requirements
 6. **Mappings**: Product-Technology links, Product-Challenge links
 
+**Note**: The `technology_modalities` links are created automatically during the import of `Manufacturing Technologies` if the `modality_names` field is present.
+
 ### Name-Based Foreign Key Resolution
 
 The import system resolves foreign keys by name:
@@ -952,6 +987,12 @@ Same stage, different challenges based on technology choice.
 
 ---
 
+### Q: Can a technology belong to multiple modalities?
+
+**A**: Yes. As of v2.1 (October 2025), technologies use a many-to-many relationship with modalities via the `technology_modalities` junction table. A technology can be linked to one, many, or zero modalities (making it "generic").
+
+---
+
 ### Q: What's the difference between modality_requirements and template_stages.base_capabilities?
 
 **A**: 
@@ -1012,6 +1053,7 @@ Process Templates
 
 Manufacturing Technologies
   ├─── stage_id → Process Stages
+  ├─── many-to-many → Modalities (via technology_modalities)
   └─── one-to-many → Challenges
 ```
 
@@ -1019,8 +1061,9 @@ Manufacturing Technologies
 
 ## Version History
 
-- **v2.0** (2025-10-05): Added process_template_id to products, clarified three-tier inheritance, removed primary_stage_id redundancy
-- **v1.0** (2025-07-15): Initial schema design
+- **v2.1** (2025-10-15): Implemented many-to-many relationship for `Manufacturing Technologies` and `Modalities`.
+- **v2.0** (2025-10-05): Added `process_template_id` to products, clarified three-tier inheritance, removed `primary_stage_id` redundancy.
+- **v1.0** (2025-07-15): Initial schema design.
 
 ---
 

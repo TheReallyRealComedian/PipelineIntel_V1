@@ -22,7 +22,7 @@ The entire application is containerized using Docker for consistent development 
 - **Hierarchical Process Modeling**: Define manufacturing processes with unlimited nesting (e.g., Phase → Stage → Operation), allowing for both high-level and granular analysis.
 - **Dynamic Data Tables**: Interactive tables with client-side sorting, filtering, and inline editing for all major data entities.
 - **Customizable Views**: Users can customize which columns to display for each entity, with preferences saved locally.
-- **Advanced Data Import**: A robust JSON import system with a preview screen, conflict resolution, and automatic foreign key resolution by name.
+- **Advanced Data Import**: A robust JSON import system with a preview screen, conflict resolution, automatic foreign key resolution by name, and detailed logging in the UI.
 - **LLM Chat Integration**: A built-in chat interface to interact with and analyze the database's content using various Large Language Models.
 - **Advanced Challenge Management**: A sophisticated system to track manufacturing challenges, distinguishing between those inherited from a process template and those added or excluded on a per-product basis.
 - **Process Templates**: Define standard manufacturing process flows for different modalities (e.g., Monoclonal Antibody, Small Molecule) to ensure consistency.
@@ -122,7 +122,7 @@ The application uses a powerful PostgreSQL schema designed to model pharmaceutic
 -   **Process Templates (`process_templates`)**: Defines a standard sequence of `Process Stages` for a given `Modality`, forming a reusable manufacturing blueprint.
 -   **Manufacturing Capabilities (`manufacturing_capabilities`)**: Granular skills or technologies required for production (e.g., "Cell Culture", "Aseptic Fill & Finish").
 -   **Manufacturing Challenges (`manufacturing_challenges`)**: Potential risks or difficulties in the manufacturing process, which can be linked to products, technologies, or process stages.
--   **Manufacturing Technologies (`manufacturing_technologies`)**: Specific platforms or techniques used in manufacturing (e.g., "Twin Screw Granulation").
+-   **Manufacturing Technologies (`manufacturing_technologies`)**: Specific platforms or techniques used in manufacturing (e.g., "Twin Screw Granulation"). Now supports a **many-to-many relationship with modalities** via the `technology_modalities` junction table, allowing a single technology to be associated with multiple product types.
 
 #### Manufacturing Network & Supply Chain
 
@@ -204,7 +204,7 @@ The schema includes several tables linked directly to a `Product` to provide a d
 
 ### Data Management
 
--   **Import**: Upload JSON files with automatic conflict detection and foreign key resolution. The system provides a detailed preview, allowing you to accept, update, or skip each record before finalizing the import.
+-   **Import**: Upload JSON files with automatic conflict detection and foreign key resolution. The system provides a detailed preview, allowing you to accept, update, or skip each record before finalizing the import. The UI now features an enhanced logging panel that shows detailed, line-by-line progress of the import process. This log remains on screen after completion for review.
 -   **Export**: Generate custom JSON datasets with fine-grained field selection across multiple entities. Includes a token counter for LLM prompt engineering.
 -   **Inline Editing**: Edit data directly in tables for most entities. Changes are saved instantly with real-time validation.
 
@@ -261,28 +261,46 @@ Use `parent_stage_name` to build the hierarchy. Parents must be defined before c
 ```json
 [
   {
-    "stage_name": "Upstream", 
+    "stage_name": "Upstream Processing", 
     "hierarchy_level": 1
   },
   {
     "stage_name": "Cell Culture", 
     "hierarchy_level": 2, 
-    "parent_stage_name": "Upstream"
+    "parent_stage_name": "Upstream Processing"
   }
 ]
 ```
 
-**Example 3: Importing Challenges and linking them to existing Products**
+**Example 3: Importing Manufacturing Technologies (New Format)**
 
-Use the `product_codes` array to establish many-to-many relationships.
+Use the `modality_names` array to establish many-to-many relationships with modalities.
 
 ```json
 [
+  // Single modality
   {
-    "challenge_name": "Scale-up Challenges",
-    "challenge_category": "Manufacturing",
-    "explanation": "Difficulties in scaling production from pilot to commercial.",
-    "product_codes": ["XYZ-001", "ABC-002"]
+    "technology_name": "Ex-Vivo T-Cell Expansion",
+    "stage_name": "Chemical/Biological Production",
+    "modality_names": ["CAR-T"]
+  },
+  // Multiple modalities
+  {
+    "technology_name": "Spray Drying",
+    "stage_name": "Physical Processing & Drying",
+    "modality_names": ["Small Molecule", "Peptides", "Oligonucleotides"]
+  },
+  // Generic technology (no specific modality)
+  {
+    "technology_name": "Track & Trace Serialization",
+    "stage_name": "Secondary Packaging & Serialization",
+    "modality_names": []
+  },
+  // DEPRECATED but supported: single modality_name
+  {
+    "technology_name": "Old Format Tech",
+    "stage_name": "Some Stage",
+    "modality_name": "Single Modality"
   }
 ]
 ```
