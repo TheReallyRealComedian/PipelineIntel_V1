@@ -40,7 +40,21 @@ def get_full_process_hierarchy_for_template(template_id):
             "technologies": []
         })
         
-    return list(phases.values())
+    # --- START OF MODIFICATION ---
+    phase_list = list(phases.values())
+    
+    # Define the desired order
+    order_preference = {
+        "Drug Substance Manufacturing": 0,
+        "Drug Product Manufacturing": 1,
+        # Add other phases here if their order matters, giving them higher numbers
+    }
+    
+    # Sort the list of phases based on the preference
+    phase_list.sort(key=lambda p: order_preference.get(p['phase_name'], 99))
+    
+    return phase_list
+    # --- END OF MODIFICATION ---
 
 def get_traceability_data(modality_id=None, template_id=None, challenge_id=None):
     """

@@ -310,5 +310,95 @@
       "master cell banking",
       "genetic stability assessment"
     ]
+  },
+  {
+    "challenge_name": "Viral Safety Testing",
+    "challenge_category": "Quality & Safety",
+    "short_description": "",
+    "explanation": "",
+    "technology_name": "Lentiviral Vector Production",
+    "severity_level": "critical",
+    "related_capabilities": []
+  },
+  {
+    "challenge_name": "Downstream Purification",
+    "challenge_category": "Purification Challenge",
+    "short_description": "",
+    "explanation": "",
+    "technology_name": "Protein A Affinity Chromatography",
+    "severity_level": "major",
+    "related_capabilities": []
+  },
+  {
+    "challenge_name": "Advanced Formulation",
+    "challenge_category": "Formulation Challenge",
+    "short_description": "",
+    "explanation": "",
+    "technology_name": "Amorphous Solid Dispersion (ASD) Technology",
+    "severity_level": "major",
+    "related_capabilities": []
+  },
+  {
+    "challenge_name": "Complex Purification",
+    "challenge_category": "Purification Challenge",
+    "short_description": "",
+    "explanation": "",
+    "technology_name": "High-Performance Liquid Chromatography (HPLC)",
+    "severity_level": "major",
+    "related_capabilities": []
+  },
+  {
+    "challenge_name": "Stability Management",
+    "challenge_category": "Formulation Challenge",
+    "short_description": "",
+    "explanation": "",
+    "technology_name": "Lyophilization (Freeze-Drying)",
+    "severity_level": "major",
+    "related_capabilities": []
+  },
+  {
+    "challenge_name": "Device & Combination Product Manufacturing",
+    "challenge_category": "Device Integration",
+    "short_description": "",
+    "explanation": "",
+    "technology_name": "Auto-Injector Integration",
+    "severity_level": "critical",
+    "related_capabilities": []
+  },
+  {
+    "challenge_name": "Advanced Purification",
+    "challenge_category": "Purification Challenge",
+    "short_description": "",
+    "explanation": "",
+    "technology_name": "Continuous Chromatography",
+    "severity_level": "major",
+    "related_capabilities": []
+  },
+  {
+    "challenge_name": "Autologous Cell Processing",
+    "challenge_category": "Advanced Therapies",
+    "short_description": "",
+    "explanation": "",
+    "technology_name": "T-Cell Expansion (Ex Vivo)",
+    "severity_level": "critical",
+    "related_capabilities": []
+  },
+  {
+    "challenge_name": "Viral Transduction",
+    "challenge_category": "Advanced Therapies",
+    "short_description": "",
+    "explanation": "",
+    "technology_name": "Viral Transduction (T-Cell/NK-Cell)",
+    "severity_level": "critical",
+    "related_capabilities": []
+  },
+  {
+    "challenge_name": "Cryopreservation",
+    "challenge_category": "Advanced Therapies",
+    "short_description": "",
+    "explanation": "",
+    "technology_name": "Controlled-Rate Cryopreservation",
+    "severity_level": "critical",
+    "related_capabilities": []
   }
 ]

@@ -2,205 +2,117 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<h1>{{ title }}</h1>
-<p class="text-color-light mb-4">Review the proposed changes. No changes will be saved until you click "Finalize Import".</p>
+<div class="import-preview-container">
+    <h1>{{ title }}</h1>
+    <p class="text-color-light mb-4">Review the proposed changes. No changes will be saved until you click "Finalize Import".</p>
 
-<!-- Bulk Actions -->
-<div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h2 class="card-title mb-0">Bulk Actions</h2>
-        <div class="d-flex align-items-center">
-            <label class="me-2 small">For all 'UPDATE' items:</label>
-            <div class="btn-group btn-group-sm">
-                <button class="btn btn-outline-success" id="bulk-accept-all">Accept All Updates</button>
-                <button class="btn btn-outline-warning" id="bulk-skip-all-updates">Skip All Updates</button>
-            </div>
-            <div class="form-check form-switch ms-4">
-                <input class="form-check-input" type="checkbox" role="switch" id="forceOverwriteAll">
-                <label class="form-check-label" for="forceOverwriteAll">Force update for all matching items (overwrite)</label>
+    <!-- Bulk Actions -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-title mb-0">Bulk Actions</h2>
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-success" id="bulk-add-new">Accept All New</button>
+                <button type="button" class="btn btn-outline-warning" id="bulk-update-existing">Accept All Updates</button>
+                <button type="button" class="btn btn-outline-secondary" id="bulk-skip-all">Skip All</button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Preview Table -->
-<div class="table-responsive">
-    <table class="table table-bordered table-hover align-middle">
-        <thead class="table-light">
-            <tr>
-                <th style="width: 10%;">Status</th>
-                <th style="width: 20%;">Identifier</th>
-                <th>Changes / Message</th>
-                <th style="width: 20%;">Action</th>
-            </tr>
-        </thead>
-        <tbody id="preview-table-body">
-            {% for item in preview_data %}
-            <tr data-identifier="{{ item.identifier }}" data-status="{{ item.status }}">
-                <td><span class="badge 
-                    {% if item.status == 'new' %}bg-success
-                    {% elif item.status == 'update' %}bg-warning text-dark
-                    {% elif item.status == 'no_change' %}bg-secondary
-                    {% else %}bg-danger{% endif %}">{{ item.status | upper }}</span>
-                </td>
-                <td><strong>{{ item.identifier }}</strong></td>
-                <td>
-                    {% if item.diff %}
-                        <ul class="list-unstyled mb-0 small">
-                        {% for field, values in item.diff.items() %}
-                            {% if field == 'product_links' %}
-                                <li>
-                                    <strong>Product Links:</strong>
-                                    {% if values.added %}
-                                        <div>Added: 
-                                        {% for code in values.added %}<span class="badge bg-success me-1">{{ code }}</span>{% endfor %}
-                                        </div>
-                                    {% endif %}
-                                    {% if values.removed %}
-                                        <div>Removed: 
-                                        {% for code in values.removed %}<span class="badge bg-danger me-1">{{ code }}</span>{% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </li>
-                            {% else %}
-                                <li><strong>{{ field }}:</strong> '{{ values.old | default('none', true) | truncate(30) }}' → '{{ values.new | default('none', true) | truncate(30) }}'</li>
-                            {% endif %}
-                        {% endfor %}
-                        </ul>
-                    {% else %}
-                        {{ item.messages[0] | default('-', true) }}
-                    {% endif %}
-                </td>
-                <td>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input action-radio" type="radio" name="action_{{ loop.index0 }}" value="add" 
-                            {% if item.action != 'add' %}disabled{% endif %} {% if item.action == 'add' %}checked{% endif %}>
-                        <label class="form-check-label">Add</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input action-radio" type="radio" name="action_{{ loop.index0 }}" value="update"
-                            {% if item.action != 'update' %}disabled{% endif %} {% if item.action == 'update' %}checked{% endif %}>
-                        <label class="form-check-label">Update</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input action-radio" type="radio" name="action_{{ loop.index0 }}" value="skip"
-                            {% if item.action == 'skip' %}checked{% endif %}>
-                        <label class="form-check-label">Skip</label>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+    <!-- Preview Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 10%;">Status</th>
+                    <th style="width: 20%;">Identifier</th>
+                    <th>Changes / Message</th>
+                    <th style="width: 20%;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="preview-table-body">
+                {% for item in preview_data %}
+                <tr class="preview-row" data-identifier="{{ item.identifier }}" data-status="{{ item.status }}">
+                    <td><span class="badge 
+                        {% if item.status == 'new' %}bg-success
+                        {% elif item.status == 'update' %}bg-warning text-dark
+                        {% elif item.status == 'no_change' %}bg-secondary
+                        {% else %}bg-danger{% endif %}">{{ item.status | upper }}</span>
+                    </td>
+                    <td><strong>{{ item.identifier }}</strong></td>
+                    <td>
+                        {% if item.diff %}
+                            <ul class="list-unstyled mb-0 small">
+                            {% for field, values in item.diff.items() %}
+                                {% if field == 'product_links' %}
+                                    <li>
+                                        <strong>Product Links:</strong>
+                                        {% if values.added %}
+                                            <div>Added: 
+                                            {% for code in values.added %}<span class="badge bg-success me-1">{{ code }}</span>{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        {% if values.removed %}
+                                            <div>Removed: 
+                                            {% for code in values.removed %}<span class="badge bg-danger me-1">{{ code }}</span>{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% else %}
+                                    <li><strong>{{ field }}:</strong> '{{ values.old | default('none', true) | truncate(30) }}' → '{{ values.new | default('none', true) | truncate(30) }}'</li>
+                                {% endif %}
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            {{ item.messages[0] | default('-', true) }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input action-radio" type="radio" name="action_{{ loop.index0 }}" value="add" 
+                                {% if item.action != 'add' %}disabled{% endif %} {% if item.action == 'add' %}checked{% endif %}>
+                            <label class="form-check-label">Add</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input action-radio" type="radio" name="action_{{ loop.index0 }}" value="update"
+                                {% if item.action != 'update' %}disabled{% endif %} {% if item.action == 'update' %}checked{% endif %}>
+                            <label class="form-check-label">Update</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input action-radio" type="radio" name="action_{{ loop.index0 }}" value="skip"
+                                {% if item.action == 'skip' %}checked{% endif %}>
+                            <label class="form-check-label">Skip</label>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-<!-- Finalize Actions -->
-<div class="mt-4 text-end">
-    <a href="{{ url_for('data_management.data_management_page') }}" class="btn btn-secondary">Cancel</a>
-    <button id="finalize-import-btn" class="btn btn-primary">Finalize Import</button>
-</div>
+    <!-- Finalize Actions -->
+    <div class="mt-4 text-end">
+        <a href="{{ url_for('data_management.data_management_page') }}" class="btn btn-secondary">Cancel</a>
+        <button id="finalize-import-btn" class="btn btn-primary">Finalize Import</button>
+    </div>
 
-<!-- Log Display Area -->
-<div id="log-container" class="mt-4" style="display: none;">
-    <h4>Import Log</h4>
-    <pre id="log-output" class="p-3 bg-light border rounded"></pre>
+    <!-- Log Display Area -->
+    <div id="log-container" class="mt-4" style="display: none;">
+        <h4>Import Log</h4>
+        <pre id="log-output" class="p-3 bg-light border rounded" style="max-height: 400px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;"></pre>
+    </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
+{# Load the correct data management script #}
+{% assets "js_data_management" %}
+    <script src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+{# Pass data from the template to the JavaScript file #}
 <script>
-function getCSRFToken() {
-    return document.querySelector('meta[name=csrf-token]').getAttribute('content');
-}
-document.addEventListener('DOMContentLoaded', function () {
-    const previewData = {{ preview_data | tojson | safe }};
-    const entityType = "{{ entity_type }}";
-
-    // Bulk action listeners
-    document.getElementById('bulk-accept-all').addEventListener('click', () => {
-        document.querySelectorAll('tr[data-status="update"] .action-radio[value="update"]').forEach(radio => radio.checked = true);
-    });
-
-    document.getElementById('bulk-skip-all-updates').addEventListener('click', () => {
-        document.querySelectorAll('tr[data-status="update"] .action-radio[value="skip"]').forEach(radio => radio.checked = true);
-    });
-
-    document.getElementById('forceOverwriteAll').addEventListener('change', function() {
-        const isChecked = this.checked;
-        document.querySelectorAll('tr[data-status="no_change"]').forEach(row => {
-            const updateRadio = row.querySelector('.action-radio[value="update"]');
-            const skipRadio = row.querySelector('.action-radio[value="skip"]');
-            if (isChecked) {
-                updateRadio.disabled = false;
-                updateRadio.checked = true;
-            } else {
-                updateRadio.disabled = true;
-                skipRadio.checked = true;
-            }
-        });
-    });
-
-    // Finalize button listener
-    document.getElementById('finalize-import-btn').addEventListener('click', async function() {
-        const finalizeBtn = this;
-        finalizeBtn.disabled = true;
-        finalizeBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Finalizing...';
-
-        const resolved_data = [];
-        document.querySelectorAll('#preview-table-body tr').forEach((row, index) => {
-            const selectedRadio = row.querySelector('.action-radio:checked');
-            if (selectedRadio) {
-                const action = selectedRadio.value;
-                if (action !== 'skip') {
-                    resolved_data.push({ action: action, data: previewData[index].json_item });
-                }
-            }
-        });
-
-        if (resolved_data.length === 0) {
-            alert("No items selected for import.");
-            finalizeBtn.disabled = false;
-            finalizeBtn.textContent = 'Finalize Import';
-            return;
-        }
-
-        try {
-            const response = await fetch("{{ url_for('data_management.finalize_json_import') }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRFToken() // ADD THIS LINE
-                },
-                body: JSON.stringify({ resolved_data: resolved_data, entity_type: entityType })
-            });
-            const result = await response.json();
-            
-            // Display server log/message
-            const logContainer = document.getElementById('log-container');
-            const logOutput = document.getElementById('log-output');
-            let logContent = `Server Response: ${result.message}\n\n`;
-            if (result.log && result.log.length > 0) {
-                logContent += "Details:\n" + result.log.join("\n");
-            }
-            logOutput.textContent = logContent;
-            logContainer.style.display = 'block';
-
-            if (result.success) {
-                alert('Import process finished. Check logs below for details. Redirecting...');
-                setTimeout(() => { window.location.href = "{{ url_for('products.list_products') }}"; }, 4000);
-            } else {
-                alert('Import process failed. Check logs below for details.');
-                finalizeBtn.disabled = false;
-                finalizeBtn.textContent = 'Finalize Import';
-            }
-        } catch (error) {
-            document.getElementById('log-output').textContent = 'A network error occurred: ' + error;
-            document.getElementById('log-container').style.display = 'block';
-            finalizeBtn.disabled = false;
-            finalizeBtn.textContent = 'Finalize Import';
-        }
-    });
-});
+    window.previewData = {{ preview_data | tojson | safe }};
+    window.entityType = "{{ entity_type }}";
 </script>
 {% endblock %}

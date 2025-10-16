@@ -197,38 +197,44 @@ function renderVisualization(data) {
                 stageGroup.appendChild(stageTitleDiv);
                 
                 if (stage.technologies && stage.technologies.length > 0) {
+                    // This is the new structure
+                    const techChallengeDiv = document.createElement('div');
+                    techChallengeDiv.className = 'tech-challenge-grid';
+
+                    const technologiesContainer = document.createElement('div');
+                    technologiesContainer.className = 'technologies-container';
+
+                    const challengesContainer = document.createElement('div');
+                    challengesContainer.className = 'challenges-container';
+
                     stage.technologies.forEach(tech => {
-                        const techChallengeDiv = document.createElement('div');
-                        techChallengeDiv.className = 'tech-challenge-grid';
-                        
-                        // Backend returns 'tech_name', not 'technology_name'
                         const techName = tech.tech_name || 'Unnamed Technology';
-                        
                         const techCard = document.createElement('div');
-                        techCard.className = 'tech-card';
+                        techCard.className = 'traceability-card tech-card';
                         techCard.textContent = techName;
-                        
-                        const challengesContainer = document.createElement('div');
-                        challengesContainer.className = 'challenges-container';
-                        
+                        technologiesContainer.appendChild(techCard);
+
                         if (tech.challenges && tech.challenges.length > 0) {
                             tech.challenges.forEach(ch => {
                                 const challengeCard = document.createElement('div');
-                                challengeCard.className = 'challenge-card';
+                                challengeCard.className = 'traceability-card challenge-card';
                                 challengeCard.textContent = ch.challenge_name || 'Unnamed Challenge';
                                 challengesContainer.appendChild(challengeCard);
                             });
-                        } else {
-                            const emptyState = document.createElement('span');
-                            emptyState.className = 'empty-state';
-                            emptyState.textContent = 'No challenges';
-                            challengesContainer.appendChild(emptyState);
                         }
-                        
-                        techChallengeDiv.appendChild(techCard);
-                        techChallengeDiv.appendChild(challengesContainer);
-                        stageGroup.appendChild(techChallengeDiv);
                     });
+                    
+                    if (challengesContainer.childElementCount === 0) {
+                        const emptyState = document.createElement('span');
+                        emptyState.className = 'empty-state';
+                        emptyState.textContent = 'No challenges';
+                        challengesContainer.appendChild(emptyState);
+                    }
+
+                    techChallengeDiv.appendChild(technologiesContainer);
+                    techChallengeDiv.appendChild(challengesContainer);
+                    stageGroup.appendChild(techChallengeDiv);
+
                 } else {
                     const emptyDiv = document.createElement('div');
                     emptyDiv.className = 'empty-state';
