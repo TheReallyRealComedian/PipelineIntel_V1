@@ -80,14 +80,15 @@ def get_product_challenges(product_id):
         effective = product.get_effective_challenges()
 
         return jsonify({
+            # FIX: `inherited` contains dicts with 'challenge' key, not challenge objects directly
             'inherited': [
                 {
-                    'challenge_id': c.challenge_id,
-                    'challenge_name': c.challenge_name,
-                    'challenge_category': c.challenge_category,
-                    'severity_level': c.severity_level,
-                    'short_description': c.short_description
-                } for c in inherited
+                    'challenge_id': item['challenge'].challenge_id,
+                    'challenge_name': item['challenge'].challenge_name,
+                    'challenge_category': item['challenge'].challenge_category,
+                    'severity_level': item['challenge'].severity_level,
+                    'short_description': item['challenge'].short_description
+                } for item in inherited  # Changed from 'c' to 'item' and access via item['challenge']
             ],
             'explicit_relationships': explicit_relationships,
             'effective': [

@@ -6,43 +6,50 @@
     "explanation": "Manufacturing products involving live viral vectors (gene therapies, oncolytic viruses) requires BSL-2+ facilities with negative pressure gradients, advanced waste treatment, specialized PPE, restricted access, and emergency protocols. These facilities prevent escape of viruses that retain ability to replicate or cause infection.",
     "technology_name": "Lentiviral Vector Production",
     "severity_level": "critical",
-    "related_capabilities": ["BSL-2+ Containment Facilities", "Viral Vector Manufacturing", "Biosafety & Biosecurity"]
+    "related_capabilities": [
+      "BSL-2+ Containment Facilities",
+      "Viral Vector Manufacturing",
+      "Biosafety & Biosecurity"
+    ]
   },
   {
     "challenge_name": "High-Potency API (HPAPI) Handling",
     "challenge_category": "Safety & Containment",
     "short_description": "Extreme containment for cytotoxic and highly potent compounds",
     "explanation": "HPAPIs at OEB 3-4 levels (≤0.1 mg/m³) can cause cancer, reproductive harm, or immune damage at microscopic doses. Requires barrier isolation, negative pressure, single-use systems, specialized waste handling, comprehensive monitoring, and validated PPE. Significantly increases timelines and costs.",
-    "technology_name": "Antibody-Drug Conjugation (ADC)",
+    "technology_name": "Bioconjugation Chemistry",
     "severity_level": "critical",
-    "related_capabilities": ["High-Potency API Handling", "Isolator Technology", "Specialized waste handling"]
-  },
-  {
-    "challenge_name": "PROTAC Manufacturing Complexity",
-    "challenge_category": "Advanced Synthesis",
-    "short_description": "Multi-component synthesis of large targeted protein degraders",
-    "explanation": "PROTACs require assembling three molecular components (target binder, linker, E3 ligase recruiter) with >1000 Da molecular weight. Involves 5-14 synthetic steps with precise linker chemistry, advanced purification for high-MW compounds, and enhanced formulation to overcome poor bioavailability due to size and complexity.",
-    "technology_name": "PROTAC Synthesis Platform",
-    "severity_level": "major",
-    "related_capabilities": ["PROTAC Synthesis", "Advanced Click Chemistry", "Multi-Step Organic Synthesis"]
+    "related_capabilities": [
+      "High-Potency API Handling",
+      "Isolator Technology",
+      "Specialized waste handling"
+    ]
   },
   {
     "challenge_name": "Advanced Peptide Manufacturing",
     "challenge_category": "Advanced Synthesis",
     "short_description": "Complex peptide synthesis with stereochemistry control",
     "explanation": "Solid-Phase Peptide Synthesis (SPPS) requires building peptides one amino acid at a time with extreme Process Mass Intensity (~13,000). Must control stereochemistry to prevent racemization, ensure sequence fidelity, and prevent aggregation. Requires automated synthesizers, HPLC purification, and specialized analytics.",
-    "technology_name": "Multi-Step Organic Synthesis",
-    "severity_level": "moderate",
-    "related_capabilities": ["Multi-Step Organic Synthesis", "Stereochemistry control", "Advanced analytical methods"]
+    "technology_name": "Solid-Phase Peptide Synthesis (SPPS)",
+    "severity_level": "major",
+    "related_capabilities": [
+      "Solid-Phase Peptide Synthesis",
+      "Stereochemistry control",
+      "Advanced analytical methods"
+    ]
   },
   {
     "challenge_name": "Bispecific Antibody Chain Pairing",
     "challenge_category": "Complex Biologics",
     "short_description": "Controlling correct pairing of different antibody chains",
     "explanation": "Bispecific antibodies require two different heavy chains and potentially different light chains. Without engineering, only ~25% may be correctly paired due to random assembly. Requires knobs-into-holes engineering, charge-based pairing, or common light chain approaches. Challenges include low yield, complex purification, and advanced analytics.",
-    "technology_name": "CHO Cell Culture Platform",
+    "technology_name": "Mammalian Cell Line Engineering",
     "severity_level": "major",
-    "related_capabilities": ["Mammalian Cell Culture (CHO/HEK293)", "Multi-Step Chromatography Platform", "Advanced Analytical Methods"]
+    "related_capabilities": [
+      "Mammalian Cell Culture (CHO/HEK293)",
+      "Multi-Step Chromatography Platform",
+      "Advanced Analytical Methods"
+    ]
   },
   {
     "challenge_name": "ADC Dual-Stream Manufacturing",
@@ -51,25 +58,37 @@
     "explanation": "ADCs require parallel manufacturing: biologics stream (antibody via cell culture) and chemical stream (cytotoxic payload with OEB4 containment), followed by conjugation with precise Drug-to-Antibody Ratio (DAR 2-4) control. Needs dual containment capabilities, specialized conjugation equipment, and advanced analytics. Regulated as both biologics and chemical drugs.",
     "technology_name": "Antibody-Drug Conjugation (ADC)",
     "severity_level": "critical",
-    "related_capabilities": ["Antibody-Drug Conjugation (ADC)", "Site-Specific Conjugation", "High-Potency API Handling"]
+    "related_capabilities": [
+      "Antibody-Drug Conjugation (ADC)",
+      "Site-Specific Conjugation",
+      "High-Potency API Handling"
+    ]
   },
   {
     "challenge_name": "Viral Vector Production Complexity",
     "challenge_category": "Advanced Therapies",
     "short_description": "Complex viral production with stringent purity requirements",
     "explanation": "Beyond containment, viral vectors require specialized cell culture, controlled viral replication, advanced purification separating viral particles from cellular debris, replication-competent virus (RCV) testing, potency assays, and cold chain logistics. Must remove cellular DNA/proteins that could cause immune reactions while maintaining viral infectivity.",
-    "technology_name": "Triple Plasmid Transfection (AAV)",
+    "technology_name": "Lentiviral Vector Production",
     "severity_level": "critical",
-    "related_capabilities": ["Viral Vector Manufacturing", "BSL-2+ Containment Facilities", "Empty/Full Capsid Separation"]
+    "related_capabilities": [
+      "Viral Vector Manufacturing",
+      "BSL-2+ Containment Facilities",
+      "Empty/Full Capsid Separation"
+    ]
   },
   {
     "challenge_name": "Amorphous Solid Dispersion (ASD) Manufacturing",
     "challenge_category": "Formulation Challenge",
     "short_description": "Complex spray drying for poorly soluble compounds",
     "explanation": "Many BCS Class IV drugs require ASD to improve bioavailability. Organic spray drying demands precise control of temperature, airflow, and solvent evaporation. Challenges include polymer selection, scale-up consistency, maintaining amorphous state during storage, and preventing conversion to crystalline forms. Requires solvent recovery and specialized analytical methods.",
-    "technology_name": "Spray Drying",
-    "severity_level": "moderate",
-    "related_capabilities": ["Amorphous Solid Dispersion (ASD) Technology", "Spray Drying Technology", "Poorly Soluble Compound Formulation"]
+    "technology_name": "Amorphous Solid Dispersion (ASD) Technology",
+    "severity_level": "major",
+    "related_capabilities": [
+      "Amorphous Solid Dispersion (ASD) Technology",
+      "Spray Drying Technology",
+      "Poorly Soluble Compound Formulation"
+    ]
   },
   {
     "challenge_name": "Cold Chain Logistics",
@@ -78,7 +97,10 @@
     "explanation": "Temperature-sensitive biologics and complex molecules lose potency or become dangerous outside specified ranges. Requires validated cold storage, specialized insulated packaging, refrigerated transportation, real-time monitoring, and contingency planning. Costs 2-5x more than ambient distribution with global infrastructure challenges.",
     "technology_name": "Cold Chain Monitoring",
     "severity_level": "critical",
-    "related_capabilities": ["Cold Chain Management", "Cryogenic Storage & Handling"]
+    "related_capabilities": [
+      "Cold Chain Management",
+      "Cryogenic Storage & Handling"
+    ]
   },
   {
     "challenge_name": "High-Selectivity Synthesis Requirements",
@@ -87,7 +109,11 @@
     "explanation": "Creating molecules with >300-fold selectivity for target enzyme over related enzymes requires stereochemical precision and minimal impurities. Even trace amounts of wrong isomers or related compounds compromise selectivity. Demands rigorous purification, multi-enzyme selectivity testing, process validation, and stringent raw material control.",
     "technology_name": "Multi-Step Organic Synthesis",
     "severity_level": "major",
-    "related_capabilities": ["Asymmetric Synthesis", "Ultra-High Purity Purification", "Advanced Analytical Methods"]
+    "related_capabilities": [
+      "Asymmetric Synthesis",
+      "Ultra-High Purity Purification",
+      "Advanced Analytical Methods"
+    ]
   },
   {
     "challenge_name": "Covalent Inhibitor Stability Control",
@@ -96,7 +122,11 @@
     "explanation": "Covalent inhibitors must be stable during manufacturing/storage but reactive enough for therapeutic effect. Walking this tightrope requires controlled reactivity, preventing premature reactions with equipment/containers, preserving target selectivity, and extensive stability-reactivity testing. Needs inert processing, specialized storage, and continuous monitoring.",
     "technology_name": "Cryogenic Reaction Technology",
     "severity_level": "major",
-    "related_capabilities": ["Multi-Step Organic Synthesis", "Transition Metal Catalysis", "Process validation"]
+    "related_capabilities": [
+      "Multi-Step Organic Synthesis",
+      "Transition Metal Catalysis",
+      "Process validation"
+    ]
   },
   {
     "challenge_name": "Complex Biologics Manufacturing",
@@ -105,7 +135,11 @@
     "explanation": "Beyond standard mAbs, complex biologics like fusion proteins and receptor modulators have unique structural requirements affecting production, purification, and characterization. Require specialized expression systems, advanced purification preserving complex structures, structure-function analysis, and bioactivity testing. Extensive process development and novel analytical methods needed.",
     "technology_name": "HEK293 Cell Culture System",
     "severity_level": "moderate",
-    "related_capabilities": ["Mammalian Cell Culture (CHO/HEK293)", "Multi-Step Chromatography Platform", "Advanced Analytical Methods"]
+    "related_capabilities": [
+      "Mammalian Cell Culture (CHO/HEK293)",
+      "Multi-Step Chromatography Platform",
+      "Advanced Analytical Methods"
+    ]
   },
   {
     "challenge_name": "High Titer Production (>5g/L)",
@@ -114,118 +148,167 @@
     "explanation": "Process intensification to achieve >10 g/L antibody titers requires optimized media formulation, advanced feeding strategies, extended culture durations (14+ days), cell line engineering for high productivity, and large-scale bioreactor operation (2,000-20,000L). Benefits include reduced manufacturing footprint and cost per dose, but increases complexity of upstream processing.",
     "technology_name": "Perfusion Cell Culture",
     "severity_level": "moderate",
-    "related_capabilities": ["Fed-Batch Culture Optimization", "Perfusion Culture Technology", "Cell Line Development & Engineering"]
-  },
-  {
-    "challenge_name": "Viral Safety Testing",
-    "challenge_category": "Manufacturing",
-    "technology_name": "Nanofiltration (20nm)",
-    "severity_level": "moderate",
-    "related_capabilities": []
-  },
-  {
-    "challenge_name": "Downstream Purification",
-    "challenge_category": "Manufacturing",
-    "technology_name": "Ion Exchange Chromatography (IEX)",
-    "severity_level": "moderate",
-    "related_capabilities": []
-  },
-  {
-    "challenge_name": "PROTAC Manufacturing",
-    "challenge_category": "Manufacturing",
-    "technology_name": "PROTAC Synthesis Platform",
-    "severity_level": "moderate",
-    "related_capabilities": []
-  },
-  {
-    "challenge_name": "Complex Synthesis",
-    "challenge_category": "Manufacturing",
-    "technology_name": "PROTAC Synthesis Platform",
-    "severity_level": "moderate",
-    "related_capabilities": []
-  },
-  {
-    "challenge_name": "Advanced Formulation",
-    "challenge_category": "Manufacturing",
-    "technology_name": "Spray Drying",
-    "severity_level": "moderate",
-    "related_capabilities": []
+    "related_capabilities": [
+      "Fed-Batch Culture Optimization",
+      "Perfusion Culture Technology",
+      "Cell Line Development & Engineering"
+    ]
   },
   {
     "challenge_name": "Specialized Solid-Phase Synthesis",
-    "challenge_category": "Manufacturing",
-    "technology_name": "Multi-Step Organic Synthesis",
-    "severity_level": "moderate",
-    "related_capabilities": []
-  },
-  {
-    "challenge_name": "Complex Purification",
-    "challenge_category": "Manufacturing",
-    "technology_name": "High-Performance Liquid Chromatography (HPLC)",
-    "severity_level": "moderate",
-    "related_capabilities": []
+    "challenge_category": "Advanced Synthesis",
+    "short_description": "Precise chemical synthesis of oligonucleotides on a solid support.",
+    "explanation": "Manufacturing therapeutic oligonucleotides requires precise, automated solid-phase synthesis using phosphoramidite chemistry. Key challenges include maintaining >99% coupling efficiency over 50+ cycles, controlling impurities, and implementing backbone modifications (e.g., phosphorothioates) for stability, which can introduce stereoisomers that require complex analytical characterization.",
+    "technology_name": "Phosphoramidite Chemistry (Oligonucleotide Synthesis)",
+    "severity_level": "major",
+    "related_capabilities": [
+      "Solid-phase synthesis",
+      "Phosphoramidite chemistry",
+      "Impurity profiling"
+    ]
   },
   {
     "challenge_name": "Delivery System Integration",
-    "challenge_category": "Manufacturing",
+    "challenge_category": "Formulation Challenge",
+    "short_description": "Integrating nucleic acids into effective delivery systems like LNPs or conjugates.",
+    "explanation": "Nucleic acid therapeutics require advanced delivery systems to protect them from degradation and facilitate cellular uptake. Lipid Nanoparticle (LNP) formulation is complex, requiring precise microfluidic mixing and control of particle size and encapsulation efficiency. Conjugation strategies, such as with GalNAc, require specialized chemistry and purification to ensure consistent targeting and potency.",
     "technology_name": "Lipid Nanoparticle (LNP) Formulation",
-    "severity_level": "moderate",
-    "related_capabilities": []
+    "severity_level": "critical",
+    "related_capabilities": [
+      "LNP formulation",
+      "Microfluidics",
+      "GalNAc conjugation"
+    ]
   },
   {
-    "challenge_name": "Stability Management",
-    "challenge_category": "Manufacturing",
-    "technology_name": "Lyophilization (Freeze-Drying)",
-    "severity_level": "moderate",
-    "related_capabilities": []
+    "challenge_name": "Personalized Manufacturing Logistics",
+    "challenge_category": "Advanced Therapies",
+    "short_description": "Managing the complex 'vein-to-vein' supply chain for autologous therapies.",
+    "explanation": "Autologous cell therapies like CAR-T require a patient-specific manufacturing model with extreme logistical complexity. This includes scheduling patient apheresis, cryopreserving and shipping cells to the manufacturing site, a 2-4 week manufacturing process with rigorous chain-of-identity tracking, and just-in-time delivery of the final cryopreserved product back to the patient's bedside. Any failure in this chain results in total loss of the batch and severe patient impact.",
+    "technology_name": "T-Cell Expansion (Ex Vivo)",
+    "severity_level": "critical",
+    "related_capabilities": [
+      "Vein-to-vein logistics",
+      "Chain of identity",
+      "Cryopreservation"
+    ]
   },
   {
-    "challenge_name": "Device & Combination Product Manufacturing",
-    "challenge_category": "Manufacturing",
-    "technology_name": "Auto-Injector Integration",
-    "severity_level": "moderate",
-    "related_capabilities": []
+    "challenge_name": "Hydrogen Safety & Explosion Risk Management",
+    "challenge_category": "Safety & Containment",
+    "short_description": "High-pressure hydrogen operations create significant explosion and fire hazards requiring specialized infrastructure and continuous monitoring.",
+    "explanation": "Hydrogenation reactions operate at pressures up to 100+ bar with highly flammable hydrogen gas (flammability range 4-76%, extremely low ignition energy). The primary safety issue is hydrogen's pyrophoric nature, which can lead to fires and explosions, with hydrogen flames being nearly invisible and difficult to detect. Industrial-scale operations require specialized high-pressure equipment, continuous gas monitoring systems, pressure relief mechanisms, explosion-proof electrical systems, and proper ventilation to prevent hydrogen accumulation below the lower flammability limit. Catalyst pyrophoricity during handling adds further risk, and thermal runaway potential increases with scale-up.",
+    "technology_name": "Large-Scale Hydrogenation",
+    "severity_level": "critical",
+    "related_capabilities": [
+      "High-pressure reactor design",
+      "hydrogen detection systems",
+      "explosion prevention",
+      "catalyst handling",
+      "thermal runaway control"
+    ]
   },
   {
-    "challenge_name": "Advanced Purification",
-    "challenge_category": "Manufacturing",
-    "technology_name": "Mixed-Mode Chromatography",
-    "severity_level": "moderate",
-    "related_capabilities": []
+    "challenge_name": "Empty Capsid Separation for Gene Therapy",
+    "challenge_category": "Purification Challenge",
+    "short_description": "Separating full from empty AAV capsids is critical for potency but extraordinarily difficult due to minimal physical differences.",
+    "explanation": "Recombinant AAV preparations contain 50-90% empty capsids that lack therapeutic DNA, competing with full capsids for cell binding and reducing efficacy while increasing immunogenicity risks. Empty and full capsids differ by only 1-2% in density and have nearly identical surface properties, making separation extremely challenging. Ultracentrifugation using cesium chloride or iodixanol gradients can achieve separation but is not scalable to commercial manufacturing and exposes product to harsh conditions. Alternative chromatographic methods using anion exchange require extensive serotype-specific optimization of pH, MgCl2 concentration, and elution conditions, with typical recoveries of only 60-70% of full capsids and purity reaching 80-90% full capsids.",
+    "technology_name": "Ultracentrifugation (Viral Vectors)",
+    "severity_level": "critical",
+    "related_capabilities": [
+      "Density gradient ultracentrifugation",
+      "anion exchange optimization",
+      "empty/full analytics",
+      "viral vector potency"
+    ]
   },
   {
-    "challenge_name": "Personalized Manufacturing",
-    "challenge_category": "Manufacturing",
-    "technology_name": "Ex-Vivo T-Cell Expansion",
-    "severity_level": "moderate",
-    "related_capabilities": []
+    "challenge_name": "Heterobifunctional PROTAC Synthesis Scale-Up",
+    "challenge_category": "Advanced Synthesis",
+    "short_description": "PROTACs require complex multi-step synthesis linking three molecular components with precise control of coupling chemistry and purification.",
+    "explanation": "PROTACs are large heterobifunctional molecules (>1000 Da) requiring assembly of three distinct components: a protein-of-interest ligand, an E3 ligase ligand, and a linker connecting them. Development faces significant synthetic challenges since it requires identification of two suitable ligands that must be appropriately linked while maintaining binding affinity for both targets. Multistep synthesis demands tight control of each coupling and deprotection step, orthogonal protecting groups, and specialized linker chemistry to maintain spatial orientation. Each synthetic intermediate requires purification to avoid carryover impurities. The molecular size and complexity create formulation challenges for oral bioavailability. Late-stage functionalization approaches are being developed to improve synthetic throughput, but de novo synthesis remains labor-intensive.",
+    "technology_name": "PROTAC Synthesis Platform",
+    "severity_level": "critical",
+    "related_capabilities": [
+      "Heterobifunctional synthesis",
+      "linker chemistry",
+      "bioconjugation",
+      "HPLC purification",
+      "complex molecule scale-up"
+    ]
   },
   {
-    "challenge_name": "Autologous Cell Processing",
-    "challenge_category": "Manufacturing",
-    "technology_name": "Ex-Vivo T-Cell Expansion",
-    "severity_level": "moderate",
-    "related_capabilities": []
+    "challenge_name": "Polymorphic Form Control & Stability",
+    "challenge_category": "Physical Processing",
+    "short_description": "Controlling crystalline polymorphic form is critical for bioavailability and regulatory compliance but challenging during scale-up.",
+    "explanation": "Active pharmaceutical ingredients can crystallize in multiple polymorphic forms with drastically different dissolution rates, bioavailability, and stability profiles. Uncontrolled polymorphism can render drugs ineffective or cause regulatory failures. More than 80% of pharmaceuticals exhibit polymorphism. Achieving consistent polymorphic form requires precise control of supersaturation, temperature gradients, nucleation conditions, anti-solvent addition rates, and crystallization time. Each polymorph must be characterized and the desired form demonstrated stable under manufacturing and storage conditions. Scale-up from laboratory to commercial production often reveals new metastable or stable polymorphs not observed at small scale, requiring process redesign and regulatory resubmission. Late-appearing more stable polymorphs have caused numerous costly issues in pharmaceutical manufacturing.",
+    "technology_name": "Crystallization & Polymorphism Control",
+    "severity_level": "critical",
+    "related_capabilities": [
+      "Crystal structure prediction",
+      "polymorph screening",
+      "nucleation control",
+      "solid-state characterization",
+      "process analytical technology"
+    ]
   },
   {
-    "challenge_name": "Viral Transduction",
-    "challenge_category": "Manufacturing",
-    "technology_name": "Lentiviral Vector Production",
-    "severity_level": "moderate",
-    "related_capabilities": []
+    "challenge_name": "Protein A Chromatography Cost & Ligand Leaching",
+    "challenge_category": "Purification Challenge",
+    "short_description": "Protein A resins are expensive ($10,000-15,000/L) and require extensive reuse cycles while controlling ligand leaching into product.",
+    "explanation": "Protein A affinity chromatography is the gold standard for monoclonal antibody capture, providing >95% product recovery, but faces significant economic and quality challenges. Resin costs are approximately 50% higher than traditional chromatographic media and can exceed $1 million for large columns (>1m diameter). To be economically viable, resins must achieve 100-200 reuse cycles, demanding rigorous cleaning validation protocols. Protein A ligand can leach from the resin into product during low pH elution (pH 3-4), requiring sensitive detection methods (<100 ppm) and removal strategies. The low pH elution necessary for antibody release provides viral inactivation but risks product aggregation. Up to 60% of downstream processing costs come from chromatography, with Protein A being the largest contributor.",
+    "technology_name": "Protein A Affinity Chromatography",
+    "severity_level": "major",
+    "related_capabilities": [
+      "Resin lifecycle management",
+      "cleaning validation",
+      "ligand leaching quantification",
+      "resin economics modeling"
+    ]
   },
   {
-    "challenge_name": "Cryopreservation",
-    "challenge_category": "Manufacturing",
-    "technology_name": "Controlled-Rate Freezing",
-    "severity_level": "moderate",
-    "related_capabilities": []
+    "challenge_name": "CRISPR Off-Target Mutagenesis & Validation",
+    "challenge_category": "Cell Line Development",
+    "short_description": "CRISPR editing can cause unintended off-target mutations at sites with sequence similarity, requiring whole-genome validation.",
+    "explanation": "While CRISPR/Cas9 offers precise genome editing with >90% efficiency at target sites, off-target cleavage at genomic sites with sequence mismatches to the guide RNA remains a critical safety concern. Guide RNAs can tolerate several base mismatches, potentially creating hundreds to thousands of potential off-target sites genome-wide. Although off-target mutation frequencies are typically low (<1%), any unintended mutations in production cell lines could affect productivity, product quality, or genetic stability, while in therapeutic cells they could compromise patient safety. Comprehensive off-target screening using whole-genome sequencing is required but costly ($5,000-15,000 per clone) and time-intensive. Delivery optimization of CRISPR components (electroporation conditions, RNP vs plasmid) is critical to achieve high editing efficiency without excessive cell death. Maintaining clonal purity and demonstrating genetic stability post-editing requires extensive characterization over 20+ passages.",
+    "technology_name": "CRISPR/Cas9 Cell Line Engineering",
+    "severity_level": "major",
+    "related_capabilities": [
+      "Whole-genome sequencing",
+      "off-target prediction",
+      "guide RNA design",
+      "electroporation optimization",
+      "clonal characterization"
+    ]
   },
   {
-    "challenge_name": "Patient-Specific Logistics",
-    "challenge_category": "Manufacturing",
-    "technology_name": "Cold Chain Monitoring",
-    "severity_level": "moderate",
-    "related_capabilities": []
+    "challenge_name": "Extractables & Leachables from Single-Use Components",
+    "challenge_category": "Quality & Safety",
+    "short_description": "Disposable bioprocessing equipment can release polymer compounds into biologics, requiring extensive safety characterization.",
+    "explanation": "Single-use systems (bags, tubing, filters, connectors) are constructed from polymeric materials that can release extractables and leachables (E&L) into product streams. Unlike stainless steel equipment that can be cleaned and sterilized, single-use components cannot be pre-cleaned, introducing risks of plasticizers, stabilizers, antioxidants, or polymer degradation products contaminating biologics. Identification and quantification requires sophisticated analytical chemistry (LC-MS, GC-MS for compounds like bis(2-ethylhexyl) phthalate or bisphenol A). Each single-use component and supplier requires qualification with product-specific extraction studies under worst-case conditions (extreme pH, temperature, contact time). The cumulative E&L burden from multiple single-use components in a process train must be assessed for patient safety through toxicological risk assessments. Supplier changes or component reformulations necessitate complete requalification studies.",
+    "technology_name": "Single-Use Systems (Biologics)",
+    "severity_level": "major",
+    "related_capabilities": [
+      "Extractables testing protocols",
+      "LC-MS/GC-MS analytics",
+      "toxicological risk assessment",
+      "supplier qualification",
+      "BPOG guidelines compliance"
+    ]
+  },
+  {
+    "challenge_name": "Allogeneic HLA Immunogenicity & Rejection",
+    "challenge_category": "Advanced Therapies",
+    "short_description": "Off-the-shelf allogeneic cells face immune rejection due to HLA mismatches, requiring multiple genetic modifications to evade recognition.",
+    "explanation": "Allogeneic cell therapeutics from healthy donors express foreign HLA molecules (both HLA class I and II) that trigger recipient T and B cell-mediated immune rejection, limiting engraftment, persistence, and therapeutic efficacy. Creating \"universal\" donor cells requires complex genetic engineering: knockout of HLA-A, HLA-B, HLA-DR genes to prevent T cell recognition, plus insertion of immune checkpoint molecules (HLA-E, CD47) to prevent NK cell-mediated killing of HLA-negative cells. Each genetic modification adds manufacturing complexity and requires validation for maintained potency, phenotype stability, and safety (absence of tumorigenicity). Even with HLA engineering, residual allogeneic immune responses can occur. Manufacturing allogeneic master cell banks demands extensive donor screening for infectious agents, characterization for genetic stability over passages, and demonstration that therapeutic function is maintained post-modification.",
+    "technology_name": "Allogeneic Cell Bank Manufacturing",
+    "severity_level": "critical",
+    "related_capabilities": [
+      "HLA engineering",
+      "NK cell evasion strategies",
+      "immunogenicity testing",
+      "master cell banking",
+      "genetic stability assessment"
+    ]
   }
 ]
