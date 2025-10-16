@@ -207,18 +207,46 @@ function renderVisualization(data) {
                     const challengesContainer = document.createElement('div');
                     challengesContainer.className = 'challenges-container';
 
-                    stage.technologies.forEach(tech => {
+                   stage.technologies.forEach(tech => {
                         const techName = tech.tech_name || 'Unnamed Technology';
+                        const techDescription = tech.tech_short_description || 'No description available';
+                        
                         const techCard = document.createElement('div');
                         techCard.className = 'traceability-card tech-card';
                         techCard.textContent = techName;
+                        
+                        // Add tooltip functionality
+                        if (techDescription && techDescription.trim() !== '') {
+                            techCard.setAttribute('title', techDescription);
+                            techCard.setAttribute('data-bs-toggle', 'tooltip');
+                            techCard.setAttribute('data-bs-placement', 'top');
+                            // Add a small info icon to indicate there's more info
+                            techCard.innerHTML = `${techName} <i class="fas fa-info-circle info-icon"></i>`;
+                        }
+                        
                         technologiesContainer.appendChild(techCard);
 
                         if (tech.challenges && tech.challenges.length > 0) {
                             tech.challenges.forEach(ch => {
+                                const challengeName = ch.challenge_name || 'Unnamed Challenge';
+                                const challengeDescription = ch.challenge_short_description || 'No description available';
+                                const severityLevel = ch.severity_level || 'unknown';
+                                
                                 const challengeCard = document.createElement('div');
                                 challengeCard.className = 'traceability-card challenge-card';
-                                challengeCard.textContent = ch.challenge_name || 'Unnamed Challenge';
+                                challengeCard.textContent = challengeName;
+                                
+                                // Add tooltip functionality for challenges
+                                if (challengeDescription && challengeDescription.trim() !== '') {
+                                    // Create a richer tooltip with description and severity
+                                    const tooltipText = `${challengeDescription} (Severity: ${severityLevel})`;
+                                    challengeCard.setAttribute('title', tooltipText);
+                                    challengeCard.setAttribute('data-bs-toggle', 'tooltip');
+                                    challengeCard.setAttribute('data-bs-placement', 'top');
+                                    // Add a small info icon to indicate there's more info
+                                    challengeCard.innerHTML = `${challengeName} <i class="fas fa-info-circle info-icon"></i>`;
+                                }
+                                
                                 challengesContainer.appendChild(challengeCard);
                             });
                         }
@@ -250,6 +278,13 @@ function renderVisualization(data) {
     });
 
     container.appendChild(flowContainer);
+    
+    // Initialize Bootstrap tooltips for all cards with tooltip data
+    const tooltipTriggerList = container.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
+        delay: { show: 300, hide: 100 },
+        trigger: 'hover focus'
+    }));
 }
 
 // Show loading state

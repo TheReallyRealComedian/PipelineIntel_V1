@@ -137,11 +137,14 @@ def get_traceability_data(modality_id=None, template_id=None, challenge_id=None)
 
                 tech_data = {
                     "tech_name": tech_dict["tech_obj"].technology_name,
+                    "tech_short_description": tech_dict["tech_obj"].short_description,  # ADD THIS LINE
                     "complexity": tech_dict["tech_obj"].complexity_rating,
                     "challenges": [
                         {
                             "challenge_name": c.challenge_name,
                             "challenge_category": c.challenge_category,
+                            "challenge_short_description": c.short_description,  # ADD THIS LINE
+                            "severity_level": c.severity_level,  # Also useful for tooltips
                         } for c in sorted_challenges
                     ]
                 }
