@@ -160,7 +160,7 @@ def remove_product_challenge_relationship(product_id, challenge_id):
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
-    
+
 
 
 # Add these endpoints to backend/routes/product_routes.py in the product_api_bp blueprint
@@ -176,10 +176,10 @@ def get_product_technologies(product_id):
     from ..models import Product, ManufacturingTechnology
 
     product = Product.query.get_or_404(product_id)
-    
+
     # Use the new, correct method from the model
     all_product_techs = product.get_inherited_technologies()
-    
+
     # Group all unique technologies by stage for display
     technologies_by_stage = {}
     for tech in sorted(all_product_techs, key=lambda t: t.technology_name):
@@ -197,7 +197,7 @@ def get_product_technologies(product_id):
             'complexity_rating': tech.complexity_rating,
             'innovation_potential': tech.innovation_potential
         })
-    
+
     return jsonify({
         'product_code': product.product_code,
         'product_name': product.product_name,
@@ -210,15 +210,15 @@ def get_product_technologies(product_id):
 def get_available_technologies(product_id):
     """Get all available technologies grouped by stage, excluding already linked ones."""
     from sqlalchemy.orm import joinedload
-    
+
     product = Product.query.get_or_404(product_id)
-    
+
     # Get IDs of already linked technologies
     linked_tech_ids = db.session.query(product_to_technology_association.c.technology_id).filter(
         product_to_technology_association.c.product_id == product_id
     ).all()
     linked_tech_ids = [tid[0] for tid in linked_tech_ids]
-    
+
     # Get all technologies NOT linked to this product
     available_techs = db.session.query(ManufacturingTechnology).filter(
         ~ManufacturingTechnology.technology_id.in_(linked_tech_ids) if linked_tech_ids else True
@@ -226,7 +226,7 @@ def get_available_technologies(product_id):
         ManufacturingTechnology.stage_id,
         ManufacturingTechnology.technology_name
     ).all()
-    
+
     # Group by stage
     technologies_by_stage = {}
     for tech in available_techs:
@@ -240,7 +240,7 @@ def get_available_technologies(product_id):
             'complexity_rating': tech.complexity_rating,
             'stage_name': stage_name
         })
-    
+
     return jsonify({
         'available_technologies_by_stage': technologies_by_stage
     })
@@ -252,18 +252,18 @@ def add_product_technology(product_id, technology_id):
     """Link a technology to a product."""
     product = Product.query.get_or_404(product_id)
     technology = ManufacturingTechnology.query.get_or_404(technology_id)
-    
+
     # Check if already linked
     if technology in product.technologies:
         return jsonify({
             'success': False,
             'message': 'Technology already linked to this product'
         }), 400
-    
+
     # Add the link
     product.technologies.append(technology)
     db.session.commit()
-    
+
     return jsonify({
         'success': True,
         'message': f'Technology "{technology.technology_name}" linked successfully'
@@ -276,19 +276,64 @@ def remove_product_technology(product_id, technology_id):
     """Unlink a technology from a product."""
     product = Product.query.get_or_404(product_id)
     technology = ManufacturingTechnology.query.get_or_404(technology_id)
-    
+
     # Check if linked
     if technology not in product.technologies:
         return jsonify({
             'success': False,
             'message': 'Technology not linked to this product'
         }), 400
-    
+
     # Remove the link
     product.technologies.remove(technology)
     db.session.commit()
-    
+
     return jsonify({
         'success': True,
         'message': f'Technology "{technology.technology_name}" unlinked successfully'
     })
+
+
+@product_api_bp.route('/<int:product_id>', methods=['DELETE'])
+@login_required
+def delete_product(product_id):
+    """
+    Delete a product and all its related data.
+    This will cascade delete:
+    - All indications
+    - All supply chain links
+    - All process overrides
+    - All challenge relationships (junction table)
+    - All technology relationships (junction table)
+    - All requirements
+    - All timeline milestones
+    - All regulatory filings
+    - All manufacturing suppliers
+    """
+    try:
+        # Get the product or return 404
+        product = Product.query.get_or_404(product_id)
+
+        # Store product info for the response message
+        product_code = product.product_code
+        product_name = product.product_name or product_code
+
+        # Delete the product
+        # SQLAlchemy will handle:
+        # - Cascade deletes for indications, supply_chain, process_overrides (cascade="all, delete-orphan")
+        # - Junction table deletions for challenges and technologies (many-to-many)
+        # - Backref deletions for timeline_milestones, regulatory_filings, manufacturing_suppliers
+        db.session.delete(product)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'Product "{product_name}" (Code: {product_code}) has been successfully deleted.'
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Failed to delete product: {str(e)}'
+        }), 500
