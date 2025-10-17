@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block head_extra %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pipeline_timeline.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="pipeline-timeline-page">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="fas fa-chart-line"></i> Pipeline Timeline</h1>
+            <p class="text-muted">Interactive pipeline visualization with configurable views</p>
+        </div>
+    </div>
+
+    <!-- Configuration Controls Panel -->
+    <div class="controls-panel">
+        <div class="row g-3">
+            <!-- Timeline Configuration -->
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Timeline Axis</label>
+                <select id="timelineMode" class="form-select">
+                    <option value="year" selected>By Year</option>
+                    <option value="phase">By Development Phase</option>
+                </select>
+            </div>
+
+            <!-- Grouping Configuration -->
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Group By (Swim Lanes)</label>
+                <select id="groupingMode" class="form-select">
+                    <option value="modality" selected>Modality</option>
+                    <option value="therapeutic_area">Therapeutic Area</option>
+                    <option value="product_type">Product Type (NBE/NCE)</option>
+                    <option value="none">No Grouping</option>
+                </select>
+            </div>
+
+            <!-- Element Display Configuration -->
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Display Elements</label>
+                <select id="elementType" class="form-select">
+                    <option value="product" selected>Products</option>
+                    <option value="modality">Modalities (Aggregated)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Year Segment Configuration (only visible when timeline is 'year') -->
+        <div id="yearSegmentConfig" class="mt-3">
+            <label class="form-label fw-bold">Year Segments</label>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-outline-primary active" data-preset="individual">Individual Years</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-preset="grouped">3-Year Groups</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-preset="custom">Custom</button>
+            </div>
+            
+            <!-- Custom segment configurator (shown when 'custom' is selected) -->
+            <div id="customSegmentBuilder" class="mt-2" style="display: none;">
+                <div class="alert alert-info alert-sm">
+                    <i class="fas fa-info-circle"></i> 
+                    Define custom year segments (e.g., "2025-2027", "2028-2030", "2031+")
+                </div>
+                <!-- We'll add dynamic segment builder in next step -->
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-3 d-flex gap-2">
+            <button id="applyConfig" class="btn btn-primary">
+                <i class="fas fa-sync"></i> Apply Configuration
+            </button>
+            <button id="saveView" class="btn btn-outline-secondary">
+                <i class="fas fa-save"></i> Save View
+            </button>
+            <button id="loadView" class="btn btn-outline-secondary">
+                <i class="fas fa-folder-open"></i> Load View
+            </button>
+        </div>
+    </div>
+
+    <!-- Timeline Visualization Container -->
+    <div class="timeline-container">
+        <div id="timelineVisualization">
+            <!-- Timeline will be rendered here by JavaScript -->
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                <p>Click "Apply Configuration" to generate timeline</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/pipeline_timeline.js') }}"></script>
+<script>
+    // Initialize the timeline when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        window.pipelineTimeline = new PipelineTimeline('timelineVisualization');
+        
+        // Attach event listeners to controls
+        document.getElementById('applyConfig').addEventListener('click', function() {
+            window.pipelineTimeline.loadAndRender();
+        });
+        
+        document.getElementById('saveView').addEventListener('click', function() {
+            window.pipelineTimeline.saveCurrentView();
+        });
+        
+        document.getElementById('loadView').addEventListener('click', function() {
+            window.pipelineTimeline.showLoadViewDialog();
+        });
+
+        // Toggle year segment config visibility
+        document.getElementById('timelineMode').addEventListener('change', function(e) {
+            document.getElementById('yearSegmentConfig').style.display = 
+                e.target.value === 'year' ? 'block' : 'none';
+        });
+
+        // Year segment preset buttons
+        document.querySelectorAll('[data-preset]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('[data-preset]').forEach(b => 
+                    b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const customBuilder = document.getElementById('customSegmentBuilder');
+                customBuilder.style.display = 
+                    this.dataset.preset === 'custom' ? 'block' : 'none';
+            });
+        });
+    });
+</script>
+{% endblock %}

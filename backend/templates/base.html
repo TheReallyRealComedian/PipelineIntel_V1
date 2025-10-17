@@ -64,9 +64,9 @@
                             <a href="{{ url_for('export.data_export_page') }}"><i class="fas fa-file-export"></i> <span class="sidebar-text">Data Export</span></a>
                         </li>
                     <li class="sidebar-menu-header">ANALYTICS</li>
-                        <li class="{% if request.blueprint == 'analytics' %}active{% endif %}">
-                            <a href="{{ url_for('analytics.manufacturing_forecast') }}"><i class="fas fa-chart-line"></i> <span class="sidebar-text">Strategic Analytics</span></a>
-                        </li>
+                            <li class="{% if request.blueprint == 'analytics' %}active{% endif %}">
+                                <a href="{{ url_for('analytics.pipeline_timeline') }}"><i class="fas fa-chart-line"></i> <span class="sidebar-text">Pipeline Timeline</span></a>
+                            </li>
                             <li class="{% if request.blueprint == 'challenge_traceability' %}active{% endif %}">
                                 <a href="{{ url_for('challenge_traceability.explorer_page') }}">
                                     <i class="fas fa-project-diagram"></i>
