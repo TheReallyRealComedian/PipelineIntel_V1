@@ -27,6 +27,9 @@ The entire application is containerized using Docker for consistent development 
 - **Advanced Challenge Management**: A sophisticated system to track manufacturing challenges, distinguishing between those inherited from a process template and those added or excluded on a per-product basis.
 - **Process Templates**: Define standard manufacturing process flows for different modalities (e.g., Monoclonal Antibody, Small Molecule) to ensure consistency.
 - **Custom Data Export**: Generate tailored JSON exports with fine-grained field selection and a token counter for LLM prompt engineering.
+- **Database Schema Visualization**: An interactive visual representation of the complete database structure, downloadable as ERD diagrams in PNG, PDF, and SVG formats, complete with schema statistics.
+- **Challenge Explorer**: An advanced analytics page to visualize manufacturing challenges across the process hierarchy, filterable by modality and process template.
+- **Pipeline Timeline**: A dynamic analytics visualization for tracking the product pipeline across different development phases and timelines.
 - **Secure User Authentication**: A complete user registration and login system.
 - **Modern UI**: A responsive design using Boehringer Ingelheim branding and a collapsible sidebar for improved navigation.
 
@@ -97,6 +100,8 @@ The backend follows a clean architecture with a clear separation of concerns:
 -   **psycopg2-binary**: PostgreSQL adapter for Python.
 -   **tiktoken**: Used for counting tokens in the Data Export and LLM features.
 -   **LangChain**: Powers integrations with various LLM providers.
+-   **eralchemy2**: Generates database schema diagrams and ERD visualizations.
+-   **graphviz**: Required for schema diagram generation (installed as a Docker Alpine package).
 
 ### Frontend (HTML/CSS/JavaScript)
 
@@ -204,16 +209,26 @@ The schema includes several tables linked directly to a `Product` to provide a d
 
 ### Data Management
 
--   **Import**: Upload JSON files with automatic conflict detection and foreign key resolution. The system provides a detailed preview, allowing you to accept, update, or skip each record before finalizing the import. The UI now features an enhanced logging panel that shows detailed, line-by-line progress of the import process. This log remains on screen after completion for review.
+-   **Import**: Upload JSON files with automatic conflict detection and foreign key resolution. The system provides a detailed preview, allowing you to accept, update, or skip each record before finalizing the import. The UI features an enhanced logging panel that shows detailed, line-by-line progress of the import process.
 -   **Export**: Generate custom JSON datasets with fine-grained field selection across multiple entities. Includes a token counter for LLM prompt engineering.
 -   **Inline Editing**: Edit data directly in tables for most entities. Changes are saved instantly with real-time validation.
 
 ### LLM Chat
 
 -   Navigate to the "LLM Chat" page to start a conversation.
+-   The system supports multiple LLM providers, including internal (Apollo) and external (Anthropic) models. Available Anthropic models include `claude-sonnet-4-20250514`, `claude-3-5-sonnet-20240620`, and others.
+-   You can define a custom "System Prompt" to guide the AI's behavior, which is now saved to your user profile.
 -   The chat interface has conversation memory for the current session.
--   You can define a custom "System Prompt" to guide the AI's behavior and save it to your user profile.
--   The system can connect to multiple LLM providers, which are configured in the backend.
+
+### Database Schema Viewer
+-   Access via "Database Schema" in the sidebar under the SYSTEM menu.
+-   View an interactive ERD diagram of all database tables and their relationships.
+-   Download schema diagrams in PNG, PDF, or SVG format.
+-   View schema statistics including table counts, columns, and foreign keys.
+
+### Analytics Pages
+-   **Pipeline Timeline**: Visualize the product pipeline with configurable timeline axes (years/phases) and groupings.
+-   **Challenge Explorer**: Explore manufacturing challenges by modality and process template, showing technology-challenge relationships across the process hierarchy.
 
 ### Table Features
 
@@ -240,19 +255,27 @@ For a production environment, ensure the following steps are taken:
 
 The application accepts a JSON array of objects for data import. The system is designed to be flexible and can resolve relationships by name.
 
-**Example 1: Importing Products and linking to a Modality by name**
+**Example 1: Importing Products with Process Template**
 
 ```json
 [
   {
-    "product_code": "XYZ-001",
+    "product_code": "BI 456789",
     "product_name": "Example mAb",
     "modality_name": "Monoclonal Antibody",
+    "process_template_name": "Perfusion mAb Process",
+    "technology_names": ["Perfusion Bioreactor", "TFF System"],
     "therapeutic_area": "Oncology",
-    "current_phase": "Phase III"
+    "current_phase": "Phase 2",
+    "expected_launch_year": 2028
   }
 ]
 ```
+
+**Key Import Fields**:
+- `process_template_name`: Links product to a specific manufacturing process (required for correct challenge inheritance).
+- `technology_names`: Array of technology names for many-to-many linking.
+- `modality_name`: Required for category-level inheritance.
 
 **Example 2: Importing Hierarchical Process Stages**
 
@@ -272,38 +295,29 @@ Use `parent_stage_name` to build the hierarchy. Parents must be defined before c
 ]
 ```
 
-**Example 3: Importing Manufacturing Technologies (New Format)**
+**Example 3: Importing Manufacturing Technologies (Current Format)**
 
 Use the `modality_names` array to establish many-to-many relationships with modalities.
 
 ```json
 [
-  // Single modality
-  {
-    "technology_name": "Ex-Vivo T-Cell Expansion",
-    "stage_name": "Chemical/Biological Production",
-    "modality_names": ["CAR-T"]
-  },
-  // Multiple modalities
+  // Technology for multiple modalities
   {
     "technology_name": "Spray Drying",
     "stage_name": "Physical Processing & Drying",
-    "modality_names": ["Small Molecule", "Peptides", "Oligonucleotides"]
+    "modality_names": ["Small Molecule", "Peptides", "Oligonucleotides"],
+    "complexity_rating": 6
   },
-  // Generic technology (no specific modality)
+  // Generic technology (applies to all)
   {
     "technology_name": "Track & Trace Serialization",
     "stage_name": "Secondary Packaging & Serialization",
-    "modality_names": []
-  },
-  // DEPRECATED but supported: single modality_name
-  {
-    "technology_name": "Old Format Tech",
-    "stage_name": "Some Stage",
-    "modality_name": "Single Modality"
+    "modality_names": [],
+    "complexity_rating": 3
   }
 ]
 ```
+**Note**: The old single `modality_name` field is no longer supported as of v2.1.
 
 ---
 

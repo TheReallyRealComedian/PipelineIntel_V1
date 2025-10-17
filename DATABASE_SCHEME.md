@@ -14,6 +14,8 @@
 5. [Common Patterns](#common-patterns)
 6. [Import Guidelines](#import-guidelines)
 7. [Troubleshooting & FAQs](#troubleshooting--faqs)
+8. [Appendix: Database Diagram Legend](#appendix-database-diagram-legend)
+9. [Version History](#version-history)
 
 ---
 
@@ -68,10 +70,10 @@ TIER 3: PRODUCT (Asset-Specific Requirements)
 **Concrete Example**:
 ```
 Modality: "Monoclonal Antibody"
-  ├─ Requires: Cell Culture (Mammalian)
-  ├─ Requires: Protein Purification
-  ├─ Requires: Fill & Finish (Aseptic)
-  └─ Standard Challenges: High Titer Production, Aggregation Control
+  ├─ Requires: Cell Culture (Mammalian) [via modality_requirements]
+  ├─ Requires: Protein Purification [via modality_requirements]
+  ├─ Requires: Fill & Finish (Aseptic) [via modality_requirements]
+  └─ Standard Challenges: High Titer Production, Aggregation Control [via modality_challenges]
   
 All 150+ mAb products inherit these requirements automatically.
 ```
@@ -80,9 +82,9 @@ All 150+ mAb products inherit these requirements automatically.
 
 ### 2. Process Templates: Manufacturing Blueprints
 
-**What they are**: Standard process flows for a specific manufacturing approach within a modality.
+**What they are**: Standard process flows for a specific manufacturing approach within a modality. Products are now **explicitly linked** to process templates via the `process_template_id` foreign key.
 
-**Why they exist**: Not all products in a modality are made the same way. Modern manufacturing offers choices (e.g., batch vs continuous), and these choices affect what capabilities you need.
+**Why they exist**: Not all products in a modality are made the same way. Modern manufacturing offers choices (e.g., batch vs continuous), and these choices affect what capabilities you need. This explicit link is **required** for proper challenge and technology inheritance. Products without templates will not inherit template-based challenges or technologies.
 
 **Concrete Example - The Fed-Batch vs Perfusion Scenario**:
 
@@ -205,12 +207,12 @@ Level 1 (Phase): "Upstream Processing"
 
 **What they are**: Specific techniques or equipment platforms used in manufacturing.
 
-**Key Design Change**: Technologies can now be linked to multiple modalities (e.g., "Spray Drying" can be used for both "Small Molecule" and "Peptides"). This is managed via a many-to-many relationship.
+**CRITICAL UPDATE**: Technologies are now linked to modalities via a many-to-many relationship. A technology can be applicable to one, multiple, or zero modalities (making it "generic").
 
 **Relationship Logic (Three-Tier Filtering)**:
-When querying for a specific modality, the system finds technologies that are:
-1.  **Template-Specific**: Directly linked to the selected process template.
-2.  **Modality-Specific**: Linked to the selected modality via the `technology_modalities` junction table.
+When querying for a specific product, the system finds technologies that are:
+1.  **Template-Specific**: Directly linked to the selected process template via `template_id`.
+2.  **Modality-Specific**: Linked to the product's modality via the `technology_modalities` junction table.
 3.  **Generic**: Not linked to **any** modality in the `technology_modalities` table.
 
 **Schema**:
@@ -235,7 +237,7 @@ complexity_rating (1-10)
 }
 ```
 
-**Links to Products**: Many-to-many (products can use multiple technologies).
+**Links to Products**: Many-to-many (`product_to_technology` table).
 
 ---
 
@@ -255,8 +257,8 @@ related_capabilities (JSONB)
 ```
 
 **Why link to technology instead of stage?**
-- Challenges are specific to HOW you do something, not WHERE
-- Example: "Sterility Assurance" is a challenge of "Aseptic Fill-Finish Technology", not just the "Fill & Finish" stage in general
+- Challenges are specific to HOW you do something, not WHERE.
+- Example: "Sterility Assurance" is a challenge of "Aseptic Fill-Finish Technology", not just the "Fill & Finish" stage in general.
 
 **Challenge → Stage Connection (Derived)**:
 ```
@@ -293,9 +295,9 @@ process_template_id (FK → process_templates)  # Which PROCESS it follows
 ```
 
 **Why both?**
-- `modality_id` defines what the product IS
-- `process_template_id` defines HOW it's made
-- The template MUST belong to the modality (enforced by validation)
+- `modality_id` defines what the product IS.
+- `process_template_id` defines HOW it's made.
+- The template MUST belong to the modality (enforced by application-level validation).
 
 **Concrete Example**:
 ```json
@@ -311,9 +313,9 @@ process_template_id (FK → process_templates)  # Which PROCESS it follows
 ```
 
 **What this product inherits**:
-1. Modality requirements (all small molecules need X)
-2. Template stage capabilities (continuous process needs Y)
-3. Plus its own specific requirements (Nerandomilast also needs Z)
+1. Modality requirements (all small molecules need X).
+2. Template stage capabilities (continuous process needs Y).
+3. Plus its own specific requirements (Nerandomilast also needs Z).
 
 ---
 
@@ -329,7 +331,7 @@ modality_name (unique) # "Monoclonal Antibody", "Small Molecule"
 modality_category # "Biologics", "NCE"
 short_description # Brief overview
 description # Detailed explanation
-standard_challenges (JSONB) # Legacy field
+standard_challenges (JSONB) # DEPRECATED - kept for reference only
 created_at
 ```
 
@@ -337,7 +339,8 @@ created_at
 - Has many: Products (`products.modality_id`)
 - Has many: Process Templates (`process_templates.modality_id`)
 - Has many: Modality Requirements (to Capabilities)
-- **Links to**: Technologies (many-to-many via `technology_modalities`)
+- Has many: Modality-Challenge Links (many-to-many via `modality_challenges`)
+- Has many: Technology Links (many-to-many via `technology_modalities`)
 
 **JSON Import Example**:
 ```json
@@ -409,7 +412,7 @@ complexity_weight (1-10) # Difficulty/cost indicator
 **Relationships**:
 - Referenced by: Modality Requirements (pattern level)
 - Referenced by: Product Requirements (specific level)
-- Referenced by: Template Stages (via base_capabilities JSONB)
+- Referenced by: Template Stages (via `base_capabilities` JSONB)
 - Referenced by: Entity Capabilities (what facilities can do)
 
 **JSON Import Example**:
@@ -487,13 +490,11 @@ base_capabilities (JSONB) # Array of capability names
 
 **Purpose**: Links templates to stages with process-specific metadata.
 
-**The base_capabilities field**: Stores capability names needed for this stage WHEN using this template.
+**The `base_capabilities` field**: Stores capability names needed for this stage WHEN using this template.
 
 **Relationships**:
 - Belongs to: Process Template
 - Belongs to: Process Stage
-
-**Why it's a composite key**: One template can use the same stage multiple times? No. But it ensures uniqueness of the (template, stage) pair.
 
 ---
 
@@ -512,20 +513,13 @@ complexity_rating (1-10)
 
 **Relationships**:
 - Belongs to: Process Stage (primary stage of use)
+- Belongs to: Process Template (optional, via `template_id` FK)
 - Has many: Challenges (`challenges.technology_id`)
 - Links to: Products (many-to-many via `product_to_technology`)
-- **Links to**: Modalities (many-to-many via `technology_modalities`)
+- **Links to: Modalities (many-to-many via `technology_modalities`)**
 
-**JSON Import Examples**:
+**JSON Import Examples (Current Format)**:
 ```json
-// Single modality
-{
-  "technology_name": "Ex-Vivo T-Cell Expansion",
-  "stage_name": "Chemical/Biological Production",
-  "modality_names": ["CAR-T"],
-  "complexity_rating": 10
-}
-
 // Multiple modalities
 {
   "technology_name": "Spray Drying",
@@ -534,7 +528,7 @@ complexity_rating (1-10)
   "complexity_rating": 6
 }
 
-// Generic (no modalities)
+// Generic (applies to all modalities)
 {
   "technology_name": "Track & Trace Serialization",
   "stage_name": "Secondary Packaging & Serialization",
@@ -547,14 +541,22 @@ complexity_rating (1-10)
 
 #### Technology-Modality Junction Table
 ```python
-# Schema for technology_modalities
-technology_id (PK, FK → manufacturing_technologies)
-modality_id (PK, FK → modalities)
+# Schema for technology_modalities (NEW in v2.1)
+technology_id (PK, FK → manufacturing_technologies.technology_id)
+modality_id (PK, FK → modalities.modality_id)
 notes (Text, nullable)
-created_at (Timestamp)
+created_at (Timestamp with timezone)
 ```
 
-**Purpose**: Enables the many-to-many relationship between `manufacturing_technologies` and `modalities`. An entry in this table signifies that a technology is relevant to a specific modality. A technology's absence from this table entirely means it is "Generic" and applies to all modalities.
+**Purpose**: Enables the many-to-many relationship between `manufacturing_technologies` and `modalities`.
+
+**Inheritance Logic**:
+When determining which technologies apply to a product:
+1.  **Template-Specific**: Technologies where `template_id` matches the product's `process_template_id`.
+2.  **Modality-Specific**: Technologies linked to the product's modality via this junction table.
+3.  **Generic**: Technologies with NO entries in `technology_modalities` (apply to all modalities).
+
+**JSON Import**: Automatically populated when importing technologies with the `modality_names` array.
 
 ---
 
@@ -571,12 +573,12 @@ related_capabilities (JSONB) # Capabilities that help address this
 
 **Relationships**:
 - Belongs to: Technology (where it occurs)
-- Links to: Products (many-to-many with relationship_type)
-- Implicit: Belongs to Stage (via technology)
+- Links to: Products (many-to-many with `relationship_type`)
+- Links to: Modalities (many-to-many via `modality_challenges`)
 
 **Product Linking Logic**:
-- `relationship_type = 'explicit'`: Product faces this challenge
-- `relationship_type = 'excluded'`: Product explicitly DOESN'T face this (overrides inheritance)
+- `relationship_type = 'explicit'`: Product faces this challenge.
+- `relationship_type = 'excluded'`: Product explicitly DOESN'T face this (overrides inheritance).
 
 **JSON Import Example**:
 ```json
@@ -587,12 +589,28 @@ related_capabilities (JSONB) # Capabilities that help address this
   "severity_level": "major",
   "related_capabilities": [
     "Advanced Cell Line Engineering",
-    "Real-Time Cell Viability Monitoring",
-    "Perfusion Process Control"
+    "Real-Time Cell Viability Monitoring"
   ],
   "product_codes": ["BI 456789"] # Products that face this
 }
 ```
+---
+
+#### Modality-Challenge Junction Table
+```python
+# Schema for modality_challenges (NEW in v2.0)
+modality_id (PK, FK → modalities.modality_id)
+challenge_id (PK, FK → manufacturing_challenges.challenge_id)
+is_typical (Boolean, default=True)
+notes (Text, nullable)
+created_at (Timestamp with timezone)
+```
+
+**Purpose**: Normalizes the relationship between modalities and their standard challenges. Replaces the JSONB `standard_challenges` field in the `modalities` table.
+
+**Why the Change**: Enables proper querying, filtering, and relationship tracking. The JSONB array was difficult to query efficiently.
+
+**Data Migration**: The migration automatically converted existing `standard_challenges` JSONB data to normalized table entries.
 
 ---
 
@@ -604,27 +622,27 @@ related_capabilities (JSONB) # Capabilities that help address this
 product_id (PK)
 product_code (unique)
 product_name
+# ... many more fields, see comprehensive list below
+
+# Foreign Keys
 modality_id (FK → modalities.modality_id)
 process_template_id (FK → process_templates.template_id)
-product_type # "NCE", "NBE", etc.
-therapeutic_area
-current_phase
-expected_launch_year
-# ... many more fields
+
+# Comprehensive Field List
+product_type, short_description, description, base_technology, mechanism_of_action, dosage_form, therapeutic_area, current_phase, project_status, lead_indication, expected_launch_year, lifecycle_indications (JSONB), regulatory_designations (JSONB), manufacturing_strategy, manufacturing_sites (JSONB), volume_forecast (JSONB), primary_packaging, route_of_administration, biel_category, granulation_technology, submission_status, submission_date (Date), approval_date (Date), launch_geography, regulatory_details (JSONB), ppq_status, ppq_completion_date (Date), ppq_details (JSONB), timeline_variance_days, timeline_variance_baseline, critical_path_item, ds_volume_category, dp_volume_category, ds_suppliers (JSONB), dp_suppliers (JSONB), device_partners (JSONB), operational_risks (JSONB), timeline_risks (JSONB), supply_chain_risks (JSONB), clinical_trials (JSONB), patient_population, development_program_name
+raw_content (Text, nullable)  # Unstructured data storage
 ```
 
 **Critical Foreign Keys**:
-- `modality_id`: Links to category (WHAT it is)
-- `process_template_id`: Links to process (HOW it's made)
+- `modality_id`: Links to category (WHAT it is).
+- `process_template_id`: Links to process (HOW it's made).
 
-**Validation Rule**: If both are set, template MUST belong to modality.
+**Validation Rule**: If both are set, the template MUST belong to the modality.
 
 **Relationships**:
 - Belongs to: Modality
 - Belongs to: Process Template (nullable)
-- Has many: Indications
-- Has many: Product Requirements (specific capabilities)
-- Has many: Product Process Overrides (process deviations)
+- Has many: Indications, Product Requirements, Product Process Overrides
 - Links to: Challenges (many-to-many with metadata)
 - Links to: Technologies (many-to-many)
 
@@ -637,8 +655,7 @@ expected_launch_year
   "process_template_name": "Perfusion mAb Process",
   "product_type": "NBE",
   "therapeutic_area": "Oncology",
-  "current_phase": "Phase 2",
-  "expected_launch_year": 2028
+  "current_phase": "Phase 2"
 }
 ```
 
@@ -658,17 +675,6 @@ timeline_context # When it's needed
 
 **Purpose**: Define standard capabilities for ALL products in a modality.
 
-**JSON Import Example**:
-```json
-{
-  "modality_name": "Monoclonal Antibody",
-  "required_capability_name": "Cell Culture (Mammalian)",
-  "requirement_level": "essential",
-  "is_critical": true,
-  "timeline_context": "Required from Phase 1 through commercial"
-}
-```
-
 ---
 
 #### Product Requirements (Specific Level)
@@ -684,25 +690,13 @@ notes
 
 **Purpose**: Define product-specific capabilities (additions or overrides).
 
-**JSON Import Example**:
-```json
-{
-  "product_code": "BI 456789",
-  "required_capability_name": "Novel ADC Conjugation",
-  "requirement_level": "essential",
-  "is_critical": true,
-  "timeline_needed": "2026-06-01",
-  "notes": "Unique to this antibody-drug conjugate"
-}
-```
-
 ---
 
 ## Data Flow Examples
 
 ### Example 1: Finding Relevant Technologies for a Modality/Template
 
-**Scenario**: The Challenge Explorer needs to find all technologies for a "Monoclonal Antibody" modality using the "Fed-Batch mAb Process" template.
+**Scenario**: Find all technologies for a "Monoclonal Antibody" modality using the "Fed-Batch mAb Process" template.
 
 **Query Logic**:
 The application runs a query equivalent to:
@@ -732,70 +726,31 @@ This ensures the correct three-tier filtering is applied.
 
 ### Example 2: Challenge Inheritance
 
-**Scenario**: Product uses "Perfusion Bioreactor System" technology.
+**Scenario**: A product inherits challenges from three sources.
 
 ```python
-# Technology has associated challenges
-technology = ManufacturingTechnology.query.filter_by(
-    technology_name="Perfusion Bioreactor System"
-).first()
+# 1. MODALITY CHALLENGES (via modality_challenges table)
+modality_challenges = db.session.query(ManufacturingChallenge)\
+    .join(ModalityChallenge)\
+    .filter(ModalityChallenge.modality_id == product.modality_id)\
+    .all()
 
-# Challenges linked to this technology:
-technology.challenges
-# Returns:
-# - "Cell Line Stability at High Density"
-# - "Perfusion Process Control Complexity"
-# - "Equipment Fouling Risk"
+# 2. TECHNOLOGY CHALLENGES (via inherited technologies using three-tier logic)
+inherited_technologies = product.get_inherited_technologies()
+# This method implements the three-tier inheritance:
+#   - Template-specific (template_id match)
+#   - Modality-specific (via technology_modalities)
+#   - Generic (no modality links)
+technology_challenges = [ch for tech in inherited_technologies 
+                        for ch in tech.challenges]
 
-# Product inherits these challenges automatically
-product.get_inherited_challenges()
-# Returns all challenges from linked technologies
+# 3. EXPLICIT PRODUCT CHALLENGES
+explicit_challenges = product.challenges.filter_by(relationship_type='explicit')
 
-# Product can exclude inherited challenges
-product.add_challenge_exclusion(
-    challenge_id=15,  # "Equipment Fouling Risk"
-    notes="Using novel anti-fouling membrane technology"
-)
+# MINUS: EXCLUDED CHALLENGES
+excluded_challenges = product.challenges.filter_by(relationship_type='excluded')
 
-# Product can add explicit challenges
-product.add_challenge_inclusion(
-    challenge_id=42,  # "Regulatory Uncertainty - Novel Process"
-    notes="First-in-class perfusion approval pathway"
-)
-
-# Final effective challenges
-product.get_effective_challenges()
-# Returns: Inherited - Excluded + Explicit
-```
-
----
-
-### Example 3: Hierarchical Stage Navigation
-
-```python
-# Find all operations under Upstream Processing
-upstream = ProcessStage.query.filter_by(
-    stage_name="Upstream Processing"
-).first()
-
-# Get all child stages
-upstream.children
-# Returns: Cell Culture, Media Preparation, Inoculation, etc.
-
-# Get full path for a detailed operation
-operation = ProcessStage.query.filter_by(
-    stage_name="Vial Thaw"
-).first()
-
-operation.get_full_path()
-# Returns: "Upstream Processing > Cell Culture > Seed Train > Vial Thaw"
-
-# Query products by stage at any level
-products_using_perfusion = Product.query.join(
-    product_to_technology_association
-).join(ManufacturingTechnology).join(ProcessStage).filter(
-    ProcessStage.stage_name == "Cell Culture"
-).all()
+# Final effective challenges = (Modality + Technology - Excluded) + Explicit
 ```
 
 ---
@@ -803,100 +758,57 @@ products_using_perfusion = Product.query.join(
 ## Common Patterns
 
 ### Pattern 1: Adding a New Modality
-
-1. Create the modality
-2. Define modality requirements (common capabilities)
-3. Create at least one process template
-4. Define template stages with base_capabilities
-5. Products can now use this modality + template
-
-```json
-// Step 1: Modality
-{
-  "modality_name": "Oligonucleotide",
-  "modality_category": "Nucleic Acid Therapeutics"
-}
-
-// Step 2: Modality Requirements
-{
-  "modality_name": "Oligonucleotide",
-  "required_capability_name": "Solid-Phase Synthesis",
-  "requirement_level": "essential"
-}
-
-// Step 3: Template
-{
-  "template_name": "Standard Oligo Process",
-  "modality_name": "Oligonucleotide",
-  "stages": [...]
-}
-
-// Step 4: Products
-{
-  "product_code": "OLIGO-001",
-  "modality_name": "Oligonucleotide",
-  "process_template_name": "Standard Oligo Process"
-}
-```
+1.  Create the modality.
+2.  Define modality requirements and modality-challenge links.
+3.  Create at least one process template for it.
+4.  Define template stages with `base_capabilities`.
+5.  Products can now use this modality + template.
 
 ---
 
 ### Pattern 2: Process Variations
-
-When a modality has multiple process approaches:
-
-```json
-// Same modality, different templates
-{
-  "modality_name": "Small Molecule",
-  "templates": [
-    {
-      "template_name": "Batch Small Molecule",
-      "stages": [
-        {
-          "stage_name": "API Synthesis",
-          "base_capabilities": ["Batch Reactor Operation"]
-        }
-      ]
-    },
-    {
-      "template_name": "Continuous Small Molecule",
-      "stages": [
-        {
-          "stage_name": "API Synthesis",
-          "base_capabilities": ["Continuous Flow Reactor", "Twin Screw Granulation"]
-        }
-      ]
-    }
-  ]
-}
-```
-
-Products choose which template based on their manufacturing approach.
+When a modality has multiple process approaches, create different templates for the same modality. Products can then choose which template to follow based on their manufacturing approach.
 
 ---
 
 ### Pattern 3: Challenge Management
+- Challenges are inherited from a product's modality and its inherited technologies.
+- A product can `exclude` an inherited challenge it doesn't face.
+- A product can `explicitly` add a challenge that isn't inherited.
 
-```json
-// Define challenge (linked to technology, not stage directly)
-{
-  "challenge_name": "High Containment Requirements",
-  "technology_name": "Live Viral Vector Production",
-  "severity_level": "critical",
-  "related_capabilities": ["BSL-2+ Facilities", "Viral Safety Protocols"]
-}
+---
 
-// Products inherit from technologies
-Product "GENE-001" uses "Live Viral Vector Production"
-  → Automatically inherits "High Containment Requirements"
+### Pattern 4: Generic vs. Specific Technologies
+- A technology linked to one or more modalities (e.g., "CAR-T Expansion") will only be available to products of those modalities.
+- A technology linked to **zero** modalities (e.g., "Track & Trace") is considered generic and is available to all products.
 
-// Product can exclude if not applicable
-{
-  "product_code": "GENE-001",
-  "excluded_challenge_name": "High Containment Requirements",
-  "notes": "Using inactivated vector"
-}
+---
+
+### Pattern 5: Three-Tier Technology Filtering
+When querying technologies for a product, use the three-tier logic:
+```python
+from sqlalchemy import or_, not_, exists
+from ..models import TechnologyModality
+
+# Get technologies for a specific product
+technologies = db.session.query(ManufacturingTechnology).filter(
+    ManufacturingTechnology.stage_id.in_(template_stage_ids),
+    or_(
+        # Tier 1: Template-specific
+        ManufacturingTechnology.template_id == product.process_template_id,
+        
+        # Tier 2: Modality-specific
+        ManufacturingTechnology.technology_id.in_(
+            db.session.query(TechnologyModality.technology_id)
+            .filter(TechnologyModality.modality_id == product.modality_id)
+        ),
+        
+        # Tier 3: Generic (no modality links)
+        ~exists().where(
+            TechnologyModality.technology_id == ManufacturingTechnology.technology_id
+        )
+    )
+).all()
 ```
 
 ---
@@ -907,162 +819,82 @@ Product "GENE-001" uses "Live Viral Vector Production"
 
 Dependencies must be imported in this order:
 
-1. **Foundation**: Modalities, Process Stages, Manufacturing Capabilities
-2. **Context**: Manufacturing Technologies, Manufacturing Challenges
-3. **Templates**: Process Templates (with stages)
-4. **Products**: Products (references modalities + templates)
-5. **Requirements**: Modality Requirements, Product Requirements
-6. **Mappings**: Product-Technology links, Product-Challenge links
+1.  **Modalities**
+2.  **Process Stages**
+3.  **Manufacturing Capabilities**
+4.  **Manufacturing Technologies** (with `modality_names` array) - auto-creates `technology_modalities` entries.
+5.  **Manufacturing Challenges** (references technologies)
+6.  **Modality-Challenge Links** - populates `modality_challenges` junction table.
+7.  **Process Templates** (references modalities + stages)
+8.  **Products** (MUST include `process_template_name`) - auto-creates `product_to_technology` entries if `technology_names` is present.
 
-**Note**: The `technology_modalities` links are created automatically during the import of `Manufacturing Technologies` if the `modality_names` field is present.
-
-### Name-Based Foreign Key Resolution
-
-The import system resolves foreign keys by name:
-
-```json
-// Instead of this (error-prone):
-{"modality_id": 5}
-
-// Use this (human-readable):
-{"modality_name": "Monoclonal Antibody"}
-
-// System automatically looks up:
-modality_id = Modality.query.filter_by(modality_name="Monoclonal Antibody").first().modality_id
-```
-
-### Nested vs Separate Imports
-
-**Nested Import** (Template with Stages):
-```json
-{
-  "template_name": "Fed-Batch mAb",
-  "modality_name": "Monoclonal Antibody",
-  "stages": [
-    {"stage_name": "Upstream", "stage_order": 1, "base_capabilities": [...]},
-    {"stage_name": "Downstream", "stage_order": 2, "base_capabilities": [...]}
-  ]
-}
-```
-
-**Separate Imports** (Product and Challenges):
-```json
-// First: Product
-{"product_code": "BI 123", "product_name": "..."}
-
-// Then: Link to Challenges
-{
-  "challenge_name": "High Titer Production",
-  "product_codes": ["BI 123", "BI 456"]
-}
-```
+> **IMPORTANT**: As of v2.0, products MUST have a `process_template_name` in import JSON to inherit template-based challenges and technologies correctly. Products without templates will only inherit modality-level requirements and generic technologies.
 
 ---
 
 ## Troubleshooting & FAQs
 
 ### Q: Why can't I add a check constraint for template-modality matching?
+**A**: PostgreSQL doesn't support subqueries in CHECK constraints. Validation is handled at the application level via the `@validates` decorator in the `Product` model.
 
-**A**: PostgreSQL doesn't support subqueries in CHECK constraints. Validation is handled at the application level via the `@validates` decorator in the Product model.
-
-**Solution**: The model automatically validates on insert/update. If you need database-level enforcement, use a trigger (see optional trigger migration).
-
----
-
-### Q: Can a product have no template?
-
-**A**: Yes. `process_template_id` is nullable. Some products may have completely bespoke processes that don't fit standard templates.
-
----
-
-### Q: Why are challenges linked to technologies instead of stages?
-
-**A**: Because challenges are specific to HOW you do something, not just WHERE. 
-
-**Example**: "Upstream Processing" stage might use:
-- Fed-Batch Technology → Challenge: "Long cycle times"
-- Perfusion Technology → Challenge: "Membrane fouling"
-
-Same stage, different challenges based on technology choice.
-
----
+### Q: Why don't I see any challenges or technologies for my product?
+**A**: Most likely causes:
+1.  **Missing `process_template_id`**: The product doesn't have a `process_template_name` in the import. Without this, it cannot inherit template-based challenges or technologies.
+2.  **No modality links**: The technologies are not linked to your product's modality via the `technology_modalities` table, and they are not generic.
+3.  **Stage mismatch**: The technologies are linked to stages that are not part of your product's process template.
 
 ### Q: Can a technology belong to multiple modalities?
+**A**: Yes. As of v2.1, technologies use a **many-to-many relationship** with modalities via the `technology_modalities` junction table. A technology can be linked to:
+-   **One modality**: Single entry in junction table.
+-   **Multiple modalities**: Multiple entries in junction table.
+-   **No modalities (Generic)**: Zero entries in junction table → applies to ALL modalities.
 
-**A**: Yes. As of v2.1 (October 2025), technologies use a many-to-many relationship with modalities via the `technology_modalities` junction table. A technology can be linked to one, many, or zero modalities (making it "generic").
-
----
-
-### Q: What's the difference between modality_requirements and template_stages.base_capabilities?
-
-**A**: 
-- **Modality Requirements**: Capabilities needed for ALL products in that category (stored in database table)
-- **Template Base Capabilities**: Capabilities needed for a specific PROCESS APPROACH (stored in JSONB field)
-
-**Example**:
-- Modality Requirement: "All mAbs need cell culture" (applies to 100+ products)
-- Template Capability: "Fed-batch mAbs need fed-batch bioreactors" (applies to ~60 products)
-
----
-
-### Q: Can a template belong to multiple modalities?
-
-**A**: No. Each template belongs to exactly one modality. If two modalities share the same process, create separate templates (can duplicate the stages).
-
----
-
-### Q: How do I query all capabilities for a product?
-
-**A**: Use the built-in method:
-
-```python
-product = Product.query.get(product_id)
-all_requirements = product.get_all_capability_requirements()
-# Returns dict with modality_inherited, template_inherited, product_specific
-```
-
----
-
-### Q: Can I modify a template after products are using it?
-
-**A**: Yes, but be careful. Changes to `template_stages.base_capabilities` will affect ALL products using that template. If you need to change requirements for one product, use `product_requirements` instead.
+### Q: What's the difference between the old `modality_id` FK and the new `technology_modalities` table?
+**A**: The old foreign key limited each technology to ONE modality. The new junction table allows for:
+-   **Flexibility**: One technology can serve multiple modalities (e.g., "Spray Drying" for Small Molecules AND Peptides).
+-   **Generic technologies**: Technologies with no entries in the junction table apply to ALL modalities.
+-   **Better querying**: You can easily filter technologies by modality membership.
 
 ---
 
 ## Appendix: Database Diagram Legend
 
-When viewing the schema diagram:
-
-- **Solid lines**: Foreign key relationships
-- **Dotted lines**: Logical/derived relationships
-- **Bold tables**: Central hub entities (Products, Modalities)
-- **Grouped boxes**: Related entity clusters
+> **Note**: You can view an interactive, auto-generated database diagram in the application by navigating to **Settings → Database Schema**. The diagram shows all current tables, relationships, and can be downloaded in multiple formats.
 
 **Key Relationships**:
 ```
 Products (central hub)
   ├─── modality_id → Modalities
   ├─── process_template_id → Process Templates
-  ├─── many-to-many → Technologies
-  ├─── many-to-many → Challenges
+  ├─── many-to-many → Technologies (via product_to_technology)
+  ├─── many-to-many → Challenges (via product_to_challenge)
   └─── one-to-many → Product Requirements
 
-Process Templates
-  ├─── modality_id → Modalities
-  └─── many-to-many → Process Stages (via Template Stages)
+Modalities
+  ├─── one-to-many → Products
+  ├─── one-to-many → Process Templates
+  ├─── many-to-many → Challenges (via modality_challenges)
+  └─── many-to-many → Technologies (via technology_modalities)
 
 Manufacturing Technologies
   ├─── stage_id → Process Stages
+  ├─── template_id → Process Templates (nullable)
   ├─── many-to-many → Modalities (via technology_modalities)
+  ├─── many-to-many → Products (via product_to_technology)
   └─── one-to-many → Challenges
+
+Manufacturing Challenges
+  ├─── technology_id → Technologies
+  ├─── many-to-many → Modalities (via modality_challenges)
+  └─── many-to-many → Products (via product_to_challenge)
 ```
 
 ---
 
 ## Version History
-
-- **v2.1** (2025-10-15): Implemented many-to-many relationship for `Manufacturing Technologies` and `Modalities`.
-- **v2.0** (2025-10-05): Added `process_template_id` to products, clarified three-tier inheritance, removed `primary_stage_id` redundancy.
+- **v2.2** (2025-10-17): Added `raw_content` field to products table for storing unstructured data.
+- **v2.1** (2025-10-15): Implemented many-to-many relationship for `Manufacturing Technologies` and `Modalities` via `technology_modalities` junction table.
+- **v2.0** (2025-10-05): Added `process_template_id` to products, created `modality_challenges` junction table, clarified three-tier inheritance, and deprecated `primary_stage_id` on challenges.
 - **v1.0** (2025-07-15): Initial schema design.
 
 ---
