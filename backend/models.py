@@ -81,6 +81,7 @@ class Product(db.Model):
     ds_suppliers = Column(JSONB, nullable=True)
     dp_suppliers = Column(JSONB, nullable=True)
     device_partners = Column(JSONB, nullable=True)
+    raw_content = Column(Text, nullable=True)
 
     # ==================== NEW RISK FIELDS ====================
     operational_risks = Column(JSONB, nullable=True)

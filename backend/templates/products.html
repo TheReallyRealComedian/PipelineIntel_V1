@@ -1,6 +1,6 @@
 {# backend/templates/products.html #}
+{# UPDATED: Add delete functionality to the products table #}
 {% extends "base.html" %}
-{# Import the new macros at the top #}
 {% from "macros/_table_macros.html" import render_column_selector, render_dynamic_table %}
 
 {% block title %}{{ title }}{% endblock %}
@@ -17,15 +17,24 @@
                 {# Use the column selector macro #}
                 {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
 
-                {# Configure actions for products table #}
+                {# Configure actions for products table - UPDATED with delete button #}
                 {% set actions_config = {
-                    'width': '100px',
-                    'icon': 'eye',
+                    'width': '140px',
+                    'icon': 'cog',
                     'title': 'Actions',
                     'detail_url': 'products.view_product_detail',
                     'detail_param': 'product_id',
                     'detail_icon': 'eye',
-                    'detail_title': 'View detailed product information and manage challenges'
+                    'detail_title': 'View detailed product information and manage challenges',
+                    'custom_actions': [
+                        {
+                            'icon': 'trash',
+                            'color': 'danger',
+                            'title': 'Delete this product',
+                            'class': 'delete-product-btn',
+                            'data_id': 'product_id'
+                        }
+                    ]
                 } %}
 
                 {# Use enhanced macro with actions #}
@@ -39,17 +48,158 @@
         </div>
     </div>
 </div>
+
+{# Delete confirmation modal #}
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteProductModalLabel">
+                    <i class="fas fa-exclamation-triangle"></i> Confirm Product Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="fw-bold text-danger">⚠️ WARNING: This action cannot be undone!</p>
+                <p>You are about to permanently delete:</p>
+                <div class="alert alert-warning">
+                    <strong>Product Code:</strong> <span id="deleteProductCode"></span><br>
+                    <strong>Product Name:</strong> <span id="deleteProductName"></span>
+                </div>
+                <p class="text-muted">This will also delete:</p>
+                <ul class="text-muted">
+                    <li>All associated indications</li>
+                    <li>All supply chain links</li>
+                    <li>All challenge relationships</li>
+                    <li>All technology links</li>
+                    <li>All process overrides</li>
+                    <li>All requirement specifications</li>
+                </ul>
+                <p class="fw-bold">Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash"></i> Yes, Delete Product
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // The table sorter initialization needs to use the dynamic table_id
+            // Initialize table sorter
             const tableId = "{{ table_id|default('') }}";
             if (tableId && window.initializeTableSorter) {
                 window.initializeTableSorter(tableId);
             }
+
+            // Handle delete button clicks
+            let deleteProductId = null;
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteProductModal'));
+            
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.delete-product-btn')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const btn = e.target.closest('.delete-product-btn');
+                    const row = btn.closest('tr');
+                    deleteProductId = row.getAttribute('data-entity-id');
+                    
+                    // Get product details from the row
+                    const cells = row.querySelectorAll('td.editable-cell');
+                    let productCode = '';
+                    let productName = '';
+                    
+                    cells.forEach(cell => {
+                        const field = cell.getAttribute('data-field');
+                        if (field === 'product_code') {
+                            productCode = cell.textContent.trim();
+                        } else if (field === 'product_name') {
+                            productName = cell.textContent.trim();
+                        }
+                    });
+                    
+                    // Update modal content
+                    document.getElementById('deleteProductCode').textContent = productCode || 'N/A';
+                    document.getElementById('deleteProductName').textContent = productName || 'N/A';
+                    
+                    // Show modal
+                    deleteModal.show();
+                }
+            });
+
+            // Handle confirm delete
+            document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+                if (!deleteProductId) return;
+                
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+                
+                fetch(`/api/products/${deleteProductId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the row from table
+                        const row = document.querySelector(`tr[data-entity-id="${deleteProductId}"]`);
+                        if (row) {
+                            row.remove();
+                        }
+                        
+                        // Show success message
+                        showToast('Success', data.message, 'success');
+                        
+                        // Close modal
+                        deleteModal.hide();
+                        
+                        // Check if table is now empty
+                        const tbody = document.querySelector('#{{ table_id }} tbody');
+                        if (tbody && tbody.querySelectorAll('tr').length === 0) {
+                            location.reload(); // Reload to show "no products" message
+                        }
+                    } else {
+                        showToast('Error', data.message, 'danger');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-trash"></i> Yes, Delete Product';
+                    }
+                })
+                .catch(error => {
+                    console.error('Delete error:', error);
+                    showToast('Error', 'Failed to delete product. Please try again.', 'danger');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-trash"></i> Yes, Delete Product';
+                });
+            });
+            
+            // Reset modal state when closed
+            document.getElementById('deleteProductModal').addEventListener('hidden.bs.modal', function() {
+                deleteProductId = null;
+                document.getElementById('confirmDeleteBtn').disabled = false;
+                document.getElementById('confirmDeleteBtn').innerHTML = '<i class="fas fa-trash"></i> Yes, Delete Product';
+            });
         });
+
+        // Toast notification helper
+        function showToast(title, message, type) {
+            // You can use Bootstrap toasts or any notification library
+            // For now, using alert as fallback
+            if (type === 'success') {
+                alert(`✓ ${title}: ${message}`);
+            } else {
+                alert(`✗ ${title}: ${message}`);
+            }
+        }
     </script>
 {% endblock %}

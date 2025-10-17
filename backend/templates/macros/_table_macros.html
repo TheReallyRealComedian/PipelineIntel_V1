@@ -104,11 +104,12 @@
                     {% endif %}
                     {% if actions_config.custom_actions %}
                         {% for action in actions_config.custom_actions %}
-                        <a href="{{ url_for(action.url, **{action.param or id_key: item[id_key]}) }}" 
-                           class="btn btn-sm btn-outline-{{ action.color or 'secondary' }} ms-1" 
-                           title="{{ action.title }}">
+                        <button type="button"
+                               class="btn btn-sm btn-outline-{{ action.color or 'secondary' }} ms-1 {{ action.class or '' }}" 
+                               title="{{ action.title }}"
+                               {% if action.data_id %}data-id="{{ item[action.data_id] }}"{% endif %}>
                             <i class="fas fa-{{ action.icon }}"></i>
-                        </a>
+                        </button>
                         {% endfor %}
                     {% endif %}
                 </td>
