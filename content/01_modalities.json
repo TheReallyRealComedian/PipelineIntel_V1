@@ -269,5 +269,19 @@
       "Payer coverage and reimbursement pathways"
     ],
     "created_at": "2025-09-25 14:30:00.000000+00:00"
-  }
+  },
+  {
+  "modality_id": 19,
+  "modality_name": "Onkolytische Viren",
+  "modality_category": "Advanced Therapy",
+  "label": "NBE (ntm)",
+  "short_description": "Gentechnisch optimierte Viren, die selektiv Tumorzellen infizieren, zerstören (Onkolyse) und gleichzeitig eine systemische Anti-Tumor-Immunantwort auslösen. Die Herstellung erfordert eine virologische GMP-Infrastruktur mit adäquater Biosicherheitsstufe (z.B. BSL-2+).",
+  "description": "",
+  "standard_challenges": [
+    "Oncolytic Virus Manufacturing",
+    "BSL-2+ Containment",
+    "Immune Response Potency Assays"
+  ],
+  "created_at": "2025-09-22 07:54:32.809167+00:00"
+}
 ]

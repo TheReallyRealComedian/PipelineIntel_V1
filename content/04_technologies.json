@@ -71,7 +71,8 @@
     "technology_name": "HEK293 Cell Culture System",
     "stage_name": "Chemical/Biological Production",
     "modality_names": [
-      "Gene Therapy"
+      "Gene Therapy",
+      "Onkolytische Viren"
     ],
     "short_description": "Human embryonic kidney cell production platform",
     "description": "Versatile human embryonic kidney cell line adapted for suspension culture, offering high transfection efficiency and human-like glycosylation profiles. Widely used for viral vector production (AAV, lentivirus, adenovirus) and recombinant proteins requiring native human post-translational modifications including gamma-carboxylation. Produces authentic N-glycan structures lacking immunogenic epitopes (N-glycolylneuraminic acid) found in non-human cell lines. Particularly advantageous for difficult-to-express proteins and transient expression systems. Scalable to 2,000L+ in serum-free media.",
@@ -330,7 +331,8 @@
     "technology_name": "Ultracentrifugation (Viral Vectors)",
     "stage_name": "Primary Recovery & Clarification",
     "modality_names": [
-      "Gene Therapy"
+      "Gene Therapy",
+      "Onkolytische Viren"
     ],
     "short_description": "High-speed centrifugal viral vector purification",
     "description": "Specialized high-speed centrifugation technique for viral vector purification and concentration utilizing density gradient separation. Critical for separating full and empty viral capsids, concentrating dilute viral preparations, and achieving high-purity viral vector products for gene therapy applications.",
@@ -801,6 +803,41 @@
     "short_description": "Systematic generation, characterization, and storage of cell banks per ICH guidelines.",
     "description": "Systematic generation, characterization, and storage of Master Cell Banks (MCB) and Working Cell Banks (WCB) per ICH Q5A/Q5B guidelines. Encompasses genetic stability testing, identity verification, sterility testing, mycoplasma testing, and adventitious agent testing. Cryopreservation protocols optimized for each cell type ensure multi-generational consistency. Critical for regulatory compliance and manufacturing reproducibility. MCB typically contains 100-200 vials stored at -150°C or below, providing 20-30+ years of manufacturing capacity.",
     "innovation_potential": "Low",
+    "complexity_rating": 5
+  },
+   {
+    "technology_name": "Vero/BHK Cell Culture System (HSV-1)",
+    "stage_name": "Chemical/Biological Production",
+    "modality_names": [
+      "Onkolytische Viren"
+    ],
+    "short_description": "Adherente Zellkulturplattform für Herpes-simplex-Virus-Vektoren",
+    "description": "Etablierte, regulatorisch anerkannte Zelllinien (z.B. Vero, BHK) für die GMP-konforme Produktion von HSV-1-basierten onkolytischen Viren wie T-VEC. Die Zellen werden typischerweise in adherenter Kultur geführt, können aber für größere Maßstäbe auf Suspensionsprozesse adaptiert werden.",
+    "innovation_potential": "Medium",
+    "complexity_rating": 7
+  },
+  {
+    "technology_name": "Plaque-Forming Unit (PFU) Assay",
+    "stage_name": "Advanced Analytical Methods",
+    "modality_names": [
+      "Onkolytische Viren",
+      "Gene Therapy"
+    ],
+    "short_description": "Funktioneller Goldstandard-Assay zur Quantifizierung infektiöser Viruspartikel",
+    "description": "Ein biologischer Potenz-Assay, der die Anzahl der infektiösen, replikationskompetenten Viruspartikel in einer Probe misst. Das Ergebnis (PFU/mL) ist ein kritischer Qualitätsparameter und für die Freigabe und Dosierung von viralen Vektoren regulatorisch erforderlich.",
+    "innovation_potential": "Low",
+    "complexity_rating": 6
+  },
+  {
+    "technology_name": "Quantitative PCR (qPCR) for Genome-Titer",
+    "stage_name": "Advanced Analytical Methods",
+    "modality_names": [
+      "Onkolytische Viren",
+      "Gene Therapy"
+    ],
+    "short_description": "Molekularbiologische Methode zur Messung der Gesamtanzahl viraler Genome",
+    "description": "Eine schnelle und hochsensitive Methode zur Bestimmung der Konzentration viraler Genome (vg/mL) in einer Probe. Sie wird zur Prozessüberwachung und zur Berechnung des Verhältnisses von Gesamtpartikeln zu infektiösen Partikeln (vg/PFU Ratio) verwendet, was ein wichtiges Qualitätsattribut darstellt.",
+    "innovation_potential": "Medium",
     "complexity_rating": 5
   }
 ]

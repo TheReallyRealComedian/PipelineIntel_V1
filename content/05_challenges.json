@@ -400,5 +400,57 @@
     "technology_name": "Controlled-Rate Cryopreservation",
     "severity_level": "critical",
     "related_capabilities": []
+  },
+    {
+    "challenge_name": "Neutralizing Antibody Response",
+    "challenge_category": "Efficacy & Safety",
+    "short_description": "Pre-existing or induced antibodies in patients can neutralize the virus and limit efficacy.",
+    "explanation": "A majority of the population has pre-existing antibodies against common viral backbones (e.g., Adenovirus, HSV). These neutralizing antibodies (NAbs) can rapidly clear systemically administered oncolytic viruses from circulation or inhibit their spread within the tumor after local injection, thus significantly reducing the direct oncolytic effect. This requires strategies like capsid engineering or combination therapies to maintain therapeutic activity.",
+    "technology_name": "Vero/BHK Cell Culture System (HSV-1)",
+    "severity_level": "major",
+    "related_capabilities": [
+      "Immunogenicity Testing",
+      "Capsid Engineering",
+      "Systemic vs. Intratumoral Administration"
+    ]
+  },
+  {
+    "challenge_name": "Neutralizing Antibody Response",
+    "challenge_category": "Efficacy & Safety",
+    "short_description": "Pre-existing or induced antibodies in patients can neutralize the virus and limit efficacy.",
+    "explanation": "A majority of the population has pre-existing antibodies against common viral backbones (e.g., Adenovirus, HSV). These neutralizing antibodies (NAbs) can rapidly clear systemically administered oncolytic viruses from circulation or inhibit their spread within the tumor after local injection, thus significantly reducing the direct oncolytic effect. This requires strategies like capsid engineering or combination therapies to maintain therapeutic activity.",
+    "technology_name": "Vero/BHK Cell Culture System (HSV-1)",
+    "severity_level": "major",
+    "related_capabilities": [
+      "Immunogenicity Testing",
+      "Capsid Engineering",
+      "Systemic vs. Intratumoral Administration"
+    ]
+  },
+  {
+    "challenge_name": "Tumor Microenvironment (TME) Penetration",
+    "challenge_category": "Efficacy & Safety",
+    "short_description": "Physical and immunological barriers in the tumor microenvironment prevent virus spread.",
+    "explanation": "The efficacy of oncolytic viruses is often limited by poor penetration and spread within solid tumors. A dense extracellular matrix, high interstitial fluid pressure, and an immunosuppressive environment create significant physical and biological barriers that shield cancer cells from the virus, leading to incomplete tumor destruction.",
+    "technology_name": "HEK293 Cell Culture System",
+    "severity_level": "major",
+    "related_capabilities": [
+      "Tumor Microenvironment Analysis",
+      "Armed Virus Design (e.g., with ECM-degrading enzymes)",
+      "Combination Therapy Strategy"
+    ]
+  },
+  {
+    "challenge_name": "Potency Assay for Dual Mechanism of Action",
+    "challenge_category": "Analytical & QC",
+    "short_description": "Developing assays that measure both direct oncolysis and immune activation is complex.",
+    "explanation": "Oncolytic viruses have a dual mechanism of action: direct cancer cell killing (oncolysis) and induction of an anti-tumor immune response. Developing a single, robust potency assay that accurately reflects both biological activities for product release and stability testing is a significant analytical challenge. Often, a matrix of different assays (e.g., cell-killing assays and immune cell activation assays) is required.",
+    "technology_name": "Plaque-Forming Unit (PFU) Assay",
+    "severity_level": "major",
+    "related_capabilities": [
+      "In-vitro Cell-Killing Assays",
+      "Immune Cell Activation Assays (e.g., cytokine release)",
+      "Potency Assay Development & Validation"
+    ]
   }
 ]
