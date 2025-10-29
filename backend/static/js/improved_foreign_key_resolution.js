@@ -130,6 +130,22 @@ class ImprovedForeignKeyResolver {
                     option.textContent = entity.label; // e.g., "Peptides (Biologics)"
                     dropdown.appendChild(option);
                 });
+
+                // --- START OF NEW CODE ---
+                // After populating, check for an AI suggestion and pre-select it.
+                const suggestedValue = dropdown.dataset.suggestion;
+                if (suggestedValue) {
+                    const suggestedOption = dropdown.querySelector(`option[value="${suggestedValue}"]`);
+                    if (suggestedOption) {
+                        suggestedOption.selected = true;
+                    }
+                }
+                
+                // Programmatically trigger a change event. This is crucial for two reasons:
+                // 1. It ensures the resolution data is immediately captured for the pre-selected item.
+                // 2. It correctly updates the progress bar and resolved item count on page load.
+                dropdown.dispatchEvent(new Event('change'));
+                // --- END OF NEW CODE ---
             });
         });
     }

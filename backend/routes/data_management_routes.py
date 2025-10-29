@@ -303,3 +303,52 @@ def finalize_json_import():
         import traceback
         traceback.print_exc()
         return jsonify(success=False, message=f"Import failed: {str(e)}"), 500
+    
+
+@data_management_bp.route('/api/lookup/<string:entity_type>')
+@login_required
+def lookup_entities(entity_type):
+    """
+    API endpoint to fetch a list of existing entities for UI dropdowns,
+    like in the foreign key resolution page.
+    """
+    from ..models import Modality # Ensure Modality model is available
+
+    # A map to securely control which models can be looked up and prevent arbitrary lookups
+    SUPPORTED_LOOKUPS = {
+        'modalities': Modality,
+        # Future-proofing: add other models here as needed for resolution
+        # 'process_stages': ProcessStage,
+    }
+    
+    model = SUPPORTED_LOOKUPS.get(entity_type)
+    if not model:
+        return jsonify(success=False, message=f"Unsupported entity type for lookup: {entity_type}"), 404
+        
+    try:
+        # Custom logic for modalities to provide a richer label (e.g., "Monoclonal Antibody (Biologics)")
+        if entity_type == 'modalities':
+            items = model.query.order_by(model.modality_name).all()
+            data = [{
+                'value': item.modality_name,
+                'label': f"{item.modality_name} ({item.modality_category or 'N/A'})"
+            } for item in items]
+        else:
+            # Generic fallback for other simple lookups in the future.
+            # Assumes the model has a reasonably named 'name' field.
+            name_field = next((c.name for c in model.__table__.columns if 'name' in c.name), None)
+            if not name_field:
+                 return jsonify(success=False, message=f"Cannot determine name field for {entity_type}"), 500
+
+            items = model.query.order_by(getattr(model, name_field)).all()
+            data = [{
+                'value': getattr(item, name_field),
+                'label': getattr(item, name_field)
+            } for item in items]
+
+        return jsonify(success=True, data=data)
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify(success=False, message=f"An error occurred while fetching {entity_type}: {str(e)}"), 500

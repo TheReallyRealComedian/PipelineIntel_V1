@@ -191,48 +191,39 @@
                         <div class="resolution-options p-3">
                             {% set field_suggestions = suggestions.get(field_name, {}).get(missing_value, []) %}
                             
-                            <!-- Use Existing Option - Always show -->
-                            <div class="resolution-choice {% if field_suggestions %}selected{% endif %}" data-choice="existing">
+                            <!-- UNIFIED "Use Existing Entity" Option -->
+                            <div class="resolution-choice selected" data-choice="existing">
                                 <div class="choice-header">
-                                    <input type="radio" name="resolution_{{ field_name }}_{{ loop.index }}" value="existing" {% if field_suggestions %}checked{% endif %}>
+                                    <input type="radio" name="resolution_{{ field_name }}_{{ loop.index }}" value="existing" checked>
                                     <i class="fas fa-search me-2 text-primary"></i>
                                     Use Existing Entity
                                 </div>
-                                <div class="choice-content" {% if field_suggestions %}style="display: block;"{% endif %}>
-                                    {% if field_suggestions %}
-                                    <p class="text-color-light mb-2">Select a similar existing {{ field_name | replace('_', ' ') }}:</p>
-                                    <div class="suggestions">
-                                        {% for suggestion in field_suggestions %}
-                                        <div class="suggestion-item {% if loop.first %}selected{% endif %}" 
-                                             data-value="{{ suggestion.value }}">
-                                            <strong>{{ suggestion.value }}</strong>
-                                            <span class="badge bg-info ms-2">{{ suggestion.reason }}</span>
-                                            {% if suggestion.get('description') %}
-                                            <div class="small text-color-light">{{ suggestion.description }}</div>
-                                            {% endif %}
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                    {% else %}
-                                    <p class="text-color-light mb-2">Select an existing {{ field_name | replace('_', ' ') }}:</p>
-                                    <select class="form-select existing-entity-manual" data-field="{{ field_name }}">
+                                <div class="choice-content" style="display: block;">
+                                    <p class="text-color-light mb-2">
+                                        {% if field_suggestions %}
+                                            We suggest using <strong>'{{ field_suggestions[0].value }}'</strong> ({{ field_suggestions[0].reason }}). You can select a different one from the list if needed.
+                                        {% else %}
+                                            No strong suggestion found. Please select an existing entity from the list.
+                                        {% endif %}
+                                    </p>
+                                    <select class="form-select existing-entity-manual" 
+                                            data-field="{{ field_name }}"
+                                            data-suggestion="{{ field_suggestions[0].value if field_suggestions else '' }}">
                                         <option value="">Choose an existing {{ field_name | replace('_', ' ') }}...</option>
                                         <!-- Options will be populated by JavaScript -->
                                     </select>
-                                    <small class="text-color-light mt-1">If you don't see the right option, use "Create New Entity" below.</small>
-                                    {% endif %}
+                                    <small class="text-color-light mt-1">If you don't see the right option, choose "Create New Entity" below.</small>
                                 </div>
                             </div>
 
                             <!-- Create New Option -->
-                            <div class="resolution-choice {% if not field_suggestions %}selected{% endif %}" data-choice="create">
+                            <div class="resolution-choice" data-choice="create">
                                 <div class="choice-header">
-                                    <input type="radio" name="resolution_{{ field_name }}_{{ loop.index }}" value="create" 
-                                           {% if not field_suggestions %}checked{% endif %}>
+                                    <input type="radio" name="resolution_{{ field_name }}_{{ loop.index }}" value="create">
                                     <i class="fas fa-plus-circle me-2 text-success"></i>
                                     Create New Entity
                                 </div>
-                                <div class="choice-content" {% if not field_suggestions %}style="display: block;"{% endif %}>
+                                <div class="choice-content">
                                     {% if field_name == 'modality_name' %}
                                     <div class="row">
                                         <div class="col-md-6">
