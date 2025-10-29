@@ -1627,5 +1627,55 @@
         ]
       }
     ]
-  }
+  },
+  {
+  "template_name": "Standard Oncolytic Virus Process",
+  "modality_name": "Onkolytische Viren",
+  "description": "Standard-Herstellungsprozess für onkolytische Viren, der die Virusproduktion in Bioreaktoren, die mehrstufige Aufreinigung, die aseptische Abfüllung und umfassende Qualitätskontrollen umfasst.",
+  "stages": [
+    {
+      "stage_name": "Upstream Processing",
+      "stage_order": 1,
+      "is_required": true,
+      "base_capabilities": [
+        "Suspensionszellkultur in Bioreaktoren",
+        "GMP Virus-Seed-Amplifikation",
+        "Kontrollierte Wirtszell-Infektion",
+        "Prozessüberwachung (pH, DO, Temperatur)"
+      ]
+    },
+    {
+      "stage_name": "Downstream Processing",
+      "stage_order": 2,
+      "is_required": true,
+      "base_capabilities": [
+        "Ernte, Zelllyse & Klärung",
+        "Konzentration mittels Tangential Flow Filtration (TFF)",
+        "Chromatographische Reinigung (AEX, Affinität)",
+        "Pufferwechsel & Formulierung (Drug Substance)"
+      ]
+    },
+    {
+      "stage_name": "Aseptic Processing",
+      "stage_order": 3,
+      "is_required": true,
+      "base_capabilities": [
+        "Sterilfiltration (0.22μm)",
+        "Aseptische Abfüllung in Vials/Spritzen",
+        "Formulierung mit Stabilisatoren (Drug Product)"
+      ]
+    },
+    {
+      "stage_name": "Quality Control & Analytics",
+      "stage_order": 4,
+      "is_required": true,
+      "base_capabilities": [
+        "Infektiöser Titer-Assay (PFU/TCID50)",
+        "Genomische Identität & Stabilitätsprüfung",
+        "Reinheits- & Sicherheitsprüfungen (z.B. Rest-DNA, Endotoxin)",
+        "Funktioneller Potenz-Assay (in-vitro Tumor-Zelllyse)"
+      ]
+    }
+  ]
+}
 ]
