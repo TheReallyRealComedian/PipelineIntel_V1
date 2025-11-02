@@ -1,0 +1,106 @@
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 3822971","Not disclosed","Monoclonal Antibody","NBE (ntm)","Oncology","Bispecific antibody binding LY6K-HLA-A*02:01 on tumor cells and CD3ε on T cells to induce tumor-specific cytotoxicity; Fc engineered for half-life extension and reduced effector function.","Bispecific TcE for NSCLC inducing tumor-specific T‑cell cytotoxicity via LY6K‑HLA/CD3 engagement.","Injectable (IV; SC possible later)","IV; SC (possible later)",,"Preclinical"
+"BI 3968621","Not disclosed","Small Molecule","NME","Oncology","PROTAC targeting HPK1 for proteasomal degradation via CRBN E3 ligase recruitment; enhances T/B/DC activation to boost anti-tumor immunity.","Oral PROTAC degrading HPK1 to boost immune activation for RCC; preclinical development.","Oral tablet","Oral",,"Preclinical"
+,"Spesolimab","Monoclonal Antibody","NBE","Immunology; Neutrophilic Dermatoses","Humanized IgG1 monoclonal antibody antagonizing IL-36 receptor (IL-36R), blocking IL-36α, IL-36β, and IL-36γ signaling.","Anti-IL-36R monoclonal antibody for pyoderma gangrenosum; IV for flares, SC for prevention.","IV for acute flare; SC for long-term prevention","Injectable",,"Phase III"
+"BI 3814916","Not yet assigned","Monoclonal Antibody","NBE","CRM; MASH","Monoclonal antibody inhibiting TLR4 to reduce hepatic/systemic inflammation in MASH.","Anti‑TLR4 monoclonal antibody to reduce hepatic and systemic inflammation in MASH; monthly SC dosing envisioned.","Injectable (likely SC monthly)","Injectable",,"Preclinical"
+"BI 3819026","Anti-LAYN antibody","Monoclonal Antibody","NBE","Oncology","Humanized afucosylated IgG1 targeting LAYN isoforms 1 and 2 to deplete tumor-resident Tregs and enhance anti-tumor immunity.","Afucosylated anti‑LAYN IgG1 depletes tumor Tregs to enhance anti‑tumor immunity in solid tumors.","Injectable (IV; SC under evaluation)","Parenteral",,"Preclinical"
+"BI 3821001","DcR3-Fc","Recombinant Proteins","NBE","Immunology; IBD","Engineered decoy receptor 3 fused to silenced IgG1 Fc to neutralize TL1A and LIGHT, reducing inflammation and tissue remodeling in IBD.","Fc‑fusion decoy receptor neutralizing TL1A and LIGHT for inflammation control in ulcerative colitis.","Injectable (SC or IV)","Injectable",,"Transitioning to Phase IIb"
+done
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 3814916","Not yet assigned","Monoclonal Antibody","NBE","CRM – MASH","Monoclonal antibody inhibiting TLR4 to reduce hepatic/systemic inflammation in MASH.","TLR4-inhibiting mAb for reducing inflammation in MASH","Injectable (likely SC monthly)",,,"Preclinical"
+"BI 3819026","Anti-LAYN antibody","Monoclonal Antibody","NBE","Oncology (Solid Tumors)","Humanized afucosylated IgG1 targeting LAYN isoforms 1 and 2 to deplete tumor-resident Tregs and enhance anti-tumor immunity.","Afucosylated IgG1 mAb targeting LAYN to deplete Tregs in solid tumors","Injectable (IV; SC under evaluation)","Parenteral",,"Preclinical"
+"BI 3812465",,"Recombinant Proteins","NBE","Ophthalmology (CI-DME)","Bispecific agonist targeting FZD4 and LRP5 to mimic Norrin and activate Wnt/β-catenin signaling, restoring BRB integrity.","Bispecific Wnt-pathway agonist for CI-DME to restore BRB integrity","Intravitreal injection","Intravitreal","SWAP™ technology","Preclinical"
+"BI 3798489","BI 3798489","Peptides","NME","Cardiovascular-Renal-Metabolic (CRM)","NMUR2 agonist targeting satiety circuits outside the BBB to reduce food intake and body weight.","NMUR2 agonist peptide for obesity targeting satiety circuits outside BBB","Injectable (subcutaneous)","SC injection",,"Preclinical"
+"BI 3797479",,"Small Molecule","NME","Neuroscience (CIAS – Cognitive Impairment Associated with Schizophrenia)","Catechol-O-methyltransferase (COMT) inhibitor that modulates dopamine metabolism to improve cognitive processes.","COMT inhibitor targeting dopamine metabolism for CIAS in schizophrenia.","Tablet","Oral",,"Preclinical / Early Development"
+done
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 3820768",,"T-cell Engager","NBE","Oncology (Solid Tumors)","Bispecific antibody in 2+1 format engaging ALPG on tumor cells and CD3 on T‑cells to induce targeted cytotoxicity and immune activation.","Bispecific TcE targeting ALPG and CD3 for solid tumors","Lyophilized powder for intravenous infusion","Intravenous",,"Preclinical"
+"BI 4018711","CT‑156 (working title)","Prescription Digital Therapeutic (SaMD/PDT)","DTx (SaMD)","Schizophrenia / Neuroscience (TA CREA)","Software‑based prescription digital therapeutic designed to improve functional outcomes in schizophrenia through structured behavioral interventions delivered via a mobile platform.","Digital therapeutic to improve functional outcomes in schizophrenia via mobile behavioral interventions","Software application (mobile/connected)","Digital (software‑delivered intervention)",,"Phase I"
+"BI 3972080","CT‑155","Prescription Digital Therapeutic (SaMD/PDT)","DTx","Mental Health / CNS (CREA)","Smartphone‑based PDT delivering evidence‑based psychosocial interventions (adaptive goal setting, cognitive restructuring, behavioral activation, social skills, positive‑affect training). Targets defeatist beliefs and promotes real‑world engagement to reduce experiential negative symptoms as an adjunct to standard‑of‑care antipsychotics.","Digital therapeutic for negative symptoms in schizophrenia","Software / Mobile App (SaMD)","Digital (smartphone‑delivered)",,"Phase III Completed"
+"BI 765128",,"Monoclonal Antibody","NBE","Eye Health","Anti-NRP1 antibody.","Anti-NRP1 monoclonal antibody for diabetic retinopathy (discontinued)","Injectable","Intravitreal","Mammalian","Pre-Clinical"
+"BI 3720931",,"Gene Therapy","NBE","Respiratory","Lentiviral vector-based gene therapy.","Gene therapy using lentiviral vectors for cystic fibrosis treatment","Inhalable (SFInh)",,,"Pre-Clinical"
+done
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 3810477",,"Monoclonal Antibody","NBE","Respiratory","Anti-CTGF antibody.","Monoclonal antibody targeting CTGF for IPF/PPF treatment",,,,,"Pre-Clinical"
+"BI 765243",,"Recombinant Proteins","NBE","Eye Health","TrkB/anti-VEGF (bispecific).","Bispecific protein targeting TrkB and VEGF for wet AMD",,,,,"Pre-Clinical"
+"BI 3794407",,"Small Molecule","NME","Immunology; CRM","cGAS inhibitor.","cGAS inhibitor for systemic sclerosis and interferonopathies",,,,,"Pre-Clinical"
+"BI 3731579",,"Small Molecule","NME","Respiratory","NOX4 inhibitor.","NOX4 inhibitor for prevention of IPF and PPF progression","Tablet",,"Organic Spray Drying; Roller Compaction","Pre-Clinical"
+done
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 3009947",,"Small Molecule","NME","Immunology","STING inhibitor.","STING inhibitor for systemic sclerosis and interferonopathies",,,,,"Pre-Clinical"
+"BI 1810631","Zongertinib","Small Molecule","NME","Oncology","Irreversible, HER2-selective Tyrosine Kinase Inhibitor (TKI).","An irreversible, HER2-selective TKI designed to block uncontrolled cell production in HER2-driven cancers like NSCLC.","Tablet","Oral","Organic Spray Drying; Roller Compaction","Registration"
+"BI 1015550","Nerandomilast","Small Molecule","NME","Respiratory; Immunology","An oral, preferential inhibitor of phosphodiesterase 4B (PDE4B).","A first-in-class oral PDE4B inhibitor that aims to stop disease progression in pulmonary fibrosis (PF).","Tablet","Oral","Twin Screw","Registration"
+"BI 456906","Survodutide","Peptides","NME","Cardiovascular-Renal-Metabolic (CRM)","A novel glucagon receptor (GCGR) and GLP-1 receptor dual agonist.","A GCGR/GLP-1 receptor dual agonist for people living with overweight or obesity, and for those with MASH.","Injectable","Injectable",,"Phase III"
+"BI 690517","Vicadrostat","Small Molecule","NME","Cardiovascular-Renal-Metabolic (CRM)","A novel, selective, and potent aldosterone synthase inhibitor (ASi).","An aldosterone synthase inhibitor used in combination with empagliflozin for cardiovascular and renal disease.","Tablet","Oral","Twin Screw","Phase III"
+done
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 685509","Avenciguat","Small Molecule","NME","Immunology; Cardiovascular-Renal-Metabolic (CRM)","A soluble guanylate cyclase (sGC) activator.","An sGC activator for fibrotic and vascular diseases, with a lead indication in Glomerulonephritis (GN).","Tablet","Oral","Direct Compression","Phase II"
+"BI 1569912",,"Small Molecule","NME","Mental Health","An oral, NMDA subunit 2b-selective negative allosteric modulator (NR2B NAM).","An oral NR2B NAM designed to rapidly relieve depressive symptoms in MDD without dissociative side effects.","Tablet","Oral",,"Discontinued"
+"BI 1358894",,"Small Molecule","NME","Mental Health","TRPC4/5 inhibitor.","A TRPC4/5 inhibitor targeting ion channels implicated in mood and stress-related disorders like PTSD.","Tablet","Oral","Fluid Bed","Discontinued"
+"BI 1291583",,"Small Molecule","NME","Respiratory; Immunology","Cathepsin C (CatC) inhibitor.","A CatC inhibitor for inflammatory lung conditions, targeting neutrophil serine proteases activation.","Tablet","Oral","Roller Compaction","Phase II"
+"BI 1819479",,"Small Molecule","NME","Respiratory; Immunology","Lysophospholipase inhibitor / Autotaxin (ATX) inhibitor.","An Autotaxin (ATX) inhibitor targeting the generation of lysophosphatidic acid (LPA) involved in fibrosis.","Tablet","Oral","High Shear","Phase II"
+done
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 706321",,"Small Molecule","NME","Immunology","RIPK2 inhibitor.","A RIPK2 inhibitor targeting the NOD signaling pathway involved in innate immunity and inflammation in IBD.","Tablet","Oral",,"Discontinued"
+"BI 3032950",,"Monoclonal Antibody","NBE","Immunology","TREM-1 antagonist.","A TREM-1 antagonist designed to reduce amplified inflammatory responses in conditions like Crohn's Disease.","Injectable","Injectable",,"Phase II"
+"BI 764198",,"Small Molecule","NME","Cardiovascular-Renal-Metabolic (CRM); Immunology","TRPC6 inhibitor.","A TRPC6 inhibitor targeting an ion channel implicated in the pathogenesis of kidney diseases like FSGS.","Tablet","Oral","Roller Compaction","Phase II"
+"BI 765845",,"Recombinant Proteins","NBE","Cardiovascular-Renal-Metabolic (CRM)","Heart disease modulator / MYDGF (Myeloid-derived growth factor)","A Myeloid-derived growth factor (MYDGF) targeting myocardial infarction (heart attack).","Injectable","Injectable","Microbial","Phase II"
+"BI 770371",,"Monoclonal Antibody","NBE","Cardiovascular-Renal-Metabolic (CRM); Oncology","SIRPα antagonist.","A SIRPα antagonist blocking the CD47 'don't eat me' signal to enable macrophage clearance of pathological cells in MASH and cancer.","Injectable","Injectable","Mammalian cell culture","Phase II"
+done
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 764524",,"Monoclonal Antibody","NBE","Eye Health","Sema3A (Semaphorin-3A) antibody.","A Sema3A antibody for retinal diseases like Diabetic Retinopathy, targeting vascular development.","Injectable","Intravitreal",,"Phase II"
+"BI 836880",,"Recombinant Proteins","NBE","Eye Health","VEGF / ANG2 (Vascular Endothelial Growth Factor / Angiopoietin-2) bispecific antibody.","A VEGF/ANG2 bispecific antibody for dual blockade of pathways involved in abnormal blood vessel formation in the eye.","Injectable","Intravitreal","Microbial","Discontinued"
+"BI 771716",,"Recombinant Proteins","NBE","Eye Health","Anti-C3 antibody fragment.","An anti-C3 antibody fragment targeting the complement cascade implicated in inflammation and cell death in Geographic Atrophy.","Injectable","Intravitreal","Microbial","Phase II"
+"BI 764532","Obrixtamig","Monoclonal Antibody","NBE","Oncology","DLL3/CD3 T-cell engager (bispecific antibody).","A DLL3/CD3 T-cell engager that brings T-cells and tumor cells together for selective killing in SCLC and other cancers.","Injectable","Injectable",,"Phase II"
+"BI 765063",,"Recombinant Proteins","NBE","Oncology","(Not specified in detail, inferred T-cell engager or similar immuno-oncology agent).","An inferred T-cell engager or immuno-oncology agent for Head and Neck Squamous Cell Carcinoma (HNSCC).","Injectable","Injectable (SFInj)","Mammalian","Discontinued"
+done
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 765049",,"Recombinant Proteins","NBE","Oncology","B7-H6/CD3 T-cell engager.","A B7-H6/CD3 T-cell engager designed to link T-cells to cancer cells expressing B7-H6 for targeted killing.","Injectable","Injectable (SFInj)","Mammalian","Phase I"
+"BI 765179",,"Monoclonal Antibody","NBE","Oncology","CD137/FAP agonist antibody.","A CD137/FAP agonist antibody targeting T-cell co-stimulation and tumor stroma to enhance anti-tumor immune responses.","Injectable","Injectable (SFInj)","Mammalian","Phase I"
+"BI 765250",,"Monoclonal Antibody","NBE","Immunology","PD-1 agonist.","A PD-1 agonist antibody for immunological conditions like Systemic Sclerosis (SSc).","Injectable","Injectable (SFInj)","Mammalian","Discontinued"
+"BI 765423",,"Monoclonal Antibody","NBE","Respiratory","Anti-IL11 antibody.","An anti-IL11 antibody designed to block the IL-11 cytokine implicated in fibrotic lung diseases.","Injectable","Injectable (SFInj)","Mammalian","Phase I"
+"BI 1703880",,"Small Molecule","NME","Oncology",,"An injectable small molecule for Non-Small Cell Lung Cancer (NSCLC).","Injectable","Injectable (SFInj)",,"Phase I"
+done
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 1831169",,"Recombinant Proteins","NBE","Oncology","VSV-GP OV (Vesicular Stomatitis Virus - Glycoprotein Oncolytic Virus).","An oncolytic virus gene therapy for solid tumors like PDAC, HNSCC, and Melanoma.","Injectable","Injectable (SFInj)","Mammalian","Phase I"
+"BI 1821736",,"Recombinant Proteins","NBE","Oncology","VSV-GP-CD80-Fc OV (Oncolytic Virus). This is a second-generation oncolytic virus, likely with enhanced immune-stimulatory properties via the CD80-Fc component.","A second-gen oncolytic virus with enhanced immune-stimulation via a CD80-Fc component, for HNSCC and Melanoma.","Injectable","Injectable (SFInj)","Mammalian","Discontinued"
+"BI 3006337",,"Peptides","NME","Cardiovascular-Renal-Metabolic (CRM)","GLP-1/FGF21 agonist.","A GLP-1/FGF21 dual agonist peptide for MASH.","Injectable","Injectable (SFInj)","Mammalian","Discontinued"
+"BI 754132",,"Small Molecule","NME","Eye Health","TrkB activator.","A TrkB activator designed to have neuroprotective effects in the retina for conditions like Geographic Atrophy (GA).","Injectable",,,"Discontinued"
+"BI 1584862",,"Small Molecule","NME","Eye Health","PAFR (Platelet-Activating Factor Receptor) antagonist.","A PAFR antagonist for Geographic Atrophy (GA).","Tablet","Oral","Roller Compaction","Phase I"
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 1815368",,"Small Molecule","NME","Eye Health","PKK (Plasma Kallikrein) inhibitor.","A Plasma Kallikrein (PKK) inhibitor for the prevention of wet age-related macular degeneration (nAMDp).","Tablet","Oral",,"Phase I"
+"BI 1839100",,"Small Molecule","NME","Respiratory","TRPA1 inhibitor.","A TRPA1 inhibitor targeting an ion channel involved in sensory nerve activation for the treatment of chronic cough.","Tablet","Oral",,"Discontinued"
+,"Ezabenlimab","Monoclonal Antibody","NBE","Oncology; Immunology","A humanized programmed cell death 1 (PD-1)-targeting monoclonal antibody.","A foundational PD-1 antibody designed to block the PD-1/PD-L1 pathway and enable T-cell attacks on cancer cells.","Injectable","Intravenous (IV)","Mammalian","Discontinued"
+"BI 3706674",,"Small Molecule","NME","Oncology","GDP KRAS inhibitor.","A targeted GDP KRAS inhibitor for KRAS-mutated cancers like Gastric, Esophageal, and Pancreatic cancer.","Tablet","Oral","Organic Spray Drying; Roller Compaction","Discontinued"
+"BI 3018078 / BI 3024308",,"Recombinant Proteins","NBE","Oncology","ATP128 + VCV-GP128 (combination of an antibody/protein and an oncolytic virus).","A combination gene therapy of an antibody/protein (ATP128) and an oncolytic virus (VCV-GP128) for Colorectal Cancer (CRC).","Injectable","Injectable (SFInj)","Microbial","Discontinued"
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 3810539",,"Recombinant Proteins","NBE","Oncology","DLL3 ADC (Antibody-Drug Conjugate).","A DLL3-targeting Antibody-Drug Conjugate (ADC) for Triple-Negative Breast Cancer (TNBC) and Small Cell Lung Cancer (SCLC).","Injectable",,,"Discontinued"
+"BI 3810944",,"Recombinant Proteins","NBE","Oncology","ODC-IL12 (likely a cytokine-based therapy).","An ODC-IL12 cytokine-based therapy for Melanoma.","Injectable",,,"Pre-Clinical"
+"BI 3907074 / BI 3907075 / BI 3720590",,"Recombinant Proteins","NBE","Oncology","ATP150/ATP152 + VSV-GP154 (A complex combination, likely involving multiple proteins and an oncolytic virus).","A complex gene therapy combining multiple proteins and an oncolytic virus for Pancreatic Ductal Adenocarcinoma (PDAC).","Injectable",,"Microbial","Pre-Clinical"
+"BI 3923948",,"Recombinant Proteins","NBE","Oncology","VSV-GP-GSDME-IL12 (Oncolytic virus engineered with Gasdermin E and Interleukin-12).","An engineered oncolytic virus designed to induce inflammatory cell death (pyroptosis) and stimulate a strong immune response in TNBC.",,,,,"Pre-Clinical"
+"BI 765883",,"Monoclonal Antibody","NBE","Oncology","TRAILR2/CDH3 Antibody.","A TRAILR2/CDH3 dual-targeting antibody for Pancreatic Ductal Adenocarcinoma (PDAC).",,,,,"Discontinued"
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 3034701",,"Peptides","NME","Cardiovascular-Renal-Metabolic (CRM)","GLP-1R/GIPR/NPY2R agonist (A tri-agonist).","A GLP-1R/GIPR/NPY2R tri-agonist peptide for the treatment of Obesity.","Injectable",,,"Pre-Clinical"
+"BI 3060292",,"Small Molecule","NME","Cardiovascular-Renal-Metabolic (CRM)","NMUR2 agonist.","An NMUR2 agonist small molecule for Obesity.","Injectable",,,"Discontinued"
+"BI 3802876",,"Recombinant Proteins","NBE","Cardiovascular-Renal-Metabolic (CRM)","FAP-TRAILR2 agonist.","A FAP-TRAILR2 agonist for MASH.","Injectable",,"Mammalian","Discontinued"
+"BI 3804379",,"Recombinant Proteins","NBE","Cardiovascular-Renal-Metabolic (CRM)","Not specified.","An injectable recombinant protein for MASH.","Injectable",,"Mammalian","Discontinued"
+"BI 3906517",,"Small Molecule","NME","Cardiovascular-Renal-Metabolic (CRM)","LG3RA (Leptin receptor antagonist).","A Leptin receptor antagonist for Obesity.",,,,,"Discontinued"
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 1356225",,"Small Molecule","NME","Mental Health; CRM","GOAT (Ghrelin O-acyltransferase) inhibitor.","A GOAT inhibitor for Impulsivity, Substance Use Disorder, and Obesity.",,,,,"Discontinued"
+"BI 3031185",,"Small Molecule","NME","Mental Health","mGluR4 NAM (Negative Allosteric Modulator).","An mGluR4 Negative Allosteric Modulator for Impulsivity.","Tablet",,,"Pre-Clinical"
+"BI 3776528",,"Small Molecule","NME","Mental Health","SSTR4 agonist.","An SSTR4 agonist small molecule for Cognitive Impairment Post-Stroke Depression (CI PSD).","Tablet",,,"Discontinued"
+"BI 3793898",,"Small Molecule","NME","Mental Health","mGluR3 PAM (Positive Allosteric Modulator).","An mGluR3 Positive Allosteric Modulator for Cognitive Impairment Associated with Schizophrenia (CIAS).",,,,,"Discontinued"
+"BI 3000202",,"Small Molecule","NME","Immunology","cGAS inhibitor.","A cGAS inhibitor small molecule for Systemic Sclerosis (SSc) and Interferonopathies (IFN).","Tablet",,"Roller Compaction","Pre-Clinical"

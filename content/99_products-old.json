@@ -2,7 +2,7 @@
   {
     "product_code": "BI 3822971",
     "product_name": "Not disclosed",
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Antibodies",
     "process_template_name": null,
     "product_type": "NBE (ntm)",
     "therapeutic_area": "Oncology",
@@ -91,7 +91,7 @@
   {
     "product_code": null,
     "product_name": "Spesolimab",
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Antibodies",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Immunology; Neutrophilic Dermatoses",
@@ -145,7 +145,7 @@
   {
     "product_code": "BI 3814916",
     "product_name": "Not yet assigned",
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Antibodies",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "CRM; MASH",
@@ -190,7 +190,7 @@
   {
     "product_code": "BI 3819026",
     "product_name": "Anti-LAYN antibody",
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Antibodies",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -239,7 +239,7 @@
   {
     "product_code": "BI 3821001",
     "product_name": "DcR3-Fc",
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Immunology; IBD",
@@ -495,7 +495,7 @@
   {
     "product_code": "BI 3820768",
     "product_name": null,
-    "modality_name": "T-cell Engager",
+    "modality_name": "T‑cell Engager",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology (Solid Tumors)",
@@ -1601,7 +1601,7 @@
   {
     "product_code": "BI 3032950",
     "product_name": null,
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Antibodies",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Immunology",
@@ -1693,7 +1693,7 @@
   {
     "product_code": "BI 765845",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Cardiovascular-Renal-Metabolic (CRM)",
@@ -1746,7 +1746,7 @@
   {
     "product_code": "BI 770371",
     "product_name": null,
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Antibodies",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Cardiovascular-Renal-Metabolic (CRM); Oncology",
@@ -1791,7 +1791,7 @@
   {
     "product_code": "BI 764524",
     "product_name": null,
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Antibodies",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Eye Health",
@@ -1844,7 +1844,7 @@
   {
     "product_code": "BI 836880",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Eye Health",
@@ -1897,7 +1897,7 @@
   {
     "product_code": "BI 771716",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Eye Health",
@@ -1943,7 +1943,7 @@
   {
     "product_code": "BI 764532",
     "product_name": "Obrixtamig",
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -2008,7 +2008,7 @@
   {
     "product_code": "BI 765063",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -2061,7 +2061,7 @@
   {
     "product_code": "BI 765049",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -2114,7 +2114,7 @@
   {
     "product_code": "BI 765179",
     "product_name": null,
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Antibodies",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -2160,7 +2160,7 @@
   {
     "product_code": "BI 765250",
     "product_name": null,
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Antibodies",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Immunology",
@@ -2199,7 +2199,7 @@
   {
     "product_code": "BI 765423",
     "product_name": null,
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Antibodies",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Respiratory",
@@ -2291,7 +2291,7 @@
   {
     "product_code": "BI 1831169",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -2344,7 +2344,7 @@
   {
     "product_code": "BI 1821736",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -2641,7 +2641,7 @@
   {
     "product_code": null,
     "product_name": "Ezabenlimab",
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Antibodies",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology; Immunology",
@@ -2753,7 +2753,7 @@
   {
     "product_code": "BI 3018078 / BI 3024308",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -2792,7 +2792,7 @@
   {
     "product_code": "BI 3810539",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -2831,7 +2831,7 @@
   {
     "product_code": "BI 3810944",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -2870,7 +2870,7 @@
   {
     "product_code": "BI 3907074 / BI 3907075 / BI 3720590",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -2909,7 +2909,7 @@
   {
     "product_code": "BI 3923948",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -2948,7 +2948,7 @@
   {
     "product_code": "BI 765883",
     "product_name": null,
-    "modality_name": "Monoclonal Antibody",
+    "modality_name": "Antibodies",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Oncology",
@@ -3079,7 +3079,7 @@
   {
     "product_code": "BI 3802876",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Cardiovascular-Renal-Metabolic (CRM)",
@@ -3118,7 +3118,7 @@
   {
     "product_code": "BI 3804379",
     "product_name": null,
-    "modality_name": "Recombinant Proteins",
+    "modality_name": "Biologics",
     "process_template_name": null,
     "product_type": "NBE",
     "therapeutic_area": "Cardiovascular-Renal-Metabolic (CRM)",
