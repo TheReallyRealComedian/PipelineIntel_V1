@@ -71,18 +71,12 @@ product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_
 done
 
 product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
-"BI 1831169",,"Recombinant Proteins","NBE","Oncology","VSV-GP OV (Vesicular Stomatitis Virus - Glycoprotein Oncolytic Virus).","An oncolytic virus gene therapy for solid tumors like PDAC, HNSCC, and Melanoma.","Injectable","Injectable (SFInj)","Mammalian","Phase I"
-"BI 1821736",,"Recombinant Proteins","NBE","Oncology","VSV-GP-CD80-Fc OV (Oncolytic Virus). This is a second-generation oncolytic virus, likely with enhanced immune-stimulatory properties via the CD80-Fc component.","A second-gen oncolytic virus with enhanced immune-stimulation via a CD80-Fc component, for HNSCC and Melanoma.","Injectable","Injectable (SFInj)","Mammalian","Discontinued"
-"BI 3006337",,"Peptides","NME","Cardiovascular-Renal-Metabolic (CRM)","GLP-1/FGF21 agonist.","A GLP-1/FGF21 dual agonist peptide for MASH.","Injectable","Injectable (SFInj)","Mammalian","Discontinued"
-"BI 754132",,"Small Molecule","NME","Eye Health","TrkB activator.","A TrkB activator designed to have neuroprotective effects in the retina for conditions like Geographic Atrophy (GA).","Injectable",,,"Discontinued"
-"BI 1584862",,"Small Molecule","NME","Eye Health","PAFR (Platelet-Activating Factor Receptor) antagonist.","A PAFR antagonist for Geographic Atrophy (GA).","Tablet","Oral","Roller Compaction","Phase I"
-
-product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
 "BI 1815368",,"Small Molecule","NME","Eye Health","PKK (Plasma Kallikrein) inhibitor.","A Plasma Kallikrein (PKK) inhibitor for the prevention of wet age-related macular degeneration (nAMDp).","Tablet","Oral",,"Phase I"
 "BI 1839100",,"Small Molecule","NME","Respiratory","TRPA1 inhibitor.","A TRPA1 inhibitor targeting an ion channel involved in sensory nerve activation for the treatment of chronic cough.","Tablet","Oral",,"Discontinued"
 ,"Ezabenlimab","Monoclonal Antibody","NBE","Oncology; Immunology","A humanized programmed cell death 1 (PD-1)-targeting monoclonal antibody.","A foundational PD-1 antibody designed to block the PD-1/PD-L1 pathway and enable T-cell attacks on cancer cells.","Injectable","Intravenous (IV)","Mammalian","Discontinued"
 "BI 3706674",,"Small Molecule","NME","Oncology","GDP KRAS inhibitor.","A targeted GDP KRAS inhibitor for KRAS-mutated cancers like Gastric, Esophageal, and Pancreatic cancer.","Tablet","Oral","Organic Spray Drying; Roller Compaction","Discontinued"
 "BI 3018078 / BI 3024308",,"Recombinant Proteins","NBE","Oncology","ATP128 + VCV-GP128 (combination of an antibody/protein and an oncolytic virus).","A combination gene therapy of an antibody/protein (ATP128) and an oncolytic virus (VCV-GP128) for Colorectal Cancer (CRC).","Injectable","Injectable (SFInj)","Microbial","Discontinued"
+done
 
 product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
 "BI 3810539",,"Recombinant Proteins","NBE","Oncology","DLL3 ADC (Antibody-Drug Conjugate).","A DLL3-targeting Antibody-Drug Conjugate (ADC) for Triple-Negative Breast Cancer (TNBC) and Small Cell Lung Cancer (SCLC).","Injectable",,,"Discontinued"
@@ -90,6 +84,7 @@ product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_
 "BI 3907074 / BI 3907075 / BI 3720590",,"Recombinant Proteins","NBE","Oncology","ATP150/ATP152 + VSV-GP154 (A complex combination, likely involving multiple proteins and an oncolytic virus).","A complex gene therapy combining multiple proteins and an oncolytic virus for Pancreatic Ductal Adenocarcinoma (PDAC).","Injectable",,"Microbial","Pre-Clinical"
 "BI 3923948",,"Recombinant Proteins","NBE","Oncology","VSV-GP-GSDME-IL12 (Oncolytic virus engineered with Gasdermin E and Interleukin-12).","An engineered oncolytic virus designed to induce inflammatory cell death (pyroptosis) and stimulate a strong immune response in TNBC.",,,,,"Pre-Clinical"
 "BI 765883",,"Monoclonal Antibody","NBE","Oncology","TRAILR2/CDH3 Antibody.","A TRAILR2/CDH3 dual-targeting antibody for Pancreatic Ductal Adenocarcinoma (PDAC).",,,,,"Discontinued"
+done
 
 product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
 "BI 3034701",,"Peptides","NME","Cardiovascular-Renal-Metabolic (CRM)","GLP-1R/GIPR/NPY2R agonist (A tri-agonist).","A GLP-1R/GIPR/NPY2R tri-agonist peptide for the treatment of Obesity.","Injectable",,,"Pre-Clinical"
@@ -97,6 +92,7 @@ product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_
 "BI 3802876",,"Recombinant Proteins","NBE","Cardiovascular-Renal-Metabolic (CRM)","FAP-TRAILR2 agonist.","A FAP-TRAILR2 agonist for MASH.","Injectable",,"Mammalian","Discontinued"
 "BI 3804379",,"Recombinant Proteins","NBE","Cardiovascular-Renal-Metabolic (CRM)","Not specified.","An injectable recombinant protein for MASH.","Injectable",,"Mammalian","Discontinued"
 "BI 3906517",,"Small Molecule","NME","Cardiovascular-Renal-Metabolic (CRM)","LG3RA (Leptin receptor antagonist).","A Leptin receptor antagonist for Obesity.",,,,,"Discontinued"
+done
 
 product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
 "BI 1356225",,"Small Molecule","NME","Mental Health; CRM","GOAT (Ghrelin O-acyltransferase) inhibitor.","A GOAT inhibitor for Impulsivity, Substance Use Disorder, and Obesity.",,,,,"Discontinued"
@@ -104,3 +100,17 @@ product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_
 "BI 3776528",,"Small Molecule","NME","Mental Health","SSTR4 agonist.","An SSTR4 agonist small molecule for Cognitive Impairment Post-Stroke Depression (CI PSD).","Tablet",,,"Discontinued"
 "BI 3793898",,"Small Molecule","NME","Mental Health","mGluR3 PAM (Positive Allosteric Modulator).","An mGluR3 Positive Allosteric Modulator for Cognitive Impairment Associated with Schizophrenia (CIAS).",,,,,"Discontinued"
 "BI 3000202",,"Small Molecule","NME","Immunology","cGAS inhibitor.","A cGAS inhibitor small molecule for Systemic Sclerosis (SSc) and Interferonopathies (IFN).","Tablet",,"Roller Compaction","Pre-Clinical"
+done
+
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 3006337",,"Peptides","NME","Cardiovascular-Renal-Metabolic (CRM)","GLP-1/FGF21 agonist.","A GLP-1/FGF21 dual agonist peptide for MASH.","Injectable","Injectable (SFInj)","Mammalian","Discontinued"
+"BI 754132",,"Small Molecule","NME","Eye Health","TrkB activator.","A TrkB activator designed to have neuroprotective effects in the retina for conditions like Geographic Atrophy (GA).","Injectable",,,"Discontinued"
+"BI 1584862",,"Small Molecule","NME","Eye Health","PAFR (Platelet-Activating Factor Receptor) antagonist.","A PAFR antagonist for Geographic Atrophy (GA).","Tablet","Oral","Roller Compaction","Phase I"
+done
+
+
+product_code,product_name,modality_name,product_type,therapeutic_area,mechanism_of_action,short_description,dosage_form,route_of_administration,base_technology,current_phase
+"BI 1831169",,"Recombinant Proteins","NBE","Oncology","VSV-GP OV (Vesicular Stomatitis Virus - Glycoprotein Oncolytic Virus).","An oncolytic virus gene therapy for solid tumors like PDAC, HNSCC, and Melanoma.","Injectable","Injectable (SFInj)","Mammalian","Phase I"
+"BI 1821736",,"Recombinant Proteins","NBE","Oncology","VSV-GP-CD80-Fc OV (Oncolytic Virus). This is a second-generation oncolytic virus, likely with enhanced immune-stimulatory properties via the CD80-Fc component.","A second-gen oncolytic virus with enhanced immune-stimulation via a CD80-Fc component, for HNSCC and Melanoma.","Injectable","Injectable (SFInj)","Mammalian","Discontinued"
+done
