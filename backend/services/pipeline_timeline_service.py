@@ -16,7 +16,6 @@ from ..models import Product, Modality, db
 class PipelineTimelineService:
     """Service for generating pipeline timeline data based on configuration."""
     
-    # Color schemes for different modalities (can be extended)
     MODALITY_COLORS = {
         'Small Molecule': '#3498db',
         'Monoclonal Antibody': '#2ecc71',
@@ -31,7 +30,6 @@ class PipelineTimelineService:
         'Default': '#95a5a6'
     }
     
-    # Icons for different modalities
     MODALITY_ICONS = {
         'Small Molecule': 'fas fa-pills',
         'Monoclonal Antibody': 'fas fa-syringe',
@@ -82,15 +80,10 @@ class PipelineTimelineService:
                 "metadata": {...}
             }
         """
-        # Fetch base product data
         products = self._fetch_products(config.get('filters', {}))
-        
-        # Build timeline units (x-axis)
         timeline_units = self._build_timeline_units(config, products)
         
-        # Build swim lanes (y-axis grouping)
         if config.get('groupingMode') == 'none':
-            # Single list of elements
             elements = self._prepare_elements(products, config, timeline_units)
             return {
                 'timeline_units': timeline_units,
@@ -99,7 +92,6 @@ class PipelineTimelineService:
                 'metadata': self._build_metadata(config, products, timeline_units)
             }
         else:
-            # Multiple swim lanes
             swim_lanes = self._build_swim_lanes(products, config, timeline_units)
             return {
                 'timeline_units': timeline_units,
@@ -126,21 +118,15 @@ class PipelineTimelineService:
         """
         query = self.db.query(Product).options(
             joinedload(Product.modality),
-            joinedload(Product.parent_nme)  # NEW: Load parent for Line-Extensions
+            joinedload(Product.parent_nme)
         )
         
-        # ========== NEW FILTERS FOR PHASE 2 ==========
-        
-        # Filter 1: Include/Exclude Line-Extensions
         include_line_extensions = filters.get('include_line_extensions', True)
         if not include_line_extensions:
-            # Only show NMEs
             query = query.filter(Product.is_nme == True)
         
-        # Filter 2: Exclude Discontinued Projects
         exclude_discontinued = filters.get('exclude_discontinued', True)
         if exclude_discontinued:
-            # Exclude discontinued products
             query = query.filter(
                 or_(
                     Product.project_status == None,
@@ -148,9 +134,6 @@ class PipelineTimelineService:
                 )
             )
         
-        # ========== EXISTING FILTERS (UNCHANGED) ==========
-        
-        # Apply existing filters
         if filters.get('therapeutic_area'):
             query = query.filter(Product.therapeutic_area == filters['therapeutic_area'])
         
@@ -164,12 +147,9 @@ class PipelineTimelineService:
         if filters.get('modality_id'):
             query = query.filter(Product.modality_id == filters['modality_id'])
         
-        # Note: project_status filter is now handled by exclude_discontinued
-        # but we keep backward compatibility
         if filters.get('project_status') and not exclude_discontinued:
             query = query.filter(Product.project_status == filters['project_status'])
         
-        # Only include products with some timeline information
         query = query.filter(
             or_(
                 Product.expected_launch_year.isnot(None),
@@ -215,11 +195,9 @@ class PipelineTimelineService:
         if preset == 'custom' and config.get('customSegments'):
             return [seg['label'] for seg in config['customSegments']]
         
-        # Determine year range from products
         years = [p.expected_launch_year for p in products if p.expected_launch_year]
         
         if not years:
-            # Default range if no years available
             current_year = datetime.now().year
             years = list(range(current_year, current_year + 10))
         else:
@@ -231,7 +209,6 @@ class PipelineTimelineService:
             return [str(year) for year in years]
         
         elif preset == 'grouped':
-            # Group into 3-year segments
             segments = []
             start_year = min(years)
             while start_year <= max(years):
@@ -259,11 +236,8 @@ class PipelineTimelineService:
             List of swim lane dictionaries
         """
         grouping_mode = config.get('groupingMode', 'modality')
-        
-        # Group products
         grouped = self._group_products(products, grouping_mode)
         
-        # Build swim lane structure
         swim_lanes = []
         for group_name, group_products in grouped.items():
             elements = self._prepare_elements(group_products, config, timeline_units)
@@ -274,7 +248,6 @@ class PipelineTimelineService:
                 'elements': elements
             })
         
-        # Sort swim lanes by name
         swim_lanes.sort(key=lambda x: x['group_name'])
         
         return swim_lanes
@@ -346,7 +319,6 @@ class PipelineTimelineService:
         for product in products:
             position = self._get_product_position(product, config)
             
-            # Skip if position not in timeline units
             if position not in timeline_units:
                 continue
             
@@ -362,8 +334,14 @@ class PipelineTimelineService:
                     'product_name': product.product_name,
                     'current_phase': product.current_phase,
                     'expected_launch_year': product.expected_launch_year,
+                    'project_status': product.project_status,
                     'therapeutic_area': product.therapeutic_area,
-                    'modality_name': product.modality.modality_name if product.modality else None
+                    'modality_name': product.modality.modality_name if product.modality else None,
+                    'is_nme': product.is_nme,
+                    'is_line_extension': product.is_line_extension,
+                    'line_extension_indication': product.line_extension_indication,
+                    'launch_sequence': product.launch_sequence,
+                    'parent_product_id': product.parent_product_id,
                 },
                 'visual': visual,
                 'count': 1
@@ -385,7 +363,6 @@ class PipelineTimelineService:
         Returns:
             List of modality element dictionaries
         """
-        # Group by timeline position and modality
         aggregated = {}
         
         for product in products:
@@ -405,7 +382,6 @@ class PipelineTimelineService:
             
             aggregated[key]['products'].append(product)
         
-        # Convert to element list
         elements = []
         for (position, modality_name), data in aggregated.items():
             modality = data['modality']
@@ -447,7 +423,6 @@ class PipelineTimelineService:
         if config.get('timelineMode') == 'phase':
             return product.current_phase or 'Unknown'
         else:
-            # Year-based positioning
             year = product.expected_launch_year
             if not year:
                 return None
@@ -458,12 +433,9 @@ class PipelineTimelineService:
                 return str(year)
             
             elif preset == 'grouped':
-                # Find which 3-year segment this belongs to
-                # This is a simplified version - we'd need the actual segments
                 return str(year)
             
             elif preset == 'custom':
-                # Find which custom segment this belongs to
                 segments = config.get('customSegments', [])
                 for segment in segments:
                     if segment['yearStart'] <= year <= segment['yearEnd']:
@@ -485,7 +457,6 @@ class PipelineTimelineService:
         """
         color_by = config.get('colorBy', 'modality')
         
-        # Determine color
         if color_by == 'modality' and product.modality:
             modality_name = product.modality.modality_name
             color = self.MODALITY_COLORS.get(modality_name, self.MODALITY_COLORS['Default'])
@@ -494,7 +465,6 @@ class PipelineTimelineService:
             color = self.MODALITY_COLORS['Default']
             icon = self.MODALITY_ICONS['Default']
         
-        # Determine label
         label = product.product_code or product.product_name
         
         return {
@@ -519,9 +489,8 @@ class PipelineTimelineService:
             'group_name': group_name
         }
     
-
     def _build_metadata(self, config: Dict[str, Any], products: List[Product], 
-                    timeline_units: List[str]) -> Dict[str, Any]:
+                        timeline_units: List[str]) -> Dict[str, Any]:
         """
         Builds metadata about the timeline including filter information.
         
@@ -535,11 +504,8 @@ class PipelineTimelineService:
         """
         filters = config.get('filters', {})
         
-        # Count NMEs vs Line-Extensions in filtered results
         nme_count = sum(1 for p in products if p.is_nme)
         line_ext_count = sum(1 for p in products if p.is_line_extension)
-        
-        # Count discontinued (if they're included)
         discontinued_count = sum(1 for p in products if p.project_status == 'Discontinued')
         active_count = len(products) - discontinued_count
         
@@ -562,7 +528,6 @@ class PipelineTimelineService:
         }
 
 
-# Singleton instance
 _timeline_service = None
 
 def get_timeline_service(db_session: Session = None) -> PipelineTimelineService:

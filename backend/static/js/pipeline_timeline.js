@@ -130,23 +130,43 @@ class PipelineTimeline {
      * Displays metadata about filtered products
      */
     displayMetadata(metadata) {
+        if (!metadata) return;
+        
         const statusDiv = document.getElementById('filterStatus');
         const statusText = document.getElementById('filterStatusText');
         
-        if (!metadata || !statusDiv || !statusText) return;
+        if (!statusDiv || !statusText) return;
         
-        let message = `Showing ${metadata.total_products} product${metadata.total_products !== 1 ? 's' : ''}`;
+        let parts = [];
         
-        if (metadata.nme_count > 0 && metadata.line_extension_count > 0) {
-            message += ` (${metadata.nme_count} NMEs, ${metadata.line_extension_count} Line-Extensions)`;
+        if (metadata.nme_count > 0 || metadata.line_extension_count > 0) {
+            let productInfo = `${metadata.total_products} product${metadata.total_products !== 1 ? 's' : ''}`;
+            
+            if (metadata.nme_count > 0 && metadata.line_extension_count > 0) {
+                productInfo += ` (${metadata.nme_count} NMEs, ${metadata.line_extension_count} Line-Extensions)`;
+            } else if (metadata.nme_count > 0) {
+                productInfo += ` (${metadata.nme_count} NMEs only)`;
+            } else if (metadata.line_extension_count > 0) {
+                productInfo += ` (${metadata.line_extension_count} Line-Extensions only)`;
+            }
+            
+            parts.push(`Showing ${productInfo}`);
         }
         
-        if (metadata.discontinued_count > 0 && metadata.active_filters.exclude_discontinued) {
-            message += ` — ${metadata.discontinued_count} discontinued hidden`;
+        if (metadata.discontinued_count > 0) {
+            if (metadata.active_filters.exclude_discontinued) {
+                parts.push(`${metadata.discontinued_count} discontinued hidden`);
+            } else {
+                parts.push(`${metadata.discontinued_count} discontinued included`);
+            }
         }
         
-        statusDiv.style.display = 'block';
-        statusText.textContent = message;
+        if (parts.length > 0) {
+            statusDiv.style.display = 'block';
+            statusText.innerHTML = `<strong>${parts[0]}</strong>${parts.length > 1 ? ' — ' + parts.slice(1).join(', ') : ''}`;
+        } else {
+            statusDiv.style.display = 'none';
+        }
     }
 
     /**
@@ -239,11 +259,29 @@ class PipelineTimeline {
     }
 
     /**
-     * Renders a single element (product or modality box)
+     * Renders a single element (product or modality box) with visual distinction
      */
     renderElement(element) {
         const box = document.createElement('div');
+        
         box.className = `timeline-element ${element.type}`;
+        
+        if (element.data && element.type === 'product') {
+            if (element.data.is_nme) {
+                box.classList.add('nme');
+                box.setAttribute('data-is-nme', 'true');
+            }
+            
+            if (element.data.is_line_extension) {
+                box.classList.add('line-extension');
+                box.setAttribute('data-is-line-extension', 'true');
+            }
+            
+            if (element.data.project_status === 'Discontinued') {
+                box.classList.add('discontinued');
+            }
+        }
+        
         box.dataset.id = element.id;
         box.dataset.type = element.type;
         
@@ -252,11 +290,17 @@ class PipelineTimeline {
             box.style.borderColor = this.darkenColor(element.visual.color || '#6c757d');
         }
 
+        let labelHtml = element.visual ? element.visual.label : element.id;
+        
+        if (element.data && element.data.is_line_extension && element.data.line_extension_indication) {
+            labelHtml += ` <small>(${element.data.line_extension_indication})</small>`;
+        }
+
         box.innerHTML = `
             <div class="element-content">
                 ${element.visual && element.visual.icon ? 
                     `<i class="${element.visual.icon}"></i>` : ''}
-                <span class="element-label">${element.visual ? element.visual.label : element.id}</span>
+                <span class="element-label">${labelHtml}</span>
                 ${element.count > 1 ? 
                     `<span class="element-count badge">${element.count}</span>` : ''}
             </div>
@@ -303,14 +347,27 @@ class PipelineTimeline {
     }
 
     /**
-     * Generates tooltip text for an element
+     * Enhanced tooltip generation with NME/LE info
      */
     generateTooltip(element) {
         let tooltip = element.data.product_name || element.data.modality_name || element.id;
         
         if (element.type === 'product') {
+            if (element.data.is_nme) {
+                tooltip += '\n🔹 NME (New Molecular Entity)';
+            } else if (element.data.is_line_extension) {
+                tooltip += '\n🔸 Line-Extension';
+                if (element.data.line_extension_indication) {
+                    tooltip += ` - ${element.data.line_extension_indication}`;
+                }
+            }
+            
             tooltip += `\nPhase: ${element.data.current_phase || 'N/A'}`;
             tooltip += `\nLaunch: ${element.data.expected_launch_year || 'TBD'}`;
+            
+            if (element.data.project_status) {
+                tooltip += `\nStatus: ${element.data.project_status}`;
+            }
         }
         
         if (element.count > 1) {
