@@ -18,13 +18,13 @@ class PipelineTimeline {
      */
     getDefaultConfig() {
         return {
-            timelineMode: 'year',           // 'year' | 'phase'
-            yearSegmentPreset: 'individual', // 'individual' | 'grouped' | 'custom'
-            customSegments: [],              // Array of {label, yearStart, yearEnd}
-            groupingMode: 'modality',        // 'modality' | 'therapeutic_area' | 'product_type' | 'none'
-            elementType: 'product',          // 'product' | 'modality'
-            colorBy: 'modality',             // What determines color
-            filters: {}                      // Additional filters
+            timelineMode: 'year',
+            yearSegmentPreset: 'individual',
+            customSegments: [],
+            groupingMode: 'modality',
+            elementType: 'product',
+            colorBy: 'modality',
+            filters: {}
         };
     }
 
@@ -36,14 +36,17 @@ class PipelineTimeline {
             timelineMode: document.getElementById('timelineMode').value,
             groupingMode: document.getElementById('groupingMode').value,
             elementType: document.getElementById('elementType').value,
-            colorBy: 'modality', // We'll add this control later
+            colorBy: 'modality',
             filters: {}
         };
 
-        // Get year segment configuration if in year mode
+        config.filters.include_line_extensions = document.getElementById('includeLineExtensions').checked;
+        config.filters.exclude_discontinued = document.getElementById('excludeDiscontinued').checked;
+
         if (config.timelineMode === 'year') {
             const activePreset = document.querySelector('[data-preset].active');
-            config.yearSegmentPreset = activePreset ? activePreset.dataset.preset : 'individual';
+            config.yearSegmentPreset = activePreset ? 
+                activePreset.dataset.preset : 'individual';
             
             if (config.yearSegmentPreset === 'custom') {
                 config.customSegments = this.getCustomSegments();
@@ -55,11 +58,8 @@ class PipelineTimeline {
 
     /**
      * Gets custom segment configuration from UI
-     * (Placeholder for now - we'll implement the builder in next step)
      */
     getCustomSegments() {
-        // For now, return empty array
-        // We'll add the segment builder UI in the next step
         return [];
     }
 
@@ -70,13 +70,10 @@ class PipelineTimeline {
         try {
             this.showLoading(true);
             
-            // Get current configuration
             this.config = this.getCurrentConfig();
             
-            // Fetch data from backend
             this.data = await this.fetchTimelineData(this.config);
             
-            // Render the timeline
             this.render();
             
             this.showLoading(false);
@@ -116,17 +113,40 @@ class PipelineTimeline {
             return;
         }
 
-        // Clear container
         this.container.innerHTML = '';
 
-        // Render timeline header
         this.renderTimelineHeader();
 
-        // Render swim lanes
         this.renderSwimLanes();
 
-        // Attach interactivity
         this.attachEventListeners();
+
+        if (this.data && this.data.metadata) {
+            this.displayMetadata(this.data.metadata);
+        }
+    }
+
+    /**
+     * Displays metadata about filtered products
+     */
+    displayMetadata(metadata) {
+        const statusDiv = document.getElementById('filterStatus');
+        const statusText = document.getElementById('filterStatusText');
+        
+        if (!metadata || !statusDiv || !statusText) return;
+        
+        let message = `Showing ${metadata.total_products} product${metadata.total_products !== 1 ? 's' : ''}`;
+        
+        if (metadata.nme_count > 0 && metadata.line_extension_count > 0) {
+            message += ` (${metadata.nme_count} NMEs, ${metadata.line_extension_count} Line-Extensions)`;
+        }
+        
+        if (metadata.discontinued_count > 0 && metadata.active_filters.exclude_discontinued) {
+            message += ` — ${metadata.discontinued_count} discontinued hidden`;
+        }
+        
+        statusDiv.style.display = 'block';
+        statusText.textContent = message;
     }
 
     /**
@@ -160,13 +180,11 @@ class PipelineTimeline {
         lanesContainer.className = 'timeline-lanes-container';
 
         if (this.config.groupingMode === 'none') {
-            // Single lane with all elements
             lanesContainer.appendChild(this.renderSwimLane({
                 group_name: 'All Products',
                 elements: this.data.elements || []
             }));
         } else {
-            // Multiple swim lanes
             this.data.swim_lanes.forEach(lane => {
                 lanesContainer.appendChild(this.renderSwimLane(lane));
             });
@@ -194,22 +212,18 @@ class PipelineTimeline {
         const laneContent = document.createElement('div');
         laneContent.className = 'timeline-lane-content';
 
-        // Create grid for timeline units
         const grid = document.createElement('div');
         grid.className = 'timeline-grid';
         
-        // Create cells for each timeline unit
         this.data.timeline_units.forEach(unit => {
             const cell = document.createElement('div');
             cell.className = 'timeline-cell';
             cell.dataset.unit = unit;
 
-            // Find elements that belong in this cell
             const elementsInCell = laneData.elements.filter(el => 
                 this.isElementInTimelineUnit(el, unit)
             );
 
-            // Render elements in this cell
             elementsInCell.forEach(element => {
                 cell.appendChild(this.renderElement(element));
             });
@@ -233,7 +247,6 @@ class PipelineTimeline {
         box.dataset.id = element.id;
         box.dataset.type = element.type;
         
-        // Apply visual styling from backend
         if (element.visual) {
             box.style.backgroundColor = element.visual.color || '#6c757d';
             box.style.borderColor = this.darkenColor(element.visual.color || '#6c757d');
@@ -249,7 +262,6 @@ class PipelineTimeline {
             </div>
         `;
 
-        // Add tooltip
         box.title = this.generateTooltip(element);
 
         return box;
@@ -262,7 +274,6 @@ class PipelineTimeline {
         if (this.config.timelineMode === 'phase') {
             return element.position === unit;
         } else {
-            // Year-based positioning
             return element.position === unit;
         }
     }
@@ -272,9 +283,9 @@ class PipelineTimeline {
      */
     formatTimelineUnit(unit) {
         if (this.config.timelineMode === 'phase') {
-            return unit; // e.g., "Phase I"
+            return unit;
         } else {
-            return unit.toString(); // e.g., "2025"
+            return unit.toString();
         }
     }
 
@@ -328,11 +339,9 @@ class PipelineTimeline {
         const id = element.dataset.id;
 
         if (type === 'product') {
-            // Navigate to product detail page
             window.location.href = `/products/${id}`;
         } else if (type === 'modality') {
-            // Navigate to modality page (or open modal with product list)
-            window.location.href = `/modalities`; // We could pass a filter here
+            window.location.href = `/modalities`;
         }
     }
 
@@ -366,7 +375,6 @@ class PipelineTimeline {
             return;
         }
 
-        // Create a simple modal for view selection
         const modal = document.createElement('div');
         modal.className = 'modal fade show';
         modal.style.display = 'block';
@@ -408,7 +416,6 @@ class PipelineTimeline {
 
         document.body.appendChild(modal);
 
-        // Event listeners for modal
         modal.querySelector('.btn-close').addEventListener('click', () => {
             modal.remove();
         });
@@ -432,7 +439,7 @@ class PipelineTimeline {
                     delete this.savedViews[btn.dataset.view];
                     this.persistSavedViews();
                     modal.remove();
-                    this.showLoadViewDialog(); // Refresh the dialog
+                    this.showLoadViewDialog();
                 }
             });
         });
@@ -448,10 +455,8 @@ class PipelineTimeline {
             return;
         }
 
-        // Apply configuration to UI controls
         this.applyConfigToUI(view.config);
 
-        // Load and render with the saved config
         this.loadAndRender();
     }
 
@@ -463,7 +468,6 @@ class PipelineTimeline {
         document.getElementById('groupingMode').value = config.groupingMode;
         document.getElementById('elementType').value = config.elementType;
 
-        // Trigger change events to update dependent UI elements
         document.getElementById('timelineMode').dispatchEvent(new Event('change'));
 
         if (config.timelineMode === 'year' && config.yearSegmentPreset) {

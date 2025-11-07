@@ -50,6 +50,51 @@
             </div>
         </div>
 
+        <!-- ========== NEW: NME/LINE-EXTENSION FILTERS ========== -->
+        <div class="row g-3 mt-2">
+            <div class="col-12">
+                <div class="filter-section p-3 bg-light rounded">
+                    <label class="form-label fw-bold mb-3">
+                        <i class="fas fa-filter"></i> Product Filters
+                    </label>
+                    <div class="row g-3">
+                        <!-- Filter: Include Line-Extensions -->
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="includeLineExtensions" checked>
+                                <label class="form-check-label" for="includeLineExtensions">
+                                    <strong>Include Line-Extensions</strong>
+                                    <br>
+                                    <small class="text-muted">Show additional launches for existing products</small>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Filter: Hide Discontinued -->
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="excludeDiscontinued" checked>
+                                <label class="form-check-label" for="excludeDiscontinued">
+                                    <strong>Hide Discontinued Projects</strong>
+                                    <br>
+                                    <small class="text-muted">Show only active pipeline products</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Status Display -->
+                    <div class="mt-3 p-2 bg-white rounded border" id="filterStatus" style="display: none;">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            <span id="filterStatusText">Loading...</span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ========== END: NEW FILTERS ========== -->
+
         <!-- Year Segment Configuration (only visible when timeline is 'year') -->
         <div id="yearSegmentConfig" class="mt-3">
             <label class="form-label fw-bold">Year Segments</label>
@@ -135,6 +180,44 @@
                     this.dataset.preset === 'custom' ? 'block' : 'none';
             });
         });
+
+        // ========== NEW: Filter Change Listeners ==========
+        // Update filter status when checkboxes change
+        document.getElementById('includeLineExtensions').addEventListener('change', function() {
+            updateFilterStatus();
+        });
+        
+        document.getElementById('excludeDiscontinued').addEventListener('change', function() {
+            updateFilterStatus();
+        });
+        
+        // Function to update filter status display
+        function updateFilterStatus() {
+            const includeLE = document.getElementById('includeLineExtensions').checked;
+            const excludeDisc = document.getElementById('excludeDiscontinued').checked;
+            const statusDiv = document.getElementById('filterStatus');
+            const statusText = document.getElementById('filterStatusText');
+            
+            // Build status text
+            let status = [];
+            if (!includeLE) {
+                status.push('NMEs only');
+            }
+            if (excludeDisc) {
+                status.push('Active projects only');
+            }
+            
+            if (status.length > 0) {
+                statusDiv.style.display = 'block';
+                statusText.textContent = 'Active filters: ' + status.join(', ');
+            } else {
+                statusDiv.style.display = 'none';
+            }
+        }
+        
+        // Initialize filter status
+        updateFilterStatus();
+        // ========== END: NEW FILTER LISTENERS ==========
     });
 </script>
 {% endblock %}
