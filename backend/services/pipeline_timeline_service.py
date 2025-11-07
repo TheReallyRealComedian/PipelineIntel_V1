@@ -113,16 +113,44 @@ class PipelineTimelineService:
         Fetches products from database with eager loading of relationships.
         
         Args:
-            filters: Dictionary of filter criteria
+            filters: Dictionary of filter criteria including:
+                - therapeutic_area: Filter by therapeutic area
+                - current_phase: Filter by development phase
+                - modality_id: Filter by modality
+                - project_status: Filter by project status
+                - include_line_extensions: If False, only returns NMEs (default: True)
+                - exclude_discontinued: If True, excludes discontinued products (default: True)
         
         Returns:
             List of Product objects
         """
         query = self.db.query(Product).options(
-            joinedload(Product.modality)
+            joinedload(Product.modality),
+            joinedload(Product.parent_nme)  # NEW: Load parent for Line-Extensions
         )
         
-        # Apply filters
+        # ========== NEW FILTERS FOR PHASE 2 ==========
+        
+        # Filter 1: Include/Exclude Line-Extensions
+        include_line_extensions = filters.get('include_line_extensions', True)
+        if not include_line_extensions:
+            # Only show NMEs
+            query = query.filter(Product.is_nme == True)
+        
+        # Filter 2: Exclude Discontinued Projects
+        exclude_discontinued = filters.get('exclude_discontinued', True)
+        if exclude_discontinued:
+            # Exclude discontinued products
+            query = query.filter(
+                or_(
+                    Product.project_status == None,
+                    Product.project_status != 'Discontinued'
+                )
+            )
+        
+        # ========== EXISTING FILTERS (UNCHANGED) ==========
+        
+        # Apply existing filters
         if filters.get('therapeutic_area'):
             query = query.filter(Product.therapeutic_area == filters['therapeutic_area'])
         
@@ -136,7 +164,9 @@ class PipelineTimelineService:
         if filters.get('modality_id'):
             query = query.filter(Product.modality_id == filters['modality_id'])
         
-        if filters.get('project_status'):
+        # Note: project_status filter is now handled by exclude_discontinued
+        # but we keep backward compatibility
+        if filters.get('project_status') and not exclude_discontinued:
             query = query.filter(Product.project_status == filters['project_status'])
         
         # Only include products with some timeline information
@@ -148,7 +178,7 @@ class PipelineTimelineService:
         )
         
         return query.order_by(Product.product_code).all()
-    
+
     def _build_timeline_units(self, config: Dict[str, Any], products: List[Product]) -> List[str]:
         """
         Builds the timeline axis units (years or phases).
@@ -489,23 +519,45 @@ class PipelineTimelineService:
             'group_name': group_name
         }
     
+
     def _build_metadata(self, config: Dict[str, Any], products: List[Product], 
-                       timeline_units: List[str]) -> Dict[str, Any]:
+                    timeline_units: List[str]) -> Dict[str, Any]:
         """
-        Builds metadata about the timeline.
+        Builds metadata about the timeline including filter information.
         
         Args:
             config: Configuration dictionary
-            products: List of products
+            products: List of products (after filtering)
             timeline_units: List of timeline units
         
         Returns:
-            Metadata dictionary
+            Metadata dictionary with filter summary
         """
+        filters = config.get('filters', {})
+        
+        # Count NMEs vs Line-Extensions in filtered results
+        nme_count = sum(1 for p in products if p.is_nme)
+        line_ext_count = sum(1 for p in products if p.is_line_extension)
+        
+        # Count discontinued (if they're included)
+        discontinued_count = sum(1 for p in products if p.project_status == 'Discontinued')
+        active_count = len(products) - discontinued_count
+        
         return {
             'total_products': len(products),
+            'nme_count': nme_count,
+            'line_extension_count': line_ext_count,
+            'active_count': active_count,
+            'discontinued_count': discontinued_count,
             'timeline_unit_count': len(timeline_units),
             'config': config,
+            'active_filters': {
+                'include_line_extensions': filters.get('include_line_extensions', True),
+                'exclude_discontinued': filters.get('exclude_discontinued', True),
+                'therapeutic_area': filters.get('therapeutic_area'),
+                'current_phase': filters.get('current_phase'),
+                'modality_id': filters.get('modality_id')
+            },
             'generated_at': datetime.now().isoformat()
         }
 
