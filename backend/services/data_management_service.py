@@ -77,11 +77,9 @@ def import_full_database(file_stream):
     try:
         data = json.load(file_stream)
 
-        # Verify that the JSON contains expected keys (table names)
         if not all(key in data for key in ['users', 'products', 'modalities']):
              return False, "Invalid backup file format. Essential tables are missing."
 
-        # 1. Truncate tables in reverse order of dependencies
         db.session.execute(text('SET session_replication_role = replica;'))
 
         for table_name in reversed(TABLE_IMPORT_ORDER):
@@ -90,17 +88,14 @@ def import_full_database(file_stream):
 
         db.session.commit()
 
-        # 2. Insert data in order of dependencies
         for table_name in TABLE_IMPORT_ORDER:
             if table_name in data and data[table_name]:
                 table_data = data[table_name]
                 model_class = MODEL_MAP.get(table_name)
 
                 if model_class:
-                    # Use bulk_insert_mappings for tables with an ORM model
                     db.session.bulk_insert_mappings(model_class, table_data)
                 else:
-                    # For simple association tables without a dedicated model class, use raw insert
                     table_obj = db.metadata.tables.get(table_name)
                     if table_obj is not None:
                         db.session.execute(table_obj.insert(), table_data)
@@ -109,7 +104,6 @@ def import_full_database(file_stream):
 
         db.session.commit()
 
-        # 3. Re-enable foreign key checks
         db.session.execute(text('SET session_replication_role = DEFAULT;'))
         db.session.commit()
 
@@ -117,12 +111,11 @@ def import_full_database(file_stream):
 
     except Exception as e:
         db.session.rollback()
-        # Ensure FK checks are re-enabled even on failure
         try:
             db.session.execute(text('SET session_replication_role = DEFAULT;'))
             db.session.commit()
         except:
-            pass # Ignore if this fails (e.g., connection closed)
+            pass
 
         traceback.print_exc()
         return False, f"An error occurred during import: {e}"
@@ -140,7 +133,15 @@ def analyze_json_import(json_data: list, model_class, unique_key_field: str):
         existing_items_map = {getattr(item, unique_key_field): item for item in existing_items_query}
 
         for json_item in json_data:
-            entry = {'status': 'error', 'action': 'skip', 'identifier': None, 'json_item': json_item, 'db_item': None, 'diff': {}, 'messages': []}
+            entry = {
+                'status': 'error',
+                'action': 'skip',
+                'identifier': None,
+                'json_item': json_item,
+                'db_item': None,
+                'diff': {},
+                'messages': []
+            }
             identifier = json_item.get(unique_key_field)
             entry['identifier'] = identifier
 
@@ -160,14 +161,16 @@ def analyze_json_import(json_data: list, model_class, unique_key_field: str):
             existing_item = existing_items_map.get(identifier)
 
             if existing_item:
-                entry['db_item'] = {c.name: getattr(existing_item, c.name) for c in existing_item.__table__.columns if not c.name.startswith('_')}
+                entry['db_item'] = {
+                    c.name: getattr(existing_item, c.name) 
+                    for c in existing_item.__table__.columns 
+                    if not c.name.startswith('_')
+                }
 
-                # Determine changed fields
                 if model_class == Product:
                     fields_to_check = [key for key in json_item.keys() if hasattr(existing_item, key)]
                     entry['diff'] = _enhanced_field_comparison(existing_item, json_item, fields_to_check)
                 else:
-                    # Original logic for other models
                     entry['diff'] = {}
                     for key, new_value in json_item.items():
                         if hasattr(existing_item, key):
@@ -200,7 +203,10 @@ def analyze_json_import(json_data: list, model_class, unique_key_field: str):
                 entry['action'] = 'add'
                 entry['messages'].append("This is a new item that will be created.")
                 if model_class == ManufacturingChallenge and product_codes_from_json:
-                     entry['diff']['product_links'] = {'added': sorted(list(product_codes_from_json)), 'removed': []}
+                     entry['diff']['product_links'] = {
+                         'added': sorted(list(product_codes_from_json)),
+                         'removed': []
+                     }
 
             preview_data.append(entry)
 
@@ -215,14 +221,12 @@ def analyze_json_import_with_resolution(json_data: list, model_class, unique_key
     Enhanced analysis that detects missing foreign keys and suggests matches.
     """
     preview_data = []
-    missing_keys = defaultdict(set)  # {field_name: {missing_values}}
-    suggestions = {}  # {field_name: {missing_value: [suggestions]}}
+    missing_keys = defaultdict(set)
+    suggestions = {}
 
     try:
-        # Get foreign key field mappings for this model
         foreign_key_fields = get_foreign_key_fields(model_class)
 
-        # Pre-fetch existing entities for suggestions
         existing_entities = {}
         for field_name, (related_model, lookup_field) in foreign_key_fields.items():
             entities = related_model.query.all()
@@ -231,7 +235,6 @@ def analyze_json_import_with_resolution(json_data: list, model_class, unique_key
                 for entity in entities
             }
 
-        # Analyze each JSON item
         for json_item in json_data:
             entry = {
                 'status': 'pending_resolution',
@@ -242,17 +245,14 @@ def analyze_json_import_with_resolution(json_data: list, model_class, unique_key
                 'messages': []
             }
 
-            # Check for missing foreign keys
             has_missing_keys = False
             for field_name, (related_model, lookup_field) in foreign_key_fields.items():
                 if field_name in json_item:
                     lookup_value = json_item[field_name]
                     if lookup_value not in existing_entities[field_name]:
-                        # Missing foreign key found
                         missing_keys[field_name].add(lookup_value)
                         has_missing_keys = True
 
-                        # Generate suggestions
                         if lookup_value not in suggestions.get(field_name, {}):
                             if field_name not in suggestions:
                                 suggestions[field_name] = {}
@@ -296,7 +296,6 @@ def get_foreign_key_fields(model_class):
         Product: {
             'modality_name': (Modality, 'modality_name'),
         },
-        # Add other model mappings as needed
     }
 
     return mappings.get(model_class, {})
@@ -308,7 +307,6 @@ def generate_suggestions(missing_value, existing_values, max_suggestions=3):
     """
     suggestions = []
 
-    # Use difflib for fuzzy matching
     matches = difflib.get_close_matches(
         missing_value,
         existing_values,
@@ -337,7 +335,6 @@ def _resolve_foreign_keys_for_technology(item, existing_technologies):
 
     resolved_item = item.copy()
 
-    # Resolve stage_name → stage_id (REQUIRED)
     if 'stage_name' in resolved_item:
         stage = ProcessStage.query.filter_by(stage_name=resolved_item['stage_name']).first()
         if stage:
@@ -346,13 +343,11 @@ def _resolve_foreign_keys_for_technology(item, existing_technologies):
         else:
             raise ValueError(f"Stage '{resolved_item['stage_name']}' not found")
 
-    # NEW: Handle multiple modalities (modality_names as array)
     if 'modality_names' in resolved_item:
         modality_names = resolved_item.pop('modality_names')
         if not isinstance(modality_names, list):
             raise ValueError(f"'modality_names' must be a list, got: {type(modality_names)}")
 
-        # Resolve all modality names to IDs
         modality_ids = []
         for modality_name in modality_names:
             modality = Modality.query.filter_by(modality_name=modality_name).first()
@@ -362,17 +357,15 @@ def _resolve_foreign_keys_for_technology(item, existing_technologies):
 
         resolved_item['modality_ids'] = modality_ids
 
-    # DEPRECATED: Handle single modality_name (backward compatibility during transition)
     elif 'modality_name' in resolved_item:
         modality_name = resolved_item.pop('modality_name')
-        if modality_name:  # Only process if not None/empty
+        if modality_name:
             modality = Modality.query.filter_by(modality_name=modality_name).first()
             if modality:
                 resolved_item['modality_ids'] = [modality.modality_id]
             else:
                 raise ValueError(f"Modality '{modality_name}' not found. Make sure to import modalities first.")
 
-    # Resolve template_name → template_id (OPTIONAL)
     if 'template_name' in resolved_item:
         template = ProcessTemplate.query.filter_by(template_name=resolved_item['template_name']).first()
         if template:
@@ -383,6 +376,7 @@ def _resolve_foreign_keys_for_technology(item, existing_technologies):
 
     return resolved_item
 
+
 def _resolve_foreign_keys_for_process_stage(item, existing_stages):
     """
     Resolves foreign keys for process stages.
@@ -392,10 +386,9 @@ def _resolve_foreign_keys_for_process_stage(item, existing_stages):
 
     resolved_item = item.copy()
 
-    # Resolve parent_stage_name → parent_stage_id (OPTIONAL)
     if 'parent_stage_name' in resolved_item:
         parent_stage_name = resolved_item.pop('parent_stage_name')
-        if parent_stage_name:  # Only process if not None/empty
+        if parent_stage_name:
             parent = ProcessStage.query.filter_by(stage_name=parent_stage_name).first()
             if parent:
                 resolved_item['parent_stage_id'] = parent.stage_id
@@ -414,7 +407,6 @@ def _resolve_foreign_keys_for_challenge(item, existing_challenges):
 
     resolved_item = item.copy()
 
-    # Resolve technology_name → technology_id (OPTIONAL - some challenges may not have a technology)
     if 'technology_name' in resolved_item:
         technology = ManufacturingTechnology.query.filter_by(
             technology_name=resolved_item['technology_name']
@@ -430,62 +422,142 @@ def _resolve_foreign_keys_for_challenge(item, existing_challenges):
 
 def _resolve_foreign_keys_for_product(item, existing_products):
     """
-    Resolves foreign keys for products.
-    Converts name-based references to ID-based references.
-    Handles: modality_name, process_template_name, technology_names
+    Resolves foreign key references in a product record by name.
+    Now handles:
+    - modality_name → modality_id
+    - process_template_name → process_template_id  
+    - parent_product_code → parent_product_id (NEW!)
+    - technology_names → product_to_technology associations
+    - challenge relationships (explicit/excluded)
+    
+    Returns: resolved_dict with warnings stored in _warnings key
     """
-    from ..models import Modality, ProcessTemplate, ManufacturingTechnology
-
-    resolved_item = item.copy()
-    product_code = resolved_item.get('product_code', 'UNKNOWN')
-
-    # ==== RESOLVE MODALITY ====
-    if 'modality_name' in resolved_item:
-        modality_name = resolved_item.pop('modality_name')
+    from ..models import Modality, ProcessTemplate, ManufacturingTechnology, ManufacturingChallenge, Product
+    
+    resolved = item.copy()
+    warnings = []
+    product_code = resolved.get('product_code', 'UNKNOWN')
+    
+    # 1. Resolve modality_name → modality_id
+    if 'modality_name' in resolved:
+        modality_name = resolved.pop('modality_name')
         if modality_name:
             modality = Modality.query.filter_by(modality_name=modality_name).first()
             if modality:
-                resolved_item['modality_id'] = modality.modality_id
+                resolved['modality_id'] = modality.modality_id
                 print(f"  ✓ Resolved modality '{modality_name}' → ID {modality.modality_id}")
             else:
-                raise ValueError(
-                    f"Product '{product_code}': Modality '{modality_name}' not found. "
-                    f"Available modalities: {[m.modality_name for m in Modality.query.all()]}"
-                )
-
-    # ==== RESOLVE PROCESS TEMPLATE ====
-    if 'process_template_name' in resolved_item:
-        template_name = resolved_item.pop('process_template_name')
+                warnings.append(f"Modality '{modality_name}' not found")
+    
+    # 2. Resolve process_template_name → process_template_id
+    if 'process_template_name' in resolved:
+        template_name = resolved.pop('process_template_name')
         if template_name:
             template = ProcessTemplate.query.filter_by(template_name=template_name).first()
             if template:
-                resolved_item['process_template_id'] = template.template_id
-                print(f"  ✓ Resolved template '{template_name}' → ID {template.template_id}")
-
-                # Validate template matches modality
-                if 'modality_id' in resolved_item and template.modality_id != resolved_item['modality_id']:
-                    modality = Modality.query.get(resolved_item['modality_id'])
-                    raise ValueError(
-                        f"Product '{product_code}': Template '{template_name}' "
-                        f"(modality: {template.modality.modality_name}) does not match "
-                        f"product modality '{modality.modality_name if modality else 'Unknown'}'"
+                if 'modality_id' in resolved and template.modality_id != resolved['modality_id']:
+                    modality = Modality.query.get(resolved['modality_id'])
+                    warnings.append(
+                        f"Template '{template_name}' does not match modality "
+                        f"'{modality.modality_name if modality else 'Unknown'}'"
                     )
+                else:
+                    resolved['process_template_id'] = template.template_id
+                    print(f"  ✓ Resolved template '{template_name}' → ID {template.template_id}")
             else:
                 available_templates = [t.template_name for t in ProcessTemplate.query.all()]
-                raise ValueError(
-                    f"Product '{product_code}': Template '{template_name}' not found. "
-                    f"Available templates: {available_templates}"
-                )
-
-    # ==== HANDLE TECHNOLOGY_NAMES (store for later processing) ====
-    if 'technology_names' in resolved_item:
-        tech_names = resolved_item.pop('technology_names')
-        if tech_names and isinstance(tech_names, list):
-            # Store as metadata for later processing (can't link M2M until product is created)
-            resolved_item['_technology_names_to_link'] = tech_names
+                warnings.append(f"Process template '{template_name}' not found. Available: {available_templates}")
+    
+    # 3. NEW: Resolve parent_product_code → parent_product_id
+    if 'parent_product_code' in resolved:
+        parent_code = resolved.pop('parent_product_code')
+        if parent_code:
+            parent = Product.query.filter_by(product_code=parent_code).first()
+            if parent:
+                if not parent.is_nme:
+                    warnings.append(
+                        f"Parent product '{parent_code}' is not an NME. "
+                        f"Line-Extensions should reference NME products."
+                    )
+                else:
+                    resolved['parent_product_id'] = parent.product_id
+                    print(f"  ✓ Resolved parent '{parent_code}' → ID {parent.product_id}")
+            else:
+                warnings.append(f"Parent product '{parent_code}' not found")
+    
+    # 4. Validate Line-Extension logic
+    if resolved.get('is_line_extension'):
+        if not resolved.get('parent_product_id'):
+            warnings.append(
+                "Line-Extensions must have a parent_product_id "
+                "(use parent_product_code in JSON)"
+            )
+        if not resolved.get('line_extension_indication'):
+            warnings.append(
+                "Line-Extensions should have a line_extension_indication"
+            )
+        if resolved.get('is_nme'):
+            warnings.append(
+                "Product cannot be both is_nme=True and is_line_extension=True"
+            )
+    
+    # 5. Auto-calculate launch_sequence if not provided
+    if resolved.get('is_line_extension') and resolved.get('parent_product_id'):
+        if 'launch_sequence' not in resolved or not resolved['launch_sequence']:
+            max_seq = db.session.query(db.func.max(Product.launch_sequence)).filter_by(
+                parent_product_id=resolved['parent_product_id']
+            ).scalar() or 1
+            
+            resolved['launch_sequence'] = max_seq + 1
+            warnings.append(f"Auto-calculated launch_sequence: {resolved['launch_sequence']}")
+            print(f"  → Auto-calculated launch_sequence: {resolved['launch_sequence']}")
+    
+    # 6. Handle technology_names
+    if 'technology_names' in resolved:
+        tech_names = resolved.pop('technology_names', [])
+        resolved['_technology_names_to_link'] = tech_names
+        
+        for tech_name in tech_names:
+            tech = ManufacturingTechnology.query.filter_by(technology_name=tech_name).first()
+            if not tech:
+                warnings.append(f"Technology '{tech_name}' not found")
+        
+        if tech_names:
             print(f"  → Found {len(tech_names)} technologies to link after product creation")
+    
+    # 7. Handle explicit_challenges
+    if 'explicit_challenges' in resolved:
+        challenges = resolved.pop('explicit_challenges', [])
+        resolved['_explicit_challenges'] = challenges
+        
+        for ch in challenges:
+            challenge_name = ch.get('challenge_name')
+            if challenge_name:
+                challenge = ManufacturingChallenge.query.filter_by(
+                    challenge_name=challenge_name
+                ).first()
+                if not challenge:
+                    warnings.append(f"Challenge '{challenge_name}' not found")
+    
+    # 8. Handle excluded_challenges
+    if 'excluded_challenges' in resolved:
+        challenges = resolved.pop('excluded_challenges', [])
+        resolved['_excluded_challenges'] = challenges
+        
+        for ch in challenges:
+            challenge_name = ch.get('challenge_name')
+            if challenge_name:
+                challenge = ManufacturingChallenge.query.filter_by(
+                    challenge_name=challenge_name
+                ).first()
+                if not challenge:
+                    warnings.append(f"Challenge '{challenge_name}' not found")
+    
+    if warnings:
+        resolved['_warnings'] = warnings
+    
+    return resolved
 
-    return resolved_item
 
 def _parse_date(date_string):
     """Helper function to parse date strings into date objects."""
@@ -496,7 +568,6 @@ def _parse_date(date_string):
         return date_string
 
     if isinstance(date_string, str):
-        # Try common date formats
         for fmt in ['%Y-%m-%d', '%m/%d/%Y', '%d.%m.%Y', '%Y-%m']:
             try:
                 return datetime.strptime(date_string, fmt).date()
@@ -516,11 +587,9 @@ def _enhanced_field_comparison(existing_obj, json_data, fields_to_check):
         json_value = json_data.get(field)
         existing_value = getattr(existing_obj, field, None)
 
-        # Special handling for date fields
         if field in ['submission_date', 'approval_date', 'ppq_completion_date']:
             json_value = _parse_date(json_value)
 
-        # Special handling for JSONB fields - normalize for comparison
         if field in ['regulatory_details', 'ppq_details', 'ds_suppliers', 'dp_suppliers',
                     'device_partners', 'operational_risks', 'timeline_risks',
                     'supply_chain_risks', 'clinical_trials']:
@@ -529,9 +598,7 @@ def _enhanced_field_comparison(existing_obj, json_data, fields_to_check):
             elif json_value != existing_value:
                 changed_fields[field] = {'old': existing_value, 'new': json_value}
 
-        # Standard field comparison
         elif json_value != existing_value:
-            # Handle None comparisons properly
             if json_value is None and existing_value == '':
                 continue
             if existing_value is None and json_value == '':
@@ -545,18 +612,12 @@ def _process_product_related_tables(product_obj, json_data):
     """
     Process and create related table entries for Products during import.
     Handles ProductTimeline, ProductRegulatoryFiling, and ProductManufacturingSupplier.
-
-    Args:
-        product_obj: SQLAlchemy Product object (must have product_id)
-        json_data: Dictionary containing the JSON import data
     """
     try:
-        # Ensure we have a valid product object with an ID
         if not hasattr(product_obj, 'product_id') or product_obj.product_id is None:
             print(f"Warning: Product object has no product_id, skipping related tables")
             return
 
-        # ==================== TIMELINE MILESTONES ====================
         if 'timeline_milestones' in json_data and isinstance(json_data['timeline_milestones'], list):
             for milestone_data in json_data['timeline_milestones']:
                 if isinstance(milestone_data, dict):
@@ -573,7 +634,6 @@ def _process_product_related_tables(product_obj, json_data):
                     )
                     db.session.add(timeline)
 
-        # ==================== REGULATORY FILINGS ====================
         if 'regulatory_filings' in json_data and isinstance(json_data['regulatory_filings'], list):
             for filing_data in json_data['regulatory_filings']:
                 if isinstance(filing_data, dict):
@@ -591,7 +651,6 @@ def _process_product_related_tables(product_obj, json_data):
                     )
                     db.session.add(filing)
 
-        # ==================== MANUFACTURING SUPPLIERS ====================
         if 'manufacturing_suppliers' in json_data and isinstance(json_data['manufacturing_suppliers'], list):
             for supplier_data in json_data['manufacturing_suppliers']:
                 if isinstance(supplier_data, dict):
@@ -610,7 +669,6 @@ def _process_product_related_tables(product_obj, json_data):
                     )
                     db.session.add(supplier)
 
-        # Auto-populate suppliers from JSONB fields if structured data not provided
         _auto_populate_suppliers_from_jsonb(product_obj)
 
     except Exception as e:
@@ -625,12 +683,10 @@ def _auto_populate_suppliers_from_jsonb(product):
     This provides backward compatibility and convenience.
     """
     try:
-        # Only create supplier records if they don't already exist
         existing_suppliers = ProductManufacturingSupplier.query.filter_by(product_id=product.product_id).count()
         if existing_suppliers > 0:
-            return  # Skip if suppliers already exist
+            return
 
-        # Process DS suppliers
         if product.ds_suppliers and isinstance(product.ds_suppliers, list):
             for ds_data in product.ds_suppliers:
                 if isinstance(ds_data, dict) and ds_data.get('name'):
@@ -644,7 +700,6 @@ def _auto_populate_suppliers_from_jsonb(product):
                     )
                     db.session.add(supplier)
 
-        # Process DP suppliers
         if product.dp_suppliers and isinstance(product.dp_suppliers, list):
             for dp_data in product.dp_suppliers:
                 if isinstance(dp_data, dict) and dp_data.get('name'):
@@ -658,7 +713,6 @@ def _auto_populate_suppliers_from_jsonb(product):
                     )
                     db.session.add(supplier)
 
-        # Process device partners
         if product.device_partners and isinstance(product.device_partners, list):
             for device_data in product.device_partners:
                 if isinstance(device_data, dict) and device_data.get('partner'):
@@ -683,7 +737,6 @@ def _separate_product_data(json_data):
     Separate main Product fields from related table data.
     Returns (main_product_data, related_table_data)
     """
-    # Fields that go to related tables, not the main Product record
     related_table_fields = [
         'timeline_milestones',
         'regulatory_filings',
@@ -702,13 +755,11 @@ def _separate_product_data(json_data):
     return main_product_data, related_table_data
 
 
-
 def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=None):
     """
     Finalizes the import by creating or updating database entries.
     Enhanced with detailed logging and product-specific technology linking.
     """
-    # Import the necessary models here to avoid circular dependencies
     from ..models import Product, ManufacturingTechnology, product_to_technology_association, TechnologyModality
 
     success_count = 0
@@ -716,17 +767,16 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
     errors = []
     detailed_logs = []
 
-    # === HEADER ===
     header = f"""
-                {'='*70}
-                IMPORT PROCESS STARTED
-                {'='*70}
-                Entity Type: {model_class.__name__}
-                Total Items: {len(resolved_data)}
-                Resolver: {'✓ Enabled' if resolver_func else '✗ None'}
-                Unique Key: {unique_key_field}
-                {'='*70}
-                """
+{'='*70}
+IMPORT PROCESS STARTED
+{'='*70}
+Entity Type: {model_class.__name__}
+Total Items: {len(resolved_data)}
+Resolver: {'✓ Enabled' if resolver_func else '✗ None'}
+Unique Key: {unique_key_field}
+{'='*70}
+"""
     print(header)
     detailed_logs.append(header)
 
@@ -734,7 +784,6 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
         for idx, entry in enumerate(resolved_data, 1):
             item_log = []
             try:
-                # === GET DATA ===
                 if 'data' in entry:
                     data = entry['data'].copy()
                 elif 'json_item' in entry:
@@ -744,15 +793,14 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
 
                 identifier = data.get(unique_key_field, f"Item {idx}")
 
-                # === ITEM HEADER ===
                 item_header = f"\n[{idx}/{len(resolved_data)}] Processing: {identifier}"
                 print(item_header)
                 item_log.append(item_header)
                 detailed_logs.append(item_header)
 
-                # === APPLY RESOLVER ===
                 tech_names_to_link = []
                 modality_ids_to_link = []
+                warnings = []
 
                 if resolver_func:
                     log_msg = f"  → Applying resolver function..."
@@ -763,20 +811,24 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
                         data = resolver_func(data, existing_instances)
 
                         tech_names_to_link = data.pop('_technology_names_to_link', [])
-
-                        # Pop modality_ids before they are passed to the constructor
                         modality_ids_to_link = data.pop('modality_ids', [])
+                        warnings = data.pop('_warnings', [])
 
                         log_msg = f"  ✓ Resolver completed"
                         print(log_msg)
                         item_log.append(log_msg)
+                        
+                        if warnings:
+                            for warning in warnings:
+                                log_msg = f"  ⚠ Warning: {warning}"
+                                print(log_msg)
+                                item_log.append(log_msg)
                     except Exception as resolve_error:
                         log_msg = f"  ✗ RESOLVER ERROR: {str(resolve_error)}"
                         print(log_msg)
                         item_log.append(log_msg)
                         raise resolve_error
 
-                # === CHECK IF EXISTS ===
                 existing_item = model_class.query.filter_by(**{unique_key_field: identifier}).first()
 
                 if existing_item:
@@ -814,13 +866,11 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
 
                 db.session.flush()
 
-                # === TECHNOLOGY-SPECIFIC: LINK MODALITIES ===
                 if model_class == ManufacturingTechnology and modality_ids_to_link:
                     log_msg = f"  → Linking {len(modality_ids_to_link)} modalities..."
                     print(log_msg)
                     item_log.append(log_msg)
 
-                    # Clear existing links for this technology before adding new ones
                     TechnologyModality.query.filter_by(technology_id=item_to_process.technology_id).delete()
 
                     for mod_id in modality_ids_to_link:
@@ -834,7 +884,6 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
                     print(log_msg)
                     item_log.append(log_msg)
 
-                # === PRODUCT-SPECIFIC: LINK TECHNOLOGIES ===
                 if model_class == Product and tech_names_to_link:
                     log_msg = f"  → Linking {len(tech_names_to_link)} technologies..."
                     print(log_msg)
@@ -849,7 +898,6 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
                         ).first()
 
                         if technology:
-                            # Check if link already exists
                             existing_link = db.session.execute(
                                 product_to_technology_association.select().where(
                                     product_to_technology_association.c.product_id == item_to_process.product_id
@@ -883,7 +931,6 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
                         errors.append(f"{identifier}: Missing technologies: {', '.join(missing_techs)}")
                         error_count += 1
 
-                # === SUCCESS ===
                 success_count += 1
                 log_msg = f"  ✓ SUCCESS"
                 print(log_msg)
@@ -901,19 +948,17 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
                 db.session.rollback()
                 continue
 
-        # === COMMIT ALL ===
         db.session.commit()
 
-        # === SUMMARY ===
         summary = f"""
-                    {'='*70}
-                    IMPORT SUMMARY - {model_class.__name__}
-                    {'='*70}
-                    ✓ Success: {success_count}
-                    ✗ Errors:  {error_count}
-                    Total:     {len(resolved_data)}
-                    {'='*70}
-                    """
+{'='*70}
+IMPORT SUMMARY - {model_class.__name__}
+{'='*70}
+✓ Success: {success_count}
+✗ Errors:  {error_count}
+Total:     {len(resolved_data)}
+{'='*70}
+"""
         print(summary)
         detailed_logs.append(summary)
 
@@ -951,6 +996,7 @@ def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=
             "detailed_logs": detailed_logs
         }
 
+
 def analyze_process_template_import(json_data):
     """
     Analyze process template import data with nested stages.
@@ -970,55 +1016,49 @@ def analyze_process_template_import(json_data):
                 'index': index,
                 'json_item': item,
                 'identifier': item.get('template_name', f'Item {index}'),
-                'action': 'skip',  # Default to skip
-                'status': 'error',  # Will be updated based on analysis
-                'messages': [],     # Changed from 'issues' to match template expectation
-                'diff': {},         # Added to match template expectation
-                'db_item': None,    # Added to match template expectation
+                'action': 'skip',
+                'status': 'error',
+                'messages': [],
+                'diff': {},
+                'db_item': None,
                 'stage_count': 0
             }
 
-
-            # Check required fields
             if not item.get('template_name'):
                 preview_item['messages'].append('Missing template_name')
                 preview_item['status'] = 'error'
                 preview_data.append(preview_item)
                 continue
 
-            # Check if template already exists
             existing_template = ProcessTemplate.query.filter_by(
                 template_name=item['template_name']
             ).first()
 
             if existing_template:
-                            preview_item['action'] = 'update'
-                            preview_item['status'] = 'update'
+                preview_item['action'] = 'update'
+                preview_item['status'] = 'update'
 
-                            # FIX: Convert the SQLAlchemy object to a simple dictionary
-                            preview_item['db_item'] = {
-                                'template_name': existing_template.template_name,
-                                'description': existing_template.description,
-                                'modality_name': existing_template.modality.modality_name if existing_template.modality else None
-                            }
+                preview_item['db_item'] = {
+                    'template_name': existing_template.template_name,
+                    'description': existing_template.description,
+                    'modality_name': existing_template.modality.modality_name if existing_template.modality else None
+                }
 
-                            preview_item['messages'].append(f'Template exists - will update existing template')
-                            # Add diff information for updates
-                            preview_item['diff']['description'] = {
-                                'old': existing_template.description or '',
-                                'new': item.get('description', '')
-                            }
-                            if item.get('modality_name') != (existing_template.modality.modality_name if existing_template.modality else None):
-                                preview_item['diff']['modality'] = {
-                                    'old': existing_template.modality.modality_name if existing_template.modality else 'None',
-                                    'new': item.get('modality_name', 'None')
-                                }
+                preview_item['messages'].append(f'Template exists - will update existing template')
+                preview_item['diff']['description'] = {
+                    'old': existing_template.description or '',
+                    'new': item.get('description', '')
+                }
+                if item.get('modality_name') != (existing_template.modality.modality_name if existing_template.modality else None):
+                    preview_item['diff']['modality'] = {
+                        'old': existing_template.modality.modality_name if existing_template.modality else 'None',
+                        'new': item.get('modality_name', 'None')
+                    }
             else:
                 preview_item['action'] = 'add'
                 preview_item['status'] = 'new'
                 preview_item['messages'].append('New template - will be created')
 
-            # Check modality reference
             modality_name = item.get('modality_name')
             if modality_name:
                 modality = Modality.query.filter_by(modality_name=modality_name).first()
@@ -1027,18 +1067,15 @@ def analyze_process_template_import(json_data):
                     preview_item['status'] = 'needs_resolution'
                     needs_resolution = True
 
-                    # Add to missing keys for resolution UI
                     if 'modality_name' not in missing_keys:
                         missing_keys['modality_name'] = set()
                     missing_keys['modality_name'].add(modality_name)
 
-                    # Suggest similar modalities
                     if 'modality_name' not in suggestions:
                         suggestions['modality_name'] = {}
                     all_modalities = [m.modality_name for m in Modality.query.all()]
-                    suggestions['modality_name'][modality_name] = all_modalities[:5]  # Top 5 suggestions
+                    suggestions['modality_name'][modality_name] = all_modalities[:5]
 
-            # Analyze stages
             stages = item.get('stages', [])
             preview_item['stage_count'] = len(stages)
             stage_issues = []
@@ -1049,19 +1086,16 @@ def analyze_process_template_import(json_data):
                     stage_issues.append(f'Stage {stage_index + 1}: Missing stage_name')
                     continue
 
-                # Check if stage exists
                 existing_stage = ProcessStage.query.filter_by(stage_name=stage_name).first()
                 if not existing_stage:
                     stage_issues.append(f'Stage "{stage_name}" not found in system')
                     preview_item['status'] = 'needs_resolution'
                     needs_resolution = True
 
-                    # Add to missing keys
                     if 'stage_name' not in missing_keys:
                         missing_keys['stage_name'] = set()
                     missing_keys['stage_name'].add(stage_name)
 
-                    # Suggest similar stages
                     if 'stage_name' not in suggestions:
                         suggestions['stage_name'] = {}
                     all_stages = [s.stage_name for s in ProcessStage.query.all()]
@@ -1070,17 +1104,14 @@ def analyze_process_template_import(json_data):
             if stage_issues:
                 preview_item['messages'].extend(stage_issues)
 
-            # Add stage count to messages
             preview_item['messages'].append(f'Contains {len(stages)} stages')
 
-            # If no issues and not needs_resolution, confirm status
             if not stage_issues and preview_item['status'] not in ['needs_resolution', 'error']:
                 if preview_item['status'] != 'update':
                     preview_item['status'] = 'new'
 
             preview_data.append(preview_item)
 
-        # Convert sets to lists for JSON serialization
         for key in missing_keys:
             missing_keys[key] = list(missing_keys[key])
 
@@ -1110,7 +1141,7 @@ def finalize_process_template_import(resolved_data):
     skipped_count = 0
     failed_count = 0
     error_messages = []
-    detailed_logs = []  # Collect logs for frontend
+    detailed_logs = []
 
     log_msg = f"\n{'='*60}\nStarting import for Process Templates\nTotal templates to process: {len(resolved_data)}\n{'='*60}"
     print(log_msg)
