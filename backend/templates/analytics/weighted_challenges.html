@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="fas fa-list-ol text-primary me-2"></i>Challenge Prioritization</h1>
+            <p class="text-muted">
+                Aggregated view of manufacturing challenges weighted by product frequency and timeline urgency.
+            </p>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+                <i class="fas fa-print"></i> Print Report
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">Weighted Challenges Matrix</h5>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-primary">{{ challenges|length }} Challenges Identified</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 5%">#</th>
+                            <th style="width: 25%">Challenge Name</th>
+                            <th style="width: 15%">Process Area</th>
+                            <th style="width: 15%">Technology</th>
+                            <th style="width: 10%" class="text-center">Frequency</th>
+                            <th style="width: 10%">Urgency</th>
+                            <th style="width: 10%">Launch Year</th>
+                            <th style="width: 10%">Severity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in challenges %}
+                        <tr>
+                            <td class="text-muted small">{{ loop.index }}</td>
+                            <td>
+                                <div class="fw-bold">{{ item.challenge_name }}</div>
+                                <small class="text-muted d-none d-print-block">
+                                    Products: {{ item.affected_products_list|truncate(50) }}
+                                </small>
+                            </td>
+                            <td>
+                                {% if item.process_area == 'Drug Substance' %}
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info">DS</span> Drug Substance
+                                {% elif item.process_area == 'Drug Product' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success">DP</span> Drug Product
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ item.process_area or 'General' }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ item.technology_name }}</small>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill bg-primary fs-6">{{ item.frequency }}</span>
+                            </td>
+                            <td>
+                                {% if item.years_until <= 1 %}
+                                    <span class="text-danger fw-bold"><i class="fas fa-fire me-1"></i>Immediate</span>
+                                {% elif item.years_until <= 3 %}
+                                    <span class="text-warning fw-bold">Near Term</span>
+                                {% else %}
+                                    <span class="text-success">Long Term</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ item.next_impact_year or 'TBD' }}</strong>
+                            </td>
+                            <td>
+                                {% if item.severity_level == 'critical' %}
+                                    <span class="badge bg-danger">CRITICAL</span>
+                                {% elif item.severity_level == 'major' %}
+                                    <span class="badge bg-warning text-dark">MAJOR</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark border">{{ item.severity_level|upper }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-clipboard-check fa-3x mb-3"></i>
+                                    <p>No active challenges found across the pipeline.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

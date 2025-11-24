@@ -423,20 +423,15 @@ def _resolve_foreign_keys_for_challenge(item, existing_challenges):
 def _resolve_foreign_keys_for_product(item, existing_products):
     """
     Resolves foreign key references in a product record by name.
-    Now handles:
-    - modality_name → modality_id
-    - process_template_name → process_template_id  
-    - parent_product_code → parent_product_id (NEW!)
-    - technology_names → product_to_technology associations
-    - challenge relationships (explicit/excluded)
     
-    Returns: resolved_dict with warnings stored in _warnings key
+    IMPROVED: Now searches both the database AND the current session's 
+    newly created objects (identity map) to find Parents that were created
+    earlier in the same batch transaction.
     """
     from ..models import Modality, ProcessTemplate, ManufacturingTechnology, ManufacturingChallenge, Product
     
     resolved = item.copy()
     warnings = []
-    product_code = resolved.get('product_code', 'UNKNOWN')
     
     # 1. Resolve modality_name → modality_id
     if 'modality_name' in resolved:
@@ -468,11 +463,29 @@ def _resolve_foreign_keys_for_product(item, existing_products):
                 available_templates = [t.template_name for t in ProcessTemplate.query.all()]
                 warnings.append(f"Process template '{template_name}' not found. Available: {available_templates}")
     
-    # 3. NEW: Resolve parent_product_code → parent_product_id
+    # 3. FIX: Resolve parent_product_code → parent_product_id
+    # We must look in the DB first, then in the current session for uncommitted parents
     if 'parent_product_code' in resolved:
         parent_code = resolved.pop('parent_product_code')
         if parent_code:
+            # A. Try finding in Database
             parent = Product.query.filter_by(product_code=parent_code).first()
+
+            # B. Try finding in current Session (newly added objects not yet queried)
+            if not parent:
+                # Check Identity Map (flushed objects)
+                for obj in db.session.identity_map.values():
+                    if isinstance(obj, Product) and obj.product_code == parent_code:
+                        parent = obj
+                        break
+                
+                # Check Pending objects (added but not flushed)
+                if not parent:
+                    for obj in db.session.new:
+                        if isinstance(obj, Product) and obj.product_code == parent_code:
+                            parent = obj
+                            break
+
             if parent:
                 if not parent.is_nme:
                     warnings.append(
@@ -481,9 +494,15 @@ def _resolve_foreign_keys_for_product(item, existing_products):
                     )
                 else:
                     resolved['parent_product_id'] = parent.product_id
-                    print(f"  ✓ Resolved parent '{parent_code}' → ID {parent.product_id}")
+                    print(f"  ✓ Resolved parent '{parent_code}' → ID {parent.product_id} (Source: {'DB' if parent.product_id else 'Session'})")
             else:
-                warnings.append(f"Parent product '{parent_code}' not found")
+                # Fallback: Search existing_products list (passed arg)
+                found_in_list = next((p for p in existing_products if p.product_code == parent_code), None)
+                if found_in_list:
+                    resolved['parent_product_id'] = found_in_list.product_id
+                    print(f"  ✓ Resolved parent '{parent_code}' → ID {found_in_list.product_id} (from existing_products list)")
+                else:
+                    warnings.append(f"Parent product '{parent_code}' not found. Ensure NMEs are imported before Line-Extensions.")
     
     # 4. Validate Line-Extension logic
     if resolved.get('is_line_extension'):
@@ -504,11 +523,22 @@ def _resolve_foreign_keys_for_product(item, existing_products):
     # 5. Auto-calculate launch_sequence if not provided
     if resolved.get('is_line_extension') and resolved.get('parent_product_id'):
         if 'launch_sequence' not in resolved or not resolved['launch_sequence']:
-            max_seq = db.session.query(db.func.max(Product.launch_sequence)).filter_by(
+            # We need to be careful here with uncommitted data
+            # Get max from DB
+            db_max = db.session.query(db.func.max(Product.launch_sequence)).filter_by(
                 parent_product_id=resolved['parent_product_id']
             ).scalar() or 1
             
-            resolved['launch_sequence'] = max_seq + 1
+            # Get max from session (newly added siblings)
+            session_max = 0
+            for obj in db.session.identity_map.values():
+                if isinstance(obj, Product) and obj.parent_product_id == resolved['parent_product_id']:
+                    if obj.launch_sequence and obj.launch_sequence > session_max:
+                        session_max = obj.launch_sequence
+            
+            current_max = max(db_max, session_max)
+            
+            resolved['launch_sequence'] = current_max + 1
             warnings.append(f"Auto-calculated launch_sequence: {resolved['launch_sequence']}")
             print(f"  → Auto-calculated launch_sequence: {resolved['launch_sequence']}")
     
@@ -780,6 +810,28 @@ Unique Key: {unique_key_field}
     print(header)
     detailed_logs.append(header)
 
+    # --- Automatic Sorting for Products ---
+    # Ensure NMEs are processed before Line-Extensions
+    if model_class == Product:
+        print("  → Optimizing import order: NMEs first, then Line Extensions...")
+
+        def product_sort_key(item):
+            data = item.get('data') or item.get('json_item') or {}
+            # Priority 0: NMEs (is_nme = True) or products without parent_product_code
+            # Priority 1: Line Extensions (is_nme = False)
+            
+            if data.get('is_nme') is True:
+                return 0
+            if not data.get('parent_product_code'):
+                return 0
+            return 1
+
+        resolved_data.sort(key=product_sort_key)
+
+        nme_count = sum(1 for item in resolved_data if product_sort_key(item) == 0)
+        le_count = len(resolved_data) - nme_count
+        print(f"  ✓ Sorted: {nme_count} NMEs will be processed first, then {le_count} Line Extensions")
+
     try:
         for idx, entry in enumerate(resolved_data, 1):
             item_log = []
@@ -864,6 +916,7 @@ Unique Key: {unique_key_field}
                     item_to_process = model_class(**data)
                     db.session.add(item_to_process)
 
+                # Flush to generate IDs and make object available in session.new/identity_map
                 db.session.flush()
 
                 if model_class == ManufacturingTechnology and modality_ids_to_link:
