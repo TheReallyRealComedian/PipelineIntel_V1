@@ -19,6 +19,9 @@ FIELDS_SHORT = [
     'current_phase',
     'project_status',
     'expected_launch_year'
+    'operational_risks',
+    'timeline_risks',
+    'supply_chain_risks'
 ]
 
 # Felder für UMFASSENDE TECH-DEV TABELLE (Option 2)

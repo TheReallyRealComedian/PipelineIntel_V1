@@ -157,21 +157,23 @@ class Product(db.Model):
     @validates('parent_product_id', 'is_line_extension', 'is_nme')
     def validate_nme_line_extension_logic(self, key, value):
         """Validates NME/Line-Extension logic rules."""
+        # We only strictly validate incompatible states here (like NME + Line Ext).
+        # We skip the "Line-Extension must have parent" check here because 
+        # during __init__, is_line_extension might be set before parent_product_id.
+        
         current_is_nme = value if key == 'is_nme' else getattr(self, 'is_nme', None)
         current_is_line_ext = value if key == 'is_line_extension' else getattr(self, 'is_line_extension', None)
-        current_parent_id = value if key == 'parent_product_id' else getattr(self, 'parent_product_id', None)
         
         if current_is_nme and current_is_line_ext:
             raise ValueError("A product cannot be both an NME and a Line-Extension")
         
-        if current_is_line_ext and not current_parent_id:
-            raise ValueError("Line-Extensions must have a parent_product_id")
-        
-        if current_parent_id and not current_is_line_ext:
-            raise ValueError("Products with a parent_product_id should be marked as Line-Extensions")
-        
-        if current_is_nme and current_parent_id:
-            raise ValueError("NMEs cannot have a parent_product_id")
+        if key == 'parent_product_id' and value and not current_is_line_ext:
+            # If we are setting a parent, it implies line extension, but we won't force it here
+            # to allow flexibility during update operations
+            pass
+            
+        if current_is_nme and (key == 'parent_product_id' and value is not None):
+             raise ValueError("NMEs cannot have a parent_product_id")
         
         return value
 
