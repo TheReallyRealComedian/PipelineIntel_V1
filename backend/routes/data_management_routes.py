@@ -10,41 +10,37 @@ from ..services.data_management_service import (
     analyze_process_template_import,
     finalize_process_template_import,
     import_full_database,
-    _resolve_foreign_keys_for_technology,
-    _resolve_foreign_keys_for_challenge,
     _resolve_foreign_keys_for_process_stage,
     _resolve_foreign_keys_for_product
 )
 
 from ..models import (
-    Product, Indication, ManufacturingChallenge, ManufacturingTechnology,
+    Product, Indication, Challenge, ChallengeModalityDetail,
     ProductSupplyChain, Modality, ManufacturingCapability, InternalFacility,
-    ExternalPartner, ProcessStage, ProductTimeline, ProductRegulatoryFiling, 
-    ProductManufacturingSupplier, ProcessTemplate, TemplateStage, ModalityChallenge
+    ExternalPartner, ProcessStage, ProductTimeline, ProductRegulatoryFiling,
+    ProductManufacturingSupplier, ProcessTemplate, TemplateStage
 )
 
 data_management_bp = Blueprint('data_management', __name__, url_prefix='/data-management')
 
 ENTITY_MAP = {
     'products': {
-        'model': Product, 
+        'model': Product,
         'key': 'product_code',
-        'resolver': _resolve_foreign_keys_for_product  # ADD THIS LINE
+        'resolver': _resolve_foreign_keys_for_product
     },
     'indications': {'model': Indication, 'key': 'indication_name'},
-    'manufacturing_challenges': {
-        'model': ManufacturingChallenge, 
-        'key': 'challenge_name',
-        'resolver': _resolve_foreign_keys_for_challenge
+    'challenges': {
+        'model': Challenge,
+        'key': 'name'
     },
-    'manufacturing_technologies': {
-        'model': ManufacturingTechnology, 
-        'key': 'technology_name',
-        'resolver': _resolve_foreign_keys_for_technology
+    'challenge_modality_details': {
+        'model': ChallengeModalityDetail,
+        'key': 'id'
     },
     'process_stages': {
-        'model': ProcessStage, 
-        'key': 'stage_name', 
+        'model': ProcessStage,
+        'key': 'stage_name',
         'resolver': _resolve_foreign_keys_for_process_stage
     },
     'process_templates': {'model': ProcessTemplate, 'key': 'template_name'},
@@ -56,7 +52,6 @@ ENTITY_MAP = {
     'product_timelines': {'model': ProductTimeline, 'key': 'timeline_id'},
     'product_regulatory_filings': {'model': ProductRegulatoryFiling, 'key': 'filing_id'},
     'product_manufacturing_suppliers': {'model': ProductManufacturingSupplier, 'key': 'supplier_id'},
-    'modality_challenges': {'model': ModalityChallenge, 'key': 'modality_id'}
 }
 
 
@@ -72,19 +67,19 @@ def full_database_import():
     if 'full_backup_file' not in request.files:
         flash('No file part in the request.', 'danger')
         return redirect(url_for('data_management.data_management_page'))
-    
+
     file = request.files['full_backup_file']
-    
+
     if file.filename == '':
         flash('No file selected for full import.', 'warning')
         return redirect(url_for('data_management.data_management_page'))
-    
+
     if file and file.filename.endswith('.json'):
         success, message = import_full_database(file.stream)
         flash(message, 'success' if success else 'danger')
     else:
         flash('Invalid file type. Please upload a .json backup file.', 'danger')
-        
+
     return redirect(url_for('data_management.data_management_page'))
 
 
@@ -222,15 +217,11 @@ def resolve_foreign_keys():
 def create_missing_entity(field_name, entity_name, metadata):
     """
     Create missing entity based on field type.
-    DEBUG VERSION with logging
     """
-    print(f"DEBUG: create_missing_entity called with field_name={field_name}, entity_name={entity_name}, metadata={metadata}")
-
     from ..db import db
     from ..models import Modality
 
     if field_name == 'modality_name':
-        print(f"DEBUG: Creating modality: {entity_name}")
         try:
             modality = Modality(
                 modality_name=entity_name,
@@ -239,17 +230,13 @@ def create_missing_entity(field_name, entity_name, metadata):
                 description=metadata.get('description', '')
             )
             db.session.add(modality)
-            db.session.flush()  # Get ID without committing
-            print(f"DEBUG: Added modality to session: {modality.modality_id}")
+            db.session.flush()
             db.session.commit()
-            print(f"DEBUG: Committed modality: {modality.modality_name}")
             return modality
         except Exception as e:
-            print(f"DEBUG: Error creating modality: {e}")
             db.session.rollback()
             raise e
 
-    # Add other entity types as needed
     raise ValueError(f"Unknown field type for creation: {field_name}")
 
 
@@ -287,46 +274,41 @@ def finalize_json_import():
         else:
             # Get the resolver if it exists
             entity_config = ENTITY_MAP[entity_type]
-            resolver = entity_config.get('resolver')  # NEW: Get the resolver
-            
-            # Regular entity finalization - NOW PASS THE RESOLVER
+            resolver = entity_config.get('resolver')
+
+            # Regular entity finalization
             result = finalize_import(
-                resolved_data, 
-                entity_config['model'], 
+                resolved_data,
+                entity_config['model'],
                 entity_config['key'],
-                resolver  # NEW: Pass resolver as 4th argument
+                resolver
             )
-        
+
         return jsonify(result)
 
     except Exception as e:
         import traceback
         traceback.print_exc()
         return jsonify(success=False, message=f"Import failed: {str(e)}"), 500
-    
+
 
 @data_management_bp.route('/api/lookup/<string:entity_type>')
 @login_required
 def lookup_entities(entity_type):
     """
-    API endpoint to fetch a list of existing entities for UI dropdowns,
-    like in the foreign key resolution page.
+    API endpoint to fetch a list of existing entities for UI dropdowns.
     """
-    from ..models import Modality # Ensure Modality model is available
+    from ..models import Modality
 
-    # A map to securely control which models can be looked up and prevent arbitrary lookups
     SUPPORTED_LOOKUPS = {
         'modalities': Modality,
-        # Future-proofing: add other models here as needed for resolution
-        # 'process_stages': ProcessStage,
     }
-    
+
     model = SUPPORTED_LOOKUPS.get(entity_type)
     if not model:
         return jsonify(success=False, message=f"Unsupported entity type for lookup: {entity_type}"), 404
-        
+
     try:
-        # Custom logic for modalities to provide a richer label (e.g., "Monoclonal Antibody (Biologics)")
         if entity_type == 'modalities':
             items = model.query.order_by(model.modality_name).all()
             data = [{
@@ -334,11 +316,9 @@ def lookup_entities(entity_type):
                 'label': f"{item.modality_name} ({item.modality_category or 'N/A'})"
             } for item in items]
         else:
-            # Generic fallback for other simple lookups in the future.
-            # Assumes the model has a reasonably named 'name' field.
             name_field = next((c.name for c in model.__table__.columns if 'name' in c.name), None)
             if not name_field:
-                 return jsonify(success=False, message=f"Cannot determine name field for {entity_type}"), 500
+                return jsonify(success=False, message=f"Cannot determine name field for {entity_type}"), 500
 
             items = model.query.order_by(getattr(model, name_field)).all()
             data = [{
@@ -347,7 +327,7 @@ def lookup_entities(entity_type):
             } for item in items]
 
         return jsonify(success=True, data=data)
-        
+
     except Exception as e:
         import traceback
         traceback.print_exc()

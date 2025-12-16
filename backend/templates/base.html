@@ -11,7 +11,6 @@
         <link rel="stylesheet" href="{{ ASSET_URL }}">
     {% endassets %}
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/challenge_traceability.css') }}">
     {% block head_extra %}{% endblock %}
 </head>
 <body>
@@ -32,9 +31,6 @@
                         </li>
                         <li class="{% if request.blueprint == 'challenges' %}active{% endif %}">
                             <a href="{{ url_for('challenges.list_challenges') }}"><i class="fas fa-exclamation-triangle"></i> <span class="sidebar-text">Challenges</span></a>
-                        </li>
-                        <li class="{% if request.blueprint == 'technologies' %}active{% endif %}">
-                            <a href="{{ url_for('technologies.list_technologies') }}"><i class="fas fa-microchip"></i> <span class="sidebar-text">Technologies</span></a>
                         </li>
                         <li class="sidebar-menu-header">MANUFACTURING SCHEMA</li>
                             <li class="{% if request.blueprint == 'modalities' %}active{% endif %}">
@@ -70,12 +66,6 @@
                             <li class="{% if request.endpoint == 'analytics.weighted_challenges' %}active{% endif %}">
                                 <a href="{{ url_for('analytics.weighted_challenges') }}">
                                     <i class="fas fa-list-ol"></i> <span class="sidebar-text">Challenge Matrix</span>
-                                </a>
-                            </li>
-                            <li class="{% if request.blueprint == 'challenge_traceability' %}active{% endif %}">
-                                <a href="{{ url_for('challenge_traceability.explorer_page') }}">
-                                    <i class="fas fa-project-diagram"></i>
-                                    <span class="sidebar-text">Challenge Explorer</span>
                                 </a>
                             </li>
                     <li class="sidebar-menu-header">SYSTEM</li>

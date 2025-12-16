@@ -9,21 +9,6 @@ from flask_login import UserMixin
 from .db import db
 from sqlalchemy.orm.properties import RelationshipProperty
 
-# --- Association Tables ---
-product_to_challenge_association = Table(
-    'product_to_challenge', db.metadata,
-    Column('product_id', Integer, ForeignKey('products.product_id'), primary_key=True),
-    Column('challenge_id', Integer, ForeignKey('manufacturing_challenges.challenge_id'), primary_key=True),
-    Column('relationship_type', String(20), nullable=False, default='explicit'),
-    Column('notes', Text, nullable=True)
-)
-
-product_to_technology_association = Table(
-    'product_to_technology', db.metadata,
-    Column('product_id', Integer, ForeignKey('products.product_id'), primary_key=True),
-    Column('technology_id', Integer, ForeignKey('manufacturing_technologies.technology_id'), primary_key=True)
-)
-
 # --- Core Entity Tables ---
 
 class Product(db.Model):
@@ -112,16 +97,6 @@ class Product(db.Model):
     # Relationships
     indications = relationship("Indication", back_populates="product", cascade="all, delete-orphan")
     supply_chain = relationship("ProductSupplyChain", back_populates="product", cascade="all, delete-orphan")
-    challenges = relationship(
-        "ManufacturingChallenge",
-        secondary=product_to_challenge_association,
-        back_populates="products"
-    )
-    technologies = relationship(
-        "ManufacturingTechnology",
-        secondary=product_to_technology_association,
-        back_populates="products"
-    )
     process_overrides = relationship("ProductProcessOverride", back_populates="product", cascade="all, delete-orphan")
     requirements = relationship("ProductRequirement", back_populates="product")
     modality = relationship("Modality", back_populates="products")
@@ -165,29 +140,9 @@ class Product(db.Model):
         if current_is_nme and current_is_line_ext:
             raise ValueError("A product cannot be both an NME and a Line-Extension")
         
-<<<<<<< HEAD
-        if key == 'parent_product_id' and value and not current_is_line_ext:
-            # If we are setting a parent, it implies line extension, but we won't force it here
-            # to allow flexibility during update operations
-            pass
-            
-        if current_is_nme and (key == 'parent_product_id' and value is not None):
-             raise ValueError("NMEs cannot have a parent_product_id")
-=======
-        # Loose validation to allow for initialization order
-        # We only check for hard contradictions that don't depend on order
-        
-        # 1. If we are setting parent_product_id, we must NOT be an NME
+        # If setting parent_product_id, must NOT be an NME
         if key == 'parent_product_id' and value is not None and current_is_nme:
              raise ValueError("NMEs cannot have a parent_product_id")
-
-        # Removed strict interdependence checks that fail during __init__
-        # if current_is_line_ext and not current_parent_id:
-        #     raise ValueError("Line-Extensions must have a parent_product_id")
-        
-        # if current_parent_id and not current_is_line_ext:
-        #     raise ValueError("Products with a parent_product_id should be marked as Line-Extensions")
->>>>>>> ae251be268e403271b46c5ea3de941691a400d69
         
         return value
 
@@ -250,199 +205,6 @@ class Product(db.Model):
             })
 
         return requirements
-
-    def get_inherited_challenges(self):
-        """
-        Get challenges from THREE sources:
-        1. Modality-level challenges (direct)
-        2. Technology-based challenges (inherited via template OR direct link)
-        3. Process template challenges (future enhancement)
-        """
-        inherited = []
-        seen_challenge_ids = set()
-        
-        # SOURCE 1: Modality challenges
-        if self.modality and self.modality.modality_challenges:
-            for mc in self.modality.modality_challenges:
-                if mc.challenge_id not in seen_challenge_ids:
-                    inherited.append({
-                        'challenge': mc.challenge,
-                        'source': f'Modality: {self.modality.modality_name}',
-                        'notes': mc.notes
-                    })
-                    seen_challenge_ids.add(mc.challenge_id)
-        
-        # SOURCE 2: Technology-based challenges
-        for tech in self.get_inherited_technologies():
-            for challenge in tech.challenges:
-                if challenge.challenge_id not in seen_challenge_ids:
-                    inherited.append({
-                        'challenge': challenge,
-                        'source': f'Technology: {tech.technology_name}',
-                        'notes': None
-                    })
-                    seen_challenge_ids.add(challenge.challenge_id)
-        
-        return inherited
-
-    def get_explicit_challenge_relationships(self):
-        """Get user-defined challenge relationships (exclusions/inclusions)."""
-        from sqlalchemy import text
-
-        result = db.session.execute(
-            text("""
-            SELECT challenge_id, relationship_type, notes
-            FROM product_to_challenge
-            WHERE product_id = :product_id
-            """),
-            {'product_id': self.product_id}
-        )
-
-        return [
-            {
-                'challenge_id': row[0],
-                'relationship_type': row[1],
-                'notes': row[2]
-            } for row in result
-        ]
-
-    def get_effective_challenges(self):
-        """Get final list of challenges (inherited - excluded + explicit)."""
-        inherited_challenges_info = self.get_inherited_challenges()
-        inherited = [item['challenge'] for item in inherited_challenges_info]
-        explicit_relationships = self.get_explicit_challenge_relationships()
-
-        explicit_lookup = {rel['challenge_id']: rel for rel in explicit_relationships}
-
-        effective_challenges = []
-
-        for challenge in inherited:
-            if challenge.challenge_id in explicit_lookup:
-                rel = explicit_lookup[challenge.challenge_id]
-                if rel['relationship_type'] == 'excluded':
-                    continue
-
-            effective_challenges.append({
-                'challenge': challenge,
-                'source': 'inherited',
-                'notes': explicit_lookup.get(challenge.challenge_id, {}).get('notes')
-            })
-
-        inherited_ids = {c.challenge_id for c in inherited}
-
-        for rel in explicit_relationships:
-            if rel['relationship_type'] == 'explicit' and rel['challenge_id'] not in inherited_ids:
-                challenge = ManufacturingChallenge.query.get(rel['challenge_id'])
-                if challenge:
-                    effective_challenges.append({
-                        'challenge': challenge,
-                        'source': 'explicit',
-                        'notes': rel['notes']
-                    })
-
-        return effective_challenges
-
-    def add_challenge_exclusion(self, challenge_id, notes=None):
-        """Exclude an inherited challenge."""
-        inherited_ids = {c['challenge'].challenge_id for c in self.get_inherited_challenges()}
-        if challenge_id not in inherited_ids:
-            raise ValueError("Cannot exclude a challenge that is not inherited")
-
-        from sqlalchemy import text
-        db.session.execute(
-            text("DELETE FROM product_to_challenge WHERE product_id = :pid AND challenge_id = :cid"),
-            {'pid': self.product_id, 'cid': challenge_id}
-        )
-
-        db.session.execute(
-            text("""
-            INSERT INTO product_to_challenge (product_id, challenge_id, relationship_type, notes)
-            VALUES (:pid, :cid, 'excluded', :notes)
-            """),
-            {'pid': self.product_id, 'cid': challenge_id, 'notes': notes}
-        )
-
-        db.session.commit()
-
-    def add_challenge_inclusion(self, challenge_id, notes=None):
-        """Add a product-specific challenge."""
-        if not ManufacturingChallenge.query.get(challenge_id):
-            raise ValueError("Challenge does not exist")
-
-        from sqlalchemy import text
-        db.session.execute(
-            text("DELETE FROM product_to_challenge WHERE product_id = :pid AND challenge_id = :cid"),
-            {'pid': self.product_id, 'cid': challenge_id}
-        )
-
-        db.session.execute(
-            text("""
-            INSERT INTO product_to_challenge (product_id, challenge_id, relationship_type, notes)
-            VALUES (:pid, :cid, 'explicit', :notes)
-            """),
-            {'pid': self.product_id, 'cid': challenge_id, 'notes': notes}
-        )
-
-        db.session.commit()
-
-    def remove_challenge_relationship(self, challenge_id):
-        """Remove any explicit relationship (exclusion or inclusion)."""
-        from sqlalchemy import text
-        db.session.execute(
-            text("DELETE FROM product_to_challenge WHERE product_id = :pid AND challenge_id = :cid"),
-            {'pid': self.product_id, 'cid': challenge_id}
-        )
-        db.session.commit()
-
-    def get_inherited_technologies(self):
-        """
-        Gets all technologies for a product using the correct three-tier filtering logic:
-        1. Template-Specific
-        2. Modality-Specific
-        3. Generic
-        """
-        from .models import ManufacturingTechnology, TechnologyModality
-        
-        all_techs = {tech.technology_id: tech for tech in self.technologies}
-
-        if not self.process_template or not self.modality_id:
-            return list(all_techs.values())
-
-        template_stage_ids = {ts.stage_id for ts in self.process_template.stages if ts.stage_id}
-        
-        if not template_stage_ids:
-            return list(all_techs.values())
-
-        # 1. Get IDs of all technologies linked to this modality
-        modality_tech_ids = {
-            res[0] for res in db.session.query(TechnologyModality.technology_id).filter_by(
-                modality_id=self.modality_id
-            )
-        }
-        
-        # 2. Get IDs of all technologies that are generic
-        generic_tech_ids = {
-            res[0] for res in db.session.query(ManufacturingTechnology.technology_id).filter(
-                ~ManufacturingTechnology.modality_links.any()
-            )
-        }
-
-        # 3. Get all technologies that are in the right stages
-        candidate_techs = db.session.query(ManufacturingTechnology).filter(
-            ManufacturingTechnology.stage_id.in_(template_stage_ids)
-        ).all()
-
-        # 4. Filter the candidates based on three-tier logic
-        for tech in candidate_techs:
-            is_template_specific = (tech.template_id == self.process_template_id)
-            is_modality_specific = tech.technology_id in modality_tech_ids
-            is_generic = tech.technology_id in generic_tech_ids
-
-            if is_template_specific or is_modality_specific or is_generic:
-                if tech.technology_id not in all_techs:
-                    all_techs[tech.technology_id] = tech
-        
-        return list(all_techs.values())
 
     def get_all_launches(self):
         """Returns all launches (NME + Line-Extensions) for this product family."""
@@ -565,25 +327,20 @@ class Indication(db.Model):
         return [c.key for c in inspect(cls).attrs if c.key not in ['product']]
 
 
-class ManufacturingChallenge(db.Model):
-    __tablename__ = 'manufacturing_challenges'
-    challenge_id = Column(Integer, primary_key=True)
-    challenge_category = Column(String(255), nullable=False, index=True)
-    challenge_name = Column(String(255), unique=True, nullable=False)
-    short_description = Column(Text, nullable=True)
-    explanation = Column(Text, nullable=True)
-    related_capabilities = Column(JSONB)
+class Challenge(db.Model):
+    """Simplified challenge model - modality-agnostic base information"""
+    __tablename__ = 'challenges'
 
-    primary_stage_id = Column(Integer, ForeignKey('process_stages.stage_id'), nullable=True)
-    technology_id = Column(Integer, ForeignKey('manufacturing_technologies.technology_id'))
-    severity_level = Column(String(50))
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), unique=True, nullable=False)
+    agnostic_description = Column(Text, nullable=True)
+    agnostic_root_cause = Column(Text, nullable=True)
+    value_step = Column(String(100), nullable=True)  # 'Upstream', 'Downstream', etc.
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    products = relationship("Product", secondary=product_to_challenge_association, back_populates="challenges")
-    primary_stage = relationship("ProcessStage", back_populates="challenges")
-    technology = relationship("ManufacturingTechnology", back_populates="challenges")
-    modality_links = relationship(
-        "ModalityChallenge",
+    modality_details = relationship(
+        "ChallengeModalityDetail",
         back_populates="challenge",
         cascade="all, delete-orphan"
     )
@@ -592,57 +349,9 @@ class ManufacturingChallenge(db.Model):
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
         return [
-            c.key for c in inspect(cls).attrs 
-            if c.key not in ['products', 'primary_stage', 'technology', 'technology_id', 'modality_links']
+            c.key for c in inspect(cls).attrs
+            if c.key not in ['modality_details']
         ]
-
-
-class ManufacturingTechnology(db.Model):
-    __tablename__ = 'manufacturing_technologies'
-    
-    technology_id = Column(Integer, primary_key=True)
-    technology_name = Column(String(255), unique=True, nullable=False)
-    stage_id = Column(Integer, ForeignKey('process_stages.stage_id'), nullable=False, index=True)
-    template_id = Column(Integer, ForeignKey('process_templates.template_id'), nullable=True, index=True)
-    
-    short_description = Column(Text)
-    description = Column(Text)
-    innovation_potential = Column(Text)
-    complexity_rating = Column(Integer)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    # Relationships
-    stage = relationship("ProcessStage", back_populates="technologies")
-    template = relationship("ProcessTemplate", backref="technologies")
-    challenges = relationship("ManufacturingChallenge", back_populates="technology", cascade="all, delete-orphan")
-    products = relationship("Product", secondary=product_to_technology_association, back_populates="technologies")
-    modality_links = relationship(
-        "TechnologyModality",
-        back_populates="technology",
-        cascade="all, delete-orphan"
-    )
-
-    @classmethod
-    def get_all_fields(cls):
-        """Returns a list of all column names for the model."""
-        return [
-            c.key for c in inspect(cls).attrs 
-            if c.key not in ['stage', 'template', 'challenges', 'products', 'modality_links']
-        ]
-
-
-class TechnologyModality(db.Model):
-    """Junction table for many-to-many relationship between technologies and modalities."""
-    __tablename__ = 'technology_modalities'
-    
-    technology_id = Column(Integer, ForeignKey('manufacturing_technologies.technology_id'), primary_key=True)
-    modality_id = Column(Integer, ForeignKey('modalities.modality_id'), primary_key=True)
-    notes = Column(Text, nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
-    # Relationships
-    technology = relationship("ManufacturingTechnology", back_populates="modality_links")
-    modality = relationship("Modality", back_populates="technology_links")
 
 
 class ProductSupplyChain(db.Model):
@@ -665,20 +374,14 @@ class Modality(db.Model):
     label = Column(String(255), nullable=True)
     short_description = Column(Text, nullable=True)
     description = Column(Text)
-    standard_challenges = Column(JSONB)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
     products = relationship("Product", back_populates="modality")
     process_templates = relationship("ProcessTemplate", back_populates="modality")
     requirements = relationship("ModalityRequirement", back_populates="modality")
-    modality_challenges = relationship(
-        "ModalityChallenge",
-        back_populates="modality",
-        cascade="all, delete-orphan"
-    )
-    technology_links = relationship(
-        "TechnologyModality",
+    challenge_details = relationship(
+        "ChallengeModalityDetail",
         back_populates="modality",
         cascade="all, delete-orphan"
     )
@@ -687,24 +390,44 @@ class Modality(db.Model):
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
         return [
-            c.key for c in inspect(cls).attrs 
-            if c.key not in ['products', 'process_templates', 'requirements', 'modality_challenges', 'technology_links']
+            c.key for c in inspect(cls).attrs
+            if c.key not in ['products', 'process_templates', 'requirements', 'challenge_details']
         ]
 
 
-class ModalityChallenge(db.Model):
-    """Links modalities to their typical manufacturing challenges"""
-    __tablename__ = 'modality_challenges'
+class ChallengeModalityDetail(db.Model):
+    """Links challenges to modalities with specific scores and details"""
+    __tablename__ = 'challenge_modality_details'
 
-    modality_id = Column(Integer, ForeignKey('modalities.modality_id'), primary_key=True)
-    challenge_id = Column(Integer, ForeignKey('manufacturing_challenges.challenge_id'), primary_key=True)
-    is_typical = Column(Boolean, default=True)
-    notes = Column(Text, nullable=True)
+    id = Column(Integer, primary_key=True)
+    challenge_id = Column(Integer, ForeignKey('challenges.id'), nullable=False)
+    modality_id = Column(Integer, ForeignKey('modalities.modality_id'), nullable=False)
+
+    # Modality-specific description and root causes
+    specific_description = Column(Text, nullable=True)
+    specific_root_cause = Column(Text, nullable=True)
+
+    # Impact scoring (1-5)
+    impact_score = Column(Integer, nullable=True)
+    impact_details = Column(Text, nullable=True)
+
+    # Maturity scoring (1-5)
+    maturity_score = Column(Integer, nullable=True)
+    maturity_details = Column(Text, nullable=True)
+
+    # Trends
+    trends_3_5_years = Column(Text, nullable=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    # Unique constraint
+    __table_args__ = (
+        db.UniqueConstraint('challenge_id', 'modality_id', name='uq_challenge_modality'),
+    )
+
     # Relationships
-    modality = relationship("Modality", back_populates="modality_challenges")
-    challenge = relationship("ManufacturingChallenge", back_populates="modality_links")
+    challenge = relationship("Challenge", back_populates="modality_details")
+    modality = relationship("Modality", back_populates="challenge_details")
 
 
 class ManufacturingCapability(db.Model):
@@ -842,8 +565,6 @@ class ProcessStage(db.Model):
     # Relationships
     template_links = relationship("TemplateStage", back_populates="stage")
     product_overrides = relationship("ProductProcessOverride", back_populates="stage")
-    technologies = relationship("ManufacturingTechnology", back_populates="stage")
-    challenges = relationship("ManufacturingChallenge", back_populates="primary_stage")
 
     # Self-referential hierarchy
     parent = relationship(
@@ -856,8 +577,8 @@ class ProcessStage(db.Model):
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
         return [
-            c.key for c in inspect(cls).attrs 
-            if c.key not in ['template_links', 'product_overrides', 'technologies', 'challenges', 'parent', 'children']
+            c.key for c in inspect(cls).attrs
+            if c.key not in ['template_links', 'product_overrides', 'parent', 'children']
         ]
 
     @classmethod

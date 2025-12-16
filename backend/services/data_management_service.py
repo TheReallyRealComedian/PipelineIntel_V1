@@ -10,12 +10,12 @@ from sqlalchemy import text
 
 from ..db import db
 from ..models import (
-    Product, Indication, ManufacturingChallenge, ManufacturingTechnology,
+    Product, Indication, Challenge, ChallengeModalityDetail,
     ProductSupplyChain, ManufacturingEntity, InternalFacility, ExternalPartner,
     Modality, ProcessStage, ProductTimeline, ProductRegulatoryFiling,
     ProductManufacturingSupplier, User, LLMSettings, ProcessTemplate, TemplateStage,
     ModalityRequirement, ProductRequirement, EntityCapability, ProductProcessOverride,
-    ManufacturingCapability, ModalityChallenge, TechnologyModality
+    ManufacturingCapability
 )
 
 # This order is critical. Parents must be inserted before children.
@@ -30,11 +30,10 @@ TABLE_IMPORT_ORDER = [
     'process_templates',
     'products',
     'indications',
-    'manufacturing_technologies',
-    'manufacturing_challenges',
+    'challenges',
+    'challenge_modality_details',
     'llm_settings',
-    'modality_challenges',
-    'template_stages', 'product_to_challenge', 'product_to_technology',
+    'template_stages',
     'product_supply_chain', 'modality_requirements', 'product_requirements',
     'entity_capabilities', 'product_process_overrides', 'product_timelines',
     'product_regulatory_filings', 'product_manufacturing_suppliers'
@@ -52,8 +51,8 @@ MODEL_MAP = {
     'process_templates': ProcessTemplate,
     'products': Product,
     'indications': Indication,
-    'manufacturing_technologies': ManufacturingTechnology,
-    'manufacturing_challenges': ManufacturingChallenge,
+    'challenges': Challenge,
+    'challenge_modality_details': ChallengeModalityDetail,
     'llm_settings': LLMSettings,
     'template_stages': TemplateStage,
     'product_supply_chain': ProductSupplyChain,
@@ -64,8 +63,6 @@ MODEL_MAP = {
     'product_timelines': ProductTimeline,
     'product_regulatory_filings': ProductRegulatoryFiling,
     'product_manufacturing_suppliers': ProductManufacturingSupplier,
-    'modality_challenges': ModalityChallenge,
-    'technology_modalities': TechnologyModality,
 }
 
 
@@ -128,7 +125,6 @@ def analyze_json_import(json_data: list, model_class, unique_key_field: str):
     """
     preview_data = []
     try:
-        product_map = {p.product_code: p for p in Product.query.all()} if model_class == ManufacturingChallenge else {}
         existing_items_query = model_class.query.all()
         existing_items_map = {getattr(item, unique_key_field): item for item in existing_items_query}
 
@@ -150,20 +146,12 @@ def analyze_json_import(json_data: list, model_class, unique_key_field: str):
                 preview_data.append(entry)
                 continue
 
-            product_codes_from_json = set()
-            if model_class == ManufacturingChallenge:
-                product_codes_from_json = set(json_item.pop('product_codes', []))
-                invalid_codes = [code for code in product_codes_from_json if code not in product_map]
-                if invalid_codes:
-                    entry['messages'].append(f"Warning: The following product codes were not found and will be ignored: {', '.join(invalid_codes)}")
-                product_codes_from_json = {code for code in product_codes_from_json if code in product_map}
-
             existing_item = existing_items_map.get(identifier)
 
             if existing_item:
                 entry['db_item'] = {
-                    c.name: getattr(existing_item, c.name) 
-                    for c in existing_item.__table__.columns 
+                    c.name: getattr(existing_item, c.name)
+                    for c in existing_item.__table__.columns
                     if not c.name.startswith('_')
                 }
 
@@ -177,16 +165,6 @@ def analyze_json_import(json_data: list, model_class, unique_key_field: str):
                             old_value = getattr(existing_item, key)
                             if str(old_value or '') != str(new_value or ''):
                                 entry['diff'][key] = {'old': old_value, 'new': new_value}
-
-                if model_class == ManufacturingChallenge:
-                    current_product_codes = {p.product_code for p in existing_item.products}
-                    added = product_codes_from_json - current_product_codes
-                    removed = current_product_codes - product_codes_from_json
-                    if added or removed:
-                        entry['diff']['product_links'] = {
-                            'added': sorted(list(added)),
-                            'removed': sorted(list(removed))
-                        }
 
                 is_dirty = bool(entry['diff'])
 
@@ -202,11 +180,6 @@ def analyze_json_import(json_data: list, model_class, unique_key_field: str):
                 entry['status'] = 'new'
                 entry['action'] = 'add'
                 entry['messages'].append("This is a new item that will be created.")
-                if model_class == ManufacturingChallenge and product_codes_from_json:
-                     entry['diff']['product_links'] = {
-                         'added': sorted(list(product_codes_from_json)),
-                         'removed': []
-                     }
 
             preview_data.append(entry)
 
@@ -325,58 +298,6 @@ def generate_suggestions(missing_value, existing_values, max_suggestions=3):
     return suggestions
 
 
-def _resolve_foreign_keys_for_technology(item, existing_technologies):
-    """
-    Resolves foreign keys for manufacturing technologies.
-    Converts name-based references to ID-based references.
-    NOW SUPPORTS MULTIPLE MODALITIES.
-    """
-    from ..models import ProcessStage, Modality, ProcessTemplate
-
-    resolved_item = item.copy()
-
-    if 'stage_name' in resolved_item:
-        stage = ProcessStage.query.filter_by(stage_name=resolved_item['stage_name']).first()
-        if stage:
-            resolved_item['stage_id'] = stage.stage_id
-            resolved_item.pop('stage_name')
-        else:
-            raise ValueError(f"Stage '{resolved_item['stage_name']}' not found")
-
-    if 'modality_names' in resolved_item:
-        modality_names = resolved_item.pop('modality_names')
-        if not isinstance(modality_names, list):
-            raise ValueError(f"'modality_names' must be a list, got: {type(modality_names)}")
-
-        modality_ids = []
-        for modality_name in modality_names:
-            modality = Modality.query.filter_by(modality_name=modality_name).first()
-            if not modality:
-                raise ValueError(f"Modality '{modality_name}' not found. Make sure to import modalities first.")
-            modality_ids.append(modality.modality_id)
-
-        resolved_item['modality_ids'] = modality_ids
-
-    elif 'modality_name' in resolved_item:
-        modality_name = resolved_item.pop('modality_name')
-        if modality_name:
-            modality = Modality.query.filter_by(modality_name=modality_name).first()
-            if modality:
-                resolved_item['modality_ids'] = [modality.modality_id]
-            else:
-                raise ValueError(f"Modality '{modality_name}' not found. Make sure to import modalities first.")
-
-    if 'template_name' in resolved_item:
-        template = ProcessTemplate.query.filter_by(template_name=resolved_item['template_name']).first()
-        if template:
-            resolved_item['template_id'] = template.template_id
-            resolved_item.pop('template_name')
-        else:
-            raise ValueError(f"Template '{resolved_item['template_name']}' not found.")
-
-    return resolved_item
-
-
 def _resolve_foreign_keys_for_process_stage(item, existing_stages):
     """
     Resolves foreign keys for process stages.
@@ -398,41 +319,17 @@ def _resolve_foreign_keys_for_process_stage(item, existing_stages):
     return resolved_item
 
 
-def _resolve_foreign_keys_for_challenge(item, existing_challenges):
-    """
-    Resolves foreign keys for manufacturing challenges.
-    Converts technology_name to technology_id.
-    """
-    from ..models import ManufacturingTechnology
-
-    resolved_item = item.copy()
-
-    if 'technology_name' in resolved_item:
-        technology = ManufacturingTechnology.query.filter_by(
-            technology_name=resolved_item['technology_name']
-        ).first()
-        if technology:
-            resolved_item['technology_id'] = technology.technology_id
-            resolved_item.pop('technology_name')
-        else:
-            raise ValueError(f"Technology '{resolved_item['technology_name']}' not found. Make sure to import technologies first.")
-
-    return resolved_item
-
-
 def _resolve_foreign_keys_for_product(item, existing_products):
     """
     Resolves foreign key references in a product record by name.
-    
-    IMPROVED: Now searches both the database AND the current session's 
-    newly created objects (identity map) to find Parents that were created
-    earlier in the same batch transaction.
+
+    SIMPLIFIED: No longer handles technology or challenge links (schema simplified).
     """
-    from ..models import Modality, ProcessTemplate, ManufacturingTechnology, ManufacturingChallenge, Product
-    
+    from ..models import Modality, ProcessTemplate, Product
+
     resolved = item.copy()
     warnings = []
-    
+
     # 1. Resolve modality_name → modality_id
     if 'modality_name' in resolved:
         modality_name = resolved.pop('modality_name')
@@ -443,7 +340,7 @@ def _resolve_foreign_keys_for_product(item, existing_products):
                 print(f"  ✓ Resolved modality '{modality_name}' → ID {modality.modality_id}")
             else:
                 warnings.append(f"Modality '{modality_name}' not found")
-    
+
     # 2. Resolve process_template_name → process_template_id
     if 'process_template_name' in resolved:
         template_name = resolved.pop('process_template_name')
@@ -462,24 +359,19 @@ def _resolve_foreign_keys_for_product(item, existing_products):
             else:
                 available_templates = [t.template_name for t in ProcessTemplate.query.all()]
                 warnings.append(f"Process template '{template_name}' not found. Available: {available_templates}")
-    
-    # 3. FIX: Resolve parent_product_code → parent_product_id
-    # We must look in the DB first, then in the current session for uncommitted parents
+
+    # 3. Resolve parent_product_code → parent_product_id
     if 'parent_product_code' in resolved:
         parent_code = resolved.pop('parent_product_code')
         if parent_code:
-            # A. Try finding in Database
             parent = Product.query.filter_by(product_code=parent_code).first()
 
-            # B. Try finding in current Session (newly added objects not yet queried)
             if not parent:
-                # Check Identity Map (flushed objects)
                 for obj in db.session.identity_map.values():
                     if isinstance(obj, Product) and obj.product_code == parent_code:
                         parent = obj
                         break
-                
-                # Check Pending objects (added but not flushed)
+
                 if not parent:
                     for obj in db.session.new:
                         if isinstance(obj, Product) and obj.product_code == parent_code:
@@ -494,98 +386,43 @@ def _resolve_foreign_keys_for_product(item, existing_products):
                     )
                 else:
                     resolved['parent_product_id'] = parent.product_id
-                    print(f"  ✓ Resolved parent '{parent_code}' → ID {parent.product_id} (Source: {'DB' if parent.product_id else 'Session'})")
+                    print(f"  ✓ Resolved parent '{parent_code}' → ID {parent.product_id}")
             else:
-                # Fallback: Search existing_products list (passed arg)
                 found_in_list = next((p for p in existing_products if p.product_code == parent_code), None)
                 if found_in_list:
                     resolved['parent_product_id'] = found_in_list.product_id
-                    print(f"  ✓ Resolved parent '{parent_code}' → ID {found_in_list.product_id} (from existing_products list)")
                 else:
-                    warnings.append(f"Parent product '{parent_code}' not found. Ensure NMEs are imported before Line-Extensions.")
-    
+                    warnings.append(f"Parent product '{parent_code}' not found.")
+
     # 4. Validate Line-Extension logic
     if resolved.get('is_line_extension'):
         if not resolved.get('parent_product_id'):
-            warnings.append(
-                "Line-Extensions must have a parent_product_id "
-                "(use parent_product_code in JSON)"
-            )
-        if not resolved.get('line_extension_indication'):
-            warnings.append(
-                "Line-Extensions should have a line_extension_indication"
-            )
+            warnings.append("Line-Extensions must have a parent_product_id")
         if resolved.get('is_nme'):
-            warnings.append(
-                "Product cannot be both is_nme=True and is_line_extension=True"
-            )
-    
+            warnings.append("Product cannot be both is_nme=True and is_line_extension=True")
+
     # 5. Auto-calculate launch_sequence if not provided
     if resolved.get('is_line_extension') and resolved.get('parent_product_id'):
         if 'launch_sequence' not in resolved or not resolved['launch_sequence']:
-            # We need to be careful here with uncommitted data
-            # Get max from DB
             db_max = db.session.query(db.func.max(Product.launch_sequence)).filter_by(
                 parent_product_id=resolved['parent_product_id']
             ).scalar() or 1
-            
-            # Get max from session (newly added siblings)
+
             session_max = 0
             for obj in db.session.identity_map.values():
                 if isinstance(obj, Product) and obj.parent_product_id == resolved['parent_product_id']:
                     if obj.launch_sequence and obj.launch_sequence > session_max:
                         session_max = obj.launch_sequence
-            
-            current_max = max(db_max, session_max)
-            
-            resolved['launch_sequence'] = current_max + 1
-            warnings.append(f"Auto-calculated launch_sequence: {resolved['launch_sequence']}")
-            print(f"  → Auto-calculated launch_sequence: {resolved['launch_sequence']}")
-    
-    # 6. Handle technology_names
-    if 'technology_names' in resolved:
-        tech_names = resolved.pop('technology_names', [])
-        resolved['_technology_names_to_link'] = tech_names
-        
-        for tech_name in tech_names:
-            tech = ManufacturingTechnology.query.filter_by(technology_name=tech_name).first()
-            if not tech:
-                warnings.append(f"Technology '{tech_name}' not found")
-        
-        if tech_names:
-            print(f"  → Found {len(tech_names)} technologies to link after product creation")
-    
-    # 7. Handle explicit_challenges
-    if 'explicit_challenges' in resolved:
-        challenges = resolved.pop('explicit_challenges', [])
-        resolved['_explicit_challenges'] = challenges
-        
-        for ch in challenges:
-            challenge_name = ch.get('challenge_name')
-            if challenge_name:
-                challenge = ManufacturingChallenge.query.filter_by(
-                    challenge_name=challenge_name
-                ).first()
-                if not challenge:
-                    warnings.append(f"Challenge '{challenge_name}' not found")
-    
-    # 8. Handle excluded_challenges
-    if 'excluded_challenges' in resolved:
-        challenges = resolved.pop('excluded_challenges', [])
-        resolved['_excluded_challenges'] = challenges
-        
-        for ch in challenges:
-            challenge_name = ch.get('challenge_name')
-            if challenge_name:
-                challenge = ManufacturingChallenge.query.filter_by(
-                    challenge_name=challenge_name
-                ).first()
-                if not challenge:
-                    warnings.append(f"Challenge '{challenge_name}' not found")
-    
+
+            resolved['launch_sequence'] = max(db_max, session_max) + 1
+
+    # Remove any obsolete fields that might be in old JSON imports
+    for obsolete_field in ['technology_names', 'explicit_challenges', 'excluded_challenges']:
+        resolved.pop(obsolete_field, None)
+
     if warnings:
         resolved['_warnings'] = warnings
-    
+
     return resolved
 
 
@@ -788,9 +625,9 @@ def _separate_product_data(json_data):
 def finalize_import(resolved_data, model_class, unique_key_field, resolver_func=None):
     """
     Finalizes the import by creating or updating database entries.
-    Enhanced with detailed logging, product-specific technology linking, and data sanitization.
+    Simplified: No longer handles technology or challenge linking.
     """
-    from ..models import Product, ManufacturingTechnology, product_to_technology_association, TechnologyModality
+    from ..models import Product
 
     success_count = 0
     error_count = 0
@@ -856,8 +693,6 @@ Unique Key: {unique_key_field}
                 item_log.append(item_header)
                 detailed_logs.append(item_header)
 
-                tech_names_to_link = []
-                modality_ids_to_link = []
                 warnings = []
 
                 # 1. Apply Resolver
@@ -870,13 +705,7 @@ Unique Key: {unique_key_field}
                         existing_instances = model_class.query.all()
                         data_to_process = resolver_func(raw_data, existing_instances)
 
-                        tech_names_to_link = data_to_process.pop('_technology_names_to_link', [])
-                        modality_ids_to_link = data_to_process.pop('modality_ids', [])
                         warnings = data_to_process.pop('_warnings', [])
-                        
-                        # Remove internal keys
-                        if '_explicit_challenges' in data_to_process: del data_to_process['_explicit_challenges']
-                        if '_excluded_challenges' in data_to_process: del data_to_process['_excluded_challenges']
 
                         log_msg = f"  ✓ Resolver completed"
                         print(log_msg)
@@ -926,30 +755,8 @@ Unique Key: {unique_key_field}
                     item_to_process = model_class(**sanitized_data)
                     db.session.add(item_to_process)
 
-<<<<<<< HEAD
-                # 4. Commit IMMEDIATELY to allow subsequent items to find this one (Fixes parent not found)
+                # Commit to allow subsequent items to find this one (important for parent-child relationships)
                 db.session.commit()
-=======
-                # Flush to generate IDs and make object available in session.new/identity_map
-                db.session.flush()
->>>>>>> ae251be268e403271b46c5ea3de941691a400d69
-
-                # 5. Post-Creation Linking (Technologies)
-                if model_class == ManufacturingTechnology and modality_ids_to_link:
-                    # ... (keep existing logic for TechnologyModality) ...
-                    pass 
-
-                if model_class == Product and tech_names_to_link:
-                    # ... (keep existing logic for product_to_technology) ...
-                    # Ensure you verify if existing_link logic is wrapped in try/except block if needed
-                    # For brevity, assuming existing logic is sound, just ensure db.session.commit() is called after linking
-                    for tech_name in tech_names_to_link:
-                        technology = ManufacturingTechnology.query.filter_by(technology_name=tech_name).first()
-                        if technology:
-                             # Check if already linked logic...
-                             if technology not in item_to_process.technologies:
-                                 item_to_process.technologies.append(technology)
-                    db.session.commit()
 
                 success_count += 1
                 log_msg = f"  ✓ SUCCESS"

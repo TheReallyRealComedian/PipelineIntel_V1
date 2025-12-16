@@ -18,11 +18,10 @@ def _get_exportable_entities():
         product_service,
         indication_service,
         challenge_service,
-        technology_service,
         modality_service,
         facility_service,
         capability_service,
-        process_stage_service,  # ADD THIS IMPORT
+        process_stage_service,
     )
     from ..models import (
         Modality,
@@ -30,9 +29,8 @@ def _get_exportable_entities():
         ManufacturingCapability,
         Product,
         Indication,
-        ManufacturingChallenge,
-        ManufacturingTechnology,
-        ProcessStage,  # ADD THIS IMPORT
+        Challenge,
+        ProcessStage,
         ProductTimeline,
         ProductRegulatoryFiling,
         ProductManufacturingSupplier,
@@ -52,16 +50,10 @@ def _get_exportable_entities():
             "name_field": "indication_name",
         },
         "challenges": {
-            "model": ManufacturingChallenge,
+            "model": Challenge,
             "fetch_all_func": challenge_service.get_all_challenges,
-            "pk_field": "challenge_id",
-            "name_field": "challenge_name",
-        },
-        "technologies": {
-            "model": ManufacturingTechnology,
-            "fetch_all_func": technology_service.get_all_technologies,
-            "pk_field": "technology_id",
-            "name_field": "technology_name",
+            "pk_field": "id",
+            "name_field": "name",
         },
         "modalities": {
             "model": Modality,
@@ -81,11 +73,10 @@ def _get_exportable_entities():
             "pk_field": "capability_id",
             "name_field": "capability_name",
         },
-        # ADD THIS ENTIRE ENTRY FOR PROCESS_STAGES
         "process_stages": {
             "model": ProcessStage,
             "fetch_all_func": lambda: ProcessStage.query.order_by(
-                ProcessStage.hierarchy_level, 
+                ProcessStage.hierarchy_level,
                 ProcessStage.stage_order
             ).all(),
             "pk_field": "stage_id",

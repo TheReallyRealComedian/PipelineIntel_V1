@@ -1,8 +1,7 @@
 # backend/services/process_stage_service.py
 from flask import session
 from sqlalchemy import inspect
-from ..models import ProcessStage, db, ManufacturingChallenge
-from sqlalchemy.orm import joinedload
+from ..models import ProcessStage, db
 
 DEFAULT_STAGE_COLUMNS = [
     'stage_name', 'stage_category', 'hierarchy_level',
@@ -10,27 +9,22 @@ DEFAULT_STAGE_COLUMNS = [
 ]
 
 
-def get_hierarchical_stages_with_challenges():
+def get_hierarchical_stages():
     """
-    Returns process stages organized hierarchically, with associated challenges
-    eager-loaded for high performance.
+    Returns process stages organized hierarchically for visualization.
     """
-    # 1. Fetch all stages in one query, and tell SQLAlchemy to also fetch all
-    #    related challenges in a second, efficient query.
-    all_stages = ProcessStage.query.options(
-        joinedload(ProcessStage.challenges)
-    ).order_by(ProcessStage.hierarchy_level, ProcessStage.stage_order).all()
+    all_stages = ProcessStage.query.order_by(
+        ProcessStage.hierarchy_level,
+        ProcessStage.stage_order
+    ).all()
 
-    # 2. Build the tree structure in memory (much faster than repeated DB calls)
     stage_map = {stage.stage_id: stage for stage in all_stages}
-    
-    # Create a node structure that includes the stage and its children
+
     node_map = {
         stage.stage_id: {
-            'stage': stage, 
-            'challenges': sorted(stage.challenges, key=lambda c: c.challenge_name),
+            'stage': stage,
             'children': []
-        } 
+        }
         for stage in all_stages
     }
 
@@ -45,6 +39,7 @@ def get_hierarchical_stages_with_challenges():
             root_nodes.append(node)
 
     return root_nodes
+
 
 def get_process_stage_table_context(requested_columns=None):
     """
@@ -121,58 +116,14 @@ def inline_update_stage_field(stage_id, field_name, new_value):
     return stage, f"Updated {field_name} successfully."
 
 
-def get_hierarchical_stages():
-    """
-    Returns process stages organized hierarchically for visualization.
-    """
-    top_level = ProcessStage.get_top_level_phases()
-
-    def build_tree(stage):
-        return {
-            'stage': stage,
-            'children': [build_tree(child) for child in stage.children]
-        }
-
-    return [build_tree(stage) for stage in top_level]
-
-
 def get_stage_details(stage_id):
     """
-    Fetches a single process stage and its directly associated challenges.
+    Fetches a single process stage.
     """
     stage = ProcessStage.query.get(stage_id)
     if not stage:
         return None
 
-    # The 'challenges' backref from the model makes this easy
-    associated_challenges = stage.challenges
-
     return {
-        "stage": stage,
-        "challenges": sorted(associated_challenges, key=lambda c: c.challenge_name)
+        "stage": stage
     }
-
-
-def update_stage_challenges(stage_id, challenge_ids):
-    """
-    Updates the list of challenges associated with a specific process stage.
-    This is a full replacement operation.
-    """
-    stage = ProcessStage.query.get(stage_id)
-    if not stage:
-        return False, "Process stage not found."
-
-    try:
-        # Fetch the challenge objects that should be linked
-        challenges_to_link = ManufacturingChallenge.query.filter(
-            ManufacturingChallenge.challenge_id.in_(challenge_ids)
-        ).all()
-
-        # SQLAlchemy's relationship management handles the adds/removes automatically
-        stage.challenges = challenges_to_link
-
-        db.session.commit()
-        return True, "Challenge associations updated successfully."
-    except Exception as e:
-        db.session.rollback()
-        return False, f"An error occurred: {str(e)}"

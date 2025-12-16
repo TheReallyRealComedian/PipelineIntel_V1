@@ -13,16 +13,13 @@ from backend.db import db, init_app_db
 from backend.utils import nl2br, markdown_to_html_filter, truncate_filter
 from backend.assets import js_main_bundle, css_bundle
 
-# Import blueprints (updated to include process_template_routes)
+# Import blueprints
 import backend.routes.auth_routes as auth_routes_mod
 import backend.routes.settings_routes as settings_routes_mod
 import backend.routes.api_routes as api_routes_mod
-# MAKE SURE THIS LINE EXISTS AND IS CORRECT
 import backend.routes.product_routes as product_routes_mod
 import backend.routes.indication_routes as indication_routes_mod
-# MAKE SURE THIS LINE EXISTS AND IS CORRECT
 import backend.routes.challenge_routes as challenge_routes_mod
-import backend.routes.technology_routes as technology_routes_mod
 import backend.routes.data_management_routes as data_management_routes_mod
 import backend.routes.export_routes as export_routes_mod
 import backend.routes.modality_routes as modality_routes_mod
@@ -32,7 +29,6 @@ import backend.routes.process_stage_routes as process_stage_routes_mod
 import backend.routes.process_template_routes as process_template_routes_mod
 import backend.routes.capability_routes as capability_routes_mod
 import backend.routes.llm_routes as llm_routes_mod
-import backend.routes.challenge_traceability_routes as challenge_traceability_routes_mod
 
 
 # Add to existing bundles
@@ -93,12 +89,11 @@ def create_app(init_session=True):
     app.register_blueprint(product_routes_mod.product_api_bp)
     
     app.register_blueprint(indication_routes_mod.indication_routes)
-    
+
     # Register both web and API blueprints for challenges
     app.register_blueprint(challenge_routes_mod.challenge_routes)
-    app.register_blueprint(challenge_routes_mod.challenge_api_bp) 
-    
-    app.register_blueprint(technology_routes_mod.technology_routes)
+    app.register_blueprint(challenge_routes_mod.challenge_api_bp)
+
     app.register_blueprint(data_management_routes_mod.data_management_bp)
     app.register_blueprint(export_routes_mod.export_bp)
     app.register_blueprint(modality_routes_mod.modality_routes)
@@ -108,8 +103,6 @@ def create_app(init_session=True):
     app.register_blueprint(process_template_routes_mod.process_template_routes)
     app.register_blueprint(capability_routes_mod.capability_routes)
     app.register_blueprint(llm_routes_mod.llm_routes)
-
-    app.register_blueprint(challenge_traceability_routes_mod.challenge_traceability_bp)
 
     @app.route('/')
     def index():
