@@ -370,11 +370,12 @@ class ImprovedForeignKeyResolver {
         const identifierFields = {
             'products': 'product_code',
             'indications': 'indication_name',
-            'manufacturing_challenges': 'challenge_name',
-            'manufacturing_technologies': 'technology_name',
+            'challenges': 'name',
+            'challenge_modality_details': 'id',
             'process_stages': 'stage_name',
             'modalities': 'modality_name',
-            // Define other entity identifiers as needed
+            'process_templates': 'template_name',
+            'manufacturing_capabilities': 'capability_name',
         };
         const identifierField = identifierFields[entityType];
 
