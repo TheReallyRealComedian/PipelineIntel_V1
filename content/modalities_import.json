@@ -1,0 +1,50 @@
+[
+  {
+    "modality_name": "ADC",
+    "modality_category": "Biologics",
+    "short_description": "Antibody-Drug Conjugates",
+    "description": "Targeted biopharmaceuticals combining monoclonal antibodies with cytotoxic drugs via chemical linkers."
+  },
+  {
+    "modality_name": "Gene Therapy",
+    "modality_category": "Advanced Therapy",
+    "short_description": "Viral Vector Gene Therapy",
+    "description": "Therapeutic approaches using viral vectors (AAV, Lentivirus) to deliver genetic material for treating genetic disorders."
+  },
+  {
+    "modality_name": "Live Bacteria",
+    "modality_category": "Biologics",
+    "short_description": "Live Biotherapeutic Products (LBPs)",
+    "description": "Therapeutic products containing live microorganisms for treating diseases through microbiome modulation."
+  },
+  {
+    "modality_name": "Oligonucleotide",
+    "modality_category": "Chemical",
+    "short_description": "Oligonucleotide Therapeutics",
+    "description": "Synthetic nucleic acid-based therapeutics including ASOs, siRNAs, and mRNAs."
+  },
+  {
+    "modality_name": "Oncolytic Virus",
+    "modality_category": "Advanced Therapy",
+    "short_description": "Oncolytic Virotherapy",
+    "description": "Engineered or naturally occurring viruses that selectively replicate in and destroy cancer cells."
+  },
+  {
+    "modality_name": "Peptide",
+    "modality_category": "Chemical",
+    "short_description": "Peptide Therapeutics",
+    "description": "Short chains of amino acids used as therapeutic agents, typically 2-50 amino acids."
+  },
+  {
+    "modality_name": "PROTAC",
+    "modality_category": "Chemical",
+    "short_description": "Proteolysis Targeting Chimeras",
+    "description": "Bifunctional molecules that induce targeted protein degradation via the ubiquitin-proteasome system."
+  },
+  {
+    "modality_name": "Recombinant Protein",
+    "modality_category": "Biologics",
+    "short_description": "Recombinant Protein Therapeutics",
+    "description": "Proteins produced through recombinant DNA technology, including enzymes, hormones, and cytokines."
+  }
+]

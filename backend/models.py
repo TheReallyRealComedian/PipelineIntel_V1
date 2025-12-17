@@ -429,6 +429,14 @@ class ChallengeModalityDetail(db.Model):
     challenge = relationship("Challenge", back_populates="modality_details")
     modality = relationship("Modality", back_populates="challenge_details")
 
+    @classmethod
+    def get_all_fields(cls):
+        """Returns a list of all column names for the model."""
+        return [
+            c.key for c in inspect(cls).attrs
+            if c.key not in ['challenge', 'modality']
+        ]
+
 
 class ManufacturingCapability(db.Model):
     __tablename__ = 'manufacturing_capabilities'

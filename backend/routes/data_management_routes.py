@@ -9,9 +9,12 @@ from ..services.data_management_service import (
     analyze_json_import_with_resolution,
     analyze_process_template_import,
     finalize_process_template_import,
+    analyze_challenge_modality_details_import,
+    finalize_challenge_modality_details_import,
     import_full_database,
     _resolve_foreign_keys_for_process_stage,
-    _resolve_foreign_keys_for_product
+    _resolve_foreign_keys_for_product,
+    _resolve_foreign_keys_for_challenge_modality_detail
 )
 
 from ..models import (
@@ -36,7 +39,8 @@ ENTITY_MAP = {
     },
     'challenge_modality_details': {
         'model': ChallengeModalityDetail,
-        'key': 'id'
+        'key': 'id',
+        'resolver': _resolve_foreign_keys_for_challenge_modality_detail
     },
     'process_stages': {
         'model': ProcessStage,
@@ -105,6 +109,9 @@ def analyze_json_upload():
         # Special handling for process templates (they have nested structure)
         if entity_type == 'process_templates':
             analysis_result = analyze_process_template_import(json_data)
+        # Special handling for challenge modality details (composite key)
+        elif entity_type == 'challenge_modality_details':
+            analysis_result = analyze_challenge_modality_details_import(json_data)
         else:
             # Use enhanced analysis for regular entities
             analysis_result = analyze_json_import_with_resolution(
@@ -271,6 +278,9 @@ def finalize_json_import():
         # Special handling for process templates
         if entity_type == 'process_templates':
             result = finalize_process_template_import(resolved_data)
+        # Special handling for challenge modality details
+        elif entity_type == 'challenge_modality_details':
+            result = finalize_challenge_modality_details_import(resolved_data)
         else:
             # Get the resolver if it exists
             entity_config = ENTITY_MAP[entity_type]

@@ -126,8 +126,8 @@ The application uses a powerful PostgreSQL schema designed to model pharmaceutic
 -   **Process Stages (`process_stages`)**: Represents individual steps in a manufacturing process. A self-referencing `parent_stage_id` allows for infinite hierarchical nesting.
 -   **Process Templates (`process_templates`)**: Defines a standard sequence of `Process Stages` for a given `Modality`, forming a reusable manufacturing blueprint.
 -   **Manufacturing Capabilities (`manufacturing_capabilities`)**: Granular skills or technologies required for production (e.g., "Cell Culture", "Aseptic Fill & Finish").
--   **Manufacturing Challenges (`manufacturing_challenges`)**: Potential risks or difficulties in the manufacturing process, which can be linked to products, technologies, or process stages.
--   **Manufacturing Technologies (`manufacturing_technologies`)**: Specific platforms or techniques used in manufacturing (e.g., "Twin Screw Granulation"). Now supports a **many-to-many relationship with modalities** via the `technology_modalities` junction table, allowing a single technology to be associated with multiple product types.
+-   **Challenges (`challenges`)**: Manufacturing challenges with modality-agnostic base information (name, description, root cause, value step).
+-   **Challenge Modality Details (`challenge_modality_details`)**: Links challenges to modalities with specific impact/maturity scores and modality-specific descriptions.
 
 #### Manufacturing Network & Supply Chain
 
@@ -228,7 +228,7 @@ The schema includes several tables linked directly to a `Product` to provide a d
 
 ### Analytics Pages
 -   **Pipeline Timeline**: Visualize the product pipeline with configurable timeline axes (years/phases) and groupings.
--   **Challenge Explorer**: Explore manufacturing challenges by modality and process template, showing technology-challenge relationships across the process hierarchy.
+-   **Challenge Prioritization**: View weighted manufacturing challenges aggregated by product frequency, timeline urgency, and impact scores.
 
 ### Table Features
 
@@ -264,7 +264,6 @@ The application accepts a JSON array of objects for data import. The system is d
     "product_name": "Example mAb",
     "modality_name": "Monoclonal Antibody",
     "process_template_name": "Perfusion mAb Process",
-    "technology_names": ["Perfusion Bioreactor", "TFF System"],
     "therapeutic_area": "Oncology",
     "current_phase": "Phase 2",
     "expected_launch_year": 2028
@@ -273,9 +272,9 @@ The application accepts a JSON array of objects for data import. The system is d
 ```
 
 **Key Import Fields**:
-- `process_template_name`: Links product to a specific manufacturing process (required for correct challenge inheritance).
-- `technology_names`: Array of technology names for many-to-many linking.
-- `modality_name`: Required for category-level inheritance.
+
+- `process_template_name`: Links product to a specific manufacturing process.
+- `modality_name`: Required for modality-level challenge inheritance.
 
 **Example 2: Importing Hierarchical Process Stages**
 
@@ -295,29 +294,35 @@ Use `parent_stage_name` to build the hierarchy. Parents must be defined before c
 ]
 ```
 
-**Example 3: Importing Manufacturing Technologies (Current Format)**
+**Example 3: Importing Challenges with Modality Details**
 
-Use the `modality_names` array to establish many-to-many relationships with modalities.
+Challenges can be imported with their modality-specific scoring data.
 
 ```json
 [
-  // Technology for multiple modalities
   {
-    "technology_name": "Spray Drying",
-    "stage_name": "Physical Processing & Drying",
-    "modality_names": ["Small Molecule", "Peptides", "Oligonucleotides"],
-    "complexity_rating": 6
-  },
-  // Generic technology (applies to all)
-  {
-    "technology_name": "Track & Trace Serialization",
-    "stage_name": "Secondary Packaging & Serialization",
-    "modality_names": [],
-    "complexity_rating": 3
+    "name": "Protein Aggregation",
+    "agnostic_description": "Unwanted protein clustering during manufacturing",
+    "agnostic_root_cause": "Stress conditions during processing",
+    "value_step": "Upstream"
   }
 ]
 ```
-**Note**: The old single `modality_name` field is no longer supported as of v2.1.
+
+**Example 4: Importing Challenge Modality Details**
+
+```json
+[
+  {
+    "challenge_name": "Protein Aggregation",
+    "modality_name": "Monoclonal Antibody",
+    "specific_description": "mAb aggregation during cell culture and purification",
+    "impact_score": 4,
+    "maturity_score": 3,
+    "trends_3_5_years": "Improved analytical methods emerging"
+  }
+]
+```
 
 ---
 

@@ -426,6 +426,50 @@ def _resolve_foreign_keys_for_product(item, existing_products):
     return resolved
 
 
+def _resolve_foreign_keys_for_challenge_modality_detail(item, existing_details):
+    """
+    Resolves foreign key references in a ChallengeModalityDetail record.
+    Converts challenge_name → challenge_id and modality_name → modality_id.
+    """
+    from ..models import Challenge, Modality
+
+    resolved = item.copy()
+    warnings = []
+
+    # 1. Resolve challenge_name → challenge_id
+    if 'challenge_name' in resolved:
+        challenge_name = resolved.pop('challenge_name')
+        if challenge_name:
+            challenge = Challenge.query.filter_by(name=challenge_name).first()
+            if challenge:
+                resolved['challenge_id'] = challenge.id
+                print(f"  ✓ Resolved challenge '{challenge_name}' → ID {challenge.id}")
+            else:
+                warnings.append(f"Challenge '{challenge_name}' not found")
+
+    # 2. Resolve modality_name → modality_id
+    if 'modality_name' in resolved:
+        modality_name = resolved.pop('modality_name')
+        if modality_name:
+            modality = Modality.query.filter_by(modality_name=modality_name).first()
+            if modality:
+                resolved['modality_id'] = modality.modality_id
+                print(f"  ✓ Resolved modality '{modality_name}' → ID {modality.modality_id}")
+            else:
+                warnings.append(f"Modality '{modality_name}' not found")
+
+    # 3. Validate required fields
+    if not resolved.get('challenge_id'):
+        warnings.append("Missing challenge_id - cannot import without valid challenge reference")
+    if not resolved.get('modality_id'):
+        warnings.append("Missing modality_id - cannot import without valid modality reference")
+
+    if warnings:
+        resolved['_warnings'] = warnings
+
+    return resolved
+
+
 def _parse_date(date_string):
     """Helper function to parse date strings into date objects."""
     if not date_string:
@@ -1120,5 +1164,279 @@ def finalize_process_template_import(resolved_data):
             'skipped_count': skipped_count,
             'failed_count': failed_count,
             'error_messages': error_messages + [str(e)],
+            'detailed_logs': detailed_logs
+        }
+
+
+def analyze_challenge_modality_details_import(json_data):
+    """
+    Analyze challenge modality details import data.
+    Uses challenge_name + modality_name as composite identifier.
+    """
+    from ..models import Challenge, Modality, ChallengeModalityDetail
+
+    try:
+        preview_data = []
+        missing_keys = {}
+        suggestions = {}
+        needs_resolution = False
+
+        # Build lookup maps
+        challenges = {c.name: c for c in Challenge.query.all()}
+        modalities = {m.modality_name: m for m in Modality.query.all()}
+
+        for index, item in enumerate(json_data):
+            challenge_name = item.get('challenge_name', '')
+            modality_name = item.get('modality_name', '')
+            identifier = f"{challenge_name} | {modality_name}"
+
+            preview_item = {
+                'index': index,
+                'json_item': item,
+                'identifier': identifier,
+                'action': 'skip',
+                'status': 'error',
+                'messages': [],
+                'diff': {},
+                'db_item': None,
+                'missing_foreign_keys': {}  # Required by template
+            }
+
+            # Validate challenge_name
+            if not challenge_name:
+                preview_item['messages'].append('Missing challenge_name')
+                preview_item['status'] = 'error'
+                preview_data.append(preview_item)
+                continue
+
+            # Validate modality_name
+            if not modality_name:
+                preview_item['messages'].append('Missing modality_name')
+                preview_item['status'] = 'error'
+                preview_data.append(preview_item)
+                continue
+
+            # Check if challenge exists
+            challenge = challenges.get(challenge_name)
+            if not challenge:
+                preview_item['messages'].append(f'Challenge "{challenge_name}" not found')
+                preview_item['status'] = 'needs_resolution'
+                preview_item['missing_foreign_keys']['challenge_name'] = challenge_name
+                needs_resolution = True
+
+                if 'challenge_name' not in missing_keys:
+                    missing_keys['challenge_name'] = set()
+                missing_keys['challenge_name'].add(challenge_name)
+
+                if 'challenge_name' not in suggestions:
+                    suggestions['challenge_name'] = {}
+                # Generate suggestions in the format expected by template
+                suggestions['challenge_name'][challenge_name] = generate_suggestions(
+                    challenge_name, list(challenges.keys())
+                )
+
+            # Check if modality exists
+            modality = modalities.get(modality_name)
+            if not modality:
+                preview_item['messages'].append(f'Modality "{modality_name}" not found')
+                preview_item['status'] = 'needs_resolution'
+                preview_item['missing_foreign_keys']['modality_name'] = modality_name
+                needs_resolution = True
+
+                if 'modality_name' not in missing_keys:
+                    missing_keys['modality_name'] = set()
+                missing_keys['modality_name'].add(modality_name)
+
+                if 'modality_name' not in suggestions:
+                    suggestions['modality_name'] = {}
+                # Generate suggestions in the format expected by template
+                suggestions['modality_name'][modality_name] = generate_suggestions(
+                    modality_name, list(modalities.keys())
+                )
+
+            # If both exist, check for existing detail record
+            if challenge and modality:
+                existing_detail = ChallengeModalityDetail.query.filter_by(
+                    challenge_id=challenge.id,
+                    modality_id=modality.modality_id
+                ).first()
+
+                if existing_detail:
+                    preview_item['action'] = 'update'
+                    preview_item['status'] = 'update'
+                    preview_item['db_item'] = {
+                        'id': existing_detail.id,
+                        'impact_score': existing_detail.impact_score,
+                        'maturity_score': existing_detail.maturity_score
+                    }
+                    preview_item['messages'].append('Record exists - will update')
+                else:
+                    preview_item['action'] = 'add'
+                    preview_item['status'] = 'new'
+                    preview_item['messages'].append('New record - will be created')
+
+            preview_data.append(preview_item)
+
+        # Convert sets to lists for JSON serialization
+        for key in missing_keys:
+            missing_keys[key] = list(missing_keys[key])
+
+        return {
+            'success': True,
+            'preview_data': preview_data,
+            'needs_resolution': needs_resolution,
+            'missing_keys': missing_keys,
+            'suggestions': suggestions,
+            'total_items': len(json_data)
+        }
+
+    except Exception as e:
+        traceback.print_exc()
+        return {
+            'success': False,
+            'message': f'Analysis failed: {str(e)}'
+        }
+
+
+def finalize_challenge_modality_details_import(resolved_data):
+    """
+    Finalize the import of challenge modality details.
+    """
+    from ..models import Challenge, Modality, ChallengeModalityDetail
+
+    added_count = 0
+    updated_count = 0
+    skipped_count = 0
+    failed_count = 0
+    error_messages = []
+    detailed_logs = []
+
+    log_msg = f"\n{'='*60}\nStarting import for Challenge Modality Details\nTotal items: {len(resolved_data)}\n{'='*60}"
+    print(log_msg)
+    detailed_logs.append(log_msg)
+
+    # Build lookup maps
+    challenges = {c.name: c for c in Challenge.query.all()}
+    modalities = {m.modality_name: m for m in Modality.query.all()}
+
+    try:
+        for idx, entry in enumerate(resolved_data):
+            action = entry.get('action')
+            data = entry.get('data', {})
+
+            challenge_name = data.get('challenge_name', '')
+            modality_name = data.get('modality_name', '')
+            identifier = f"{challenge_name} | {modality_name}"
+
+            log_msg = f"[{idx+1}/{len(resolved_data)}] Processing: {identifier}"
+            print(log_msg)
+            detailed_logs.append(log_msg)
+
+            if action == 'skip':
+                skipped_count += 1
+                log_msg = f"  → Skipped by user"
+                print(log_msg)
+                detailed_logs.append(log_msg)
+                continue
+
+            try:
+                # Resolve foreign keys
+                challenge = challenges.get(challenge_name)
+                modality = modalities.get(modality_name)
+
+                if not challenge:
+                    raise ValueError(f"Challenge '{challenge_name}' not found")
+                if not modality:
+                    raise ValueError(f"Modality '{modality_name}' not found")
+
+                # Always check for existing record to avoid duplicates
+                existing_detail = ChallengeModalityDetail.query.filter_by(
+                    challenge_id=challenge.id,
+                    modality_id=modality.modality_id
+                ).first()
+
+                if existing_detail:
+                    # Update existing record
+                    log_msg = f"  → Updating existing record (ID: {existing_detail.id})"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
+
+                    # Update fields
+                    if 'specific_description' in data:
+                        existing_detail.specific_description = data['specific_description']
+                    if 'specific_root_cause' in data:
+                        existing_detail.specific_root_cause = data['specific_root_cause']
+                    if 'impact_score' in data:
+                        existing_detail.impact_score = data['impact_score']
+                    if 'impact_details' in data:
+                        existing_detail.impact_details = data['impact_details']
+                    if 'maturity_score' in data:
+                        existing_detail.maturity_score = data['maturity_score']
+                    if 'maturity_details' in data:
+                        existing_detail.maturity_details = data['maturity_details']
+                    if 'trends_3_5_years' in data:
+                        existing_detail.trends_3_5_years = data['trends_3_5_years']
+
+                    updated_count += 1
+
+                else:
+                    # Create new record
+                    log_msg = f"  → Creating new record"
+                    print(log_msg)
+                    detailed_logs.append(log_msg)
+
+                    new_detail = ChallengeModalityDetail(
+                        challenge_id=challenge.id,
+                        modality_id=modality.modality_id,
+                        specific_description=data.get('specific_description'),
+                        specific_root_cause=data.get('specific_root_cause'),
+                        impact_score=data.get('impact_score'),
+                        impact_details=data.get('impact_details'),
+                        maturity_score=data.get('maturity_score'),
+                        maturity_details=data.get('maturity_details'),
+                        trends_3_5_years=data.get('trends_3_5_years')
+                    )
+                    db.session.add(new_detail)
+                    added_count += 1
+
+                db.session.commit()
+                log_msg = f"  ✓ SUCCESS"
+                print(log_msg)
+                detailed_logs.append(log_msg)
+
+            except Exception as e:
+                failed_count += 1
+                error_msg = f"Failed to process '{identifier}': {str(e)}"
+                error_messages.append(error_msg)
+                log_msg = f"  ✗ ERROR: {str(e)}"
+                print(log_msg)
+                detailed_logs.append(log_msg)
+                db.session.rollback()
+                continue
+
+        summary = f"\n{'='*60}\nImport Summary for Challenge Modality Details\nAdded: {added_count}\nUpdated: {updated_count}\nSkipped: {skipped_count}\nFailed: {failed_count}\n{'='*60}"
+        print(summary)
+        detailed_logs.append(summary)
+
+        return {
+            'success': True,
+            'message': f"Import completed: {added_count} added, {updated_count} updated, {failed_count} errors",
+            'added_count': added_count,
+            'updated_count': updated_count,
+            'skipped_count': skipped_count,
+            'failed_count': failed_count,
+            'error_messages': error_messages,
+            'success_count': added_count + updated_count,
+            'detailed_logs': detailed_logs
+        }
+
+    except Exception as e:
+        db.session.rollback()
+        log_msg = f"\n✗ CRITICAL ERROR: {str(e)}"
+        print(log_msg)
+        detailed_logs.append(log_msg)
+        return {
+            'success': False,
+            'message': f'Import failed: {str(e)}',
             'detailed_logs': detailed_logs
         }

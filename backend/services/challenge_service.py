@@ -11,9 +11,13 @@ def get_all_challenges():
 def get_challenge_table_context(requested_columns_str: str = None):
     """Prepares the full context needed for rendering the dynamic challenges table."""
 
-    DEFAULT_COLUMNS = ['name', 'value_step', 'agnostic_description']
+    DEFAULT_COLUMNS = ['name', 'value_step', 'modalities_summary', 'agnostic_description']
 
-    all_fields = Challenge.get_all_fields()
+    # Get base fields from model
+    base_fields = Challenge.get_all_fields()
+
+    # Add computed field for modalities
+    all_fields = base_fields + ['modalities_summary']
 
     if requested_columns_str:
         selected_fields = [col for col in requested_columns_str.split(',') if col in all_fields]
@@ -25,8 +29,23 @@ def get_challenge_table_context(requested_columns_str: str = None):
 
     challenges = get_all_challenges()
 
-    # Convert SQLAlchemy objects to dictionaries
-    challenge_dicts = [{field: getattr(c, field) for field in all_fields} for c in challenges]
+    # Convert SQLAlchemy objects to dictionaries with modality info
+    challenge_dicts = []
+    for c in challenges:
+        challenge_dict = {field: getattr(c, field, None) for field in base_fields}
+
+        # Build modalities summary
+        modality_summaries = []
+        for detail in c.modality_details:
+            if detail.modality:
+                impact = f"I:{detail.impact_score}" if detail.impact_score else "I:–"
+                maturity = f"M:{detail.maturity_score}" if detail.maturity_score else "M:–"
+                modality_summaries.append(
+                    f"{detail.modality.modality_name} ({impact}/{maturity})"
+                )
+
+        challenge_dict['modalities_summary'] = ', '.join(modality_summaries) if modality_summaries else '–'
+        challenge_dicts.append(challenge_dict)
 
     return {
         'items': challenge_dicts,
