@@ -1,0 +1,176 @@
+[
+  {
+    "name": "Consortium-Kompatibilität & Metabolische Interaktionen",
+    "agnostic_description": "Validation of coexistence in multi-strain consortia without metabolic inhibition or dominance shifts. Complex management of strain ratios and metabolic cross-talk.",
+    "agnostic_root_cause": "Multi-strain systems exhibit inherent metabolic competition, secondary metabolite production (bacteriocins, organic acids), and quorum-sensing-driven population dynamics that vary with fermentation conditions.",
+    "value_step": "Upstream"
+  },
+  {
+    "name": "Sporulationsverhalten & Keimungs-Kinetik",
+    "agnostic_description": "Control of sporulation efficiency and spore quality (germination capacity, viability, structural integrity) for spore-based live biotherapeutic products.",
+    "agnostic_root_cause": "Sporulation conditions (temperature, water activity, nutrient availability) create a quality-quantity tradeoff where high sporulation efficiency often results in defective spores with reduced germination capacity.",
+    "value_step": "Upstream"
+  },
+  {
+    "name": "Fehlende CFU-Efficacy-Korrelation & VBNC-Phänomen",
+    "agnostic_description": "Inability to establish mechanistic link between colony-forming units (CFU) and clinical therapeutic outcome. Viable-but-non-culturable (VBNC) cells represent 30–50% of viable population but evade standard potency assays.",
+    "agnostic_root_cause": "Standard CFU enumeration misses metabolically dormant but viable cells. Lack of validated biomarkers that predict clinical mechanism of action across diverse indications.",
+    "value_step": "QC/Reg"
+  },
+  {
+    "name": "Fehlende Sterilisation & Endotoxin-Akkumulation",
+    "agnostic_description": "Inability to apply terminal sterilization (0.22 µm filtration, gamma radiation) because the product itself is living. Risk of endotoxin (LPS) accumulation from Gram-negative bacteria during fermentation.",
+    "agnostic_root_cause": "Living organisms cannot be sterilized post-manufacture. Gram-negative anaerobes produce LPS during fermentation; no validated removal strategy for live bacterial products.",
+    "value_step": "QC/Reg"
+  },
+  {
+    "name": "Anaerobe-Fermentationskapazität & Skalierungs-Limitationen",
+    "agnostic_description": "Global shortage of GMP-capable anaerobic fermentation infrastructure. Scale-up introduces dissolved oxygen gradients, pH heterogeneity, and non-linear metabolic effects absent at laboratory scale.",
+    "agnostic_root_cause": "Specialized capital-intensive anaerobic equipment (oxygen-free bioreactors, monitoring sensors) with limited CDMO availability. Fermentation physics changes non-linearly above 100 L scale.",
+    "value_step": "Upstream"
+  },
+  {
+    "name": "Genetische Drift & Batch-zu-Batch-Variabilität",
+    "agnostic_description": "Spontaneous mutations, inokulum variability, and strain dominance shifts lead to 15–30% batch-to-batch variance in growth rate, metabolic profile, and final cell titer.",
+    "agnostic_root_cause": "Microorganisms undergo spontaneous genetic variation and phenotypic drift during extended fermentation. Lack of real-time adaptive control strategies in routine manufacturing.",
+    "value_step": "Upstream"
+  },
+  {
+    "name": "Lyophilisierungs-Prozesskontrolle & Viabilitätsverlust",
+    "agnostic_description": "Freeze-drying can reduce bacterial viability by 20–40% despite cryoprotectant use. Spore quality and cell membrane integrity must be preserved across primary and secondary drying phases.",
+    "agnostic_root_cause": "Ice crystal formation, osmotic stress, and removal of residual water damage cellular structures. Protective excipients (trehalose, lactose) are empirically optimized per strain.",
+    "value_step": "Fill & Finish"
+  },
+  {
+    "name": "Modulierte Analyitk und Potenz-Assay-Variabilität",
+    "agnostic_description": "Multiple analytical methods (CFU, flow cytometry, qPCR, 16S sequencing) yield different population counts and don't correlate with potency. Lack of harmonized release testing standards.",
+    "agnostic_root_cause": "Living products are heterogeneous (planktonic cells, biofilm, VBNC, metabolically active vs. dormant). No single assay captures all relevant subpopulations and mechanism-of-action proxies.",
+    "value_step": "QC/Reg"
+  },
+  {
+    "name": "Regulatorische Harmonisierung & CMC-Ambiguität",
+    "agnostic_description": "FDA, EMA, PMDA, and regional authorities lack fully harmonized CMC guidance for LBPs, especially consortia and hybrid modalities. Regulatory uncertainty delays batch release by 3–5 weeks.",
+    "agnostic_root_cause": "LBPs are novel therapeutic modality with biological complexity not addressed in traditional small-molecule or even standard biologics frameworks. Guidance is rapidly evolving and not yet globally aligned.",
+    "value_step": "QC/Reg"
+  },
+    {
+    "name": "Pre-existing AAV Seropositivity and Neutralizing Antibody Barriers",
+    "agnostic_description": "A significant proportion of the human population carries pre-existing neutralizing antibodies (NAbs) against specific AAV serotypes due to natural exposure to wild-type AAVs. These antibodies neutralize recombinant AAV vectors, preventing successful cell transduction and rendering affected patients ineligible for systemic AAV-based gene therapies.",
+    "agnostic_root_cause": "Natural exposure of the human population to wild-type AAVs triggers adaptive immune responses that generate durable, serotype-specific neutralizing antibodies. Cross-reactivity between serotypes further limits treatment options for seropositive patients.",
+    "value_step": "QC/Reg"
+  },
+  {
+    "name": "Insertional Mutagenesis Risk and Long-Term Safety Surveillance",
+    "agnostic_description": "Integrating viral vectors (lentiviruses, gamma-retroviruses) carry inherent risk of insertional mutagenesis when their genetic material integrates randomly into the host genome. Integration near proto-oncogenes can result in aberrant gene activation, clonal expansion, and potential malignant transformation. This necessitates extensive preclinical genotoxicity assessment and lifelong patient follow-up protocols.",
+    "agnostic_root_cause": "Random integration of viral vector proviral DNA into the host genome, particularly near transcriptionally active loci and regulatory regions of proto-oncogenes, combined with potent viral promoters driving expression can trigger uncontrolled cell proliferation and clonal dominance.",
+    "value_step": "QC/Reg"
+  },
+  {
+    "name": "PEG-Dilemma und Anti-PEG-Antikörper (ABC-Phänomen)",
+    "agnostic_description": "Wiederholte Verabreichung von PEGylierten Lipid-Nanopartikeln induziert Anti-PEG-Antikörper (IgM und IgG), die zu beschleunigter Blutclearance (Accelerated Blood Clearance, ABC) und reduzierten therapeutischen Effekt bei nachfolgenden Dosen führen.",
+    "agnostic_root_cause": "Immunogene Erkennung von linearem PEG durch B-Zellen in der Milz; Komplementaktivierung und Opsonisierung durch Anti-PEG-IgM verstärken MPS-Clearance.",
+    "value_step": "Fill & Finish"
+  },
+  {
+    "name": "CircRNA und saRNA - Herstellungskomplexität",
+    "agnostic_description": "Zirkuläre RNA (circRNA) und selbstverstärkende RNA (saRNA) erfordern komplexe mehrstufige Herstellungsprozesse (IVT, Zirkularisierung/Ligation, Aufreinigung), die zu Ausbeute-, Reinheits- und Kontrollproblemen führen.",
+    "agnostic_root_cause": "Nicht-lineare Skalierbarkeit von enzymatischen Zirkularisierungsschritten; konkurrierende Nebenreaktionen (Konkatemere, nicked circles, lineare Verunreinigungen); thermodynamische Effizienzeinbußen bei höheren RNA-Konzentrationen.",
+    "value_step": "Upstream"
+  },
+  {
+    "name": "Mündliche Bioverfügbarkeit von GalNAc-siRNAs",
+    "agnostic_description": "Orale Verabreichung von siRNA ist durch biologische Barrieren stark eingeschränkt (GI-Abbau, Mukus-Penetration, epitheliale Permeabilität, endosomaler Escape), was zu extrem niedriger Bioverfügbarkeit (<2%) führt.",
+    "agnostic_root_cause": "Nukleaseabbau im GI-Trakt; unzureichende passive Membranpermeabilität großer, hydrophiler Moleküle; begrenzte zelluläre Aufnahme über natürliche Pfade; Endosomentrapping bei neutralem pH.",
+    "value_step": "Fill & Finish"
+  },
+    {
+    "name": "Cold Tumor Microenvironment and Immunosuppression Limitation",
+    "agnostic_description": "Immunosuppressive tumor microenvironment (TME) limits viral oncolysis-induced immune activation, resulting in reduced therapeutic efficacy in combination with checkpoint inhibitors.",
+    "agnostic_root_cause": "Immunosuppressive factors (TGF-β, Tregs, MDSCs, hypoxia, acidosis) prevent sufficient T-cell infiltration and activation despite viral replication; extracellular matrix and vascular barriers limit viral diffusion to tumor core.",
+    "value_step": "QC/Reg"
+  },
+    {
+    "name": "Abtrennung monovalenter Spezies und Hook-Effekt-Management",
+    "agnostic_description": "Separation of monovalent impurities from bifunctional molecules to prevent inhibitory binary complex formation at high concentrations.",
+    "agnostic_root_cause": "Bifunctional structure inherently prone to binary complex formation; chromatographic resolution limitations for structurally similar species.",
+    "value_step": "Downstream"
+  },
+  {
+    "name": "Phasenentmischung in amorpher Schmelzextrusion",
+    "agnostic_description": "Phase separation and drug-rich domain formation in hot melt extruded formulations leading to loss of bioavailability.",
+    "agnostic_root_cause": "Poor polymer-drug miscibility combined with processing temperature constraints and supersaturation during cooling.",
+    "value_step": "Fill & Finish"
+  },
+  {
+    "name": "Fehlende Kristallisierbarkeit und Amorphe-Öl-Problem",
+    "agnostic_description": "Inability to crystallize molecules reliably, forcing reliance on expensive chromatography-first purification and amorphous solid dispersion formulations.",
+    "agnostic_root_cause": "Molecular structure with flexible linkers and high conformational flexibility preventing stable crystal lattice formation.",
+    "value_step": "Downstream"
+  },
+  {
+    "name": "Inclusion Body Formation and Refolding",
+    "agnostic_description": "Formation of insoluble protein aggregates during bacterial expression, requiring energy-intensive refolding process to achieve biological activity.",
+    "agnostic_root_cause": "Protein overexpression exceeds cellular chaperone capacity; suboptimal expression conditions; lack of proper disulfide bond formation environment.",
+    "value_step": "Upstream"
+  },
+  {
+    "name": "High-Concentration Viscosity and Device Integration",
+    "agnostic_description": "Therapeutic requirements for high protein concentrations lead to exponential viscosity increases, complicating processing and patient administration via injection devices.",
+    "agnostic_root_cause": "Intermolecular protein-protein interactions at elevated concentrations; physical volumetric constraints of dosing; protein self-association behavior.",
+    "value_step": "Fill & Finish"
+  },
+  {
+    "name": "Batch-to-Batch Variability and Post-Translational Modification Control",
+    "agnostic_description": "Inconsistent glycosylation profiles and other PTM patterns between production batches, affecting product potency and regulatory compliance.",
+    "agnostic_root_cause": "Process parameter fluctuations (pH, DO, temperature, nutrient availability); cell line clone instability; metabolic heterogeneity during scale-up.",
+    "value_step": "Upstream"
+  },
+  {
+    "name": "Host Cell Protein (HCP) Removal and Quantification",
+    "agnostic_description": "Residual host cell proteins after purification present safety and regulatory challenges; analytical method transitions complicate process control.",
+    "agnostic_root_cause": "Non-specific adsorption of HCP to product; incomplete chromatographic resolution; evolving regulatory acceptance of analytical platforms.",
+    "value_step": "Downstream"
+  },
+  {
+    "name": "Tangential Flow Filtration (TFF) Membrane Fouling and Flux Decline",
+    "agnostic_description": "Rapid decline in filtration flux at high protein concentrations due to membrane surface fouling and concentration polarization, limiting processing capacity.",
+    "agnostic_root_cause": "Protein layer deposition on membrane; pore blockage by aggregates; concentration polarization; transmembrane pressure gradients.",
+    "value_step": "Downstream"
+  },
+  {
+    "name": "Chromatography Resin Fouling and Capacity Decline",
+    "agnostic_description": "Loss of binding capacity and mass transfer efficiency in chromatographic resins after multiple cycles, reducing column lifespan and process economics.",
+    "agnostic_root_cause": "Non-specific adsorption of impurities and proteins to resin matrix; pore diffusion limitations; particle porosity reduction; chemical ligand degradation.",
+    "value_step": "Downstream"
+  },
+  {
+    "name": "Sterile Filtration Product Loss",
+    "agnostic_description": "Protein loss during sterile filtration step due to membrane adsorption, gel layer formation, and aggregation, reducing final yield.",
+    "agnostic_root_cause": "Protein-membrane interactions; hydrophobic membrane surfaces; aggregate precipitation; incomplete buffer optimization.",
+    "value_step": "Fill & Finish"
+  },
+  {
+    "name": "Lyophilization Process Control and Freeze-Thaw Stability",
+    "agnostic_description": "Protein denaturation and aggregation during freeze-drying and multiple freeze-thaw cycles compromise product stability and recovery.",
+    "agnostic_root_cause": "Ice crystal formation and recrystallization; dehydration stress; exceeding glass transition temperature (Tg'); absence of appropriate lyoprotectants.",
+    "value_step": "Fill & Finish"
+  },
+  {
+    "name": "Process Analytical Technology (PAT) Implementation and Real-Time Monitoring Gaps",
+    "agnostic_description": "Incomplete PAT capabilities for real-time monitoring of critical quality attributes, especially complex attributes like glycosylation and protein conformation.",
+    "agnostic_root_cause": "Technical limitations of available sensors; complexity of protein attribute measurement; lack of harmonized analytical methods; data interpretation challenges.",
+    "value_step": "QC/Reg"
+  },
+  {
+    "name": "Potency Assay Development and Standardization",
+    "agnostic_description": "Difficulty in developing robust, rapid, and standardized potency assays for release testing and process comparability assessment.",
+    "agnostic_root_cause": "Functional attribute complexity; biological variability in cell-based assays; lack of regulatory harmonization; need for in vitro-in vivo correlation.",
+    "value_step": "QC/Reg"
+  },
+    {
+    "name": "Linker-Mediated Bystander Effect vs. Off-Target Toxicity Balance",
+    "agnostic_description": "The fundamental trade-off between achieving therapeutic efficacy through bystander killing of heterogeneous tumors and minimizing systemic toxicity to healthy tissues through uncontrolled payload release.",
+    "agnostic_root_cause": "Linker design determines payload membrane permeability, plasma stability, and intracellular release kinetics. Cleavable linkers that enable bystander killing inherently increase risk of off-target payload diffusion in non-target tissues.",
+    "value_step": "Conjugation"
+  }
+]
