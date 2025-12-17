@@ -3,7 +3,7 @@
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required
 from ..services.pipeline_timeline_service import get_timeline_service
-from ..services.strategic_analytics_service import get_weighted_challenges_data
+from ..services.strategic_analytics_service import get_weighted_challenges_data, get_challenge_modality_matrix
 
 analytics_routes = Blueprint('analytics', __name__, url_prefix='/analytics')
 
@@ -86,5 +86,33 @@ def get_weighted_challenges():
         data = get_weighted_challenges_data()
         return jsonify(data)
 
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@analytics_routes.route('/challenge-matrix')
+@login_required
+def challenge_matrix():
+    """
+    Interactive matrix view: Challenges (rows) x Modalities (columns).
+    Filterable by value step, with selectable display values (applicable/impact/maturity).
+    """
+    data = get_challenge_modality_matrix()
+    return render_template(
+        'analytics/challenge_matrix.html',
+        title="Challenge-Modality Matrix",
+        **data
+    )
+
+
+@analytics_routes.route('/api/challenge-matrix', methods=['GET'])
+@login_required
+def get_challenge_matrix_data():
+    """
+    API endpoint for challenge-modality matrix data.
+    """
+    try:
+        data = get_challenge_modality_matrix()
+        return jsonify(data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

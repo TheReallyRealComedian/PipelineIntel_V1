@@ -327,6 +327,45 @@ class Indication(db.Model):
         return [c.key for c in inspect(cls).attrs if c.key not in ['product']]
 
 
+class ValueStep(db.Model):
+    """Manufacturing value chain steps with defined order"""
+    __tablename__ = 'value_steps'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), unique=True, nullable=False)
+    sort_order = Column(Integer, nullable=False, unique=True)
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    challenges = relationship("Challenge", back_populates="value_step_rel")
+
+    @classmethod
+    def get_all_fields(cls):
+        return [c.key for c in inspect(cls).attrs if c.key not in ['challenges']]
+
+    @classmethod
+    def get_ordered(cls):
+        """Get all value steps in manufacturing order."""
+        return cls.query.order_by(cls.sort_order).all()
+
+    @classmethod
+    def get_next(cls, current_step):
+        """Get the next step in the value chain."""
+        if not current_step:
+            return None
+        return cls.query.filter(cls.sort_order > current_step.sort_order)\
+            .order_by(cls.sort_order).first()
+
+    @classmethod
+    def get_previous(cls, current_step):
+        """Get the previous step in the value chain."""
+        if not current_step:
+            return None
+        return cls.query.filter(cls.sort_order < current_step.sort_order)\
+            .order_by(cls.sort_order.desc()).first()
+
+
 class Challenge(db.Model):
     """Simplified challenge model - modality-agnostic base information"""
     __tablename__ = 'challenges'
@@ -335,22 +374,28 @@ class Challenge(db.Model):
     name = Column(String(255), unique=True, nullable=False)
     agnostic_description = Column(Text, nullable=True)
     agnostic_root_cause = Column(Text, nullable=True)
-    value_step = Column(String(100), nullable=True)  # 'Upstream', 'Downstream', etc.
+    value_step_id = Column(Integer, ForeignKey('value_steps.id'), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
+    value_step_rel = relationship("ValueStep", back_populates="challenges")
     modality_details = relationship(
         "ChallengeModalityDetail",
         back_populates="challenge",
         cascade="all, delete-orphan"
     )
 
+    @property
+    def value_step(self):
+        """Convenience property to get value step name."""
+        return self.value_step_rel.name if self.value_step_rel else None
+
     @classmethod
     def get_all_fields(cls):
         """Returns a list of all column names for the model."""
         return [
             c.key for c in inspect(cls).attrs
-            if c.key not in ['modality_details']
+            if c.key not in ['modality_details', 'value_step_rel']
         ]
 
 

@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block head_extra %}
+<style>
+    .matrix-container {
+        overflow-x: auto;
+    }
+    .matrix-table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .matrix-table th,
+    .matrix-table td {
+        border: 1px solid #dee2e6;
+        padding: 0.5rem;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .matrix-table thead th {
+        background-color: #f8f9fa;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    .matrix-table thead th.modality-header {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        transform: rotate(180deg);
+        height: 150px;
+        white-space: nowrap;
+        font-size: 0.85rem;
+    }
+    .matrix-table tbody th {
+        text-align: left;
+        background-color: #f8f9fa;
+        position: sticky;
+        left: 0;
+        z-index: 5;
+        max-width: 300px;
+    }
+    .challenge-name {
+        font-weight: 500;
+    }
+    .value-step-badge {
+        font-size: 0.7rem;
+        display: block;
+        margin-top: 2px;
+    }
+    /* Cell styles */
+    .cell-applicable {
+        background-color: #d4edda;
+        color: #155724;
+        font-weight: bold;
+    }
+    .cell-not-applicable {
+        background-color: #f8f9fa;
+        color: #ccc;
+    }
+    .cell-impact-1 { background-color: #d4edda; }
+    .cell-impact-2 { background-color: #c3e6cb; }
+    .cell-impact-3 { background-color: #ffeaa7; }
+    .cell-impact-4 { background-color: #fdcb6e; }
+    .cell-impact-5 { background-color: #e17055; color: white; }
+    .cell-maturity-1 { background-color: #e17055; color: white; }
+    .cell-maturity-2 { background-color: #fdcb6e; }
+    .cell-maturity-3 { background-color: #ffeaa7; }
+    .cell-maturity-4 { background-color: #c3e6cb; }
+    .cell-maturity-5 { background-color: #d4edda; }
+    .filter-controls {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .display-mode-btn.active {
+        font-weight: bold;
+    }
+    .cell-tooltip {
+        cursor: help;
+    }
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 1rem;
+    }
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 3px;
+        margin-right: 5px;
+        border: 1px solid #ddd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="fas fa-th text-primary me-2"></i>Challenge-Modality Matrix</h1>
+            <p class="text-muted">
+                Matrix view of manufacturing challenges across modalities. Filter by value step and select display mode.
+            </p>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter and Display Controls -->
+    <div class="filter-controls">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <label class="form-label fw-bold mb-1">Filter by Value Step</label>
+                <select id="valueStepFilter" class="form-select form-select-sm">
+                    <option value="">All Value Steps</option>
+                    {% for vs in value_steps %}
+                    <option value="{{ vs.name }}">{{ vs.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold mb-1">Display Mode</label>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-primary display-mode-btn active" data-mode="applicable">
+                        <i class="fas fa-check"></i> Applicable
+                    </button>
+                    <button type="button" class="btn btn-outline-primary display-mode-btn" data-mode="impact">
+                        <i class="fas fa-bolt"></i> Impact
+                    </button>
+                    <button type="button" class="btn btn-outline-primary display-mode-btn" data-mode="maturity">
+                        <i class="fas fa-chart-line"></i> Maturity
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold mb-1">Sort Challenges</label>
+                <select id="sortOrder" class="form-select form-select-sm">
+                    <option value="name">By Name (A-Z)</option>
+                    <option value="value_step" selected>By Value Step</option>
+                    <option value="applicability">By Applicability Count</option>
+                </select>
+            </div>
+        </div>
+        <!-- Legend -->
+        <div class="mt-3" id="legend-container">
+            <div id="legend-applicable" class="legend">
+                <span class="legend-item"><span class="legend-color cell-applicable"></span> Applicable</span>
+                <span class="legend-item"><span class="legend-color cell-not-applicable"></span> Not Applicable</span>
+            </div>
+            <div id="legend-impact" class="legend d-none">
+                <span class="legend-item"><span class="legend-color cell-impact-1"></span> 1 (Low)</span>
+                <span class="legend-item"><span class="legend-color cell-impact-2"></span> 2</span>
+                <span class="legend-item"><span class="legend-color cell-impact-3"></span> 3</span>
+                <span class="legend-item"><span class="legend-color cell-impact-4"></span> 4</span>
+                <span class="legend-item"><span class="legend-color cell-impact-5"></span> 5 (High)</span>
+            </div>
+            <div id="legend-maturity" class="legend d-none">
+                <span class="legend-item"><span class="legend-color cell-maturity-1"></span> 1 (Low)</span>
+                <span class="legend-item"><span class="legend-color cell-maturity-2"></span> 2</span>
+                <span class="legend-item"><span class="legend-color cell-maturity-3"></span> 3</span>
+                <span class="legend-item"><span class="legend-color cell-maturity-4"></span> 4</span>
+                <span class="legend-item"><span class="legend-color cell-maturity-5"></span> 5 (High)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Matrix Card -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">Challenges vs. Modalities</h5>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-primary" id="challengeCount">{{ challenges|length }} Challenges</span>
+                    <span class="badge bg-secondary">{{ modalities|length }} Modalities</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="matrix-container">
+                <table class="table matrix-table mb-0" id="matrixTable">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 250px;">Challenge</th>
+                            {% for mod in modalities %}
+                            <th class="modality-header" title="{{ mod.name }}{% if mod.category %} ({{ mod.category }}){% endif %}">
+                                {{ mod.label or mod.name }}
+                            </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody id="matrixBody">
+                        {% for challenge in challenges %}
+                        <tr data-challenge-id="{{ challenge.id }}" data-value-step="{{ challenge.value_step or '' }}">
+                            <th>
+                                <div class="challenge-name">{{ challenge.name }}</div>
+                                {% if challenge.value_step %}
+                                <span class="badge value-step-badge
+                                    {% if challenge.value_step == 'Upstream' %}bg-info text-dark
+                                    {% elif challenge.value_step == 'Downstream' %}bg-success
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ challenge.value_step }}
+                                </span>
+                                {% endif %}
+                            </th>
+                            {% for mod in modalities %}
+                            {% set detail = matrix.get(challenge.id, {}).get(mod.id, {}) %}
+                            <td class="matrix-cell cell-tooltip
+                                {% if detail.get('applicable') %}cell-applicable{% else %}cell-not-applicable{% endif %}"
+                                data-challenge-id="{{ challenge.id }}"
+                                data-modality-id="{{ mod.id }}"
+                                data-applicable="{{ 'true' if detail.get('applicable') else 'false' }}"
+                                data-impact="{{ detail.get('impact_score', '') }}"
+                                data-maturity="{{ detail.get('maturity_score', '') }}"
+                                title="{% if detail.get('applicable') %}{{ mod.name }}: Impact={{ detail.get('impact_score', 'N/A') }}, Maturity={{ detail.get('maturity_score', 'N/A') }}{% else %}Not applicable{% endif %}">
+                                {% if detail.get('applicable') %}
+                                    <span class="cell-value-applicable"><i class="fas fa-check"></i></span>
+                                    <span class="cell-value-impact d-none">{{ detail.get('impact_score', '-') }}</span>
+                                    <span class="cell-value-maturity d-none">{{ detail.get('maturity_score', '-') }}</span>
+                                {% else %}
+                                    <span class="cell-value-applicable">-</span>
+                                    <span class="cell-value-impact d-none">-</span>
+                                    <span class="cell-value-maturity d-none">-</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="{{ modalities|length + 1 }}" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-database fa-3x mb-3"></i>
+                                    <p>No challenges found. Import challenge data first.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const valueStepFilter = document.getElementById('valueStepFilter');
+    const sortOrder = document.getElementById('sortOrder');
+    const displayModeButtons = document.querySelectorAll('.display-mode-btn');
+    const matrixBody = document.getElementById('matrixBody');
+
+    // Value chain order from database (passed from backend)
+    const VALUE_STEPS = {{ value_steps | tojson }};
+    const VALUE_STEP_ORDER = VALUE_STEPS.map(vs => vs.name);
+
+    function getValueStepSortIndex(valueStep) {
+        const step = VALUE_STEPS.find(vs => vs.name === valueStep);
+        return step ? step.sort_order : 999;
+    }
+
+    let currentDisplayMode = 'applicable';
+
+    // Display mode switching
+    displayModeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            displayModeButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentDisplayMode = this.dataset.mode;
+            updateDisplayMode();
+            updateLegend();
+        });
+    });
+
+    function updateDisplayMode() {
+        const cells = document.querySelectorAll('.matrix-cell');
+        cells.forEach(cell => {
+            const applicable = cell.dataset.applicable === 'true';
+            const impact = cell.dataset.impact;
+            const maturity = cell.dataset.maturity;
+
+            // Hide all value spans
+            cell.querySelectorAll('[class^="cell-value-"]').forEach(span => {
+                span.classList.add('d-none');
+            });
+
+            // Remove all cell styling classes
+            cell.classList.remove('cell-applicable', 'cell-not-applicable');
+            for (let i = 1; i <= 5; i++) {
+                cell.classList.remove('cell-impact-' + i, 'cell-maturity-' + i);
+            }
+
+            if (currentDisplayMode === 'applicable') {
+                cell.querySelector('.cell-value-applicable').classList.remove('d-none');
+                cell.classList.add(applicable ? 'cell-applicable' : 'cell-not-applicable');
+            } else if (currentDisplayMode === 'impact') {
+                cell.querySelector('.cell-value-impact').classList.remove('d-none');
+                if (applicable && impact && impact !== '-') {
+                    cell.classList.add('cell-impact-' + impact);
+                } else {
+                    cell.classList.add('cell-not-applicable');
+                }
+            } else if (currentDisplayMode === 'maturity') {
+                cell.querySelector('.cell-value-maturity').classList.remove('d-none');
+                if (applicable && maturity && maturity !== '-') {
+                    cell.classList.add('cell-maturity-' + maturity);
+                } else {
+                    cell.classList.add('cell-not-applicable');
+                }
+            }
+        });
+    }
+
+    function updateLegend() {
+        document.querySelectorAll('.legend').forEach(l => l.classList.add('d-none'));
+        document.getElementById('legend-' + currentDisplayMode).classList.remove('d-none');
+    }
+
+    // Filter by value step
+    valueStepFilter.addEventListener('change', function() {
+        filterAndSort();
+    });
+
+    // Sort order change
+    sortOrder.addEventListener('change', function() {
+        filterAndSort();
+    });
+
+    function filterAndSort() {
+        const filterValue = valueStepFilter.value;
+        const sortValue = sortOrder.value;
+        const rows = Array.from(matrixBody.querySelectorAll('tr[data-challenge-id]'));
+
+        // Filter
+        rows.forEach(row => {
+            const valueStep = row.dataset.valueStep || '';
+            if (!filterValue || valueStep === filterValue) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Sort visible rows
+        const visibleRows = rows.filter(r => r.style.display !== 'none');
+        visibleRows.sort((a, b) => {
+            if (sortValue === 'name') {
+                const nameA = a.querySelector('.challenge-name').textContent.toLowerCase();
+                const nameB = b.querySelector('.challenge-name').textContent.toLowerCase();
+                return nameA.localeCompare(nameB);
+            } else if (sortValue === 'value_step') {
+                const idxA = getValueStepSortIndex(a.dataset.valueStep);
+                const idxB = getValueStepSortIndex(b.dataset.valueStep);
+                return idxA - idxB;
+            } else if (sortValue === 'applicability') {
+                const countA = a.querySelectorAll('.matrix-cell[data-applicable="true"]').length;
+                const countB = b.querySelectorAll('.matrix-cell[data-applicable="true"]').length;
+                return countB - countA; // Descending
+            }
+            return 0;
+        });
+
+        // Re-append sorted rows
+        visibleRows.forEach(row => matrixBody.appendChild(row));
+
+        // Update count
+        const visibleCount = visibleRows.length;
+        document.getElementById('challengeCount').textContent = visibleCount + ' Challenges';
+    }
+
+    // Initialize tooltips if Bootstrap is available
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        document.querySelectorAll('.cell-tooltip').forEach(el => {
+            new bootstrap.Tooltip(el);
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -63,9 +63,9 @@
                             <li class="{% if request.endpoint == 'analytics.pipeline_timeline' %}active{% endif %}">
                                 <a href="{{ url_for('analytics.pipeline_timeline') }}"><i class="fas fa-chart-line"></i> <span class="sidebar-text">Pipeline Timeline</span></a>
                             </li>
-                            <li class="{% if request.endpoint == 'analytics.weighted_challenges' %}active{% endif %}">
-                                <a href="{{ url_for('analytics.weighted_challenges') }}">
-                                    <i class="fas fa-list-ol"></i> <span class="sidebar-text">Challenge Matrix</span>
+                            <li class="{% if request.endpoint == 'analytics.challenge_matrix' %}active{% endif %}">
+                                <a href="{{ url_for('analytics.challenge_matrix') }}">
+                                    <i class="fas fa-th"></i> <span class="sidebar-text">Challenge Matrix</span>
                                 </a>
                             </li>
                     <li class="sidebar-menu-header">SYSTEM</li>

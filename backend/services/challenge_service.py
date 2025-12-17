@@ -1,6 +1,6 @@
 # backend/services/challenge_service.py
 from ..db import db
-from ..models import Challenge, ChallengeModalityDetail, Modality
+from ..models import Challenge, ChallengeModalityDetail, Modality, ValueStep
 
 
 def get_all_challenges():
@@ -63,6 +63,18 @@ def inline_update_challenge_field(challenge_id: int, field: str, value):
     if not challenge:
         return None, "Challenge not found."
 
+    # Handle value_step specially (convert name to ID)
+    if field == 'value_step':
+        if value:
+            vs = ValueStep.query.filter_by(name=value).first()
+            if not vs:
+                return None, f"Value step '{value}' not found."
+            challenge.value_step_id = vs.id
+        else:
+            challenge.value_step_id = None
+        db.session.commit()
+        return challenge, "Challenge updated."
+
     if not hasattr(challenge, field):
         return None, f"Field '{field}' does not exist."
 
@@ -101,18 +113,31 @@ def get_challenges_by_modality(modality_id: int):
 
 
 def create_challenge(name: str, agnostic_description: str = None,
-                     agnostic_root_cause: str = None, value_step: str = None):
-    """Create a new challenge."""
+                     agnostic_root_cause: str = None, value_step: str = None,
+                     value_step_id: int = None):
+    """Create a new challenge.
+
+    Args:
+        value_step: Name of value step (will be looked up)
+        value_step_id: Direct ID of value step (takes precedence)
+    """
     # Check for duplicate name
     existing = Challenge.query.filter_by(name=name).first()
     if existing:
         return None, f"Challenge '{name}' already exists."
 
+    # Resolve value_step_id
+    resolved_value_step_id = value_step_id
+    if not resolved_value_step_id and value_step:
+        vs = ValueStep.query.filter_by(name=value_step).first()
+        if vs:
+            resolved_value_step_id = vs.id
+
     challenge = Challenge(
         name=name,
         agnostic_description=agnostic_description,
         agnostic_root_cause=agnostic_root_cause,
-        value_step=value_step
+        value_step_id=resolved_value_step_id
     )
     db.session.add(challenge)
     db.session.commit()
