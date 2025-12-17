@@ -22,6 +22,15 @@
             </div>
             <nav class="sidebar-menu">
                 <ul>
+                    <li class="sidebar-menu-header">ANALYTICS</li>
+                        <li class="{% if request.endpoint == 'analytics.pipeline_timeline' %}active{% endif %}">
+                            <a href="{{ url_for('analytics.pipeline_timeline') }}"><i class="fas fa-chart-line"></i> <span class="sidebar-text">Pipeline Timeline</span></a>
+                        </li>
+                        <li class="{% if request.endpoint == 'analytics.challenge_matrix' %}active{% endif %}">
+                            <a href="{{ url_for('analytics.challenge_matrix') }}">
+                                <i class="fas fa-th"></i> <span class="sidebar-text">Challenge Matrix</span>
+                            </a>
+                        </li>
                     <li class="sidebar-menu-header">CORE ENTITIES</li>
                         <li class="{% if request.blueprint == 'products' %}active{% endif %}">
                             <a href="{{ url_for('products.list_products') }}"><i class="fas fa-pills"></i> <span class="sidebar-text">Products</span></a>
@@ -32,26 +41,12 @@
                         <li class="{% if request.blueprint == 'challenges' %}active{% endif %}">
                             <a href="{{ url_for('challenges.list_challenges') }}"><i class="fas fa-exclamation-triangle"></i> <span class="sidebar-text">Challenges</span></a>
                         </li>
-                        <li class="sidebar-menu-header">MANUFACTURING SCHEMA</li>
-                            <li class="{% if request.blueprint == 'modalities' %}active{% endif %}">
-                                <a href="{{ url_for('modalities.list_modalities') }}"><i class="fas fa-dna"></i> <span class="sidebar-text">Modalities</span></a>
-                            </li>
-                            <li class="{% if request.blueprint == 'process_stages' %}active{% endif %}">
-                                <a href="{{ url_for('process_stages.list_process_stages') }}"><i class="fas fa-project-diagram"></i> <span class="sidebar-text">Process Stages</span></a>
-                            </li>
-                            <li class="{% if request.blueprint == 'capabilities' %}active{% endif %}">
-                                <a href="{{ url_for('capabilities.list_capabilities') }}">
-                                    <i class="fas fa-cogs"></i> <span class="sidebar-text">Manufacturing Capabilities</span>
-                                </a>
-                            </li>              
-                            <li class="{% if request.blueprint == 'process_templates' %}active{% endif %}">
-                                <a href="{{ url_for('process_templates.list_process_templates') }}">
-                                    <i class="fas fa-flow-chart"></i> <span class="sidebar-text">Process Templates</span>
-                                </a>
-                            </li>              
-                            <li class="{% if request.blueprint == 'facilities' %}active{% endif %}">
-                                <a href="{{ url_for('facilities.list_facilities') }}"><i class="fas fa-industry"></i> <span class="sidebar-text">Facilities & Partners</span></a>
-                            </li>
+                        <li class="{% if request.blueprint == 'modalities' %}active{% endif %}">
+                            <a href="{{ url_for('modalities.list_modalities') }}"><i class="fas fa-dna"></i> <span class="sidebar-text">Modalities</span></a>
+                        </li>
+                        <li class="{% if request.blueprint == 'facilities' %}active{% endif %}">
+                            <a href="{{ url_for('facilities.list_facilities') }}"><i class="fas fa-industry"></i> <span class="sidebar-text">Facilities & Partners</span></a>
+                        </li>
                     <li class="sidebar-menu-header">DATA</li>
                         <li class="{% if request.blueprint == 'data_management' %}active{% endif %}">
                             <a href="{{ url_for('data_management.data_management_page') }}"><i class="fas fa-database"></i> <span class="sidebar-text">Data Management</span></a>
@@ -59,15 +54,6 @@
                         <li class="{% if request.blueprint == 'export' %}active{% endif %}">
                             <a href="{{ url_for('export.data_export_page') }}"><i class="fas fa-file-export"></i> <span class="sidebar-text">Data Export</span></a>
                         </li>
-                    <li class="sidebar-menu-header">ANALYTICS</li>
-                            <li class="{% if request.endpoint == 'analytics.pipeline_timeline' %}active{% endif %}">
-                                <a href="{{ url_for('analytics.pipeline_timeline') }}"><i class="fas fa-chart-line"></i> <span class="sidebar-text">Pipeline Timeline</span></a>
-                            </li>
-                            <li class="{% if request.endpoint == 'analytics.challenge_matrix' %}active{% endif %}">
-                                <a href="{{ url_for('analytics.challenge_matrix') }}">
-                                    <i class="fas fa-th"></i> <span class="sidebar-text">Challenge Matrix</span>
-                                </a>
-                            </li>
                     <li class="sidebar-menu-header">SYSTEM</li>
                         <li class="{% if request.blueprint == 'settings' and 'database-schema' in request.path %}active{% endif %}">
                             <a href="{{ url_for('settings.database_schema') }}">

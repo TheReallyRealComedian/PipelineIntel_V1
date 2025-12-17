@@ -76,11 +76,16 @@
     .cell-impact-3 { background-color: #ffeaa7; }
     .cell-impact-4 { background-color: #fdcb6e; }
     .cell-impact-5 { background-color: #e17055; }
-    .cell-maturity-1 { background-color: #e17055; }
-    .cell-maturity-2 { background-color: #fdcb6e; }
-    .cell-maturity-3 { background-color: #ffeaa7; }
-    .cell-maturity-4 { background-color: #a8d5a2; }
-    .cell-maturity-5 { background-color: #d4edda; }
+    /* Maturity: 1=low (red) → 9=high (green) */
+    .cell-maturity-1 { background-color: #c0392b; }
+    .cell-maturity-2 { background-color: #e17055; }
+    .cell-maturity-3 { background-color: #e67e22; }
+    .cell-maturity-4 { background-color: #fdcb6e; }
+    .cell-maturity-5 { background-color: #ffeaa7; }
+    .cell-maturity-6 { background-color: #d4edda; }
+    .cell-maturity-7 { background-color: #a8d5a2; }
+    .cell-maturity-8 { background-color: #7dcea0; }
+    .cell-maturity-9 { background-color: #27ae60; }
     /* Override Bootstrap table td background - use !important for specificity */
     .matrix-table td.cell-applicable { background-color: #d4edda !important; color: #155724; }
     .matrix-table td.cell-not-applicable { background-color: #f8f9fa !important; color: #ccc; }
@@ -90,12 +95,16 @@
     .matrix-table td.cell-impact-3 { background-color: #ffeaa7 !important; color: #856404; }
     .matrix-table td.cell-impact-4 { background-color: #fdcb6e !important; color: #856404; }
     .matrix-table td.cell-impact-5 { background-color: #e17055 !important; color: white; }
-    /* Maturity: 1=low maturity (red) → 5=high maturity (green) */
-    .matrix-table td.cell-maturity-1 { background-color: #e17055 !important; color: white; }
-    .matrix-table td.cell-maturity-2 { background-color: #fdcb6e !important; color: #856404; }
-    .matrix-table td.cell-maturity-3 { background-color: #ffeaa7 !important; color: #856404; }
-    .matrix-table td.cell-maturity-4 { background-color: #a8d5a2 !important; color: #155724; }
-    .matrix-table td.cell-maturity-5 { background-color: #d4edda !important; color: #155724; }
+    /* Maturity: 1=low maturity (red) → 9=high maturity (green) */
+    .matrix-table td.cell-maturity-1 { background-color: #c0392b !important; color: white; }
+    .matrix-table td.cell-maturity-2 { background-color: #e17055 !important; color: white; }
+    .matrix-table td.cell-maturity-3 { background-color: #e67e22 !important; color: white; }
+    .matrix-table td.cell-maturity-4 { background-color: #fdcb6e !important; color: #856404; }
+    .matrix-table td.cell-maturity-5 { background-color: #ffeaa7 !important; color: #856404; }
+    .matrix-table td.cell-maturity-6 { background-color: #d4edda !important; color: #155724; }
+    .matrix-table td.cell-maturity-7 { background-color: #a8d5a2 !important; color: #155724; }
+    .matrix-table td.cell-maturity-8 { background-color: #7dcea0 !important; color: #155724; }
+    .matrix-table td.cell-maturity-9 { background-color: #27ae60 !important; color: white; }
     .filter-controls {
         background-color: #f8f9fa;
         padding: 0.75rem 1rem;
@@ -193,7 +202,11 @@
                 <span class="legend-item"><span class="legend-color cell-maturity-2"></span> 2</span>
                 <span class="legend-item"><span class="legend-color cell-maturity-3"></span> 3</span>
                 <span class="legend-item"><span class="legend-color cell-maturity-4"></span> 4</span>
-                <span class="legend-item"><span class="legend-color cell-maturity-5"></span> 5 (High)</span>
+                <span class="legend-item"><span class="legend-color cell-maturity-5"></span> 5</span>
+                <span class="legend-item"><span class="legend-color cell-maturity-6"></span> 6</span>
+                <span class="legend-item"><span class="legend-color cell-maturity-7"></span> 7</span>
+                <span class="legend-item"><span class="legend-color cell-maturity-8"></span> 8</span>
+                <span class="legend-item"><span class="legend-color cell-maturity-9"></span> 9 (High)</span>
             </div>
         </div>
     </div>
@@ -218,7 +231,7 @@
                         <tr>
                             <th class="challenge-cell">Challenge</th>
                             {% for mod in modalities %}
-                            <th class="modality-header" title="{{ mod.name }}{% if mod.category %} ({{ mod.category }}){% endif %}">
+                            <th class="modality-header" title="{{ mod.short_description or mod.name }}">
                                 {{ mod.label or mod.name }}
                             </th>
                             {% endfor %}
@@ -227,7 +240,7 @@
                     <tbody id="matrixBody">
                         {% for challenge in challenges %}
                         <tr data-challenge-id="{{ challenge.id }}" data-value-step="{{ challenge.value_step or '' }}">
-                            <th class="challenge-cell">
+                            <th class="challenge-cell" title="{{ challenge.agnostic_description or '' }}">
                                 <div class="challenge-name">{{ challenge.name }}</div>
                                 {% if challenge.value_step %}
                                 <span class="badge value-step-badge
@@ -248,9 +261,12 @@
                                 {% if detail.get('applicable') %}cell-applicable{% else %}cell-not-applicable{% endif %}"
                                 data-challenge-id="{{ challenge.id }}"
                                 data-modality-id="{{ mod.id }}"
+                                data-modality-name="{{ mod.name }}"
                                 data-applicable="{{ 'true' if detail.get('applicable') else 'false' }}"
                                 data-impact="{{ detail.get('impact_score', '') }}"
                                 data-maturity="{{ detail.get('maturity_score', '') }}"
+                                data-impact-details="{{ detail.get('impact_details', '') | e }}"
+                                data-maturity-details="{{ detail.get('maturity_details', '') | e }}"
                                 title="{% if detail.get('applicable') %}{{ mod.name }}: Impact={{ detail.get('impact_score', 'N/A') }}, Maturity={{ detail.get('maturity_score', 'N/A') }}{% else %}Not applicable{% endif %}">
                                 {% if detail.get('applicable') %}
                                     <span class="cell-value-applicable">✓</span>
@@ -318,6 +334,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const applicable = cell.dataset.applicable === 'true';
             const impact = cell.dataset.impact;
             const maturity = cell.dataset.maturity;
+            const modalityName = cell.dataset.modalityName || '';
+            const impactDetails = cell.dataset.impactDetails || '';
+            const maturityDetails = cell.dataset.maturityDetails || '';
 
             // Hide all value spans
             cell.querySelectorAll('[class^="cell-value-"]').forEach(span => {
@@ -326,9 +345,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Remove all cell styling classes
             cell.classList.remove('cell-applicable', 'cell-not-applicable');
-            for (let i = 1; i <= 5; i++) {
+            for (let i = 1; i <= 9; i++) {
                 cell.classList.remove('cell-impact-' + i, 'cell-maturity-' + i);
             }
+
+            // Update tooltip based on display mode
+            let tooltipText = 'Not applicable';
+            if (applicable) {
+                if (currentDisplayMode === 'applicable') {
+                    tooltipText = `${modalityName}: Impact=${impact || 'N/A'}, Maturity=${maturity || 'N/A'}`;
+                } else if (currentDisplayMode === 'impact') {
+                    tooltipText = impactDetails || `${modalityName}: Impact=${impact || 'N/A'}`;
+                } else if (currentDisplayMode === 'maturity') {
+                    tooltipText = maturityDetails || `${modalityName}: Maturity=${maturity || 'N/A'}`;
+                }
+            }
+
+            // Update native title attribute for tooltip
+            cell.setAttribute('title', tooltipText);
 
             if (currentDisplayMode === 'applicable') {
                 cell.querySelector('.cell-value-applicable').classList.remove('d-none');
@@ -408,12 +442,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('challengeCount').textContent = visibleCount + ' Challenges';
     }
 
-    // Initialize tooltips if Bootstrap is available
-    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-        document.querySelectorAll('.cell-tooltip').forEach(el => {
-            new bootstrap.Tooltip(el);
-        });
-    }
 });
 </script>
 {% endblock %}

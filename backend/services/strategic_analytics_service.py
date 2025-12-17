@@ -82,7 +82,8 @@ def get_challenge_modality_matrix():
                 'id': m.modality_id,
                 'name': m.modality_name,
                 'category': m.modality_category,
-                'label': m.label
+                'label': m.label,
+                'short_description': m.short_description
             } for m in modalities
         ],
         'matrix': matrix,
