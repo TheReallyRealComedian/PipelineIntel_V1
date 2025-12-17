@@ -55,6 +55,11 @@
                             <a href="{{ url_for('export.data_export_page') }}"><i class="fas fa-file-export"></i> <span class="sidebar-text">Data Export</span></a>
                         </li>
                     <li class="sidebar-menu-header">SYSTEM</li>
+                        <li class="{% if request.blueprint == 'translation' %}active{% endif %}">
+                            <a href="{{ url_for('translation.translation_page') }}">
+                                <i class="fas fa-language"></i> <span class="sidebar-text">Translation</span>
+                            </a>
+                        </li>
                         <li class="{% if request.blueprint == 'settings' and 'database-schema' in request.path %}active{% endif %}">
                             <a href="{{ url_for('settings.database_schema') }}">
                                 <i class="fas fa-project-diagram"></i> <span class="sidebar-text">Database Schema</span>

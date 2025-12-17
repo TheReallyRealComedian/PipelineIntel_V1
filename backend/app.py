@@ -29,6 +29,7 @@ import backend.routes.process_stage_routes as process_stage_routes_mod
 import backend.routes.process_template_routes as process_template_routes_mod
 import backend.routes.capability_routes as capability_routes_mod
 import backend.routes.llm_routes as llm_routes_mod
+import backend.routes.translation_routes as translation_routes_mod
 
 
 # Add to existing bundles
@@ -103,6 +104,7 @@ def create_app(init_session=True):
     app.register_blueprint(process_template_routes_mod.process_template_routes)
     app.register_blueprint(capability_routes_mod.capability_routes)
     app.register_blueprint(llm_routes_mod.llm_routes)
+    app.register_blueprint(translation_routes_mod.translation_bp)
 
     @app.route('/')
     def index():

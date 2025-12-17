@@ -3,129 +3,39 @@ import json
 import tiktoken
 import datetime
 
-
 from ..db import db
 
 
+# Challenge-Felder, die modalitäts-agnostisch sind
+AGNOSTIC_FIELDS = {
+    'name': 'Challenge Name',
+    'agnostic_description': 'General Description',
+    'agnostic_root_cause': 'General Root Cause',
+    'value_step': 'Value Step',
+}
 
-def _get_exportable_entities():
-    """
-    A helper function to build the EXPORTABLE_ENTITIES dictionary.
-    Imports are done locally within the function to prevent circular import errors at startup.
-    """
-
-    from . import (
-        product_service,
-        indication_service,
-        challenge_service,
-        modality_service,
-        facility_service,
-        capability_service,
-        process_stage_service,
-    )
-    from ..models import (
-        Modality,
-        ManufacturingEntity,
-        ManufacturingCapability,
-        Product,
-        Indication,
-        Challenge,
-        ProcessStage,
-        ProductTimeline,
-        ProductRegulatoryFiling,
-        ProductManufacturingSupplier,
-    )
-
-    return {
-        "products": {
-            "model": Product,
-            "fetch_all_func": product_service.get_all_products,
-            "pk_field": "product_id",
-            "name_field": "product_name",
-        },
-        "indications": {
-            "model": Indication,
-            "fetch_all_func": indication_service.get_all_indications,
-            "pk_field": "indication_id",
-            "name_field": "indication_name",
-        },
-        "challenges": {
-            "model": Challenge,
-            "fetch_all_func": challenge_service.get_all_challenges,
-            "pk_field": "id",
-            "name_field": "name",
-        },
-        "modalities": {
-            "model": Modality,
-            "fetch_all_func": modality_service.get_all_modalities,
-            "pk_field": "modality_id",
-            "name_field": "modality_name",
-        },
-        "facilities": {
-            "model": ManufacturingEntity,
-            "fetch_all_func": facility_service.get_all_entities,
-            "pk_field": "entity_id",
-            "name_field": "entity_name",
-        },
-        "capabilities": {
-            "model": ManufacturingCapability,
-            "fetch_all_func": capability_service.get_all_capabilities,
-            "pk_field": "capability_id",
-            "name_field": "capability_name",
-        },
-        "process_stages": {
-            "model": ProcessStage,
-            "fetch_all_func": lambda: ProcessStage.query.order_by(
-                ProcessStage.hierarchy_level,
-                ProcessStage.stage_order
-            ).all(),
-            "pk_field": "stage_id",
-            "name_field": "stage_name",
-        },
-        "product_timelines": {
-            "model": ProductTimeline,
-            "fetch_all_func": lambda: ProductTimeline.query.all(),
-            "pk_field": "timeline_id",
-            "name_field": "milestone_name",
-        },
-        "product_regulatory_filings": {
-            "model": ProductRegulatoryFiling,
-            "fetch_all_func": lambda: ProductRegulatoryFiling.query.all(),
-            "pk_field": "filing_id",
-            "name_field": "indication",
-        },
-        "product_manufacturing_suppliers": {
-            "model": ProductManufacturingSupplier,
-            "fetch_all_func": lambda: ProductManufacturingSupplier.query.all(),
-            "pk_field": "supplier_id",
-            "name_field": "supplier_name",
-        },
-    }
+# Challenge-Felder, die modalitäts-spezifisch sind (aus ChallengeModalityDetail)
+MODALITY_SPECIFIC_FIELDS = {
+    'specific_description': 'Modality-Specific Description',
+    'specific_root_cause': 'Modality-Specific Root Cause',
+    'impact_score': 'Impact Score (1-5)',
+    'impact_details': 'Impact Details',
+    'maturity_score': 'Maturity Score (1-5)',
+    'maturity_details': 'Maturity Details',
+    'trends_3_5_years': 'Trends (3-5 Years)',
+}
 
 
 def get_export_page_context():
     """Gathers all necessary data for rendering the data export page."""
-    EXPORTABLE_ENTITIES = _get_exportable_entities()
+    from ..models import Modality
 
-    all_items = {
-        name: config["fetch_all_func"]()
-        for name, config in EXPORTABLE_ENTITIES.items()
-    }
-
-    selectable_fields = {
-        name: config["model"].get_all_fields()
-        for name, config in EXPORTABLE_ENTITIES.items()
-    }
-
-    display_config = {
-        name: {"pk": config["pk_field"], "name": config["name_field"]}
-        for name, config in EXPORTABLE_ENTITIES.items()
-    }
+    modalities = Modality.query.order_by(Modality.modality_name).all()
 
     return {
-        "all_items": all_items,
-        "selectable_fields": selectable_fields,
-        "display_config": display_config,
+        "modalities": modalities,
+        "agnostic_fields": AGNOSTIC_FIELDS,
+        "modality_specific_fields": MODALITY_SPECIFIC_FIELDS,
     }
 
 
@@ -138,50 +48,87 @@ def count_tokens(text: str) -> int:
         return len(text) // 4
 
 
-def prepare_json_export(form_data: dict):
-    """Prepares a custom JSON export based on user selections from the form."""
-    EXPORTABLE_ENTITIES = _get_exportable_entities()
-    final_json_data = {}
+def prepare_challenge_export(form_data: dict):
+    """
+    Prepares a JSON export of challenges based on selected modalities and fields.
 
-    for entity_name, config in EXPORTABLE_ENTITIES.items():
-        selected_fields = form_data.getlist(f"{entity_name}_fields")
-        if not selected_fields:
-            continue
+    Returns challenges that have ChallengeModalityDetail entries for at least one
+    of the selected modalities.
+    """
+    from ..models import Challenge, ChallengeModalityDetail, Modality
 
-        selected_ids = [
-            int(id_str)
-            for id_str in form_data.getlist(f"{entity_name}_ids")
-            if id_str.isdigit()
-        ]
+    # Get selected modality IDs
+    selected_modality_ids = [
+        int(id_str) for id_str in form_data.getlist('modality_ids')
+        if id_str.isdigit()
+    ]
 
-        query = config["model"].query
-        if selected_ids:
-            pk_column = getattr(config["model"], config["pk_field"])
-            query = query.filter(pk_column.in_(selected_ids))
+    if not selected_modality_ids:
+        return json.dumps({"error": "No modalities selected"}, indent=2), 0
 
-        results = query.all()
-        entity_data_list = []
-        for item in results:
-            item_data = {}
-            for field in selected_fields:
-                if hasattr(item, field):
-                    item_data[field] = getattr(item, field)
-            entity_data_list.append(item_data)
+    # Get selected fields
+    selected_agnostic_fields = form_data.getlist('agnostic_fields')
+    selected_specific_fields = form_data.getlist('specific_fields')
 
-        if entity_data_list:
-            final_json_data[entity_name] = entity_data_list
+    if not selected_agnostic_fields and not selected_specific_fields:
+        return json.dumps({"error": "No fields selected"}, indent=2), 0
 
-    json_string = json.dumps(final_json_data, default=str, indent=2)
+    # Get modality names for output
+    modalities = {m.modality_id: m.modality_name for m in Modality.query.all()}
+
+    # Query challenges that have details for at least one selected modality
+    challenges_with_details = db.session.query(Challenge).join(
+        ChallengeModalityDetail
+    ).filter(
+        ChallengeModalityDetail.modality_id.in_(selected_modality_ids)
+    ).distinct().order_by(Challenge.name).all()
+
+    result = []
+
+    for challenge in challenges_with_details:
+        challenge_data = {}
+
+        # Add agnostic fields
+        for field in selected_agnostic_fields:
+            if field == 'value_step':
+                challenge_data['value_step'] = challenge.value_step
+            elif hasattr(challenge, field):
+                challenge_data[field] = getattr(challenge, field)
+
+        # Add modality-specific details if any specific fields selected
+        if selected_specific_fields:
+            modality_details = {}
+
+            for detail in challenge.modality_details:
+                if detail.modality_id in selected_modality_ids:
+                    modality_name = modalities.get(detail.modality_id, f"Modality {detail.modality_id}")
+                    detail_data = {}
+
+                    for field in selected_specific_fields:
+                        if hasattr(detail, field):
+                            detail_data[field] = getattr(detail, field)
+
+                    if detail_data:
+                        modality_details[modality_name] = detail_data
+
+            if modality_details:
+                challenge_data['modality_details'] = modality_details
+
+        if challenge_data:
+            result.append(challenge_data)
+
+    json_string = json.dumps(result, default=str, indent=2, ensure_ascii=False)
     total_tokens = count_tokens(json_string)
 
     return json_string, total_tokens
 
+
 def export_full_database():
     """Exports all data from all tables into a structured dictionary."""
     from .data_management_service import TABLE_IMPORT_ORDER
-    
+
     all_data = {}
-    
+
     def json_serializer(obj):
         if isinstance(obj, (datetime.datetime, datetime.date)):
             return obj.isoformat()
@@ -191,7 +138,7 @@ def export_full_database():
         table = db.metadata.tables.get(table_name)
         if table is None or table_name == 'flask_sessions':
             continue
-        
+
         result = db.session.execute(table.select())
         rows = [dict(row._mapping) for row in result]
         all_data[table_name] = rows

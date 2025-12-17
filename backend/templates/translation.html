@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+{% block title %}Translation Management{% endblock %}
+
+{% block head_extra %}
+<style>
+    .translation-container {
+        padding: 20px;
+    }
+
+    .table-selector {
+        margin-bottom: 20px;
+    }
+
+    .table-selector select {
+        padding: 8px 16px;
+        font-size: 14px;
+        border-radius: 4px;
+        border: 1px solid var(--border-color, #ddd);
+        background: var(--bg-color, #fff);
+        min-width: 250px;
+    }
+
+    .translation-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .translation-table th,
+    .translation-table td {
+        border: 1px solid var(--border-color, #ddd);
+        padding: 8px;
+        vertical-align: top;
+    }
+
+    .translation-table th {
+        background: var(--header-bg, #f5f5f5);
+        font-weight: 600;
+        text-align: left;
+    }
+
+    .translation-table th.col-identifier {
+        width: 15%;
+    }
+
+    .translation-table th.col-field {
+        width: 10%;
+    }
+
+    .translation-table th.col-de,
+    .translation-table th.col-en {
+        width: 37.5%;
+    }
+
+    .translation-table textarea {
+        width: 100%;
+        min-height: 60px;
+        padding: 6px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        resize: vertical;
+        font-family: inherit;
+        font-size: 13px;
+        background: transparent;
+    }
+
+    .translation-table textarea:focus {
+        border-color: var(--primary-color, #007bff);
+        outline: none;
+        background: var(--bg-color, #fff);
+    }
+
+    .translation-table textarea:hover {
+        background: var(--hover-bg, #f9f9f9);
+    }
+
+    .translation-table textarea.modified {
+        background: #fff3cd;
+    }
+
+    .translation-table textarea.saving {
+        background: #cce5ff;
+    }
+
+    .translation-table textarea.saved {
+        background: #d4edda;
+    }
+
+    .translation-table textarea.error {
+        background: #f8d7da;
+    }
+
+    .identifier-cell {
+        font-weight: 500;
+        background: var(--identifier-bg, #fafafa);
+    }
+
+    .field-label {
+        font-size: 12px;
+        color: var(--text-muted, #666);
+        font-weight: 500;
+    }
+
+    .loading-indicator {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-muted, #666);
+    }
+
+    .status-bar {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        border-radius: 4px;
+        background: #333;
+        color: #fff;
+        display: none;
+        z-index: 1000;
+    }
+
+    .status-bar.show {
+        display: block;
+    }
+
+    .row-group {
+        border-bottom: 2px solid var(--border-color, #ddd);
+    }
+
+    .row-group:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="translation-container">
+    <h1>Translation Management</h1>
+    <p class="text-muted">Select a table to edit translations. Changes are saved automatically when you leave a field.</p>
+
+    <div class="table-selector">
+        <label for="tableSelect"><strong>Table:</strong></label>
+        <select id="tableSelect">
+            <option value="">-- Select a table --</option>
+            {% for table in tables %}
+            <option value="{{ table.key }}">{{ table.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id="tableContent">
+        <div class="loading-indicator" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i> Loading...
+        </div>
+        <div id="tableData"></div>
+    </div>
+</div>
+
+<div id="statusBar" class="status-bar"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    const tableSelect = document.getElementById('tableSelect');
+    const tableData = document.getElementById('tableData');
+    const loadingIndicator = document.querySelector('.loading-indicator');
+    const statusBar = document.getElementById('statusBar');
+
+    let currentTable = null;
+    let saveTimeout = null;
+
+    function showStatus(message, duration = 2000) {
+        statusBar.textContent = message;
+        statusBar.classList.add('show');
+        setTimeout(() => statusBar.classList.remove('show'), duration);
+    }
+
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.content || '';
+    }
+
+    async function loadTableData(tableName) {
+        if (!tableName) {
+            tableData.innerHTML = '<p class="text-muted">Please select a table above.</p>';
+            return;
+        }
+
+        currentTable = tableName;
+        loadingIndicator.style.display = 'block';
+        tableData.innerHTML = '';
+
+        try {
+            const response = await fetch(`/translation/api/table/${tableName}`);
+            const result = await response.json();
+
+            if (result.success) {
+                renderTable(result.data, result.fields);
+            } else {
+                tableData.innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
+            }
+        } catch (error) {
+            tableData.innerHTML = `<div class="alert alert-danger">Error loading data: ${error.message}</div>`;
+        } finally {
+            loadingIndicator.style.display = 'none';
+        }
+    }
+
+    function renderTable(data, fields) {
+        if (data.length === 0) {
+            tableData.innerHTML = '<p class="text-muted">No data found in this table.</p>';
+            return;
+        }
+
+        let html = `
+            <table class="translation-table">
+                <thead>
+                    <tr>
+                        <th class="col-identifier">Item</th>
+                        <th class="col-field">Field</th>
+                        <th class="col-de">Deutsch (DE)</th>
+                        <th class="col-en">English (EN)</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        for (const item of data) {
+            const rowspan = item.fields.length;
+
+            for (let i = 0; i < item.fields.length; i++) {
+                const field = item.fields[i];
+                html += '<tr class="row-group">';
+
+                // Identifier cell (only on first row of group)
+                if (i === 0) {
+                    html += `<td class="identifier-cell" rowspan="${rowspan}">${escapeHtml(item.identifier)}</td>`;
+                }
+
+                // Field label
+                html += `<td class="field-label">${escapeHtml(field.label)}</td>`;
+
+                // DE textarea
+                html += `
+                    <td>
+                        <textarea
+                            data-id="${item.id}"
+                            data-field="${field.de_field}"
+                            data-original="${escapeAttr(field.de_value)}"
+                        >${escapeHtml(field.de_value)}</textarea>
+                    </td>
+                `;
+
+                // EN textarea
+                html += `
+                    <td>
+                        <textarea
+                            data-id="${item.id}"
+                            data-field="${field.en_field}"
+                            data-original="${escapeAttr(field.en_value)}"
+                        >${escapeHtml(field.en_value)}</textarea>
+                    </td>
+                `;
+
+                html += '</tr>';
+            }
+        }
+
+        html += '</tbody></table>';
+        tableData.innerHTML = html;
+
+        // Attach event listeners
+        tableData.querySelectorAll('textarea').forEach(textarea => {
+            textarea.addEventListener('input', handleInput);
+            textarea.addEventListener('blur', handleBlur);
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function escapeAttr(text) {
+        if (!text) return '';
+        return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function handleInput(e) {
+        const textarea = e.target;
+        const original = textarea.dataset.original || '';
+
+        if (textarea.value !== original) {
+            textarea.classList.add('modified');
+        } else {
+            textarea.classList.remove('modified');
+        }
+    }
+
+    async function handleBlur(e) {
+        const textarea = e.target;
+        const original = textarea.dataset.original || '';
+
+        // Only save if changed
+        if (textarea.value === original) {
+            return;
+        }
+
+        textarea.classList.remove('modified');
+        textarea.classList.add('saving');
+
+        try {
+            const response = await fetch('/translation/api/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    table: currentTable,
+                    id: textarea.dataset.id,
+                    field: textarea.dataset.field,
+                    value: textarea.value
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                textarea.classList.remove('saving');
+                textarea.classList.add('saved');
+                textarea.dataset.original = textarea.value;
+                showStatus('Saved!');
+
+                setTimeout(() => textarea.classList.remove('saved'), 1500);
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            textarea.classList.remove('saving');
+            textarea.classList.add('error');
+            showStatus(`Error: ${error.message}`, 4000);
+
+            setTimeout(() => textarea.classList.remove('error'), 3000);
+        }
+    }
+
+    // Event listeners
+    tableSelect.addEventListener('change', (e) => {
+        loadTableData(e.target.value);
+    });
+
+    // Initial state
+    tableData.innerHTML = '<p class="text-muted">Please select a table above to begin editing translations.</p>';
+})();
+</script>
+{% endblock %}

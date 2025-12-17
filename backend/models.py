@@ -333,8 +333,10 @@ class ValueStep(db.Model):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True, nullable=False)
+    name_en = Column(String(100), nullable=True)
     sort_order = Column(Integer, nullable=False, unique=True)
     description = Column(Text, nullable=True)
+    description_en = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
@@ -372,8 +374,11 @@ class Challenge(db.Model):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(255), unique=True, nullable=False)
+    name_en = Column(String(255), nullable=True)
     agnostic_description = Column(Text, nullable=True)
+    agnostic_description_en = Column(Text, nullable=True)
     agnostic_root_cause = Column(Text, nullable=True)
+    agnostic_root_cause_en = Column(Text, nullable=True)
     value_step_id = Column(Integer, ForeignKey('value_steps.id'), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -415,10 +420,14 @@ class Modality(db.Model):
     __tablename__ = 'modalities'
     modality_id = Column(Integer, primary_key=True)
     modality_name = Column(String(255), unique=True, nullable=False)
+    modality_name_en = Column(String(255), nullable=True)
     modality_category = Column(String(255))
     label = Column(String(255), nullable=True)
+    label_en = Column(String(255), nullable=True)
     short_description = Column(Text, nullable=True)
+    short_description_en = Column(Text, nullable=True)
     description = Column(Text)
+    description_en = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
@@ -450,18 +459,23 @@ class ChallengeModalityDetail(db.Model):
 
     # Modality-specific description and root causes
     specific_description = Column(Text, nullable=True)
+    specific_description_en = Column(Text, nullable=True)
     specific_root_cause = Column(Text, nullable=True)
+    specific_root_cause_en = Column(Text, nullable=True)
 
     # Impact scoring (1-5)
     impact_score = Column(Integer, nullable=True)
     impact_details = Column(Text, nullable=True)
+    impact_details_en = Column(Text, nullable=True)
 
     # Maturity scoring (1-5)
     maturity_score = Column(Integer, nullable=True)
     maturity_details = Column(Text, nullable=True)
+    maturity_details_en = Column(Text, nullable=True)
 
     # Trends
     trends_3_5_years = Column(Text, nullable=True)
+    trends_3_5_years_en = Column(Text, nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

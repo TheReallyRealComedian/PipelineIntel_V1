@@ -7,7 +7,7 @@
     <div class="page-header d-flex justify-content-between align-items-center">
         <div>
             <h1>{{ title }}</h1>
-            <p class="text-secondary">Select entities and fields to generate a custom JSON dataset.</p>
+            <p class="text-secondary">Export challenge data by modality with token count for LLM context.</p>
         </div>
         <div>
             <a href="{{ url_for('export.full_database_export') }}" class="btn btn-sm btn-outline-danger">
@@ -18,78 +18,107 @@
 
     <div class="card">
         <div class="card-header">
-            <h2 class="card-title mb-0">Selection Criteria</h2>
+            <h2 class="card-title mb-0">Export Configuration</h2>
         </div>
         <div class="card-body">
             <form method="POST">
-                {# ADD THIS CSRF TOKEN LINE #}
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                
-                {# --- ENTITY SELECTION --- #}
-                <div class="row g-3">
-                    {# THIS LOOP IS NOW FULLY DYNAMIC #}
-                    {% for entity_name, items in all_items.items() %}
-                    <div class="col-lg-4 col-md-6">
-                        <div class="selection-item p-3 border rounded">
-                            <div class="d-flex justify-content-between">
-                                <label class="form-label">{{ entity_name | title }}</label>
-                                <span class="badge bg-secondary" id="{{ entity_name }}_ids_selected_count">0 selected</span>
+
+                {# --- MODALITY SELECTION --- #}
+                <div class="mb-4">
+                    <h3 class="h5 mb-3">1. Select Modalities</h3>
+                    <p class="text-muted small mb-2">Choose one or more modalities to export challenges for.</p>
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="d-flex gap-2 mb-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="selectAllModalities">Select All</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="clearAllModalities">Clear All</button>
                             </div>
-                            <input type="search" id="{{ entity_name }}_search" class="form-control form-control-sm mb-2" placeholder="Search...">
-                            <div class="btn-group btn-group-sm w-100 mb-2">
-                                <button type="button" class="btn btn-outline-secondary select-all" data-type="{{ entity_name }}">All</button>
-                                <button type="button" class="btn btn-outline-secondary clear-all" data-type="{{ entity_name }}">None</button>
-                            </div>
-                            <div class="custom-select-list border rounded p-1" id="{{ entity_name }}-select-container" style="height: 150px; overflow-y: auto;">
-                                {% for item in items %}
-                                    {# THIS LOGIC IS NOW ROBUST, USING THE CONFIG FROM THE ROUTE #}
-                                    {% set config = display_config[entity_name] %}
-                                    {% set item_id = item[config.pk] %}
-                                    {% set item_name = item[config.name] %}
-                                    {% set is_selected = (entity_name ~ '_ids') in form_data and item_id|string in form_data.getlist(entity_name ~ '_ids') %}
-                                    <div class="select-option p-1 {% if is_selected %}selected{% endif %}" data-value="{{ item_id }}" data-name="{{ entity_name }}_ids">
-                                        {{ item_name }}
-                                    </div>
+                            <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+                                {% for modality in modalities %}
+                                {% set is_selected = 'modality_ids' in form_data and modality.modality_id|string in form_data.getlist('modality_ids') %}
+                                <div class="form-check">
+                                    <input class="form-check-input modality-checkbox" type="checkbox"
+                                           name="modality_ids" value="{{ modality.modality_id }}"
+                                           id="modality_{{ modality.modality_id }}"
+                                           {% if is_selected %}checked{% endif %}>
+                                    <label class="form-check-label" for="modality_{{ modality.modality_id }}">
+                                        {{ modality.modality_name }}
+                                        {% if modality.label %}<span class="text-muted small">({{ modality.label }})</span>{% endif %}
+                                    </label>
+                                </div>
                                 {% endfor %}
                             </div>
-                            <div id="{{ entity_name }}_hidden_inputs"></div>
+                            <div class="mt-1">
+                                <span class="badge bg-secondary" id="modalityCount">0 selected</span>
+                            </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
 
-                <hr class="my-4">
+                <hr>
 
                 {# --- FIELD SELECTION --- #}
-                <h3 class="mb-3">Select Fields to Export</h3>
-                <div class="row g-3">
-                    {% for entity_name, fields in selectable_fields.items() %}
-                    <div class="col-lg-4 col-md-6">
-                        <div class="field-group border rounded p-3">
-                            <div class="field-group-header d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold">{{ entity_name | title }} Fields</span>
-                                <div class="btn-group btn-group-sm">
-                                    <button type="button" class="btn btn-outline-secondary select-all-fields" data-type="{{ entity_name }}">All</button>
-                                    <button type="button" class="btn btn-outline-secondary clear-all-fields" data-type="{{ entity_name }}">None</button>
+                <div class="mb-4">
+                    <h3 class="h5 mb-3">2. Select Challenge Fields</h3>
+                    <div class="row g-4">
+                        {# Agnostic Fields #}
+                        <div class="col-lg-6">
+                            <div class="field-group border rounded p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold">General Fields</span>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-secondary" data-select="agnostic" data-action="all">All</button>
+                                        <button type="button" class="btn btn-outline-secondary" data-select="agnostic" data-action="none">None</button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="field-group-content" style="height: 200px; overflow-y: auto;">
-                                {% for field in fields %}
-                                {% set is_checked = (entity_name ~ '_fields') in form_data and field in form_data.getlist(entity_name ~ '_fields') %}
+                                <p class="text-muted small mb-2">Modality-agnostic challenge information</p>
+                                {% for field_key, field_label in agnostic_fields.items() %}
+                                {% set is_checked = 'agnostic_fields' in form_data and field_key in form_data.getlist('agnostic_fields') %}
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="{{ entity_name }}_fields" value="{{ field }}" id="field_{{ entity_name }}_{{ field }}" {% if is_checked %}checked{% endif %}>
-                                    <label class="form-check-label small" for="field_{{ entity_name }}_{{ field }}">{{ field.replace('_', ' ') | title }}</label>
+                                    <input class="form-check-input agnostic-field" type="checkbox"
+                                           name="agnostic_fields" value="{{ field_key }}"
+                                           id="agnostic_{{ field_key }}"
+                                           {% if is_checked %}checked{% endif %}>
+                                    <label class="form-check-label small" for="agnostic_{{ field_key }}">
+                                        {{ field_label }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        {# Modality-Specific Fields #}
+                        <div class="col-lg-6">
+                            <div class="field-group border rounded p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold">Modality-Specific Fields</span>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-secondary" data-select="specific" data-action="all">All</button>
+                                        <button type="button" class="btn btn-outline-secondary" data-select="specific" data-action="none">None</button>
+                                    </div>
+                                </div>
+                                <p class="text-muted small mb-2">Details specific to each selected modality</p>
+                                {% for field_key, field_label in modality_specific_fields.items() %}
+                                {% set is_checked = 'specific_fields' in form_data and field_key in form_data.getlist('specific_fields') %}
+                                <div class="form-check">
+                                    <input class="form-check-input specific-field" type="checkbox"
+                                           name="specific_fields" value="{{ field_key }}"
+                                           id="specific_{{ field_key }}"
+                                           {% if is_checked %}checked{% endif %}>
+                                    <label class="form-check-label small" for="specific_{{ field_key }}">
+                                        {{ field_label }}
+                                    </label>
                                 </div>
                                 {% endfor %}
                             </div>
                         </div>
                     </div>
-                    {% endfor %} {# <-- This correctly closes the outer loop #}
                 </div>
 
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-cogs"></i> Generate Preview
+                        <i class="fas fa-cogs me-1"></i> Generate Export
                     </button>
                 </div>
             </form>
@@ -100,10 +129,12 @@
     {% if total_tokens > 0 %}
     <div class="card mt-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h2 class="card-title mb-0">Data Preview</h2>
+            <h2 class="card-title mb-0">Export Preview</h2>
             <div>
                 <span id="tokenCountDisplay" class="text-muted me-3"><strong>Token Count: {{ total_tokens }}</strong></span>
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="copyJsonButton"><i class="fas fa-copy me-1"></i>Copy JSON</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="copyJsonButton">
+                    <i class="fas fa-copy me-1"></i>Copy JSON
+                </button>
             </div>
         </div>
         <div class="card-body">

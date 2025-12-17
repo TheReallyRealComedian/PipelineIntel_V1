@@ -71,6 +71,17 @@
     /* Base color classes (for legend) */
     .cell-applicable { background-color: #d4edda; }
     .cell-not-applicable { background-color: #f8f9fa; }
+    /* Innovation Need: Kritisch (hoch) → Minimal (niedrig) */
+    .cell-innovation-critical { background-color: #c0392b; }
+    .cell-innovation-high { background-color: #e67e22; }
+    .cell-innovation-medium { background-color: #f39c12; }
+    .cell-innovation-low { background-color: #d4edda; }
+    .cell-innovation-minimal { background-color: #27ae60; }
+    .matrix-table td.cell-innovation-critical { background-color: #c0392b !important; color: white; }
+    .matrix-table td.cell-innovation-high { background-color: #e67e22 !important; color: white; }
+    .matrix-table td.cell-innovation-medium { background-color: #f39c12 !important; color: #856404; }
+    .matrix-table td.cell-innovation-low { background-color: #d4edda !important; color: #155724; }
+    .matrix-table td.cell-innovation-minimal { background-color: #27ae60 !important; color: white; }
     .cell-impact-1 { background-color: #d4edda; }
     .cell-impact-2 { background-color: #a8d5a2; }
     .cell-impact-3 { background-color: #ffeaa7; }
@@ -113,6 +124,10 @@
     }
     .display-mode-btn.active {
         font-weight: bold;
+    }
+    .display-mode-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
     }
     .cell-tooltip {
         cursor: help;
@@ -164,8 +179,8 @@
             <div class="col-md-4">
                 <label class="form-label fw-bold mb-1">Display Mode</label>
                 <div class="btn-group btn-group-sm" role="group">
-                    <button type="button" class="btn btn-outline-primary display-mode-btn active" data-mode="applicable">
-                        <i class="fas fa-check"></i> Applicable
+                    <button type="button" class="btn btn-outline-primary display-mode-btn active" data-mode="innovation">
+                        <i class="fas fa-lightbulb"></i> Innovationsbedarf
                     </button>
                     <button type="button" class="btn btn-outline-primary display-mode-btn" data-mode="impact">
                         <i class="fas fa-bolt"></i> Impact
@@ -186,9 +201,13 @@
         </div>
         <!-- Legend -->
         <div class="mt-3" id="legend-container">
-            <div id="legend-applicable" class="legend">
-                <span class="legend-item"><span class="legend-color cell-applicable"></span> Applicable</span>
-                <span class="legend-item"><span class="legend-color cell-not-applicable"></span> Not Applicable</span>
+            <div id="legend-innovation" class="legend">
+                <span class="legend-item"><span class="legend-color cell-innovation-critical"></span> Kritisch (30+)</span>
+                <span class="legend-item"><span class="legend-color cell-innovation-high"></span> Hoch (20-29)</span>
+                <span class="legend-item"><span class="legend-color cell-innovation-medium"></span> Mittel (10-19)</span>
+                <span class="legend-item"><span class="legend-color cell-innovation-low"></span> Niedrig (5-9)</span>
+                <span class="legend-item"><span class="legend-color cell-innovation-minimal"></span> Minimal (1-4)</span>
+                <span class="legend-item"><span class="legend-color cell-not-applicable"></span> N/A</span>
             </div>
             <div id="legend-impact" class="legend d-none">
                 <span class="legend-item"><span class="legend-color cell-impact-1"></span> 1 (Low)</span>
@@ -269,11 +288,12 @@
                                 data-maturity-details="{{ detail.get('maturity_details', '') | e }}"
                                 title="{% if detail.get('applicable') %}{{ mod.name }}: Impact={{ detail.get('impact_score', 'N/A') }}, Maturity={{ detail.get('maturity_score', 'N/A') }}{% else %}Not applicable{% endif %}">
                                 {% if detail.get('applicable') %}
-                                    <span class="cell-value-applicable">✓</span>
+                                    {% set inn_score = (detail.get('impact_score', 0)|int) * (10 - (detail.get('maturity_score', 5)|int)) %}
+                                    <span class="cell-value-innovation">{{ inn_score if detail.get('impact_score') and detail.get('maturity_score') else '–' }}</span>
                                     <span class="cell-value-impact d-none">{{ detail.get('impact_score', '–') }}</span>
                                     <span class="cell-value-maturity d-none">{{ detail.get('maturity_score', '–') }}</span>
                                 {% else %}
-                                    <span class="cell-value-applicable">–</span>
+                                    <span class="cell-value-innovation">–</span>
                                     <span class="cell-value-impact d-none">–</span>
                                     <span class="cell-value-maturity d-none">–</span>
                                 {% endif %}
@@ -315,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return step ? step.sort_order : 999;
     }
 
-    let currentDisplayMode = 'applicable';
+    let currentDisplayMode = 'innovation';
 
     // Display mode switching
     displayModeButtons.forEach(btn => {
@@ -328,12 +348,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    function getInnovationClass(score) {
+        if (score >= 30) return 'cell-innovation-critical';
+        if (score >= 20) return 'cell-innovation-high';
+        if (score >= 10) return 'cell-innovation-medium';
+        if (score >= 5) return 'cell-innovation-low';
+        return 'cell-innovation-minimal';
+    }
+
+    function getInnovationLabel(score) {
+        if (score >= 30) return 'Kritisch';
+        if (score >= 20) return 'Hoch';
+        if (score >= 10) return 'Mittel';
+        if (score >= 5) return 'Niedrig';
+        return 'Minimal';
+    }
+
     function updateDisplayMode() {
         const cells = document.querySelectorAll('.matrix-cell');
         cells.forEach(cell => {
             const applicable = cell.dataset.applicable === 'true';
-            const impact = cell.dataset.impact;
-            const maturity = cell.dataset.maturity;
+            const impact = parseInt(cell.dataset.impact) || 0;
+            const maturity = parseInt(cell.dataset.maturity) || 0;
             const modalityName = cell.dataset.modalityName || '';
             const impactDetails = cell.dataset.impactDetails || '';
             const maturityDetails = cell.dataset.maturityDetails || '';
@@ -345,15 +381,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Remove all cell styling classes
             cell.classList.remove('cell-applicable', 'cell-not-applicable');
+            cell.classList.remove('cell-innovation-critical', 'cell-innovation-high', 'cell-innovation-medium', 'cell-innovation-low', 'cell-innovation-minimal');
             for (let i = 1; i <= 9; i++) {
                 cell.classList.remove('cell-impact-' + i, 'cell-maturity-' + i);
             }
 
+            // Calculate innovation score
+            const innovationScore = impact * (10 - maturity);
+
             // Update tooltip based on display mode
             let tooltipText = 'Not applicable';
             if (applicable) {
-                if (currentDisplayMode === 'applicable') {
-                    tooltipText = `${modalityName}: Impact=${impact || 'N/A'}, Maturity=${maturity || 'N/A'}`;
+                if (currentDisplayMode === 'innovation') {
+                    const label = getInnovationLabel(innovationScore);
+                    tooltipText = `${modalityName}: Innovationsbedarf=${innovationScore} (${label})\nImpact=${impact}, Maturity=${maturity}`;
                 } else if (currentDisplayMode === 'impact') {
                     tooltipText = impactDetails || `${modalityName}: Impact=${impact || 'N/A'}`;
                 } else if (currentDisplayMode === 'maturity') {
@@ -364,19 +405,23 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update native title attribute for tooltip
             cell.setAttribute('title', tooltipText);
 
-            if (currentDisplayMode === 'applicable') {
-                cell.querySelector('.cell-value-applicable').classList.remove('d-none');
-                cell.classList.add(applicable ? 'cell-applicable' : 'cell-not-applicable');
+            if (currentDisplayMode === 'innovation') {
+                cell.querySelector('.cell-value-innovation').classList.remove('d-none');
+                if (applicable && impact && maturity) {
+                    cell.classList.add(getInnovationClass(innovationScore));
+                } else {
+                    cell.classList.add('cell-not-applicable');
+                }
             } else if (currentDisplayMode === 'impact') {
                 cell.querySelector('.cell-value-impact').classList.remove('d-none');
-                if (applicable && impact && impact !== '' && impact !== '–') {
+                if (applicable && impact) {
                     cell.classList.add('cell-impact-' + impact);
                 } else {
                     cell.classList.add('cell-not-applicable');
                 }
             } else if (currentDisplayMode === 'maturity') {
                 cell.querySelector('.cell-value-maturity').classList.remove('d-none');
-                if (applicable && maturity && maturity !== '' && maturity !== '–') {
+                if (applicable && maturity) {
                     cell.classList.add('cell-maturity-' + maturity);
                 } else {
                     cell.classList.add('cell-not-applicable');
@@ -441,6 +486,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const visibleCount = visibleRows.length;
         document.getElementById('challengeCount').textContent = visibleCount + ' Challenges';
     }
+
+    // Initialize display mode on page load
+    updateDisplayMode();
 
 });
 </script>
