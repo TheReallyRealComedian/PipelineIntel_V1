@@ -14,6 +14,7 @@ from ..services.data_management_service import (
     import_full_database,
     _resolve_foreign_keys_for_process_stage,
     _resolve_foreign_keys_for_product,
+    _resolve_foreign_keys_for_challenge,
     _resolve_foreign_keys_for_challenge_modality_detail
 )
 
@@ -35,7 +36,8 @@ ENTITY_MAP = {
     'indications': {'model': Indication, 'key': 'indication_name'},
     'challenges': {
         'model': Challenge,
-        'key': 'name'
+        'key': 'name',
+        'resolver': _resolve_foreign_keys_for_challenge
     },
     'challenge_modality_details': {
         'model': ChallengeModalityDetail,

@@ -60,12 +60,10 @@ def get_challenge_modality_matrix():
             'trends_3_5_years': detail.trends_3_5_years
         }
 
-    # Get value steps that are actually used by challenges
-    used_step_ids = set(c.value_step_id for c in challenges if c.value_step_id)
+    # Return ALL value steps (for filter dropdown), in order
     value_steps = [
         {'id': vs.id, 'name': vs.name, 'sort_order': vs.sort_order}
         for vs in all_value_steps
-        if vs.id in used_step_ids
     ]
 
     return {

@@ -265,11 +265,14 @@ def get_foreign_key_fields(model_class):
     Returns mapping of foreign key fields for a model.
     Format: {field_name: (related_model_class, lookup_field)}
     """
-    from ..models import Product, Modality, ProcessStage, ManufacturingCapability
+    from ..models import Product, Modality, ProcessStage, ManufacturingCapability, Challenge, ValueStep
 
     mappings = {
         Product: {
             'modality_name': (Modality, 'modality_name'),
+        },
+        Challenge: {
+            'value_step': (ValueStep, 'name'),
         },
     }
 
@@ -421,6 +424,41 @@ def _resolve_foreign_keys_for_product(item, existing_products):
     # Remove any obsolete fields that might be in old JSON imports
     for obsolete_field in ['technology_names', 'explicit_challenges', 'excluded_challenges']:
         resolved.pop(obsolete_field, None)
+
+    if warnings:
+        resolved['_warnings'] = warnings
+
+    return resolved
+
+
+def _resolve_foreign_keys_for_challenge(item, existing_challenges):
+    """
+    Resolves foreign key references in a Challenge record.
+    Converts value_step (string name) → value_step_id (FK).
+    """
+    from ..models import ValueStep
+
+    resolved = item.copy()
+    warnings = []
+
+    # Resolve value_step (name) → value_step_id
+    if 'value_step' in resolved:
+        value_step_name = resolved.pop('value_step')
+        if value_step_name:
+            vs = ValueStep.query.filter_by(name=value_step_name).first()
+            if vs:
+                resolved['value_step_id'] = vs.id
+                print(f"  ✓ Resolved value_step '{value_step_name}' → ID {vs.id}")
+            else:
+                # Try fuzzy matching
+                all_steps = ValueStep.query.all()
+                step_names = [s.name for s in all_steps]
+                suggestions = generate_suggestions(value_step_name, step_names, max_suggestions=3)
+                if suggestions:
+                    suggestion_str = ", ".join([s['value'] for s in suggestions])
+                    warnings.append(f"Value step '{value_step_name}' not found. Did you mean: {suggestion_str}?")
+                else:
+                    warnings.append(f"Value step '{value_step_name}' not found. Available: {', '.join(step_names)}")
 
     if warnings:
         resolved['_warnings'] = warnings

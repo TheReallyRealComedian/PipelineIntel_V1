@@ -10,11 +10,12 @@
     .matrix-table {
         border-collapse: separate;
         border-spacing: 0;
+        font-size: 0.85rem;
     }
     .matrix-table th,
     .matrix-table td {
         border: 1px solid #dee2e6;
-        padding: 0.5rem;
+        padding: 0.25rem 0.4rem;
         text-align: center;
         vertical-align: middle;
     }
@@ -28,49 +29,76 @@
         writing-mode: vertical-rl;
         text-orientation: mixed;
         transform: rotate(180deg);
-        height: 150px;
+        height: 120px;
         white-space: nowrap;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
+        padding: 0.3rem;
     }
-    .matrix-table tbody th {
+    .matrix-table tbody th.challenge-cell {
         text-align: left;
         background-color: #f8f9fa;
         position: sticky;
         left: 0;
         z-index: 5;
-        max-width: 300px;
+        width: 140px;
+        min-width: 140px;
+        max-width: 140px;
+        padding: 0.3rem 0.4rem;
     }
     .challenge-name {
         font-weight: 500;
+        font-size: 0.8rem;
+        line-height: 1.2;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
     }
     .value-step-badge {
-        font-size: 0.7rem;
-        display: block;
+        font-size: 0.6rem;
+        display: inline-block;
+        padding: 0.1rem 0.3rem;
         margin-top: 2px;
+        line-height: 1;
+        border-radius: 0.2rem;
     }
-    /* Cell styles */
-    .cell-applicable {
-        background-color: #d4edda;
-        color: #155724;
-        font-weight: bold;
+    /* Cell styles - compact */
+    .matrix-cell {
+        width: 32px;
+        min-width: 32px;
+        font-size: 0.75rem;
+        font-weight: 600;
     }
-    .cell-not-applicable {
-        background-color: #f8f9fa;
-        color: #ccc;
-    }
+    /* Base color classes (for legend) */
+    .cell-applicable { background-color: #d4edda; }
+    .cell-not-applicable { background-color: #f8f9fa; }
     .cell-impact-1 { background-color: #d4edda; }
-    .cell-impact-2 { background-color: #c3e6cb; }
+    .cell-impact-2 { background-color: #a8d5a2; }
     .cell-impact-3 { background-color: #ffeaa7; }
     .cell-impact-4 { background-color: #fdcb6e; }
-    .cell-impact-5 { background-color: #e17055; color: white; }
-    .cell-maturity-1 { background-color: #e17055; color: white; }
+    .cell-impact-5 { background-color: #e17055; }
+    .cell-maturity-1 { background-color: #e17055; }
     .cell-maturity-2 { background-color: #fdcb6e; }
     .cell-maturity-3 { background-color: #ffeaa7; }
-    .cell-maturity-4 { background-color: #c3e6cb; }
+    .cell-maturity-4 { background-color: #a8d5a2; }
     .cell-maturity-5 { background-color: #d4edda; }
+    /* Override Bootstrap table td background - use !important for specificity */
+    .matrix-table td.cell-applicable { background-color: #d4edda !important; color: #155724; }
+    .matrix-table td.cell-not-applicable { background-color: #f8f9fa !important; color: #ccc; }
+    /* Impact: 1=low impact (green) → 5=high impact (red) */
+    .matrix-table td.cell-impact-1 { background-color: #d4edda !important; color: #155724; }
+    .matrix-table td.cell-impact-2 { background-color: #a8d5a2 !important; color: #155724; }
+    .matrix-table td.cell-impact-3 { background-color: #ffeaa7 !important; color: #856404; }
+    .matrix-table td.cell-impact-4 { background-color: #fdcb6e !important; color: #856404; }
+    .matrix-table td.cell-impact-5 { background-color: #e17055 !important; color: white; }
+    /* Maturity: 1=low maturity (red) → 5=high maturity (green) */
+    .matrix-table td.cell-maturity-1 { background-color: #e17055 !important; color: white; }
+    .matrix-table td.cell-maturity-2 { background-color: #fdcb6e !important; color: #856404; }
+    .matrix-table td.cell-maturity-3 { background-color: #ffeaa7 !important; color: #856404; }
+    .matrix-table td.cell-maturity-4 { background-color: #a8d5a2 !important; color: #155724; }
+    .matrix-table td.cell-maturity-5 { background-color: #d4edda !important; color: #155724; }
     .filter-controls {
         background-color: #f8f9fa;
-        padding: 1rem;
+        padding: 0.75rem 1rem;
         border-radius: 0.5rem;
         margin-bottom: 1rem;
     }
@@ -83,13 +111,14 @@
     .legend-item {
         display: inline-flex;
         align-items: center;
-        margin-right: 1rem;
+        margin-right: 0.75rem;
+        font-size: 0.8rem;
     }
     .legend-color {
-        width: 20px;
-        height: 20px;
-        border-radius: 3px;
-        margin-right: 5px;
+        width: 16px;
+        height: 16px;
+        border-radius: 2px;
+        margin-right: 4px;
         border: 1px solid #ddd;
     }
 </style>
@@ -115,8 +144,8 @@
     <div class="filter-controls">
         <div class="row align-items-center">
             <div class="col-md-4">
-                <label class="form-label fw-bold mb-1">Filter by Value Step</label>
-                <select id="valueStepFilter" class="form-select form-select-sm">
+                <label class="form-label fw-bold mb-1" for="valueStepFilter">Filter by Value Step</label>
+                <select id="valueStepFilter" class="form-select form-select-sm" title="Filter challenges by value step">
                     <option value="">All Value Steps</option>
                     {% for vs in value_steps %}
                     <option value="{{ vs.name }}">{{ vs.name }}</option>
@@ -138,8 +167,8 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <label class="form-label fw-bold mb-1">Sort Challenges</label>
-                <select id="sortOrder" class="form-select form-select-sm">
+                <label class="form-label fw-bold mb-1" for="sortOrder">Sort Challenges</label>
+                <select id="sortOrder" class="form-select form-select-sm" title="Sort challenges by criteria">
                     <option value="name">By Name (A-Z)</option>
                     <option value="value_step" selected>By Value Step</option>
                     <option value="applicability">By Applicability Count</option>
@@ -187,7 +216,7 @@
                 <table class="table matrix-table mb-0" id="matrixTable">
                     <thead>
                         <tr>
-                            <th style="min-width: 250px;">Challenge</th>
+                            <th class="challenge-cell">Challenge</th>
                             {% for mod in modalities %}
                             <th class="modality-header" title="{{ mod.name }}{% if mod.category %} ({{ mod.category }}){% endif %}">
                                 {{ mod.label or mod.name }}
@@ -198,12 +227,16 @@
                     <tbody id="matrixBody">
                         {% for challenge in challenges %}
                         <tr data-challenge-id="{{ challenge.id }}" data-value-step="{{ challenge.value_step or '' }}">
-                            <th>
+                            <th class="challenge-cell">
                                 <div class="challenge-name">{{ challenge.name }}</div>
                                 {% if challenge.value_step %}
                                 <span class="badge value-step-badge
                                     {% if challenge.value_step == 'Upstream' %}bg-info text-dark
                                     {% elif challenge.value_step == 'Downstream' %}bg-success
+                                    {% elif challenge.value_step == 'Conjugation' %}bg-warning text-dark
+                                    {% elif challenge.value_step == 'Fill & Finish' %}bg-primary
+                                    {% elif challenge.value_step == 'Assembly' %}bg-dark
+                                    {% elif challenge.value_step == 'QC/Reg' %}bg-danger
                                     {% else %}bg-secondary{% endif %}">
                                     {{ challenge.value_step }}
                                 </span>
@@ -220,13 +253,13 @@
                                 data-maturity="{{ detail.get('maturity_score', '') }}"
                                 title="{% if detail.get('applicable') %}{{ mod.name }}: Impact={{ detail.get('impact_score', 'N/A') }}, Maturity={{ detail.get('maturity_score', 'N/A') }}{% else %}Not applicable{% endif %}">
                                 {% if detail.get('applicable') %}
-                                    <span class="cell-value-applicable"><i class="fas fa-check"></i></span>
-                                    <span class="cell-value-impact d-none">{{ detail.get('impact_score', '-') }}</span>
-                                    <span class="cell-value-maturity d-none">{{ detail.get('maturity_score', '-') }}</span>
+                                    <span class="cell-value-applicable">✓</span>
+                                    <span class="cell-value-impact d-none">{{ detail.get('impact_score', '–') }}</span>
+                                    <span class="cell-value-maturity d-none">{{ detail.get('maturity_score', '–') }}</span>
                                 {% else %}
-                                    <span class="cell-value-applicable">-</span>
-                                    <span class="cell-value-impact d-none">-</span>
-                                    <span class="cell-value-maturity d-none">-</span>
+                                    <span class="cell-value-applicable">–</span>
+                                    <span class="cell-value-impact d-none">–</span>
+                                    <span class="cell-value-maturity d-none">–</span>
                                 {% endif %}
                             </td>
                             {% endfor %}
@@ -302,14 +335,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 cell.classList.add(applicable ? 'cell-applicable' : 'cell-not-applicable');
             } else if (currentDisplayMode === 'impact') {
                 cell.querySelector('.cell-value-impact').classList.remove('d-none');
-                if (applicable && impact && impact !== '-') {
+                if (applicable && impact && impact !== '' && impact !== '–') {
                     cell.classList.add('cell-impact-' + impact);
                 } else {
                     cell.classList.add('cell-not-applicable');
                 }
             } else if (currentDisplayMode === 'maturity') {
                 cell.querySelector('.cell-value-maturity').classList.remove('d-none');
-                if (applicable && maturity && maturity !== '-') {
+                if (applicable && maturity && maturity !== '' && maturity !== '–') {
                     cell.classList.add('cell-maturity-' + maturity);
                 } else {
                     cell.classList.add('cell-not-applicable');
