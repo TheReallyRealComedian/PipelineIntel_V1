@@ -10,7 +10,7 @@ from sqlalchemy import text
 
 from ..db import db
 from ..models import (
-    Product, Indication, Challenge, ChallengeModalityDetail,
+    Product, Indication, Challenge, ChallengeModalityDetail, ValueStep,
     ProductSupplyChain, ManufacturingEntity, InternalFacility, ExternalPartner,
     Modality, ProcessStage, ProductTimeline, ProductRegulatoryFiling,
     ProductManufacturingSupplier, User, LLMSettings, ProcessTemplate, TemplateStage,
@@ -30,6 +30,7 @@ TABLE_IMPORT_ORDER = [
     'process_templates',
     'products',
     'indications',
+    'value_steps',  # Must come before challenges (FK reference)
     'challenges',
     'challenge_modality_details',
     'llm_settings',
@@ -51,6 +52,7 @@ MODEL_MAP = {
     'process_templates': ProcessTemplate,
     'products': Product,
     'indications': Indication,
+    'value_steps': ValueStep,
     'challenges': Challenge,
     'challenge_modality_details': ChallengeModalityDetail,
     'llm_settings': LLMSettings,

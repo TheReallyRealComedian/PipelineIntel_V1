@@ -38,8 +38,9 @@ build/
 .vite
 
 # Operating System files
-.DS_Store # macOS
-Thumbs.db # Windows
+.DS_Store
+**/.DS_Store
+Thumbs.db
 
 # Editor/IDE specific files
 .vscode/ # Visual Studio Code
