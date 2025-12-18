@@ -100,7 +100,7 @@ def challenge_matrix():
     data = get_challenge_modality_matrix()
     return render_template(
         'analytics/challenge_matrix.html',
-        title="Challenge-Modality Matrix",
+        title="Need Matrix V0.1",
         **data
     )
 
