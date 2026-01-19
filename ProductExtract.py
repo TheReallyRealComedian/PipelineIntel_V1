@@ -2,10 +2,11 @@
 
 import json
 import os
+import csv
 
 # Definiert die Pfade relativ zum Stammverzeichnis, in dem das Skript liegt.
 INPUT_JSON_PATH = os.path.join('content', '06_products.json')
-OUTPUT_MD_PATH = 'products_summary.md'
+OUTPUT_BASE_PATH = 'products_summary'
 
 # === FELD-SETS ===
 
@@ -234,7 +235,8 @@ def clean_for_md_table(value):
 
 def get_user_choice():
     """
-    Fragt den User nach dem gewünschten Tabellen-Umfang.
+    Fragt den User nach dem gewünschten Tabellen-Umfang und Format.
+    Returns: tuple (field_choice, format_choice)
     """
     print("\n" + "="*60)
     print("PRODUKT-EXPORT: Wähle den Tabellen-Umfang")
@@ -242,89 +244,140 @@ def get_user_choice():
     print("1 - Kurzzusammenfassung (8 Felder)")
     print("2 - Umfassende Tech-Dev Tabelle (34 Felder)")
     print("="*60)
-    
-    while True:
-        choice = input("\nDeine Wahl (1 oder 2): ").strip()
-        if choice in ['1', '2']:
-            return choice
-        print("❌ Ungültige Eingabe. Bitte '1' oder '2' eingeben.")
 
-def create_product_summary(fields_to_use, output_suffix=''):
+    while True:
+        field_choice = input("\nDeine Wahl (1 oder 2): ").strip()
+        if field_choice in ['1', '2']:
+            break
+        print("Ungueltige Eingabe. Bitte '1' oder '2' eingeben.")
+
+    print("\n" + "="*60)
+    print("PRODUKT-EXPORT: Wähle das Ausgabeformat")
+    print("="*60)
+    print("1 - Markdown (.md)")
+    print("2 - CSV (.csv)")
+    print("="*60)
+
+    while True:
+        format_choice = input("\nDeine Wahl (1 oder 2): ").strip()
+        if format_choice in ['1', '2']:
+            break
+        print("Ungueltige Eingabe. Bitte '1' oder '2' eingeben.")
+
+    return field_choice, format_choice
+
+def create_product_summary(fields_to_use, output_suffix='', output_format='md'):
     """
     Extrahiert Produktinformationen aus einer großen JSON-Datei und schreibt sie
-    in eine kompakte Markdown-Tabelle.
-    
+    in eine Markdown-Tabelle oder CSV-Datei.
+
     Args:
         fields_to_use: Liste der zu extrahierenden Felder
         output_suffix: Suffix für den Ausgabe-Dateinamen
+        output_format: 'md' für Markdown oder 'csv' für CSV
     """
-    # Output-Pfad anpassen wenn Suffix vorhanden
-    output_path = OUTPUT_MD_PATH
+    # Output-Pfad erstellen
+    extension = '.csv' if output_format == 'csv' else '.md'
     if output_suffix:
-        base, ext = os.path.splitext(OUTPUT_MD_PATH)
-        output_path = f"{base}_{output_suffix}{ext}"
-    
-    print(f"\n🔄 Starte die Produktextraktion aus '{INPUT_JSON_PATH}'...")
+        output_path = f"{OUTPUT_BASE_PATH}_{output_suffix}{extension}"
+    else:
+        output_path = f"{OUTPUT_BASE_PATH}{extension}"
+
+    print(f"\nStarte die Produktextraktion aus '{INPUT_JSON_PATH}'...")
 
     # --- 1. JSON-Daten lesen ---
     try:
         with open(INPUT_JSON_PATH, 'r', encoding='utf-8') as f:
             products = json.load(f)
     except FileNotFoundError:
-        print(f"❌ FEHLER: Eingabedatei unter '{INPUT_JSON_PATH}' nicht gefunden.")
+        print(f"FEHLER: Eingabedatei unter '{INPUT_JSON_PATH}' nicht gefunden.")
         print("Bitte stelle sicher, dass die Datei 'content/06_products.json' existiert.")
         return
     except json.JSONDecodeError:
-        print(f"❌ FEHLER: JSON aus '{INPUT_JSON_PATH}' konnte nicht verarbeitet werden. Bitte überprüfe das Dateiformat.")
+        print(f"FEHLER: JSON aus '{INPUT_JSON_PATH}' konnte nicht verarbeitet werden. Bitte überprüfe das Dateiformat.")
         return
 
     if not isinstance(products, list):
-        print("❌ FEHLER: Die JSON-Datei sollte eine Liste von Produkten enthalten (ein Array von Objekten).")
+        print("FEHLER: Die JSON-Datei sollte eine Liste von Produkten enthalten (ein Array von Objekten).")
         return
 
-    print(f"✅ {len(products)} Produkte in der JSON-Datei gefunden.")
+    print(f"{len(products)} Produkte in der JSON-Datei gefunden.")
 
-    # --- 2. Markdown-Tabelle schreiben ---
+    # --- 2. Daten schreiben ---
     try:
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write("# Product Summary\n\n")
-            
-            # Tabellenkopf schreiben
-            header_titles = [field.replace('_', ' ').title() for field in fields_to_use]
-            f.write(f"| {' | '.join(header_titles)} |\n")
-
-            # Trennlinie schreiben
-            separators = ['---'] * len(fields_to_use)
-            f.write(f"| {' | '.join(separators)} |\n")
-
-            # Tabellenzeilen schreiben
-            for product in sorted(products, key=lambda p: p.get('product_code', '')):
-                row_values = []
-                for field in fields_to_use:
-                    raw_value = product.get(field)
-                    formatted_value = format_field_value(field, raw_value)
-                    cleaned_value = clean_for_md_table(formatted_value)
-                    row_values.append(cleaned_value)
-                
-                f.write(f"| {' | '.join(row_values)} |\n")
+        if output_format == 'csv':
+            _write_csv(output_path, fields_to_use, products)
+        else:
+            _write_markdown(output_path, fields_to_use, products)
 
     except IOError as e:
-        print(f"❌ FEHLER: Konnte nicht in die Ausgabedatei '{output_path}' schreiben.\n{e}")
+        print(f"FEHLER: Konnte nicht in die Ausgabedatei '{output_path}' schreiben.\n{e}")
         return
 
-    print(f"\n✅ Erfolg! Die Produktübersicht wurde unter '{output_path}' erstellt.")
+    print(f"\nErfolg! Die Produktuebersicht wurde unter '{output_path}' erstellt.")
+
+
+def _write_markdown(output_path, fields_to_use, products):
+    """Schreibt die Produktdaten als Markdown-Tabelle."""
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write("# Product Summary\n\n")
+
+        # Tabellenkopf schreiben
+        header_titles = [field.replace('_', ' ').title() for field in fields_to_use]
+        f.write(f"| {' | '.join(header_titles)} |\n")
+
+        # Trennlinie schreiben
+        separators = ['---'] * len(fields_to_use)
+        f.write(f"| {' | '.join(separators)} |\n")
+
+        # Tabellenzeilen schreiben
+        for product in sorted(products, key=lambda p: p.get('product_code', '')):
+            row_values = []
+            for field in fields_to_use:
+                raw_value = product.get(field)
+                formatted_value = format_field_value(field, raw_value)
+                cleaned_value = clean_for_md_table(formatted_value)
+                row_values.append(cleaned_value)
+
+            f.write(f"| {' | '.join(row_values)} |\n")
+
+
+def _write_csv(output_path, fields_to_use, products):
+    """Schreibt die Produktdaten als CSV-Datei."""
+    with open(output_path, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.writer(f, delimiter=';', quoting=csv.QUOTE_MINIMAL)
+
+        # Header schreiben
+        header_titles = [field.replace('_', ' ').title() for field in fields_to_use]
+        writer.writerow(header_titles)
+
+        # Datenzeilen schreiben
+        for product in sorted(products, key=lambda p: p.get('product_code', '')):
+            row_values = []
+            for field in fields_to_use:
+                raw_value = product.get(field)
+                formatted_value = format_field_value(field, raw_value)
+                # Zeilenumbrüche entfernen für CSV
+                cleaned_value = str(formatted_value).replace('\n', ' ').replace('\r', '')
+                row_values.append(cleaned_value)
+
+            writer.writerow(row_values)
 
 if __name__ == "__main__":
     # User-Auswahl
-    choice = get_user_choice()
-    
-    if choice == '1':
-        print("\n📋 Erstelle Kurzzusammenfassung...")
-        create_product_summary(FIELDS_SHORT, 'short')
+    field_choice, format_choice = get_user_choice()
+
+    # Format bestimmen
+    output_format = 'csv' if format_choice == '2' else 'md'
+    format_name = 'CSV' if output_format == 'csv' else 'Markdown'
+
+    if field_choice == '1':
+        print(f"\nErstelle Kurzzusammenfassung als {format_name}...")
+        create_product_summary(FIELDS_SHORT, 'short', output_format)
     else:
-        print("\n📊 Erstelle umfassende Tech-Dev Tabelle...")
-        create_product_summary(FIELDS_COMPREHENSIVE, 'comprehensive')
-    
+        print(f"\nErstelle umfassende Tech-Dev Tabelle als {format_name}...")
+        create_product_summary(FIELDS_COMPREHENSIVE, 'comprehensive', output_format)
+
     print("\n" + "="*60)
-    print("✨ Export abgeschlossen!")
+    print("Export abgeschlossen!")
     print("="*60 + "\n")
