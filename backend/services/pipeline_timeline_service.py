@@ -18,31 +18,86 @@ from ..models import Project, DrugSubstance, Modality, db
 class PipelineTimelineService:
     """Service for generating pipeline timeline data based on configuration."""
 
+    # Colors for molecule types / modalities (includes common alternative spellings)
     MODALITY_COLORS = {
+        # Small molecules
         'Small Molecule': '#3498db',
+        'Small molecule': '#3498db',
+        'small molecule': '#3498db',
+        'NCE': '#3498db',
+        # Monoclonal antibodies
         'Monoclonal Antibody': '#2ecc71',
+        'mAb': '#2ecc71',
+        'MAb': '#2ecc71',
+        'Antibody': '#2ecc71',
+        # CAR-T
         'CAR-T': '#e74c3c',
+        'CAR-T cell': '#e74c3c',
+        # Cell & Gene Therapy
         'Cell & Gene Therapy': '#9b59b6',
+        'Gene Therapy': '#9b59b6',
+        'Cell Therapy': '#9b59b6',
+        # Viral Vector
         'Viral Vector': '#f39c12',
+        'AAV': '#f39c12',
+        # Peptides
         'Peptides': '#1abc9c',
+        'Peptide': '#1abc9c',
+        # Oligonucleotides
         'Oligonucleotides': '#34495e',
+        'Oligonucleotide': '#34495e',
+        'ASO': '#34495e',
+        'siRNA': '#34495e',
+        # ADC
         'ADC': '#e67e22',
+        'Antibody-Drug Conjugate': '#e67e22',
+        # Bispecific
         'Bispecific Antibody': '#16a085',
+        'Bispecific': '#16a085',
+        # Vaccine
         'Vaccine': '#27ae60',
+        # Default
         'Default': '#95a5a6'
     }
 
     MODALITY_ICONS = {
+        # Small molecules
         'Small Molecule': 'fas fa-pills',
+        'Small molecule': 'fas fa-pills',
+        'small molecule': 'fas fa-pills',
+        'NCE': 'fas fa-pills',
+        # Monoclonal antibodies
         'Monoclonal Antibody': 'fas fa-syringe',
+        'mAb': 'fas fa-syringe',
+        'MAb': 'fas fa-syringe',
+        'Antibody': 'fas fa-syringe',
+        # CAR-T
         'CAR-T': 'fas fa-dna',
+        'CAR-T cell': 'fas fa-dna',
+        # Cell & Gene Therapy
         'Cell & Gene Therapy': 'fas fa-microscope',
+        'Gene Therapy': 'fas fa-microscope',
+        'Cell Therapy': 'fas fa-microscope',
+        # Viral Vector
         'Viral Vector': 'fas fa-virus',
+        'AAV': 'fas fa-virus',
+        # Peptides
         'Peptides': 'fas fa-link',
+        'Peptide': 'fas fa-link',
+        # Oligonucleotides
         'Oligonucleotides': 'fas fa-chain',
+        'Oligonucleotide': 'fas fa-chain',
+        'ASO': 'fas fa-chain',
+        'siRNA': 'fas fa-chain',
+        # ADC
         'ADC': 'fas fa-flask',
+        'Antibody-Drug Conjugate': 'fas fa-flask',
+        # Bispecific
         'Bispecific Antibody': 'fas fa-project-diagram',
+        'Bispecific': 'fas fa-project-diagram',
+        # Vaccine
         'Vaccine': 'fas fa-shield-virus',
+        # Default
         'Default': 'fas fa-capsules'
     }
 
@@ -53,11 +108,20 @@ class PipelineTimelineService:
         """Initialize the service with a database session."""
         self.db = db_session or db.session
 
-    def _get_project_modality(self, project: Project) -> Optional[Modality]:
-        """Get modality from project's first drug substance."""
+    def _get_project_modality_name(self, project: Project) -> Optional[str]:
+        """Get modality name from project's first drug substance.
+
+        Uses molecule_type field as the primary source (e.g., 'Small molecule', 'mAb').
+        Falls back to modality relationship if molecule_type is not set.
+        """
         if project.drug_substances:
             ds = project.drug_substances[0]
-            return ds.modality if hasattr(ds, 'modality') else None
+            # Primary: use molecule_type field
+            if ds.molecule_type:
+                return ds.molecule_type
+            # Fallback: use modality relationship
+            if hasattr(ds, 'modality') and ds.modality:
+                return ds.modality.modality_name
         return None
 
     def _get_launch_year(self, project: Project) -> Optional[int]:
@@ -269,8 +333,7 @@ class PipelineTimelineService:
 
         for project in projects:
             if grouping_mode == 'modality':
-                modality = self._get_project_modality(project)
-                key = modality.modality_name if modality else 'Unknown'
+                key = self._get_project_modality_name(project) or 'Unknown'
             elif grouping_mode == 'therapeutic_area':
                 key = project.indication or 'Unknown'
             elif grouping_mode == 'project_type':
@@ -326,7 +389,7 @@ class PipelineTimelineService:
                 continue
 
             visual = self._get_visual_encoding(project, config)
-            modality = self._get_project_modality(project)
+            modality_name = self._get_project_modality_name(project)
 
             elements.append({
                 'id': project.id,
@@ -339,7 +402,7 @@ class PipelineTimelineService:
                     'project_type': project.project_type,
                     'expected_launch_year': self._get_launch_year(project),
                     'status': project.status,
-                    'modality_name': modality.modality_name if modality else None,
+                    'modality_name': modality_name,
                     'is_nme': self._is_nme(project),
                     'is_line_extension': self._is_line_extension(project),
                 },
@@ -371,21 +434,19 @@ class PipelineTimelineService:
             if position not in timeline_units:
                 continue
 
-            modality = self._get_project_modality(project)
-            modality_name = modality.modality_name if modality else 'Unknown'
+            modality_name = self._get_project_modality_name(project) or 'Unknown'
             key = (position, modality_name)
 
             if key not in aggregated:
                 aggregated[key] = {
                     'projects': [],
-                    'modality': modality
+                    'modality_name': modality_name
                 }
 
             aggregated[key]['projects'].append(project)
 
         elements = []
         for (position, modality_name), data in aggregated.items():
-            modality = data['modality']
             project_count = len(data['projects'])
 
             visual = {
@@ -395,11 +456,10 @@ class PipelineTimelineService:
             }
 
             elements.append({
-                'id': f"modality_{modality.modality_id if modality else 0}_{position}",
+                'id': f"modality_{modality_name}_{position}",
                 'type': 'modality',
                 'position': position,
                 'data': {
-                    'modality_id': modality.modality_id if modality else None,
                     'modality_name': modality_name,
                     'project_count': project_count,
                     'project_ids': [p.id for p in data['projects']]
@@ -454,10 +514,9 @@ class PipelineTimelineService:
             Dictionary with 'color', 'icon', and 'label' keys
         """
         color_by = config.get('colorBy', 'modality')
-        modality = self._get_project_modality(project)
+        modality_name = self._get_project_modality_name(project)
 
-        if color_by == 'modality' and modality:
-            modality_name = modality.modality_name
+        if color_by == 'modality' and modality_name:
             color = self.MODALITY_COLORS.get(modality_name, self.MODALITY_COLORS['Default'])
             icon = self.MODALITY_ICONS.get(modality_name, self.MODALITY_ICONS['Default'])
         else:
