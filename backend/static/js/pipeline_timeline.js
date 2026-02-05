@@ -11,6 +11,8 @@ class PipelineTimeline {
         this.config = this.getDefaultConfig();
         this.data = null;
         this.savedViews = this.loadSavedViews();
+        this.zoomLevel = 1;
+        this.zoomLevels = [0.5, 0.75, 1, 1.25, 1.5];
     }
 
     /**
@@ -18,7 +20,7 @@ class PipelineTimeline {
      */
     getDefaultConfig() {
         return {
-            timelineMode: 'year',
+            dateSource: 'launch',
             yearSegmentPreset: 'individual',
             customSegments: [],
             groupingMode: 'modality',
@@ -33,7 +35,7 @@ class PipelineTimeline {
      */
     getCurrentConfig() {
         const config = {
-            timelineMode: document.getElementById('timelineMode').value,
+            dateSource: document.getElementById('dateSource').value,
             groupingMode: document.getElementById('groupingMode').value,
             elementType: document.getElementById('elementType').value,
             colorBy: 'modality',
@@ -43,14 +45,23 @@ class PipelineTimeline {
         config.filters.include_line_extensions = document.getElementById('includeLineExtensions').checked;
         config.filters.exclude_discontinued = document.getElementById('excludeDiscontinued').checked;
 
-        if (config.timelineMode === 'year') {
-            const activePreset = document.querySelector('[data-preset].active');
-            config.yearSegmentPreset = activePreset ? 
-                activePreset.dataset.preset : 'individual';
-            
-            if (config.yearSegmentPreset === 'custom') {
-                config.customSegments = this.getCustomSegments();
-            }
+        // Year range filters
+        const yearFrom = document.getElementById('yearFrom');
+        const yearTo = document.getElementById('yearTo');
+        if (yearFrom && yearFrom.value) {
+            config.filters.year_from = parseInt(yearFrom.value, 10);
+        }
+        if (yearTo && yearTo.value) {
+            config.filters.year_to = parseInt(yearTo.value, 10);
+        }
+
+        // Year segment configuration (always year-based now with different milestones)
+        const activePreset = document.querySelector('[data-preset].active');
+        config.yearSegmentPreset = activePreset ?
+            activePreset.dataset.preset : 'individual';
+
+        if (config.yearSegmentPreset === 'custom') {
+            config.customSegments = this.getCustomSegments();
         }
 
         return config;
@@ -315,22 +326,14 @@ class PipelineTimeline {
      * Determines if an element belongs in a specific timeline unit
      */
     isElementInTimelineUnit(element, unit) {
-        if (this.config.timelineMode === 'phase') {
-            return element.position === unit;
-        } else {
-            return element.position === unit;
-        }
+        return element.position === unit;
     }
 
     /**
      * Formats a timeline unit for display
      */
     formatTimelineUnit(unit) {
-        if (this.config.timelineMode === 'phase') {
-            return unit;
-        } else {
-            return unit.toString();
-        }
+        return unit.toString();
     }
 
     /**
@@ -395,7 +398,7 @@ class PipelineTimeline {
         const type = element.dataset.type;
         const id = element.dataset.id;
 
-        if (type === 'product') {
+        if (type === 'project') {
             window.location.href = `/projects/${id}`;
         } else if (type === 'modality') {
             window.location.href = `/modalities`;
@@ -521,13 +524,11 @@ class PipelineTimeline {
      * Applies a configuration to the UI controls
      */
     applyConfigToUI(config) {
-        document.getElementById('timelineMode').value = config.timelineMode;
+        document.getElementById('dateSource').value = config.dateSource || 'launch';
         document.getElementById('groupingMode').value = config.groupingMode;
         document.getElementById('elementType').value = config.elementType;
 
-        document.getElementById('timelineMode').dispatchEvent(new Event('change'));
-
-        if (config.timelineMode === 'year' && config.yearSegmentPreset) {
+        if (config.yearSegmentPreset) {
             const presetBtn = document.querySelector(`[data-preset="${config.yearSegmentPreset}"]`);
             if (presetBtn) {
                 document.querySelectorAll('[data-preset]').forEach(b => b.classList.remove('active'));
@@ -606,10 +607,44 @@ class PipelineTimeline {
         const R = (num >> 16) - amt;
         const G = (num >> 8 & 0x00FF) - amt;
         const B = (num & 0x0000FF) - amt;
-        return '#' + (0x1000000 + 
+        return '#' + (0x1000000 +
             (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
             (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
             (B < 255 ? (B < 1 ? 0 : B) : 255)
         ).toString(16).slice(1);
+    }
+
+    /**
+     * Zoom in the timeline
+     */
+    zoomIn() {
+        const currentIndex = this.zoomLevels.indexOf(this.zoomLevel);
+        if (currentIndex < this.zoomLevels.length - 1) {
+            this.setZoom(this.zoomLevels[currentIndex + 1]);
+        }
+    }
+
+    /**
+     * Zoom out the timeline
+     */
+    zoomOut() {
+        const currentIndex = this.zoomLevels.indexOf(this.zoomLevel);
+        if (currentIndex > 0) {
+            this.setZoom(this.zoomLevels[currentIndex - 1]);
+        }
+    }
+
+    /**
+     * Set zoom level
+     */
+    setZoom(level) {
+        this.zoomLevel = level;
+        document.documentElement.style.setProperty('--timeline-zoom', level);
+
+        // Update zoom display
+        const zoomDisplay = document.getElementById('zoomLevel');
+        if (zoomDisplay) {
+            zoomDisplay.textContent = Math.round(level * 100) + '%';
+        }
     }
 }

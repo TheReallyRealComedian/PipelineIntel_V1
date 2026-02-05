@@ -20,12 +20,18 @@
     <!-- Configuration Controls Panel -->
     <div class="controls-panel">
         <div class="row g-3">
-            <!-- Timeline Configuration -->
+            <!-- Timeline Configuration: Position by Milestone -->
             <div class="col-md-4">
-                <label class="form-label fw-bold">Timeline Axis</label>
-                <select id="timelineMode" class="form-select">
-                    <option value="year" selected>By Year</option>
-                    <option value="phase">By Development Phase</option>
+                <label class="form-label fw-bold">Position by Milestone</label>
+                <select id="dateSource" class="form-select">
+                    <option value="launch" selected>Launch</option>
+                    <option value="submission">Submission</option>
+                    <option value="rofd">RoFD (Release of Full Development)</option>
+                    <option value="sod">SOD (Start of Development)</option>
+                    <option value="dsmm3">DSMM3</option>
+                    <option value="dsmm4">DSMM4</option>
+                    <option value="dpmm3">DPMM3</option>
+                    <option value="dpmm4">DPMM4</option>
                 </select>
             </div>
 
@@ -59,27 +65,37 @@
                     </label>
                     <div class="row g-3">
                         <!-- Filter: Include Line-Extensions -->
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="includeLineExtensions" checked>
+                                <input class="form-check-input" type="checkbox" id="includeLineExtensions">
                                 <label class="form-check-label" for="includeLineExtensions">
                                     <strong>Include Line-Extensions</strong>
                                     <br>
-                                    <small class="text-muted">Show additional launches for existing products</small>
+                                    <small class="text-muted">Show additional launches</small>
                                 </label>
                             </div>
                         </div>
-                        
+
                         <!-- Filter: Hide Discontinued -->
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="excludeDiscontinued" checked>
                                 <label class="form-check-label" for="excludeDiscontinued">
-                                    <strong>Hide Discontinued Projects</strong>
+                                    <strong>Hide Discontinued</strong>
                                     <br>
-                                    <small class="text-muted">Show only active pipeline products</small>
+                                    <small class="text-muted">Show only active</small>
                                 </label>
                             </div>
+                        </div>
+
+                        <!-- Filter: Year Range -->
+                        <div class="col-md-3">
+                            <label class="form-label"><strong>Von Jahr</strong></label>
+                            <input type="number" class="form-control form-control-sm" id="yearFrom" placeholder="z.B. 2025" min="2020" max="2060">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label"><strong>Bis Jahr</strong></label>
+                            <input type="number" class="form-control form-control-sm" id="yearTo" placeholder="z.B. 2045" min="2020" max="2060">
                         </div>
                     </div>
                     
@@ -128,6 +144,21 @@
         </div>
     </div>
 
+    <!-- Zoom Controls -->
+    <div class="zoom-controls d-flex align-items-center gap-2 mb-2">
+        <span class="text-muted small">Zoom:</span>
+        <button id="zoomOut" class="btn btn-sm btn-outline-secondary" title="Verkleinern">
+            <i class="fas fa-minus"></i>
+        </button>
+        <span id="zoomLevel" class="badge bg-light text-dark">100%</span>
+        <button id="zoomIn" class="btn btn-sm btn-outline-secondary" title="Vergrößern">
+            <i class="fas fa-plus"></i>
+        </button>
+        <button id="zoomReset" class="btn btn-sm btn-outline-secondary ms-1" title="Zurücksetzen">
+            <i class="fas fa-undo"></i>
+        </button>
+    </div>
+
     <!-- Timeline Visualization Container -->
     <div class="timeline-container">
         <div id="timelineVisualization">
@@ -160,12 +191,6 @@
         
         document.getElementById('loadView').addEventListener('click', function() {
             window.pipelineTimeline.showLoadViewDialog();
-        });
-
-        // Toggle year segment config visibility
-        document.getElementById('timelineMode').addEventListener('change', function(e) {
-            document.getElementById('yearSegmentConfig').style.display = 
-                e.target.value === 'year' ? 'block' : 'none';
         });
 
         // Year segment preset buttons
@@ -218,6 +243,23 @@
         // Initialize filter status
         updateFilterStatus();
         // ========== END: NEW FILTER LISTENERS ==========
+
+        // ========== ZOOM CONTROLS ==========
+        document.getElementById('zoomIn').addEventListener('click', function() {
+            window.pipelineTimeline.zoomIn();
+        });
+
+        document.getElementById('zoomOut').addEventListener('click', function() {
+            window.pipelineTimeline.zoomOut();
+        });
+
+        document.getElementById('zoomReset').addEventListener('click', function() {
+            window.pipelineTimeline.setZoom(1);
+        });
+        // ========== END: ZOOM CONTROLS ==========
+
+        // ========== AUTO-LOAD ON PAGE LOAD ==========
+        window.pipelineTimeline.loadAndRender();
     });
 </script>
 {% endblock %}

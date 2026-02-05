@@ -1009,7 +1009,7 @@ class Project(db.Model):
     dsmm4 = Column(Date, nullable=True)  # Drug Substance Manufacturing Milestone 4
     dpmm3 = Column(Date, nullable=True)  # Drug Product Manufacturing Milestone 3
     dpmm4 = Column(Date, nullable=True)  # Drug Product Manufacturing Milestone 4
-    rofd = Column(Date, nullable=True)  # Ready for Filing Decision
+    rofd = Column(Date, nullable=True)  # Release of Full Development
     submission = Column(Date, nullable=True)  # Regulatory Submission
     launch = Column(Date, nullable=True)  # Market Launch
 

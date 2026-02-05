@@ -21,15 +21,15 @@ def pipeline_timeline():
 def get_pipeline_timeline_data():
     """
     API endpoint to fetch timeline data based on configuration.
-    
+
     Expects JSON body with configuration:
     {
-        "timelineMode": "year",
+        "dateSource": "launch",
         "groupingMode": "modality",
         "elementType": "product",
         ...
     }
-    
+
     Returns structured timeline data.
     """
     try:

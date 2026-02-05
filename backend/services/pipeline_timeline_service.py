@@ -75,10 +75,38 @@ class PipelineTimelineService:
                 return ds.modality.modality_name
         return None
 
+    # Mapping of dateSource values to Project model field names
+    MILESTONE_FIELD_MAP = {
+        'launch': 'launch',
+        'submission': 'submission',
+        'rofd': 'rofd',
+        'sod': 'sod',
+        'dsmm3': 'dsmm3',
+        'dsmm4': 'dsmm4',
+        'dpmm3': 'dpmm3',
+        'dpmm4': 'dpmm4',
+    }
+
     def _get_launch_year(self, project: Project) -> Optional[int]:
         """Extract year from project's launch date."""
         if project.launch:
             return project.launch.year
+        return None
+
+    def _get_milestone_year(self, project: Project, date_source: str) -> Optional[int]:
+        """Extract year from any milestone field.
+
+        Args:
+            project: Project object
+            date_source: Milestone field name (launch, submission, sod, rofd, dsmm3, etc.)
+
+        Returns:
+            Year as integer or None if field is empty
+        """
+        field_name = self.MILESTONE_FIELD_MAP.get(date_source, 'launch')
+        date_value = getattr(project, field_name, None)
+        if date_value:
+            return date_value.year
         return None
 
     def _is_nme(self, project: Project) -> bool:
@@ -95,7 +123,7 @@ class PipelineTimelineService:
 
         Args:
             config: Configuration dictionary with keys:
-                - timelineMode: 'year' | 'phase'
+                - dateSource: Milestone to position by ('launch', 'sod', 'rofd', 'submission', etc.)
                 - yearSegmentPreset: 'individual' | 'grouped' | 'custom'
                 - customSegments: List of segment definitions
                 - groupingMode: 'modality' | 'therapeutic_area' | 'project_type' | 'none'
@@ -112,7 +140,10 @@ class PipelineTimelineService:
                 "metadata": {...}
             }
         """
-        projects = self._fetch_projects(config.get('filters', {}))
+        # Include dateSource in filters for _fetch_projects
+        filters = config.get('filters', {}).copy()
+        filters['date_source'] = config.get('dateSource', 'launch')
+        projects = self._fetch_projects(filters)
         timeline_units = self._build_timeline_units(config, projects)
 
         if config.get('groupingMode') == 'none':
@@ -142,6 +173,7 @@ class PipelineTimelineService:
                 - modality_id: Filter by modality (via drug_substances)
                 - include_line_extensions: If False, only returns NMEs (default: True)
                 - exclude_discontinued: If True, excludes discontinued projects (default: True)
+                - date_source: Milestone field to use for filtering (launch, sod, rofd, etc.)
 
         Returns:
             List of Project objects
@@ -149,6 +181,11 @@ class PipelineTimelineService:
         query = self.db.query(Project).options(
             joinedload(Project.drug_substances).joinedload(DrugSubstance.modality)
         )
+
+        # Get the dynamic date field based on date_source
+        date_source = filters.get('date_source', 'launch')
+        field_name = self.MILESTONE_FIELD_MAP.get(date_source, 'launch')
+        date_field = getattr(Project, field_name)
 
         # Filter: Only NMEs (exclude line extensions)
         include_line_extensions = filters.get('include_line_extensions', True)
@@ -177,8 +214,18 @@ class PipelineTimelineService:
             else:
                 query = query.filter(Project.project_type == types)
 
-        # Only include projects with a launch date
-        query = query.filter(Project.launch.isnot(None))
+        # Only include projects with a date for the selected milestone
+        query = query.filter(date_field.isnot(None))
+
+        # Filter: By year range (using the selected date source)
+        if filters.get('year_from'):
+            query = query.filter(
+                func.extract('year', date_field) >= filters['year_from']
+            )
+        if filters.get('year_to'):
+            query = query.filter(
+                func.extract('year', date_field) <= filters['year_to']
+            )
 
         return query.order_by(Project.name).all()
 
@@ -200,27 +247,30 @@ class PipelineTimelineService:
         Builds year-based timeline units.
 
         Args:
-            config: Configuration with yearSegmentPreset and customSegments
+            config: Configuration with yearSegmentPreset, customSegments, and dateSource
             projects: List of projects to determine year range
 
         Returns:
             List of year or year-range labels
         """
         preset = config.get('yearSegmentPreset', 'individual')
+        date_source = config.get('dateSource', 'launch')
 
         if preset == 'custom' and config.get('customSegments'):
             return [seg['label'] for seg in config['customSegments']]
 
-        years = [self._get_launch_year(p) for p in projects]
+        years = [self._get_milestone_year(p, date_source) for p in projects]
         years = [y for y in years if y is not None]
 
         if not years:
             current_year = datetime.now().year
-            years = list(range(current_year, current_year + 10))
+            min_year = current_year
+            max_year = 2045
         else:
             min_year = min(years)
-            max_year = max(years)
-            years = list(range(min_year, max_year + 1))
+            max_year = max(max(years), 2045)  # Mindestens bis 2045
+
+        years = list(range(min_year, max_year + 1))
 
         if preset == 'individual':
             return [str(year) for year in years]
@@ -427,12 +477,13 @@ class PipelineTimelineService:
 
         Args:
             project: Project object
-            config: Configuration dictionary
+            config: Configuration dictionary with dateSource
 
         Returns:
             Timeline position string
         """
-        year = self._get_launch_year(project)
+        date_source = config.get('dateSource', 'launch')
+        year = self._get_milestone_year(project, date_source)
         if not year:
             return None
 

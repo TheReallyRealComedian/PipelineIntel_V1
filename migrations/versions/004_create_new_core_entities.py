@@ -129,7 +129,7 @@ def upgrade():
         sa.Column('dsmm4', sa.Date(), nullable=True),    # DS Manufacturing Milestone 4
         sa.Column('dpmm3', sa.Date(), nullable=True),    # DP Manufacturing Milestone 3
         sa.Column('dpmm4', sa.Date(), nullable=True),    # DP Manufacturing Milestone 4
-        sa.Column('rofd', sa.Date(), nullable=True),     # Ready for Filing Decision
+        sa.Column('rofd', sa.Date(), nullable=True),     # Release of Full Development
         sa.Column('submission', sa.Date(), nullable=True),  # Regulatory Submission
         sa.Column('launch', sa.Date(), nullable=True),   # Market Launch
 
