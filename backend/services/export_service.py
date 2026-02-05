@@ -134,6 +134,14 @@ def export_full_database():
             return obj.isoformat()
         return str(obj)
 
+    # Add metadata for version tracking
+    all_data['_meta'] = {
+        'version': '2.0',
+        'exported_at': datetime.datetime.now().isoformat(),
+        'schema': 'projects_based',
+        'tables': list(TABLE_IMPORT_ORDER),
+    }
+
     for table_name in TABLE_IMPORT_ORDER:
         table = db.metadata.tables.get(table_name)
         if table is None or table_name == 'flask_sessions':

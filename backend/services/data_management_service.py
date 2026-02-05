@@ -94,8 +94,9 @@ def import_full_database(file_stream):
     try:
         data = json.load(file_stream)
 
-        if not all(key in data for key in ['users', 'products', 'modalities']):
-             return False, "Invalid backup file format. Essential tables are missing."
+        # Validate essential tables - 'products' is optional for new-style backups
+        if not all(key in data for key in ['users', 'modalities']):
+             return False, "Invalid backup file format. Essential tables (users, modalities) are missing."
 
         db.session.execute(text('SET session_replication_role = replica;'))
 
@@ -108,6 +109,10 @@ def import_full_database(file_stream):
         for table_name in TABLE_IMPORT_ORDER:
             if table_name in data and data[table_name]:
                 table_data = data[table_name]
+
+                # Convert ISO date strings back to date objects
+                table_data = _convert_date_fields_for_import(table_name, table_data)
+
                 model_class = MODEL_MAP.get(table_name)
 
                 if model_class:
@@ -683,6 +688,32 @@ def _parse_date(date_string):
                 continue
 
     return None
+
+
+def _convert_date_fields_for_import(table_name, records):
+    """
+    Convert ISO date strings back to date objects for database import.
+    This is necessary because JSON serialization converts dates to strings.
+    """
+    DATE_FIELDS = {
+        'drug_substances': ['last_refresh'],
+        'drug_products': ['last_refresh'],
+        'projects': ['sod', 'dsmm3', 'dsmm4', 'dpmm3', 'dpmm4', 'rofd', 'submission', 'launch'],
+        'products': ['submission_date', 'approval_date', 'ppq_completion_date'],
+        'product_timelines': ['planned_date', 'actual_date'],
+        'product_regulatory_filings': ['submission_date', 'approval_date'],
+        'product_manufacturing_suppliers': ['start_date', 'qualification_date'],
+    }
+
+    if table_name not in DATE_FIELDS:
+        return records
+
+    for record in records:
+        for field in DATE_FIELDS[table_name]:
+            if field in record and record[field]:
+                record[field] = _parse_date(record[field])
+
+    return records
 
 
 def _enhanced_field_comparison(existing_obj, json_data, fields_to_check):
