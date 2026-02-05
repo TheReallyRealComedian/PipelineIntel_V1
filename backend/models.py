@@ -1001,6 +1001,7 @@ class Project(db.Model):
     indication = Column(String(255), nullable=True)  # "IPF", "SSc", "NSCLC"
     project_type = Column(String(50), nullable=True)  # "NME", "NI", "PMO", "PED"
     administration = Column(String(100), nullable=True)  # "Oral", "Subcutaneous", "Intravenous"
+    status = Column(String(50), nullable=True, default='active')  # 'active', 'discontinued', 'on_hold'
 
     # Timeline Milestones (Core Data!)
     sod = Column(Date, nullable=True)  # Start of Development
