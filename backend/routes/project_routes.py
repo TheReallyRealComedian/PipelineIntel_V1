@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required
 
 from ..services import project_service
-from ..models import Project
+from ..models import Project, DrugSubstance, DrugProduct
 
 project_routes = Blueprint(
     'projects',
@@ -38,7 +38,17 @@ def view_project(project_id):
     project = project_service.get_project_by_id(project_id)
     if not project:
         return render_template('errors/404.html', message="Project not found"), 404
-    return render_template('projects/detail.html', title=project.name, project=project)
+
+    # Get all drug substances and products for linking dropdowns
+    all_drug_substances = DrugSubstance.query.order_by(DrugSubstance.code).all()
+    all_drug_products = DrugProduct.query.order_by(DrugProduct.code).all()
+
+    return render_template('projects/detail.html',
+        title=project.name,
+        project=project,
+        all_drug_substances=all_drug_substances,
+        all_drug_products=all_drug_products
+    )
 
 
 @project_routes.route('/timeline')

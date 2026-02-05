@@ -396,7 +396,7 @@ class PipelineTimeline {
         const id = element.dataset.id;
 
         if (type === 'product') {
-            window.location.href = `/products/${id}`;
+            window.location.href = `/projects/${id}`;
         } else if (type === 'modality') {
             window.location.href = `/modalities`;
         }

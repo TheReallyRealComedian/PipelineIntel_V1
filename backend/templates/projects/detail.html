@@ -138,26 +138,34 @@
         <div class="col-md-4">
             <!-- Related Drug Substances -->
             <div class="card mb-4">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title mb-0">
                         <i class="fas fa-flask"></i>
                         Drug Substances ({{ project.drug_substances|length }})
                     </h3>
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#linkDrugSubstanceModal">
+                        <i class="fas fa-plus"></i>
+                    </button>
                 </div>
                 <div class="card-body">
                     {% if project.drug_substances %}
                     <ul class="list-group list-group-flush">
                         {% for ds in project.drug_substances %}
-                        <li class="list-group-item">
-                            <a href="{{ url_for('drug_substances.view_drug_substance', ds_id=ds.id) }}">
-                                {{ ds.code }}
-                            </a>
-                            {% if ds.inn %}
-                            <small class="text-muted d-block">{{ ds.inn }}</small>
-                            {% endif %}
-                            {% if ds.molecule_type %}
-                            <span class="badge bg-secondary">{{ ds.molecule_type }}</span>
-                            {% endif %}
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div>
+                                <a href="{{ url_for('drug_substances.view_drug_substance', ds_id=ds.id) }}">
+                                    {{ ds.code }}
+                                </a>
+                                {% if ds.inn %}
+                                <small class="text-muted d-block">{{ ds.inn }}</small>
+                                {% endif %}
+                                {% if ds.molecule_type %}
+                                <span class="badge bg-secondary">{{ ds.molecule_type }}</span>
+                                {% endif %}
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="unlinkDrugSubstance({{ ds.id }})" title="Unlink">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </li>
                         {% endfor %}
                     </ul>
@@ -169,23 +177,31 @@
 
             <!-- Related Drug Products -->
             <div class="card mb-4">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title mb-0">
                         <i class="fas fa-pills"></i>
                         Drug Products ({{ project.drug_products|length }})
                     </h3>
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#linkDrugProductModal">
+                        <i class="fas fa-plus"></i>
+                    </button>
                 </div>
                 <div class="card-body">
                     {% if project.drug_products %}
                     <ul class="list-group list-group-flush">
                         {% for dp in project.drug_products %}
-                        <li class="list-group-item">
-                            <a href="{{ url_for('drug_products.view_drug_product', dp_id=dp.id) }}">
-                                {{ dp.code }}
-                            </a>
-                            {% if dp.pharm_form %}
-                            <small class="text-muted d-block">{{ dp.pharm_form }}</small>
-                            {% endif %}
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div>
+                                <a href="{{ url_for('drug_products.view_drug_product', dp_id=dp.id) }}">
+                                    {{ dp.code }}
+                                </a>
+                                {% if dp.pharm_form %}
+                                <small class="text-muted d-block">{{ dp.pharm_form }}</small>
+                                {% endif %}
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="unlinkDrugProduct({{ dp.id }})" title="Unlink">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </li>
                         {% endfor %}
                     </ul>
@@ -197,4 +213,127 @@
         </div>
     </div>
 </div>
+
+<!-- Link Drug Substance Modal -->
+<div class="modal fade" id="linkDrugSubstanceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-flask"></i> Link Drug Substance</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <select id="dsSelect" class="form-select">
+                    <option value="">-- Select Drug Substance --</option>
+                    {% for ds in all_drug_substances %}
+                    <option value="{{ ds.id }}">{{ ds.code }}{% if ds.inn %} - {{ ds.inn }}{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="linkDrugSubstance()">
+                    <i class="fas fa-link"></i> Link
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Link Drug Product Modal -->
+<div class="modal fade" id="linkDrugProductModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-pills"></i> Link Drug Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <select id="dpSelect" class="form-select">
+                    <option value="">-- Select Drug Product --</option>
+                    {% for dp in all_drug_products %}
+                    <option value="{{ dp.id }}">{{ dp.code }}{% if dp.pharm_form %} - {{ dp.pharm_form }}{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="linkDrugProduct()">
+                    <i class="fas fa-link"></i> Link
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const projectId = {{ project.id }};
+
+function getCSRFToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+
+function linkDrugSubstance() {
+    const dsId = document.getElementById('dsSelect').value;
+    if (!dsId) return alert('Please select a Drug Substance');
+
+    fetch(`/api/projects/${projectId}/link-drug-substance/${dsId}`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCSRFToken() }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert(data.message || 'Error linking');
+    })
+    .catch(e => alert('Error: ' + e));
+}
+
+function unlinkDrugSubstance(dsId) {
+    if (!confirm('Remove this Drug Substance from the project?')) return;
+
+    fetch(`/api/projects/${projectId}/unlink-drug-substance/${dsId}`, {
+        method: 'DELETE',
+        headers: { 'X-CSRFToken': getCSRFToken() }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert(data.message || 'Error unlinking');
+    })
+    .catch(e => alert('Error: ' + e));
+}
+
+function linkDrugProduct() {
+    const dpId = document.getElementById('dpSelect').value;
+    if (!dpId) return alert('Please select a Drug Product');
+
+    fetch(`/api/projects/${projectId}/link-drug-product/${dpId}`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCSRFToken() }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert(data.message || 'Error linking');
+    })
+    .catch(e => alert('Error: ' + e));
+}
+
+function unlinkDrugProduct(dpId) {
+    if (!confirm('Remove this Drug Product from the project?')) return;
+
+    fetch(`/api/projects/${projectId}/unlink-drug-product/${dpId}`, {
+        method: 'DELETE',
+        headers: { 'X-CSRFToken': getCSRFToken() }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert(data.message || 'Error unlinking');
+    })
+    .catch(e => alert('Error: ' + e));
+}
+</script>
 {% endblock %}

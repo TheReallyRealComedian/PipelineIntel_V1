@@ -29,11 +29,13 @@ def get_project_by_name(name: str):
 def get_project_table_context(requested_columns_str: str = None):
     """Prepares the full context needed for rendering the dynamic projects table."""
     DEFAULT_COLUMNS = ['name', 'indication', 'project_type', 'administration', 'launch']
+    EXTENDED_FIELDS = ['drug_substance_count', 'drug_product_count', 'drug_substance_codes', 'drug_product_codes']
 
     all_fields = Project.get_all_fields()
+    valid_fields = all_fields + EXTENDED_FIELDS
 
     if requested_columns_str:
-        selected_fields = [col for col in requested_columns_str.split(',') if col in all_fields]
+        selected_fields = [col for col in requested_columns_str.split(',') if col in valid_fields]
     else:
         selected_fields = DEFAULT_COLUMNS
 
@@ -50,14 +52,16 @@ def get_project_table_context(requested_columns_str: str = None):
         for date_field in ['sod', 'dsmm3', 'dsmm4', 'dpmm3', 'dpmm4', 'rofd', 'submission', 'launch']:
             if p_dict.get(date_field):
                 p_dict[date_field] = p_dict[date_field].isoformat()
-        # Add related counts
+        # Add related counts and codes
         p_dict['drug_substance_count'] = len(p.drug_substances)
         p_dict['drug_product_count'] = len(p.drug_products)
+        p_dict['drug_substance_codes'] = ', '.join([ds.code for ds in p.drug_substances]) or '-'
+        p_dict['drug_product_codes'] = ', '.join([dp.code for dp in p.drug_products]) or '-'
         project_dicts.append(p_dict)
 
     return {
         'items': project_dicts,
-        'all_fields': all_fields + ['drug_substance_count', 'drug_product_count'],
+        'all_fields': all_fields + EXTENDED_FIELDS,
         'selected_fields': selected_fields,
         'entity_type': 'project',
         'entity_plural': 'projects',
