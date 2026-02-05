@@ -71,6 +71,12 @@ def get_project_table_context(requested_columns_str: str = None):
 
 def inline_update_project_field(project_id: int, field: str, value):
     """Updates a single field on a project."""
+    # These are computed display fields, not editable columns
+    NON_EDITABLE_FIELDS = ['drug_substance_count', 'drug_product_count', 'drug_substance_codes', 'drug_product_codes']
+
+    if field in NON_EDITABLE_FIELDS:
+        return None, f"Field '{field}' is read-only. Edit relationships on the project detail page."
+
     project = Project.query.get(project_id)
     if not project:
         return None, "Project not found."
