@@ -15,7 +15,10 @@ from ..models import (
     Modality, ProcessStage, ProductTimeline, ProductRegulatoryFiling,
     ProductManufacturingSupplier, User, LLMSettings, ProcessTemplate, TemplateStage,
     ModalityRequirement, ProductRequirement, EntityCapability, ProductProcessOverride,
-    ManufacturingCapability
+    ManufacturingCapability,
+    # New Core Entities
+    DrugSubstance, DrugProduct, Project,
+    project_drug_substances, project_drug_products, drug_substance_drug_products
 )
 
 # This order is critical. Parents must be inserted before children.
@@ -28,6 +31,15 @@ TABLE_IMPORT_ORDER = [
     'internal_facilities',
     'external_partners',
     'process_templates',
+    # New Core Entities (insert before products for parallel existence)
+    'drug_substances',
+    'drug_products',
+    'projects',
+    # Junction tables for new entities
+    'project_drug_substances',
+    'project_drug_products',
+    'drug_substance_drug_products',
+    # Legacy tables (will be removed in future migration)
     'products',
     'indications',
     'value_steps',  # Must come before challenges (FK reference)
@@ -50,6 +62,12 @@ MODEL_MAP = {
     'internal_facilities': InternalFacility,
     'external_partners': ExternalPartner,
     'process_templates': ProcessTemplate,
+    # New Core Entities
+    'drug_substances': DrugSubstance,
+    'drug_products': DrugProduct,
+    'projects': Project,
+    # Junction tables are handled via db.metadata.tables (not ORM models)
+    # Legacy tables
     'products': Product,
     'indications': Indication,
     'value_steps': ValueStep,

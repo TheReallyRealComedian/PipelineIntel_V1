@@ -30,6 +30,10 @@ import backend.routes.process_template_routes as process_template_routes_mod
 import backend.routes.capability_routes as capability_routes_mod
 import backend.routes.llm_routes as llm_routes_mod
 import backend.routes.translation_routes as translation_routes_mod
+# New Core Entity Routes
+import backend.routes.drug_substance_routes as drug_substance_routes_mod
+import backend.routes.drug_product_routes as drug_product_routes_mod
+import backend.routes.project_routes as project_routes_mod
 
 
 # Add to existing bundles
@@ -105,6 +109,14 @@ def create_app(init_session=True):
     app.register_blueprint(capability_routes_mod.capability_routes)
     app.register_blueprint(llm_routes_mod.llm_routes)
     app.register_blueprint(translation_routes_mod.translation_bp)
+
+    # New Core Entity Blueprints
+    app.register_blueprint(drug_substance_routes_mod.drug_substance_routes)
+    app.register_blueprint(drug_substance_routes_mod.drug_substance_api_bp)
+    app.register_blueprint(drug_product_routes_mod.drug_product_routes)
+    app.register_blueprint(drug_product_routes_mod.drug_product_api_bp)
+    app.register_blueprint(project_routes_mod.project_routes)
+    app.register_blueprint(project_routes_mod.project_api_bp)
 
     @app.route('/')
     def index():

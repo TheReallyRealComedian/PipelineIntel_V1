@@ -831,3 +831,220 @@ class LLMSettings(db.Model):
     apollo_client_id = Column(String(255), nullable=True)
     apollo_client_secret = Column(String(length=255), nullable=True)
     user = relationship("User", back_populates="llm_settings")
+
+
+# =============================================================================
+# NEW CORE ENTITIES: Drug Substances, Drug Products, Projects
+# =============================================================================
+
+# Junction Tables (defined first for relationship references)
+project_drug_substances = Table(
+    'project_drug_substances', db.metadata,
+    Column('project_id', Integer, ForeignKey('projects.id', ondelete='CASCADE'), primary_key=True),
+    Column('drug_substance_id', Integer, ForeignKey('drug_substances.id', ondelete='CASCADE'), primary_key=True)
+)
+
+project_drug_products = Table(
+    'project_drug_products', db.metadata,
+    Column('project_id', Integer, ForeignKey('projects.id', ondelete='CASCADE'), primary_key=True),
+    Column('drug_product_id', Integer, ForeignKey('drug_products.id', ondelete='CASCADE'), primary_key=True)
+)
+
+drug_substance_drug_products = Table(
+    'drug_substance_drug_products', db.metadata,
+    Column('drug_substance_id', Integer, ForeignKey('drug_substances.id', ondelete='CASCADE'), primary_key=True),
+    Column('drug_product_id', Integer, ForeignKey('drug_products.id', ondelete='CASCADE'), primary_key=True)
+)
+
+
+class DrugSubstance(db.Model):
+    """
+    Drug Substance (API) - Active Pharmaceutical Ingredient
+    Represents the chemical/biological compound before formulation.
+    """
+    __tablename__ = 'drug_substances'
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(50), unique=True, nullable=False, index=True)  # e.g., "BI 1015550"
+    inn = Column(String(255), nullable=True)  # International Nonproprietary Name, e.g., "Nerandomilast"
+
+    # Technical Information
+    molecule_type = Column(String(100), nullable=True)  # "Small molecule", "mAb", etc.
+    mechanism_of_action = Column(Text, nullable=True)  # "PDE4B inh."
+    technology = Column(Text, nullable=True)  # "Standard chemical synthetic"
+    storage_conditions = Column(String(255), nullable=True)  # "Room Temp.", "2-8°C"
+    shelf_life = Column(String(100), nullable=True)
+
+    # Site Information
+    development_approach = Column(String(100), nullable=True)  # "INTERNAL", "CDMO"
+    development_site = Column(String(255), nullable=True)  # "BI Biberach"
+    launch_site = Column(String(255), nullable=True)  # "BI Ingelheim"
+    release_site = Column(String(255), nullable=True)
+    routine_site = Column(String(255), nullable=True)
+
+    # Volume Information
+    demand_category = Column(String(50), nullable=True)  # "Low", "Medium", "High"
+    demand_launch_year = Column(String(50), nullable=True)  # "32kg"
+    demand_peak_year = Column(String(50), nullable=True)  # "2200kg"
+    peak_demand_range = Column(String(100), nullable=True)  # "1000-10000kg"
+
+    # Meta
+    commercial = Column(String(50), nullable=True)  # "Make", "Buy"
+    status = Column(String(50), nullable=True)  # "Ongoing", "Completed"
+    type = Column(String(50), nullable=True)  # "NCE", "Biosimilar"
+    biel = Column(String(10), nullable=True)  # "3A"
+    d_and_dl_ops = Column(Text, nullable=True)  # Responsible person
+    last_refresh = Column(Date, nullable=True)
+
+    # Optional: Link to Modality
+    modality_id = Column(Integer, ForeignKey('modalities.modality_id'), nullable=True)
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    modality = relationship("Modality", backref="drug_substances")
+    projects = relationship(
+        "Project",
+        secondary=project_drug_substances,
+        back_populates="drug_substances"
+    )
+    drug_products = relationship(
+        "DrugProduct",
+        secondary=drug_substance_drug_products,
+        back_populates="drug_substances"
+    )
+
+    @classmethod
+    def get_all_fields(cls):
+        """Returns a list of all column names for the model."""
+        return [
+            c.key for c in inspect(cls).attrs
+            if c.key not in ['modality', 'projects', 'drug_products']
+        ]
+
+
+class DrugProduct(db.Model):
+    """
+    Drug Product - The formulated pharmaceutical product
+    Represents the final dosage form (tablet, injection, etc.)
+    """
+    __tablename__ = 'drug_products'
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(100), unique=True, nullable=False, index=True)  # e.g., "Nerandomilast-FC_Tablet"
+
+    # Technical Information
+    pharm_form = Column(String(100), nullable=True)  # "FC_Tablet", "Sf_Injection"
+    technology = Column(Text, nullable=True)  # "Fluid Bed Granulation", "Sterile Filling"
+    classification = Column(String(50), nullable=True)  # "Solid", "Liquid"
+    storage_conditions = Column(String(255), nullable=True)
+    transport_conditions = Column(String(255), nullable=True)
+    holding_time = Column(String(100), nullable=True)
+
+    # Site Information
+    development_approach = Column(String(100), nullable=True)  # "INTERNAL", "CDMO", "EACD"
+    development_site = Column(String(255), nullable=True)
+    launch_site = Column(String(255), nullable=True)
+    release_site = Column(String(255), nullable=True)
+    routine_site = Column(String(255), nullable=True)
+
+    # Volume Information
+    demand_category = Column(String(50), nullable=True)  # "Very Low", "Low", "Medium", "High"
+    demand_launch_year = Column(String(50), nullable=True)
+    demand_peak_year = Column(String(50), nullable=True)
+    peak_demand_range = Column(String(100), nullable=True)  # "<1 mio PCS", "1-10 mio PCS"
+
+    # Meta
+    commercial = Column(String(50), nullable=True)  # "Make", "Buy", "Make (strat)"
+    strategic_technology = Column(Text, nullable=True)  # "Film-coated tablet", "Device for s.c. injection"
+    d_and_dl_ops = Column(Text, nullable=True)
+    last_refresh = Column(Date, nullable=True)
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    projects = relationship(
+        "Project",
+        secondary=project_drug_products,
+        back_populates="drug_products"
+    )
+    drug_substances = relationship(
+        "DrugSubstance",
+        secondary=drug_substance_drug_products,
+        back_populates="drug_products"
+    )
+
+    @classmethod
+    def get_all_fields(cls):
+        """Returns a list of all column names for the model."""
+        return [
+            c.key for c in inspect(cls).attrs
+            if c.key not in ['projects', 'drug_substances']
+        ]
+
+
+class Project(db.Model):
+    """
+    Project - Links Drug Substances and Drug Products with Timeline
+    Represents a development project with its milestones.
+    """
+    __tablename__ = 'projects'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(200), unique=True, nullable=False, index=True)  # e.g., "Nerandomilast (IPF)"
+
+    # Project Information
+    indication = Column(String(255), nullable=True)  # "IPF", "SSc", "NSCLC"
+    project_type = Column(String(50), nullable=True)  # "NME", "NI", "PMO", "PED"
+    administration = Column(String(100), nullable=True)  # "Oral", "Subcutaneous", "Intravenous"
+
+    # Timeline Milestones (Core Data!)
+    sod = Column(Date, nullable=True)  # Start of Development
+    dsmm3 = Column(Date, nullable=True)  # Drug Substance Manufacturing Milestone 3
+    dsmm4 = Column(Date, nullable=True)  # Drug Substance Manufacturing Milestone 4
+    dpmm3 = Column(Date, nullable=True)  # Drug Product Manufacturing Milestone 3
+    dpmm4 = Column(Date, nullable=True)  # Drug Product Manufacturing Milestone 4
+    rofd = Column(Date, nullable=True)  # Ready for Filing Decision
+    submission = Column(Date, nullable=True)  # Regulatory Submission
+    launch = Column(Date, nullable=True)  # Market Launch
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    drug_substances = relationship(
+        "DrugSubstance",
+        secondary=project_drug_substances,
+        back_populates="projects"
+    )
+    drug_products = relationship(
+        "DrugProduct",
+        secondary=project_drug_products,
+        back_populates="projects"
+    )
+
+    @classmethod
+    def get_all_fields(cls):
+        """Returns a list of all column names for the model."""
+        return [
+            c.key for c in inspect(cls).attrs
+            if c.key not in ['drug_substances', 'drug_products']
+        ]
+
+    def get_timeline_dict(self):
+        """Returns timeline milestones as a dictionary."""
+        return {
+            'sod': self.sod.isoformat() if self.sod else None,
+            'dsmm3': self.dsmm3.isoformat() if self.dsmm3 else None,
+            'dsmm4': self.dsmm4.isoformat() if self.dsmm4 else None,
+            'dpmm3': self.dpmm3.isoformat() if self.dpmm3 else None,
+            'dpmm4': self.dpmm4.isoformat() if self.dpmm4 else None,
+            'rofd': self.rofd.isoformat() if self.rofd else None,
+            'submission': self.submission.isoformat() if self.submission else None,
+            'launch': self.launch.isoformat() if self.launch else None,
+        }
