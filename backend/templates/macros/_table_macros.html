@@ -115,9 +115,9 @@
                 </td>
                 {% endif %}
                 
-                {# Regular columns - computed fields are read-only #}
+                {# Regular columns - only count fields are read-only #}
                 {% for field in selected_fields %}
-                    {% set is_readonly = field.endswith('_count') or field.endswith('_codes') %}
+                    {% set is_readonly = field.endswith('_count') %}
                     <td class="{{ 'text-muted' if is_readonly else 'editable-cell' }}" data-field="{{ field }}"{% if is_readonly %} title="Read-only"{% endif %}>{{ item[field] or '' }}</td>
                 {% endfor %}
             </tr>

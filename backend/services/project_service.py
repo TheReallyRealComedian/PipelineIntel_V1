@@ -71,15 +71,21 @@ def get_project_table_context(requested_columns_str: str = None):
 
 def inline_update_project_field(project_id: int, field: str, value):
     """Updates a single field on a project."""
-    # These are computed display fields, not editable columns
-    NON_EDITABLE_FIELDS = ['drug_substance_count', 'drug_product_count', 'drug_substance_codes', 'drug_product_codes']
-
-    if field in NON_EDITABLE_FIELDS:
-        return None, f"Field '{field}' is read-only. Edit relationships on the project detail page."
+    # Count fields are truly read-only
+    if field in ['drug_substance_count', 'drug_product_count']:
+        return None, f"Field '{field}' is read-only (computed from relationships)."
 
     project = Project.query.get(project_id)
     if not project:
         return None, "Project not found."
+
+    # Handle drug_substance_codes - updates the M:N relationship
+    if field == 'drug_substance_codes':
+        return _update_project_drug_substances(project, value)
+
+    # Handle drug_product_codes - updates the M:N relationship
+    if field == 'drug_product_codes':
+        return _update_project_drug_products(project, value)
 
     if not hasattr(project, field):
         return None, f"Field '{field}' does not exist."
@@ -108,6 +114,60 @@ def inline_update_project_field(project_id: int, field: str, value):
     setattr(project, field, value)
     db.session.commit()
     return project, "Project updated."
+
+
+def _update_project_drug_substances(project, codes_str):
+    """Update project's drug substances based on comma-separated codes."""
+    # Parse the codes
+    if not codes_str or codes_str.strip() == '-':
+        codes = []
+    else:
+        codes = [c.strip() for c in codes_str.split(',') if c.strip()]
+
+    # Find all matching drug substances
+    new_substances = []
+    not_found = []
+    for code in codes:
+        ds = DrugSubstance.query.filter_by(code=code).first()
+        if ds:
+            new_substances.append(ds)
+        else:
+            not_found.append(code)
+
+    if not_found:
+        return None, f"Drug substance(s) not found: {', '.join(not_found)}"
+
+    # Replace the relationship
+    project.drug_substances = new_substances
+    db.session.commit()
+    return project, f"Linked {len(new_substances)} drug substance(s)."
+
+
+def _update_project_drug_products(project, codes_str):
+    """Update project's drug products based on comma-separated codes."""
+    # Parse the codes
+    if not codes_str or codes_str.strip() == '-':
+        codes = []
+    else:
+        codes = [c.strip() for c in codes_str.split(',') if c.strip()]
+
+    # Find all matching drug products
+    new_products = []
+    not_found = []
+    for code in codes:
+        dp = DrugProduct.query.filter_by(code=code).first()
+        if dp:
+            new_products.append(dp)
+        else:
+            not_found.append(code)
+
+    if not_found:
+        return None, f"Drug product(s) not found: {', '.join(not_found)}"
+
+    # Replace the relationship
+    project.drug_products = new_products
+    db.session.commit()
+    return project, f"Linked {len(new_products)} drug product(s)."
 
 
 def create_project(data: dict):
