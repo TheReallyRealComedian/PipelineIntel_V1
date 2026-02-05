@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="drug-product-detail-page">
+    <!-- Breadcrumb and Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('drug_products.list_drug_products') }}">Drug Products</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ drug_product.code }}</li>
+                </ol>
+            </nav>
+            <h1>{{ drug_product.code }}</h1>
+            <p class="text-color-light">
+                {% if drug_product.pharm_form %}
+                <span class="badge bg-secondary">{{ drug_product.pharm_form }}</span>
+                {% endif %}
+                {% if drug_product.classification %}
+                <span class="badge bg-info ms-2">{{ drug_product.classification }}</span>
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <a href="{{ url_for('drug_products.list_drug_products') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Drug Products
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Info Column -->
+        <div class="col-md-8">
+            <!-- Basic Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-pills text-primary"></i>
+                        Drug Product Information
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th scope="row" style="width: 30%;">Code</th>
+                                <td><strong>{{ drug_product.code }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Pharmaceutical Form</th>
+                                <td>{{ drug_product.pharm_form or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Technology</th>
+                                <td>{{ drug_product.technology or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Classification</th>
+                                <td>{{ drug_product.classification or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Storage Conditions</th>
+                                <td>{{ drug_product.storage_conditions or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Transport Conditions</th>
+                                <td>{{ drug_product.transport_conditions or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Holding Time</th>
+                                <td>{{ drug_product.holding_time or '-' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Site Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-building text-primary"></i>
+                        Site Information
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th scope="row" style="width: 30%;">Development Approach</th>
+                                <td>
+                                    {% if drug_product.development_approach %}
+                                    <span class="badge bg-info">{{ drug_product.development_approach }}</span>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Development Site</th>
+                                <td>{{ drug_product.development_site or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Launch Site</th>
+                                <td>{{ drug_product.launch_site or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Release Site</th>
+                                <td>{{ drug_product.release_site or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Routine Site</th>
+                                <td>{{ drug_product.routine_site or '-' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Demand Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-chart-bar text-primary"></i>
+                        Volume / Demand
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th scope="row" style="width: 30%;">Demand Category</th>
+                                <td>
+                                    {% if drug_product.demand_category %}
+                                    <span class="badge bg-warning text-dark">{{ drug_product.demand_category }}</span>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Demand Launch Year</th>
+                                <td>{{ drug_product.demand_launch_year or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Demand Peak Year</th>
+                                <td>{{ drug_product.demand_peak_year or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Peak Demand Range</th>
+                                <td>{{ drug_product.peak_demand_range or '-' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Meta Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Meta</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th>Commercial</th>
+                                <td>{{ drug_product.commercial or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Strategic Technology</th>
+                                <td>{{ drug_product.strategic_technology or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>D&DL Ops</th>
+                                <td>{{ drug_product.d_and_dl_ops or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Last Refresh</th>
+                                <td>{{ drug_product.last_refresh or '-' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Related Drug Substances -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-flask"></i>
+                        Drug Substances ({{ drug_product.drug_substances|length }})
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if drug_product.drug_substances %}
+                    <ul class="list-group list-group-flush">
+                        {% for ds in drug_product.drug_substances %}
+                        <li class="list-group-item">
+                            <a href="{{ url_for('drug_substances.view_drug_substance', ds_id=ds.id) }}">
+                                {{ ds.code }}
+                            </a>
+                            {% if ds.inn %}
+                            <small class="text-muted d-block">{{ ds.inn }}</small>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted mb-0"><em>No drug substances linked.</em></p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Related Projects -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-project-diagram"></i>
+                        Related Projects ({{ drug_product.projects|length }})
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if drug_product.projects %}
+                    <ul class="list-group list-group-flush">
+                        {% for project in drug_product.projects %}
+                        <li class="list-group-item">
+                            <a href="{{ url_for('projects.view_project', project_id=project.id) }}">
+                                {{ project.name }}
+                            </a>
+                            {% if project.indication %}
+                            <small class="text-muted d-block">{{ project.indication }}</small>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted mb-0"><em>No projects linked.</em></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

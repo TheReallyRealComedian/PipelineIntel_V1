@@ -47,6 +47,16 @@
                         <li class="{% if request.blueprint == 'facilities' %}active{% endif %}">
                             <a href="{{ url_for('facilities.list_facilities') }}"><i class="fas fa-industry"></i> <span class="sidebar-text">Facilities & Partners</span></a>
                         </li>
+                    <li class="sidebar-menu-header">NEW CORE ENTITIES</li>
+                        <li class="{% if request.blueprint == 'drug_substances' %}active{% endif %}">
+                            <a href="{{ url_for('drug_substances.list_drug_substances') }}"><i class="fas fa-flask"></i> <span class="sidebar-text">Drug Substances</span></a>
+                        </li>
+                        <li class="{% if request.blueprint == 'drug_products' %}active{% endif %}">
+                            <a href="{{ url_for('drug_products.list_drug_products') }}"><i class="fas fa-capsules"></i> <span class="sidebar-text">Drug Products</span></a>
+                        </li>
+                        <li class="{% if request.blueprint == 'projects' %}active{% endif %}">
+                            <a href="{{ url_for('projects.list_projects') }}"><i class="fas fa-project-diagram"></i> <span class="sidebar-text">Projects</span></a>
+                        </li>
                     <li class="sidebar-menu-header">DATA</li>
                         <li class="{% if request.blueprint == 'data_management' %}active{% endif %}">
                             <a href="{{ url_for('data_management.data_management_page') }}"><i class="fas fa-database"></i> <span class="sidebar-text">Data Management</span></a>

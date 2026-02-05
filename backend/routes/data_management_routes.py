@@ -15,19 +15,41 @@ from ..services.data_management_service import (
     _resolve_foreign_keys_for_process_stage,
     _resolve_foreign_keys_for_product,
     _resolve_foreign_keys_for_challenge,
-    _resolve_foreign_keys_for_challenge_modality_detail
+    _resolve_foreign_keys_for_challenge_modality_detail,
+    _resolve_foreign_keys_for_drug_substance,
+    _resolve_foreign_keys_for_drug_product,
+    _resolve_foreign_keys_for_project
 )
 
 from ..models import (
     Product, Indication, Challenge, ChallengeModalityDetail,
     ProductSupplyChain, Modality, ManufacturingCapability, InternalFacility,
     ExternalPartner, ProcessStage, ProductTimeline, ProductRegulatoryFiling,
-    ProductManufacturingSupplier, ProcessTemplate, TemplateStage
+    ProductManufacturingSupplier, ProcessTemplate, TemplateStage,
+    # New Core Entities
+    DrugSubstance, DrugProduct, Project
 )
 
 data_management_bp = Blueprint('data_management', __name__, url_prefix='/data-management')
 
 ENTITY_MAP = {
+    # New Core Entities
+    'drug_substances': {
+        'model': DrugSubstance,
+        'key': 'code',
+        'resolver': _resolve_foreign_keys_for_drug_substance
+    },
+    'drug_products': {
+        'model': DrugProduct,
+        'key': 'code',
+        'resolver': _resolve_foreign_keys_for_drug_product
+    },
+    'projects': {
+        'model': Project,
+        'key': 'name',
+        'resolver': _resolve_foreign_keys_for_project
+    },
+    # Legacy Entities
     'products': {
         'model': Product,
         'key': 'product_code',

@@ -26,10 +26,15 @@
                     <label for="entity_type" class="form-label">Select Data Type:</label>
                     <select name="entity_type" id="entity_type" class="form-select" required>
                         <option value="">-- Choose data type --</option>
-                        <optgroup label="Core Entities">
-                            <option value="products">Products</option>
-                            <option value="indications">Indications</option>
-                            <option value="supply_chain">Product Supply Chain</option>
+                        <optgroup label="New Core Entities">
+                            <option value="drug_substances">Drug Substances (API)</option>
+                            <option value="drug_products">Drug Products</option>
+                            <option value="projects">Projects</option>
+                        </optgroup>
+                        <optgroup label="Legacy Entities">
+                            <option value="products">Products (Legacy)</option>
+                            <option value="indications">Indications (Legacy)</option>
+                            <option value="supply_chain">Product Supply Chain (Legacy)</option>
                         </optgroup>
                         <optgroup label="Manufacturing Schema">
                             <option value="modalities">Modalities</option>

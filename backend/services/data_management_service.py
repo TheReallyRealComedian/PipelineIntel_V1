@@ -528,6 +528,106 @@ def _resolve_foreign_keys_for_challenge_modality_detail(item, existing_details):
     return resolved
 
 
+def _resolve_foreign_keys_for_drug_substance(item, existing_substances):
+    """
+    Resolves foreign key references in a DrugSubstance record.
+    Converts modality_name → modality_id.
+    """
+    from ..models import Modality
+
+    resolved = item.copy()
+    warnings = []
+
+    # Resolve modality_name → modality_id
+    if 'modality_name' in resolved:
+        modality_name = resolved.pop('modality_name')
+        if modality_name:
+            modality = Modality.query.filter_by(modality_name=modality_name).first()
+            if modality:
+                resolved['modality_id'] = modality.modality_id
+                print(f"  ✓ Resolved modality '{modality_name}' → ID {modality.modality_id}")
+            else:
+                warnings.append(f"Modality '{modality_name}' not found")
+
+    if warnings:
+        resolved['_warnings'] = warnings
+
+    return resolved
+
+
+def _resolve_foreign_keys_for_drug_product(item, existing_products):
+    """
+    Resolves foreign key references in a DrugProduct record.
+    DrugProduct has no direct FKs, but we handle M:N links via drug_substance_codes.
+    """
+    resolved = item.copy()
+    warnings = []
+
+    # Note: drug_substance_codes for M:N linking should be handled after creation
+    # We just preserve them here for the finalize step
+    if 'drug_substance_codes' in resolved:
+        # Keep for post-processing, but flag if substances don't exist
+        from ..models import DrugSubstance
+        codes = resolved.get('drug_substance_codes', [])
+        if isinstance(codes, str):
+            codes = [c.strip() for c in codes.split(',') if c.strip()]
+        for code in codes:
+            ds = DrugSubstance.query.filter_by(code=code).first()
+            if not ds:
+                warnings.append(f"DrugSubstance '{code}' not found for linking")
+
+    if warnings:
+        resolved['_warnings'] = warnings
+
+    return resolved
+
+
+def _resolve_foreign_keys_for_project(item, existing_projects):
+    """
+    Resolves foreign key references in a Project record.
+    Project has no direct FKs, but we handle M:N links via drug_substance_codes and drug_product_codes.
+    Also parses date fields.
+    """
+    resolved = item.copy()
+    warnings = []
+
+    # Parse date fields
+    date_fields = ['sod', 'dsmm3', 'dsmm4', 'dpmm3', 'dpmm4', 'rofd', 'submission', 'launch']
+    for field in date_fields:
+        if field in resolved and resolved[field]:
+            parsed = _parse_date(resolved[field])
+            if parsed:
+                resolved[field] = parsed
+            else:
+                warnings.append(f"Could not parse date for '{field}': {resolved[field]}")
+
+    # Validate M:N links (don't resolve yet, just validate)
+    if 'drug_substance_codes' in resolved:
+        from ..models import DrugSubstance
+        codes = resolved.get('drug_substance_codes', [])
+        if isinstance(codes, str):
+            codes = [c.strip() for c in codes.split(',') if c.strip()]
+        for code in codes:
+            ds = DrugSubstance.query.filter_by(code=code).first()
+            if not ds:
+                warnings.append(f"DrugSubstance '{code}' not found for linking")
+
+    if 'drug_product_codes' in resolved:
+        from ..models import DrugProduct
+        codes = resolved.get('drug_product_codes', [])
+        if isinstance(codes, str):
+            codes = [c.strip() for c in codes.split(',') if c.strip()]
+        for code in codes:
+            dp = DrugProduct.query.filter_by(code=code).first()
+            if not dp:
+                warnings.append(f"DrugProduct '{code}' not found for linking")
+
+    if warnings:
+        resolved['_warnings'] = warnings
+
+    return resolved
+
+
 def _parse_date(date_string):
     """Helper function to parse date strings into date objects."""
     if not date_string:

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "macros/_table_macros.html" import render_column_selector, render_dynamic_table %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="drug-substances-page">
+    <h1>{{ title }}</h1>
+    <p class="text-color-light mb-4">A filterable and editable list of all Drug Substances (API - Active Pharmaceutical Ingredients).</p>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="card-title mb-0">All Drug Substances</h2>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if items %}
+                {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
+                {{ render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural) }}
+            {% else %}
+                <p class="text-muted text-center p-4">
+                    <em>No drug substances found. Import data via the <a href="{{ url_for('data_management.data_management_page') }}">Data Management</a> page.</em>
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="project-detail-page">
+    <!-- Breadcrumb and Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('projects.list_projects') }}">Projects</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
+                </ol>
+            </nav>
+            <h1>{{ project.name }}</h1>
+            <p class="text-color-light">
+                {% if project.indication %}
+                <span class="badge bg-secondary">{{ project.indication }}</span>
+                {% endif %}
+                {% if project.project_type %}
+                <span class="badge bg-info ms-2">{{ project.project_type }}</span>
+                {% endif %}
+                {% if project.administration %}
+                <span class="badge bg-primary ms-2">{{ project.administration }}</span>
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <a href="{{ url_for('projects.list_projects') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Projects
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Info Column -->
+        <div class="col-md-8">
+            <!-- Basic Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-project-diagram text-primary"></i>
+                        Project Information
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th scope="row" style="width: 30%;">Name</th>
+                                <td><strong>{{ project.name }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Indication</th>
+                                <td>{{ project.indication or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Project Type</th>
+                                <td>{{ project.project_type or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Administration</th>
+                                <td>{{ project.administration or '-' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Timeline Milestones -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-calendar-alt text-primary"></i>
+                        Timeline Milestones
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Milestone</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>SOD</strong></td>
+                                <td>{{ project.sod or '-' }}</td>
+                                <td class="text-muted">Start of Development</td>
+                            </tr>
+                            <tr>
+                                <td><strong>DSMM3</strong></td>
+                                <td>{{ project.dsmm3 or '-' }}</td>
+                                <td class="text-muted">Drug Substance Manufacturing Milestone 3</td>
+                            </tr>
+                            <tr>
+                                <td><strong>DSMM4</strong></td>
+                                <td>{{ project.dsmm4 or '-' }}</td>
+                                <td class="text-muted">Drug Substance Manufacturing Milestone 4</td>
+                            </tr>
+                            <tr>
+                                <td><strong>DPMM3</strong></td>
+                                <td>{{ project.dpmm3 or '-' }}</td>
+                                <td class="text-muted">Drug Product Manufacturing Milestone 3</td>
+                            </tr>
+                            <tr>
+                                <td><strong>DPMM4</strong></td>
+                                <td>{{ project.dpmm4 or '-' }}</td>
+                                <td class="text-muted">Drug Product Manufacturing Milestone 4</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ROFD</strong></td>
+                                <td>{{ project.rofd or '-' }}</td>
+                                <td class="text-muted">Ready for Filing Decision</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Submission</strong></td>
+                                <td>{{ project.submission or '-' }}</td>
+                                <td class="text-muted">Regulatory Submission</td>
+                            </tr>
+                            <tr class="table-primary">
+                                <td><strong>Launch</strong></td>
+                                <td><strong>{{ project.launch or '-' }}</strong></td>
+                                <td class="text-muted">Market Launch</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Related Drug Substances -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-flask"></i>
+                        Drug Substances ({{ project.drug_substances|length }})
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if project.drug_substances %}
+                    <ul class="list-group list-group-flush">
+                        {% for ds in project.drug_substances %}
+                        <li class="list-group-item">
+                            <a href="{{ url_for('drug_substances.view_drug_substance', ds_id=ds.id) }}">
+                                {{ ds.code }}
+                            </a>
+                            {% if ds.inn %}
+                            <small class="text-muted d-block">{{ ds.inn }}</small>
+                            {% endif %}
+                            {% if ds.molecule_type %}
+                            <span class="badge bg-secondary">{{ ds.molecule_type }}</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted mb-0"><em>No drug substances linked.</em></p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Related Drug Products -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-pills"></i>
+                        Drug Products ({{ project.drug_products|length }})
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if project.drug_products %}
+                    <ul class="list-group list-group-flush">
+                        {% for dp in project.drug_products %}
+                        <li class="list-group-item">
+                            <a href="{{ url_for('drug_products.view_drug_product', dp_id=dp.id) }}">
+                                {{ dp.code }}
+                            </a>
+                            {% if dp.pharm_form %}
+                            <small class="text-muted d-block">{{ dp.pharm_form }}</small>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted mb-0"><em>No drug products linked.</em></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

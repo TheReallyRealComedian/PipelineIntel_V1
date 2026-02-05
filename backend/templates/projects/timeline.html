@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="project-timeline-page">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>{{ title }}</h1>
+            <p class="text-color-light">Timeline overview of all projects with milestones.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('projects.list_projects') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-list"></i> View List
+            </a>
+        </div>
+    </div>
+
+    {% if timeline_data %}
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title mb-0">Project Timeline</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Project</th>
+                            <th>Indication</th>
+                            <th>SOD</th>
+                            <th>DSMM3</th>
+                            <th>DSMM4</th>
+                            <th>DPMM3</th>
+                            <th>DPMM4</th>
+                            <th>ROFD</th>
+                            <th>Submission</th>
+                            <th>Launch</th>
+                            <th>DS</th>
+                            <th>DP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for project in timeline_data %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('projects.view_project', project_id=project.id) }}">
+                                    {{ project.name }}
+                                </a>
+                            </td>
+                            <td>{{ project.indication or '-' }}</td>
+                            <td>{{ project.timeline.sod or '-' }}</td>
+                            <td>{{ project.timeline.dsmm3 or '-' }}</td>
+                            <td>{{ project.timeline.dsmm4 or '-' }}</td>
+                            <td>{{ project.timeline.dpmm3 or '-' }}</td>
+                            <td>{{ project.timeline.dpmm4 or '-' }}</td>
+                            <td>{{ project.timeline.rofd or '-' }}</td>
+                            <td>{{ project.timeline.submission or '-' }}</td>
+                            <td><strong>{{ project.timeline.launch or '-' }}</strong></td>
+                            <td>
+                                {% for ds in project.drug_substances %}
+                                <span class="badge bg-secondary" title="{{ ds.inn or ds.code }}">{{ ds.code }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for dp in project.drug_products %}
+                                <span class="badge bg-info" title="{{ dp.pharm_form or dp.code }}">{{ dp.code[:20] }}{% if dp.code|length > 20 %}...{% endif %}</span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center p-5">
+            <p class="text-muted mb-0">
+                <em>No projects found. Import data via the <a href="{{ url_for('data_management.data_management_page') }}">Data Management</a> page.</em>
+            </p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
