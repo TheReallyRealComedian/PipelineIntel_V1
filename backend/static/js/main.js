@@ -347,8 +347,9 @@
         if (newValue === originalText) { cell.innerHTML = originalHTML; return; }
         cell.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-        const pluralName = entityPlural || (entityType + 's');
-        const apiEndpoint = `/${pluralName}/api/${pluralName}/${entityId}/inline-update`;
+        // Convert snake_case to kebab-case for URL (drug_products → drug-products)
+        const urlPath = (entityPlural || (entityType + 's')).replace(/_/g, '-');
+        const apiEndpoint = `/api/${urlPath}/${entityId}/inline-update`;
 
         fetch(apiEndpoint, {
             method: 'PUT',
