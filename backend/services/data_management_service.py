@@ -628,6 +628,45 @@ def _resolve_foreign_keys_for_project(item, existing_projects):
     return resolved
 
 
+def _link_project_relationships(project, raw_data):
+    """Create M:N links for Project after creation/update."""
+    from ..models import DrugSubstance, DrugProduct
+
+    # Link DrugSubstances
+    ds_codes = raw_data.get('drug_substance_codes', [])
+    if isinstance(ds_codes, str):
+        ds_codes = [c.strip() for c in ds_codes.split(',') if c.strip()]
+
+    for code in ds_codes:
+        ds = DrugSubstance.query.filter_by(code=code).first()
+        if ds and ds not in project.drug_substances:
+            project.drug_substances.append(ds)
+
+    # Link DrugProducts
+    dp_codes = raw_data.get('drug_product_codes', [])
+    if isinstance(dp_codes, str):
+        dp_codes = [c.strip() for c in dp_codes.split(',') if c.strip()]
+
+    for code in dp_codes:
+        dp = DrugProduct.query.filter_by(code=code).first()
+        if dp and dp not in project.drug_products:
+            project.drug_products.append(dp)
+
+
+def _link_drug_product_relationships(drug_product, raw_data):
+    """Create M:N links for DrugProduct after creation/update."""
+    from ..models import DrugSubstance
+
+    ds_codes = raw_data.get('drug_substance_codes', [])
+    if isinstance(ds_codes, str):
+        ds_codes = [c.strip() for c in ds_codes.split(',') if c.strip()]
+
+    for code in ds_codes:
+        ds = DrugSubstance.query.filter_by(code=code).first()
+        if ds and ds not in drug_product.drug_substances:
+            drug_product.drug_substances.append(ds)
+
+
 def _parse_date(date_string):
     """Helper function to parse date strings into date objects."""
     if not date_string:
@@ -959,6 +998,16 @@ Unique Key: {unique_key_field}
 
                 # Commit to allow subsequent items to find this one (important for parent-child relationships)
                 db.session.commit()
+
+                # 4. Post-Processing: Create M:N links for Projects
+                if model_class == Project:
+                    _link_project_relationships(item_to_process, raw_data)
+                    db.session.commit()
+
+                # 5. Post-Processing: Create M:N links for DrugProducts
+                if model_class == DrugProduct:
+                    _link_drug_product_relationships(item_to_process, raw_data)
+                    db.session.commit()
 
                 success_count += 1
                 log_msg = f"  ✓ SUCCESS"

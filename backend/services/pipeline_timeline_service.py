@@ -18,86 +18,37 @@ from ..models import Project, DrugSubstance, Modality, db
 class PipelineTimelineService:
     """Service for generating pipeline timeline data based on configuration."""
 
-    # Colors for molecule types / modalities (includes common alternative spellings)
+    # Colors for molecule types from DrugSubstance.molecule_type field
     MODALITY_COLORS = {
-        # Small molecules
-        'Small Molecule': '#3498db',
-        'Small molecule': '#3498db',
-        'small molecule': '#3498db',
-        'NCE': '#3498db',
-        # Monoclonal antibodies
-        'Monoclonal Antibody': '#2ecc71',
-        'mAb': '#2ecc71',
-        'MAb': '#2ecc71',
-        'Antibody': '#2ecc71',
-        # CAR-T
-        'CAR-T': '#e74c3c',
-        'CAR-T cell': '#e74c3c',
-        # Cell & Gene Therapy
-        'Cell & Gene Therapy': '#9b59b6',
-        'Gene Therapy': '#9b59b6',
-        'Cell Therapy': '#9b59b6',
-        # Viral Vector
-        'Viral Vector': '#f39c12',
-        'AAV': '#f39c12',
-        # Peptides
-        'Peptides': '#1abc9c',
-        'Peptide': '#1abc9c',
-        # Oligonucleotides
-        'Oligonucleotides': '#34495e',
-        'Oligonucleotide': '#34495e',
-        'ASO': '#34495e',
-        'siRNA': '#34495e',
-        # ADC
-        'ADC': '#e67e22',
-        'Antibody-Drug Conjugate': '#e67e22',
-        # Bispecific
-        'Bispecific Antibody': '#16a085',
-        'Bispecific': '#16a085',
-        # Vaccine
-        'Vaccine': '#27ae60',
-        # Default
-        'Default': '#95a5a6'
+        'ADC': '#e67e22',              # Orange
+        'Antibody': '#2ecc71',         # Green
+        'Digital': '#3498db',          # Blue
+        'Gene therapy': '#9b59b6',     # Purple
+        'Live Bacteria': '#1abc9c',    # Turquoise
+        'Oncolytic virus': '#e74c3c',  # Red
+        'Unknown': '#95a5a6',          # Gray
+        'Peptide': '#16a085',          # Dark turquoise
+        'PROTAC': '#f39c12',           # Yellow/Orange
+        'Protein': '#27ae60',          # Dark green
+        'Small molecule': '#3498db',   # Blue
+        'Viral vaccine': '#27ae60',    # Dark green
+        'Default': '#95a5a6'           # Gray
     }
 
+    # Icons for molecule types from DrugSubstance.molecule_type field
     MODALITY_ICONS = {
-        # Small molecules
-        'Small Molecule': 'fas fa-pills',
-        'Small molecule': 'fas fa-pills',
-        'small molecule': 'fas fa-pills',
-        'NCE': 'fas fa-pills',
-        # Monoclonal antibodies
-        'Monoclonal Antibody': 'fas fa-syringe',
-        'mAb': 'fas fa-syringe',
-        'MAb': 'fas fa-syringe',
-        'Antibody': 'fas fa-syringe',
-        # CAR-T
-        'CAR-T': 'fas fa-dna',
-        'CAR-T cell': 'fas fa-dna',
-        # Cell & Gene Therapy
-        'Cell & Gene Therapy': 'fas fa-microscope',
-        'Gene Therapy': 'fas fa-microscope',
-        'Cell Therapy': 'fas fa-microscope',
-        # Viral Vector
-        'Viral Vector': 'fas fa-virus',
-        'AAV': 'fas fa-virus',
-        # Peptides
-        'Peptides': 'fas fa-link',
-        'Peptide': 'fas fa-link',
-        # Oligonucleotides
-        'Oligonucleotides': 'fas fa-chain',
-        'Oligonucleotide': 'fas fa-chain',
-        'ASO': 'fas fa-chain',
-        'siRNA': 'fas fa-chain',
-        # ADC
         'ADC': 'fas fa-flask',
-        'Antibody-Drug Conjugate': 'fas fa-flask',
-        # Bispecific
-        'Bispecific Antibody': 'fas fa-project-diagram',
-        'Bispecific': 'fas fa-project-diagram',
-        # Vaccine
-        'Vaccine': 'fas fa-shield-virus',
-        # Default
+        'Antibody': 'fas fa-syringe',
+        'Digital': 'fas fa-microchip',
+        'Gene therapy': 'fas fa-dna',
+        'Live Bacteria': 'fas fa-bacterium',
+        'Oncolytic virus': 'fas fa-virus',
+        'Unknown': 'fas fa-question-circle',
+        'Peptide': 'fas fa-link',
+        'PROTAC': 'fas fa-atom',
+        'Protein': 'fas fa-project-diagram',
+        'Small molecule': 'fas fa-pills',
+        'Viral vaccine': 'fas fa-shield-virus',
         'Default': 'fas fa-capsules'
     }
 
