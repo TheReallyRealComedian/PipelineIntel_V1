@@ -17,7 +17,7 @@
         <div class="card-body">
             {% if items %}
                 {{ render_column_selector(all_fields, selected_fields, entity_type, table_id) }}
-                {{ render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural) }}
+                {{ render_dynamic_table(items, selected_fields, entity_type, table_id, entity_plural, pk_field='id') }}
             {% else %}
                 <p class="text-muted text-center p-4">
                     <em>No drug substances found. Import data via the <a href="{{ url_for('data_management.data_management_page') }}">Data Management</a> page.</em>
