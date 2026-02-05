@@ -208,7 +208,9 @@
                 sidebar.classList.remove('sidebar-collapsed');
             }
             // Save state to localStorage
-            localStorage.setItem(sidebarStateKey, isCollapsed ? 'true' : 'false');
+            try {
+                localStorage.setItem(sidebarStateKey, isCollapsed ? 'true' : 'false');
+            } catch (e) { /* Storage access blocked */ }
         };
 
         // Event listener for the toggle button
@@ -218,10 +220,12 @@
         });
 
         // Check localStorage on page load
-        const savedState = localStorage.getItem(sidebarStateKey);
-        if (savedState === 'true') {
-            setSidebarState(true);
-        }
+        try {
+            const savedState = localStorage.getItem(sidebarStateKey);
+            if (savedState === 'true') {
+                setSidebarState(true);
+            }
+        } catch (e) { /* Storage access blocked */ }
     }
 
     // --- Global Initializer ---
@@ -269,7 +273,9 @@
                 .map(cb => cb.value)
                 .join(',');
 
-            localStorage.setItem(`table_columns_${tableId}`, selectedColumns);
+            try {
+                localStorage.setItem(`table_columns_${tableId}`, selectedColumns);
+            } catch (e) { /* Storage access blocked */ }
 
             const url = new URL(window.location.href);
             url.searchParams.set('columns', selectedColumns);
@@ -278,12 +284,14 @@
 
         const currentUrlParams = new URLSearchParams(window.location.search);
         if (!currentUrlParams.has('columns')) {
-            const savedColumns = localStorage.getItem(`table_columns_${tableId}`);
-            if (savedColumns) {
-                const url = new URL(window.location.href);
-                url.searchParams.set('columns', savedColumns);
-                window.location.replace(url.toString());
-            }
+            try {
+                const savedColumns = localStorage.getItem(`table_columns_${tableId}`);
+                if (savedColumns) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('columns', savedColumns);
+                    window.location.replace(url.toString());
+                }
+            } catch (e) { /* Storage access blocked */ }
         }
     };
     

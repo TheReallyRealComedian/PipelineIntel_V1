@@ -2,8 +2,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- Modality selection ---
     function updateModalityCount() {
+        const modalityCountEl = document.getElementById('modalityCount');
+        if (!modalityCountEl) return; // Only run on pages with this element
         const count = document.querySelectorAll('.modality-checkbox:checked').length;
-        document.getElementById('modalityCount').textContent = `${count} selected`;
+        modalityCountEl.textContent = `${count} selected`;
     }
 
     document.querySelectorAll('.modality-checkbox').forEach(cb => {
