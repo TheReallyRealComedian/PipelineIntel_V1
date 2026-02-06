@@ -1,0 +1,2309 @@
+[
+  {
+    "name": "LCM_Nerandomilast",
+    "indication": "IPF",
+    "project_type": "PMO",
+    "administration": "Oral",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 1015550"
+    ],
+    "drug_product_codes": [
+      "Nerandomilast"
+    ]
+  },
+  {
+    "name": "JASCAYD° (IPF)",
+    "indication": "IPF",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2017-03-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2025-01-01",
+    "rofd": "2022-05-01",
+    "submission": "2025-01-01",
+    "launch": "2025-01-01",
+    "drug_substance_codes": [
+      "BI 1015550"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "Nerandomilast (PPF)",
+    "indication": "PPF",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2022-05-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2025-01-01",
+    "rofd": "2022-05-01",
+    "submission": "2026-01-01",
+    "launch": "2026-01-01",
+    "drug_substance_codes": [
+      "BI 1015550"
+    ],
+    "drug_product_codes": [
+      "Nerandomilast"
+    ]
+  },
+  {
+    "name": "Nerandomilast",
+    "indication": "PED",
+    "project_type": "(IPF; PPF) PED",
+    "administration": "PF-ILD",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2026-07-01",
+    "dpmm4": "2029-01-01",
+    "rofd": "2020-02-01",
+    "submission": "2030-01-01",
+    "launch": "2030-01-01",
+    "drug_substance_codes": [
+      "BI 1015550"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "Nerandomilast (Myositis)",
+    "indication": "Myositis",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2025-07-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2030-01-01",
+    "rofd": "2026-03-01",
+    "submission": "2030-01-01",
+    "launch": "2030-01-01",
+    "drug_substance_codes": [
+      "BI 1015550"
+    ],
+    "drug_product_codes": [
+      "Nerandomilast"
+    ]
+  },
+  {
+    "name": "Nerandomilast (SSc)",
+    "indication": "SSc",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2023-07-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2031-01-01",
+    "rofd": "2025-11-01",
+    "submission": "2031-01-01",
+    "launch": "2031-01-01",
+    "drug_substance_codes": [
+      "BI 1015550"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "Jardiance® (CKD)",
+    "indication": "CKD",
+    "project_type": "PMO",
+    "administration": "Oral",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "Bl 10773"
+    ],
+    "drug_product_codes": [
+      "Empagliflozin"
+    ]
+  },
+  {
+    "name": "Jardiance (T2DM) PED",
+    "indication": "T2DM",
+    "project_type": "PMO",
+    "administration": "Oral",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "Bl 10773"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "Vicadrostat + empagliflozin (CKD)",
+    "indication": "CKD",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2016-07-01",
+    "dsmm3": "2026-01-01",
+    "dsmm4": "2026-01-01",
+    "dpmm3": "2024-12-01",
+    "dpmm4": "2025-12-01",
+    "rofd": "2023-10-01",
+    "submission": "2028-01-01",
+    "launch": "2028-01-01",
+    "drug_substance_codes": [
+      "Bl 10773",
+      "Bl 690517"
+    ],
+    "drug_product_codes": [
+      "Vicadrostat; Empagliflozin"
+    ]
+  },
+  {
+    "name": "Vicadrostat + empagliflozin (HFpEF)",
+    "indication": "HFpEF",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2021-10-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2024-12-01",
+    "dpmm4": "2025-12-01",
+    "rofd": "2023-10-01",
+    "submission": "2029-01-01",
+    "launch": "2029-01-01",
+    "drug_substance_codes": [
+      "Bl 10773",
+      "Bl 690517"
+    ],
+    "drug_product_codes": [
+      "Vicadrostat; Empagliflozin"
+    ]
+  },
+  {
+    "name": "Empagliflozin (CKD) PED",
+    "indication": "CKD",
+    "project_type": "PED",
+    "administration": "Oral",
+    "sod": "2023-12-01",
+    "dsmm3": null,
+    "dsmm4": "2026-02-01",
+    "dpmm3": "2026-02-01",
+    "dpmm4": "2027-02-01",
+    "rofd": null,
+    "submission": "2030-01-01",
+    "launch": "2030-01-01",
+    "drug_substance_codes": [
+      "Bl 10773"
+    ],
+    "drug_product_codes": [
+      "Empagliflozin"
+    ]
+  },
+  {
+    "name": "Vicadrostat + empagliflozin (HFrEF)",
+    "indication": "HFrEF",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2024-06-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2029-01-01",
+    "rofd": "2024-06-01",
+    "submission": "2030-01-01",
+    "launch": "2030-01-01",
+    "drug_substance_codes": [
+      "Bl 10773",
+      "Bl 690517"
+    ],
+    "drug_product_codes": [
+      "Vicadrostat; Empagliflozin"
+    ]
+  },
+  {
+    "name": "Vicadrostat; empagliflozin (CVRR)",
+    "indication": "CVRR",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2025-04-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2030-01-01",
+    "rofd": "2025-04-01",
+    "submission": "2031-01-01",
+    "launch": "2031-01-01",
+    "drug_substance_codes": [
+      "Bl 10773",
+      "Bl 690517"
+    ],
+    "drug_product_codes": [
+      "Vicadrostat; Empagliflozin"
+    ]
+  },
+  {
+    "name": "Verducatib (BE)",
+    "indication": "BE",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2021-04-01",
+    "dsmm3": "2024-06-01",
+    "dsmm4": "2026-04-01",
+    "dpmm3": "2025-05-01",
+    "dpmm4": "2026-06-01",
+    "rofd": "2024-12-01",
+    "submission": "2028-01-01",
+    "launch": "2028-01-01",
+    "drug_substance_codes": [
+      "BI 1291583"
+    ],
+    "drug_product_codes": [
+      "Verducatib"
+    ]
+  },
+  {
+    "name": "Verducatib (NCFBE) PED",
+    "indication": "nCFB",
+    "project_type": "PED",
+    "administration": "Oral",
+    "sod": "2021-09-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2029-01-01",
+    "dpmm4": "2029-10-01",
+    "rofd": null,
+    "submission": "2031-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [
+      "BI 1291583"
+    ],
+    "drug_product_codes": [
+      "Verducatib"
+    ]
+  },
+  {
+    "name": "Linagliptin (T2DM) PED",
+    "indication": "T2DM",
+    "project_type": "PMO",
+    "administration": "Oral",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 1356"
+    ],
+    "drug_product_codes": [
+      "Linagliptin"
+    ]
+  },
+  {
+    "name": "BI 1356225 (Impulsivity SuD)",
+    "indication": "Impulsivity",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2023-11-01",
+    "dsmm3": "2029-11-01",
+    "dsmm4": "2030-10-01",
+    "dpmm3": "2030-06-01",
+    "dpmm4": "2031-09-01",
+    "rofd": "2030-08-01",
+    "submission": "2033-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [
+      "BI 1356225"
+    ],
+    "drug_product_codes": [
+      "BI 1356225"
+    ]
+  },
+  {
+    "name": "BI 1584862 (GA)",
+    "indication": "GA",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2020-09-01",
+    "dsmm3": "2028-10-01",
+    "dsmm4": "2029-10-01",
+    "dpmm3": "2029-06-01",
+    "dpmm4": "2029-06-01",
+    "rofd": "2020-09-01",
+    "submission": "2032-01-01",
+    "launch": "2033-01-01",
+    "drug_substance_codes": [
+      "BI 1584862"
+    ],
+    "drug_product_codes": [
+      "BI 1584862"
+    ]
+  },
+  {
+    "name": "BI 1703880 (1L sqNSCLC)",
+    "indication": "NSCLC",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2021-02-01",
+    "dsmm3": "2026-09-01",
+    "dsmm4": "2030-02-01",
+    "dpmm3": "2029-11-01",
+    "dpmm4": "2029-11-01",
+    "rofd": "2021-02-01",
+    "submission": "2032-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [
+      "BI 1703880"
+    ],
+    "drug_product_codes": [
+      "BI 1703880"
+    ]
+  },
+  {
+    "name": "LCM",
+    "indication": "PMO",
+    "project_type": "HERNEXEOS",
+    "administration": "2L NSCLC",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "Bl 1810631"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "HERNEXEOS",
+    "indication": "NME",
+    "project_type": "(2L NSCLC)",
+    "administration": "2L NSCLC",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2020-03-01",
+    "submission": "2024-01-01",
+    "launch": "2025-01-01",
+    "drug_substance_codes": [
+      "Bl 1810631"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "Zongertinib",
+    "indication": "NI",
+    "project_type": "(1L NSCLC)",
+    "administration": "1LNSCLC",
+    "sod": null,
+    "dsmm3": "2023-07-01",
+    "dsmm4": "2025-10-01",
+    "dpmm3": "2028-01-01",
+    "dpmm4": "2025-10-01",
+    "rofd": "2020-03-01",
+    "submission": "2025-01-01",
+    "launch": "2026-01-01",
+    "drug_substance_codes": [
+      "Bl 1810631"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "Zongertinib (1L CRC)",
+    "indication": "CRC",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2025-10-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2025-10-01",
+    "submission": "2030-01-01",
+    "launch": "2030-01-01",
+    "drug_substance_codes": [
+      "Bl 1810631"
+    ],
+    "drug_product_codes": [
+      "Zongertinib"
+    ]
+  },
+  {
+    "name": "BI 1815368 (DME)",
+    "indication": "CI-DME",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2024-08-01",
+    "dsmm3": "2028-06-01",
+    "dsmm4": "2029-05-01",
+    "dpmm3": "2028-12-01",
+    "dpmm4": "2028-12-01",
+    "rofd": "2024-08-01",
+    "submission": "2031-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [
+      "BI 1815368"
+    ],
+    "drug_product_codes": [
+      "BI 1815368"
+    ]
+  },
+  {
+    "name": "BI 1815368 (nAMDp)",
+    "indication": "nAMDp",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2020-09-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2020-09-01",
+    "submission": "2034-01-01",
+    "launch": "2035-01-01",
+    "drug_substance_codes": [
+      "BI 1815368"
+    ],
+    "drug_product_codes": [
+      "BI 1815368"
+    ]
+  },
+  {
+    "name": "BI 1819479 (IPF/PPF)",
+    "indication": "IPF/PPF",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2019-08-01",
+    "dsmm3": "2027-09-01",
+    "dsmm4": "2028-07-01",
+    "dpmm3": "2028-03-01",
+    "dpmm4": "2029-06-01",
+    "rofd": "2027-09-01",
+    "submission": "2030-01-01",
+    "launch": "2031-01-01",
+    "drug_substance_codes": [
+      "BI 1819479"
+    ],
+    "drug_product_codes": [
+      "Bl 1819479"
+    ]
+  },
+  {
+    "name": "BI 1819479 (SSc)",
+    "indication": "SSc",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2019-08-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2029-10-01",
+    "submission": "2033-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [
+      "BI 1819479"
+    ],
+    "drug_product_codes": [
+      "Bl 1819479"
+    ]
+  },
+  {
+    "name": "BI 1819479 (chILD) PED",
+    "indication": "PF-ILD incl IPF & Systemic Sclerosis",
+    "project_type": "PED",
+    "administration": "Oral",
+    "sod": "2022-02-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2028-06-01",
+    "dpmm4": "2028-06-01",
+    "rofd": "2022-02-01",
+    "submission": "2035-01-01",
+    "launch": "2036-01-01",
+    "drug_substance_codes": [
+      "BI 1819479"
+    ],
+    "drug_product_codes": [
+      "Bl 1819479"
+    ]
+  },
+  {
+    "name": "BI 1831169 (PDAC; HNSCC; Melanoma)",
+    "indication": "HNSCC; Melanoma",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2018-09-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2021-03-01",
+    "dpmm4": "2021-03-01",
+    "rofd": "2018-09-01",
+    "submission": "2033-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [
+      "BI 1831169"
+    ],
+    "drug_product_codes": [
+      "Bl 1831169"
+    ]
+  },
+  {
+    "name": "BI 3000202 (IFN)",
+    "indication": "Interferonopathy",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2023-03-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2028-03-01",
+    "dpmm4": "2029-06-01",
+    "rofd": "2023-03-01",
+    "submission": "2031-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [
+      "BI 3000202"
+    ],
+    "drug_product_codes": [
+      "BI 3000202"
+    ]
+  },
+  {
+    "name": "BI 3000202 (dF4)",
+    "indication": "dF4",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2025-05-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2025-05-01",
+    "submission": "2033-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [
+      "BI 3000202"
+    ],
+    "drug_product_codes": [
+      "BI 3000202"
+    ]
+  },
+  {
+    "name": "BI 3000202 (SSc)",
+    "indication": "SSc",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2021-12-01",
+    "dsmm3": "2028-08-01",
+    "dsmm4": "2029-08-01",
+    "dpmm3": "2029-04-01",
+    "dpmm4": "2029-04-01",
+    "rofd": "2021-12-01",
+    "submission": "2034-01-01",
+    "launch": "2035-01-01",
+    "drug_substance_codes": [
+      "BI 3000202"
+    ],
+    "drug_product_codes": [
+      "BI 3000202"
+    ]
+  },
+  {
+    "name": "BI 3009947 (IFN)",
+    "indication": "IFN",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 3009947"
+    ],
+    "drug_product_codes": [
+      "BI 3009947"
+    ]
+  },
+  {
+    "name": "BI 3009947 (SSc)",
+    "indication": "SSc",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2023-11-01",
+    "dsmm3": "2032-04-01",
+    "dsmm4": "2033-04-01",
+    "dpmm3": "2032-12-01",
+    "dpmm4": "2032-12-01",
+    "rofd": "2023-11-01",
+    "submission": "2036-01-01",
+    "launch": "2037-01-01",
+    "drug_substance_codes": [
+      "BI 3009947"
+    ],
+    "drug_product_codes": [
+      "BI 3009947"
+    ]
+  },
+  {
+    "name": "BI 3031185 (Obesity)",
+    "indication": "Obesity",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2024-12-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2024-12-01",
+    "submission": "2033-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [
+      "BI 3031185"
+    ],
+    "drug_product_codes": [
+      "Bl 3031185"
+    ]
+  },
+  {
+    "name": "BI 3031185 (Impulsivity)",
+    "indication": "Impulsivity in Psychiatric Disorders",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2022-07-01",
+    "dsmm3": "2029-12-01",
+    "dsmm4": "2030-11-01",
+    "dpmm3": "2030-07-01",
+    "dpmm4": "2030-07-01",
+    "rofd": "2022-07-01",
+    "submission": "2035-01-01",
+    "launch": "2036-01-01",
+    "drug_substance_codes": [
+      "BI 3031185"
+    ],
+    "drug_product_codes": [
+      "Bl 3031185"
+    ]
+  },
+  {
+    "name": "BI 3032950 (CD)",
+    "indication": "CD",
+    "project_type": "NME",
+    "administration": "Subcutaneous",
+    "sod": "2020-03-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2025-07-01",
+    "dpmm4": "2025-07-01",
+    "rofd": "2029-04-01",
+    "submission": "2033-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [
+      "BI 3032950"
+    ],
+    "drug_product_codes": [
+      "BI 3032950"
+    ]
+  },
+  {
+    "name": "BI 3034701 (Obesity)",
+    "indication": "Obesity",
+    "project_type": "NME",
+    "administration": "Subcutaneous",
+    "sod": "2021-12-01",
+    "dsmm3": "2027-03-01",
+    "dsmm4": "2028-05-01",
+    "dpmm3": "2028-04-01",
+    "dpmm4": "2029-01-01",
+    "rofd": "2028-03-01",
+    "submission": "2031-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [
+      "BI 3034701"
+    ],
+    "drug_product_codes": [
+      "BI 3034701"
+    ]
+  },
+  {
+    "name": "BI 3720931 (CF)",
+    "indication": "CF",
+    "project_type": "NME",
+    "administration": "Inhalation",
+    "sod": "2021-10-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2027-03-01",
+    "dpmm4": "2027-03-01",
+    "rofd": "2021-10-01",
+    "submission": "2033-01-01",
+    "launch": "2033-01-01",
+    "drug_substance_codes": [
+      "BI 3720931"
+    ],
+    "drug_product_codes": [
+      "Bl 3720931"
+    ]
+  },
+  {
+    "name": "BI 3776528 (CI PSD)",
+    "indication": "Cognitive impairment in PSD Oral",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2023-03-01",
+    "dsmm3": "2031-12-01",
+    "dsmm4": "2032-12-01",
+    "dpmm3": "2032-08-01",
+    "dpmm4": "2032-08-01",
+    "rofd": "2023-03-01",
+    "submission": "2035-01-01",
+    "launch": "2036-01-01",
+    "drug_substance_codes": [
+      "BI 3776528"
+    ],
+    "drug_product_codes": [
+      "BI 3776528"
+    ]
+  },
+  {
+    "name": "BI 3782253 (IPF/PPFr)",
+    "indication": "IPF; PPFr",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2024-10-01",
+    "dsmm3": "2032-08-01",
+    "dsmm4": "2033-09-01",
+    "dpmm3": "2033-05-01",
+    "dpmm4": "2033-05-01",
+    "rofd": "2024-10-01",
+    "submission": "2035-01-01",
+    "launch": "2036-01-01",
+    "drug_substance_codes": [
+      "BI 3782253"
+    ],
+    "drug_product_codes": [
+      "BI 3782253"
+    ]
+  },
+  {
+    "name": "BI 3794407 (SSc; IFN)",
+    "indication": "SSc; IFN",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2023-11-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 3794407"
+    ],
+    "drug_product_codes": [
+      "BI 3794407"
+    ]
+  },
+  {
+    "name": "BI 3797363 (SSc; IFN)",
+    "indication": "SSc; IFN",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2024-10-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 3797363"
+    ],
+    "drug_product_codes": [
+      "BI 3797363"
+    ]
+  },
+  {
+    "name": "BI 3798489 (Obesity)",
+    "indication": "Obesity",
+    "project_type": "NME",
+    "administration": "Subcutaneous",
+    "sod": "2023-11-01",
+    "dsmm3": "2029-07-01",
+    "dsmm4": "2030-06-01",
+    "dpmm3": "2030-01-01",
+    "dpmm4": "2032-10-01",
+    "rofd": "2030-10-01",
+    "submission": "2034-01-01",
+    "launch": "2035-01-01",
+    "drug_substance_codes": [
+      "BI 3798489"
+    ],
+    "drug_product_codes": [
+      "BI 3798489"
+    ]
+  },
+  {
+    "name": "BI 3802876 (MASH)",
+    "indication": "MASH",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2022-10-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2027-03-01",
+    "dpmm4": "2027-03-01",
+    "rofd": "2022-10-01",
+    "submission": "2036-01-01",
+    "launch": "2037-01-01",
+    "drug_substance_codes": [
+      "BI 3802876"
+    ],
+    "drug_product_codes": [
+      "BI 3802876"
+    ]
+  },
+  {
+    "name": "BI 3804379 (MASH)",
+    "indication": "MASH",
+    "project_type": "NME",
+    "administration": "Subcutaneous",
+    "sod": "2022-11-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2028-06-01",
+    "dpmm4": "2029-12-01",
+    "rofd": "2032-02-01",
+    "submission": "2036-01-01",
+    "launch": "2037-01-01",
+    "drug_substance_codes": [
+      "BI 3804379"
+    ],
+    "drug_product_codes": [
+      "BI 3804379"
+    ]
+  },
+  {
+    "name": "BI 3810477 (IPF/PPFr)",
+    "indication": "IPF; PPF",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2023-07-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2028-02-01",
+    "dpmm4": "2028-02-01",
+    "rofd": "2031-08-01",
+    "submission": "2033-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [
+      "Bl 3810477"
+    ],
+    "drug_product_codes": [
+      "Bl 3810477"
+    ]
+  },
+  {
+    "name": "BI 3810944 (Melanoma)",
+    "indication": "Melanoma",
+    "project_type": "NME",
+    "administration": "aIntravenous",
+    "sod": "2023-03-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2026-08-01",
+    "dpmm4": "2027-12-01",
+    "rofd": "2023-03-01",
+    "submission": "2033-01-01",
+    "launch": "2033-01-01",
+    "drug_substance_codes": [
+      "BI 3810944"
+    ],
+    "drug_product_codes": [
+      "BI 3810944"
+    ]
+  },
+  {
+    "name": "BI 3812465 (CI-DME)",
+    "indication": "CI-DME",
+    "project_type": "NME",
+    "administration": "Intravitreal",
+    "sod": "2024-08-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2025-10-01",
+    "dpmm4": "2026-03-01",
+    "rofd": "2024-08-01",
+    "submission": "2031-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [
+      "BI 3812465"
+    ],
+    "drug_product_codes": [
+      "BI 3812465"
+    ]
+  },
+  {
+    "name": "BI 3814916 (MASH)",
+    "indication": "MASH",
+    "project_type": "NME",
+    "administration": "Subcutaneous",
+    "sod": "2025-02-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2028-06-01",
+    "dpmm4": "2029-04-01",
+    "rofd": "2031-08-01",
+    "submission": "2033-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [
+      "BI 3814916"
+    ],
+    "drug_product_codes": [
+      "Bl 3814916"
+    ]
+  },
+  {
+    "name": "BI 3817491 (nAMD)",
+    "indication": "anti-VEGF/TNFa",
+    "project_type": "NME",
+    "administration": "Intravitreal",
+    "sod": "2025-11-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2029-03-01",
+    "dpmm4": "2030-09-01",
+    "rofd": "2032-06-01",
+    "submission": "2035-01-01",
+    "launch": "2036-01-01",
+    "drug_substance_codes": [
+      "Bl 3817491"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "BI 3819026 (Solid tumor)",
+    "indication": "Solid tumor Intravenous",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2024-11-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2030-05-01",
+    "dpmm4": "2030-05-01",
+    "rofd": "2024-11-01",
+    "submission": "2035-01-01",
+    "launch": "2035-01-01",
+    "drug_substance_codes": [
+      "Bl 3819026"
+    ],
+    "drug_product_codes": [
+      "BI 3819026"
+    ]
+  },
+  {
+    "name": "BI 3820768 (solid tumors)",
+    "indication": "solid tumors",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2024-12-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2027-09-01",
+    "dpmm4": "2029-03-01",
+    "rofd": "2024-12-01",
+    "submission": "2031-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [
+      "BI 3820768"
+    ],
+    "drug_product_codes": [
+      "BI 3820768"
+    ]
+  },
+  {
+    "name": "BI 3820923 (MASH)",
+    "indication": "MASH",
+    "project_type": "NME",
+    "administration": "Subcutaneous",
+    "sod": "2024-12-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2029-06-01",
+    "dpmm4": "2030-12-01",
+    "rofd": "2024-12-01",
+    "submission": "2038-01-01",
+    "launch": "2039-01-01",
+    "drug_substance_codes": [
+      "BI 3820923"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "BI 3821001 (IBD)",
+    "indication": "IBD",
+    "project_type": "NME",
+    "administration": "Subcutaneous",
+    "sod": "2024-12-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2026-10-01",
+    "dpmm4": "2028-04-01",
+    "rofd": "2024-12-01",
+    "submission": "2034-01-01",
+    "launch": "2035-01-01",
+    "drug_substance_codes": [
+      "Bl 3821001"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "BI 3822971 (NSCLC; HNSCC)",
+    "indication": "NSCLC; HNSCC",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2025-07-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2033-04-01",
+    "rofd": "2033-07-01",
+    "submission": "2037-01-01",
+    "launch": "2038-01-01",
+    "drug_substance_codes": [
+      "BI 3822971"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "BI 3823554 (EC; OC)",
+    "indication": "EC; OC",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 3823554"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "BI 3828540 (fsCD)",
+    "indication": "fsCD",
+    "project_type": "NME",
+    "administration": "Subcutaneous",
+    "sod": "2025-10-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2028-09-01",
+    "dpmm4": "2030-03-01",
+    "rofd": "2032-01-01",
+    "submission": "2034-01-01",
+    "launch": "2035-01-01",
+    "drug_substance_codes": [
+      "BI 3828540"
+    ],
+    "drug_product_codes": [
+      "BI 3828540"
+    ]
+  },
+  {
+    "name": "BI 3907074; BI 3907075; BI 3720590",
+    "indication": "PDAC",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2021-09-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2021-09-01",
+    "submission": "2034-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [
+      "BI 3907074",
+      "BI 3907075"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "(PDAC)",
+    "indication": null,
+    "project_type": null,
+    "administration": null,
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 3907074"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "BI 3923948 (TNBC)",
+    "indication": "TNBC",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2023-11-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2030-12-01",
+    "dpmm4": "2030-12-01",
+    "rofd": "2023-11-01",
+    "submission": "2033-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [
+      "BI 3923948"
+    ],
+    "drug_product_codes": [
+      "BI 3923948"
+    ]
+  },
+  {
+    "name": "BI 3935509 (Obesity)",
+    "indication": "Obesity",
+    "project_type": "NME",
+    "administration": "Subcutaneous",
+    "sod": "2025-07-01",
+    "dsmm3": "2032-10-01",
+    "dsmm4": "2033-10-01",
+    "dpmm3": "2033-06-01",
+    "dpmm4": "2033-06-01",
+    "rofd": "2025-07-01",
+    "submission": "2036-01-01",
+    "launch": "2037-01-01",
+    "drug_substance_codes": [
+      "BI 3935509"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "BI 3940749 (CRC; NSCLC; PDAC)",
+    "indication": "GC; EC; GEJC; PDAC",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2024-10-01",
+    "dsmm3": "2027-07-01",
+    "dsmm4": "2028-07-01",
+    "dpmm3": null,
+    "dpmm4": "2029-11-01",
+    "rofd": "2024-10-01",
+    "submission": "2031-01-01",
+    "launch": "2031-01-01",
+    "drug_substance_codes": [
+      "BI 3940749"
+    ],
+    "drug_product_codes": [
+      "BI 3940749"
+    ]
+  },
+  {
+    "name": "BI 3955569 (IBD)",
+    "indication": "IBD",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2025-10-01",
+    "dsmm3": "2031-09-01",
+    "dsmm4": "2032-09-01",
+    "dpmm3": "2032-04-01",
+    "dpmm4": "2033-07-01",
+    "rofd": "2032-06-01",
+    "submission": "2034-01-01",
+    "launch": "2035-01-01",
+    "drug_substance_codes": [
+      "BI 3955569"
+    ],
+    "drug_product_codes": [
+      "BI 3955569"
+    ]
+  },
+  {
+    "name": "BI 3968621 (RCC; NSCLC; HNSCC)",
+    "indication": "RCC; NSCLC; HNSCC Oral",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2025-07-01",
+    "dsmm3": "2031-02-01",
+    "dsmm4": "2032-02-01",
+    "dpmm3": "2035-01-01",
+    "dpmm4": "2030-02-01",
+    "rofd": "2025-07-01",
+    "submission": "2034-01-01",
+    "launch": "2035-01-01",
+    "drug_substance_codes": [
+      "BI 3968621"
+    ],
+    "drug_product_codes": [
+      "BI 3968621"
+    ]
+  },
+  {
+    "name": "BI 3972080 (XNS SCZ)",
+    "indication": "Schizophrenia",
+    "project_type": "DTx",
+    "administration": "N/A",
+    "sod": "2020-09-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2020-09-01",
+    "submission": "2025-01-01",
+    "launch": "2026-01-01",
+    "drug_substance_codes": [
+      "BI 39720080"
+    ],
+    "drug_product_codes": [
+      "BI 39720080 (CT-155)"
+    ]
+  },
+  {
+    "name": "BI 3986283 (nPDR)",
+    "indication": "nPDR",
+    "project_type": "NME",
+    "administration": "Intravitreal",
+    "sod": "2025-12-01",
+    "dsmm3": "2030-03-01",
+    "dsmm4": "2031-03-01",
+    "dpmm3": "2030-10-01",
+    "dpmm4": "2030-10-01",
+    "rofd": "2030-03-01",
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 3986283"
+    ],
+    "drug_product_codes": [
+      "BI 3986283"
+    ]
+  },
+  {
+    "name": "BI 4009032 (GC; NSCLC; OC)",
+    "indication": "GC; NSCLC; OC",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2025-09-01",
+    "dsmm3": "2028-12-01",
+    "dsmm4": "2029-12-01",
+    "dpmm3": "2026-10-01",
+    "dpmm4": "2027-10-01",
+    "rofd": "2025-09-01",
+    "submission": "2031-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [
+      "BI 4009032"
+    ],
+    "drug_product_codes": [
+      "BI 4009032"
+    ]
+  },
+  {
+    "name": "BI 4015092 (CRC)",
+    "indication": "CRC",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2025-10-01",
+    "dsmm3": "2029-05-01",
+    "dsmm4": "2030-07-01",
+    "dpmm3": "2029-12-01",
+    "dpmm4": "2029-12-01",
+    "rofd": "2025-10-01",
+    "submission": "2031-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [
+      "BI 4015092"
+    ],
+    "drug_product_codes": [
+      "BI 4015092"
+    ]
+  },
+  {
+    "name": "BI 4060107 (NSCLC)",
+    "indication": "NSCLC",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 4060107"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "LCM_Survodutide",
+    "indication": "Obesity",
+    "project_type": "PMO",
+    "administration": "Subcutaneous",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 456906"
+    ],
+    "drug_product_codes": [
+      "Survodutide"
+    ]
+  },
+  {
+    "name": "Survodutide",
+    "indication": "(LC)",
+    "project_type": "(Obesity)",
+    "administration": "PMO",
+    "sod": null,
+    "dsmm3": "2024-01-01",
+    "dsmm4": "2024-01-01",
+    "dpmm3": "2024-10-01",
+    "dpmm4": "2026-04-01",
+    "rofd": "2016-11-01",
+    "submission": "2027-01-01",
+    "launch": "2027-01-01",
+    "drug_substance_codes": [
+      "BI 456906"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "Survodutide (Obesity; MASH) PED",
+    "indication": "Obesity; MASH Subcutaneous",
+    "project_type": "PED",
+    "administration": "Subcutaneous",
+    "sod": "2019-07-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2032-01-01",
+    "rofd": "2024-09-01",
+    "submission": "2033-01-01",
+    "launch": "2033-01-01",
+    "drug_substance_codes": [
+      "BI 456906"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "Spesolimab (PG)",
+    "indication": "Pyoderma Gangrenosum",
+    "project_type": "NI",
+    "administration": "Intravenous",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 655130"
+    ],
+    "drug_product_codes": [
+      "Spesolimab"
+    ]
+  },
+  {
+    "name": "Spevigo® (GPP (acute flare))",
+    "indication": "GPP",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 655130"
+    ],
+    "drug_product_codes": [
+      "Spesolimab"
+    ]
+  },
+  {
+    "name": "Spesolimab (GPP flare prevention)",
+    "indication": "GPP",
+    "project_type": "NI",
+    "administration": "Subcutaneous",
+    "sod": "2016-03-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2016-03-01",
+    "submission": "2023-01-01",
+    "launch": "2024-01-01",
+    "drug_substance_codes": [
+      "BI 655130"
+    ],
+    "drug_product_codes": [
+      "Spesolimab"
+    ]
+  },
+  {
+    "name": "Vicadrostat; empagliflozin (CKD) PED",
+    "indication": "CKD",
+    "project_type": "PED",
+    "administration": "Oral",
+    "sod": "2019-10-01",
+    "dsmm3": null,
+    "dsmm4": "2029-01-01",
+    "dpmm3": "2029-01-01",
+    "dpmm4": "2029-01-01",
+    "rofd": null,
+    "submission": "2034-01-01",
+    "launch": "2035-01-01",
+    "drug_substance_codes": [
+      "Bl 690517"
+    ],
+    "drug_product_codes": [
+      "Vicadrostat"
+    ]
+  },
+  {
+    "name": "Cyltezo",
+    "indication": "RA; CD; Ps; PsA",
+    "project_type": "PMO",
+    "administration": "Subcutaneous",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 695501"
+    ],
+    "drug_product_codes": [
+      "Adalimumab"
+    ]
+  },
+  {
+    "name": "Cyltezo® HCLF",
+    "indication": "RA; Ps",
+    "project_type": "NF",
+    "administration": "Subcutaneous",
+    "sod": "2016-12-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": "2023-01-01",
+    "launch": "2024-01-01",
+    "drug_substance_codes": [
+      "BI 695501"
+    ],
+    "drug_product_codes": [
+      "Adalimumab"
+    ]
+  },
+  {
+    "name": "Ezabenlimab iv",
+    "indication": null,
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2016-07-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2018-02-01",
+    "dpmm4": "2018-02-01",
+    "rofd": "2029-10-01",
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BI 754091"
+    ],
+    "drug_product_codes": [
+      "Ezabenlimab"
+    ]
+  },
+  {
+    "name": "BI 764198 (FSGS)",
+    "indication": "FSGS",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2017-12-01",
+    "dsmm3": "2025-06-01",
+    "dsmm4": "2026-09-01",
+    "dpmm3": "2026-11-01",
+    "dpmm4": "2027-02-01",
+    "rofd": "2025-11-01",
+    "submission": "2030-01-01",
+    "launch": "2031-01-01",
+    "drug_substance_codes": [
+      "BI 764198"
+    ],
+    "drug_product_codes": [
+      "BI 764198"
+    ]
+  },
+  {
+    "name": "BI 764198",
+    "indication": "NI",
+    "project_type": "(DMD)",
+    "administration": "DMD",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2027-04-01",
+    "dpmm4": "2028-04-01",
+    "rofd": "2023-10-01",
+    "submission": "2032-01-01",
+    "launch": "2033-01-01",
+    "drug_substance_codes": [
+      "BI 764198"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "BI 764198 (FSGS) PED",
+    "indication": "FSGS",
+    "project_type": "PED",
+    "administration": "Oral",
+    "sod": "2022-05-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2035-01-01",
+    "rofd": "2022-05-01",
+    "submission": "2035-01-01",
+    "launch": "2035-01-01",
+    "drug_substance_codes": [
+      "BI 764198"
+    ],
+    "drug_product_codes": [
+      "BI 764198"
+    ]
+  },
+  {
+    "name": "BI 764524 (DR)",
+    "indication": "Diabetic Retinopathy",
+    "project_type": "NME",
+    "administration": "Intravitreal",
+    "sod": "2017-12-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2021-06-01",
+    "dpmm4": "2021-06-01",
+    "rofd": "2017-12-01",
+    "submission": "2030-01-01",
+    "launch": "2031-01-01",
+    "drug_substance_codes": [
+      "BI 764524"
+    ],
+    "drug_product_codes": [
+      "BI 764524"
+    ]
+  },
+  {
+    "name": "BI 764524",
+    "indication": "NI",
+    "project_type": "(CI-DME)",
+    "administration": "CI-DME",
+    "sod": null,
+    "dsmm3": "2029-05-01",
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2023-10-01",
+    "submission": "2031-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [
+      "BI 764524"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "Obrixtamig (2L epNEC)",
+    "indication": "2Lep-NEC",
+    "project_type": "NI",
+    "administration": "Intravenous",
+    "sod": "2023-11-01",
+    "dsmm3": null,
+    "dsmm4": "2020-11-01",
+    "dpmm3": "2023-10-01",
+    "dpmm4": "2027-01-01",
+    "rofd": "2024-12-01",
+    "submission": "2027-01-01",
+    "launch": "2027-01-01",
+    "drug_substance_codes": [
+      "BI 764532"
+    ],
+    "drug_product_codes": [
+      "Obrixtamig"
+    ]
+  },
+  {
+    "name": "Obrixtamig (1L epNEC)",
+    "indication": "1LepNEC",
+    "project_type": "NI",
+    "administration": "Intravenous",
+    "sod": "2023-03-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2029-01-01",
+    "rofd": "2025-11-01",
+    "submission": "2029-01-01",
+    "launch": "2029-01-01",
+    "drug_substance_codes": [
+      "BI 764532"
+    ],
+    "drug_product_codes": [
+      "Obrixtamig"
+    ]
+  },
+  {
+    "name": "Obrixtamig (1L SCLC)",
+    "indication": "1LSCLC",
+    "project_type": "NI",
+    "administration": "Intravenous",
+    "sod": "2023-03-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2029-01-01",
+    "rofd": "2025-07-01",
+    "submission": "2029-01-01",
+    "launch": "2029-01-01",
+    "drug_substance_codes": [
+      "BI 764532"
+    ],
+    "drug_product_codes": [
+      "Obrixtamig"
+    ]
+  },
+  {
+    "name": "BI 765049 (CRC)",
+    "indication": "3L CRC; 2L CRC",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2019-02-01",
+    "dsmm3": null,
+    "dsmm4": "2031-01-01",
+    "dpmm3": "2021-09-01",
+    "dpmm4": "2023-04-01",
+    "rofd": "2019-02-01",
+    "submission": "2031-01-01",
+    "launch": "2031-01-01",
+    "drug_substance_codes": [
+      "BI 765049"
+    ],
+    "drug_product_codes": [
+      "BI 765049"
+    ]
+  },
+  {
+    "name": "BI 765179 (HNSCC)",
+    "indication": "HNSCC",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2020-01-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2021-10-01",
+    "dpmm4": "2026-01-01",
+    "rofd": "2020-01-01",
+    "submission": "2031-01-01",
+    "launch": "2031-01-01",
+    "drug_substance_codes": [
+      "BI 765179"
+    ],
+    "drug_product_codes": [
+      "BI 765179"
+    ]
+  },
+  {
+    "name": "BI 765423 (IPF/PPFr)",
+    "indication": "IPF/PPF",
+    "project_type": "NME",
+    "administration": "Subcutaneous",
+    "sod": "2020-12-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2026-09-01",
+    "dpmm4": "2026-09-01",
+    "rofd": "2020-12-01",
+    "submission": "2033-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [
+      "BI 765423"
+    ],
+    "drug_product_codes": [
+      "BI 765423"
+    ]
+  },
+  {
+    "name": "BI 770371 (HNSCC)",
+    "indication": "HNSCC",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2021-04-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2022-08-01",
+    "dpmm4": "2022-08-01",
+    "rofd": "2021-04-01",
+    "submission": "2032-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [
+      "BI 770371"
+    ],
+    "drug_product_codes": [
+      "BI 770371"
+    ]
+  },
+  {
+    "name": "BI 770371 (MASH)",
+    "indication": "MASH",
+    "project_type": "NI",
+    "administration": "Intravenous",
+    "sod": "2023-07-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2023-07-01",
+    "submission": "2033-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [
+      "BI 770371"
+    ],
+    "drug_product_codes": [
+      "BI 770371"
+    ]
+  },
+  {
+    "name": "BI 771716 (GA)",
+    "indication": "GA",
+    "project_type": "NME",
+    "administration": "Intravitreal",
+    "sod": "2021-07-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": "2023-03-01",
+    "dpmm4": "2023-03-01",
+    "rofd": "2021-07-01",
+    "submission": "2029-01-01",
+    "launch": "2030-01-01",
+    "drug_substance_codes": [
+      "BI 771716"
+    ],
+    "drug_product_codes": [
+      "BI 771716"
+    ]
+  },
+  {
+    "name": "Nintedanib (PF-ILD) PED",
+    "indication": "PF-ILD",
+    "project_type": "PED",
+    "administration": "Oral",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [
+      "BIBF 1120"
+    ],
+    "drug_product_codes": [
+      "Nintedanib"
+    ]
+  },
+  {
+    "name": "BI 4018711 (FI SCZ)",
+    "indication": "SCZ",
+    "project_type": "DTx",
+    "administration": "N/A",
+    "sod": "2023-06-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2028-01-01",
+    "rofd": "2023-06-01",
+    "submission": "2028-01-01",
+    "launch": "2028-01-01",
+    "drug_substance_codes": [
+      "CT-156"
+    ],
+    "drug_product_codes": [
+      "CT-156"
+    ]
+  },
+  {
+    "name": "Survodutide 2nd Gen DS",
+    "indication": "n/a",
+    "project_type": "NME",
+    "administration": "N/A",
+    "sod": null,
+    "dsmm3": "2026-10-01",
+    "dsmm4": "2026-10-01",
+    "dpmm3": null,
+    "dpmm4": "2028-01-01",
+    "rofd": null,
+    "submission": "2028-01-01",
+    "launch": "2029-01-01",
+    "drug_substance_codes": [
+      "Survodutide 2nd Gen"
+    ],
+    "drug_product_codes": []
+  },
+  {
+    "name": "BI 4041979 (HNSCC; Melanoma)",
+    "indication": "HNSCC, Melanoma",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2023-11-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2027-12-01",
+    "submission": "2031-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [
+      "T3P-Y058-739"
+    ],
+    "drug_product_codes": [
+      "T3P-Y058-739"
+    ]
+  },
+  {
+    "name": "Tenecteplase (AIS) 25mg",
+    "indication": "AIS",
+    "project_type": "NF",
+    "administration": "Intravenous",
+    "sod": "2022-01-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": "2023-01-01",
+    "launch": "2024-01-01",
+    "drug_substance_codes": [
+      "Tenecteplase"
+    ],
+    "drug_product_codes": [
+      "Tenecteplase"
+    ]
+  },
+  {
+    "name": "Tenecteplase (AIS 4.5h)",
+    "indication": "AIS",
+    "project_type": "NI",
+    "administration": "Intravenous",
+    "sod": "2025-07-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": "2028-01-01",
+    "launch": "2029-01-01",
+    "drug_substance_codes": [
+      "Tenecteplase"
+    ],
+    "drug_product_codes": [
+      "Tenecteplase"
+    ]
+  },
+  {
+    "name": "Tenecteplase (AIS) 2nd gen. DS",
+    "indication": "AIS",
+    "project_type": "NF",
+    "administration": "Intravenous",
+    "sod": "2022-11-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": "2028-01-01",
+    "launch": "2029-01-01",
+    "drug_substance_codes": [
+      "Tenecteplase (2nd Gen.)"
+    ],
+    "drug_product_codes": [
+      "Tenecteplase (2nd Gen.)"
+    ]
+  },
+  {
+    "name": "BI 3907074; BI 3907075; BI 3720590 (PDAC)",
+    "indication": "PDAC",
+    "project_type": "NME",
+    "administration": "Intravenous",
+    "sod": "2021-09-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2029-10-01",
+    "submission": "2034-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "BI 3907074; BI 3907075; BI 3720590"
+    ]
+  },
+  {
+    "name": "BI 935509 (Obesity)",
+    "indication": "Obesity",
+    "project_type": "NME",
+    "administration": "Subcutaneous",
+    "sod": "2025-07-01",
+    "dsmm3": "2032-10-01",
+    "dsmm4": "2033-10-01",
+    "dpmm3": null,
+    "dpmm4": "2034-09-01",
+    "rofd": "2031-02-01",
+    "submission": "2036-01-01",
+    "launch": "2037-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "BI 3935509"
+    ]
+  },
+  {
+    "name": "BI 764198 (Podocytopathies)",
+    "indication": "Alport's syndrome",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2025-04-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2029-03-01",
+    "submission": "2034-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "BI 764198"
+    ]
+  },
+  {
+    "name": "BI 764198 (DMD)",
+    "indication": "DMD",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2023-10-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2028-04-01",
+    "rofd": "2028-12-01",
+    "submission": "2032-01-01",
+    "launch": "2033-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "BI 764198"
+    ]
+  },
+  {
+    "name": "BI 764198 (Sepsis)",
+    "indication": "Sepsis",
+    "project_type": "NF",
+    "administration": "Intravenous",
+    "sod": "2023-07-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2031-01-01",
+    "rofd": "2029-12-01",
+    "submission": "2032-01-01",
+    "launch": "2033-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "BI 764198"
+    ]
+  },
+  {
+    "name": "BI 764524 (CI-DME)",
+    "indication": "CI-DME",
+    "project_type": "NI",
+    "administration": "Intravitreal",
+    "sod": "2023-10-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2029-05-01",
+    "submission": "2031-01-01",
+    "launch": "2032-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "BI 764524"
+    ]
+  },
+  {
+    "name": "BI 764524 (iRVO)",
+    "indication": "iRVO",
+    "project_type": "NI",
+    "administration": "Intravitreal",
+    "sod": "2023-10-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2030-07-01",
+    "submission": "2033-01-01",
+    "launch": "2034-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "BI 764524"
+    ]
+  },
+  {
+    "name": "Jardiance® (T2DM) PED",
+    "indication": "T2DM",
+    "project_type": "PMO",
+    "administration": "Oral",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "Empagliflozin"
+    ]
+  },
+  {
+    "name": "JASCAYD (IPF)",
+    "indication": "IPF",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2017-03-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2022-05-01",
+    "submission": "2025-01-01",
+    "launch": "2025-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "Nerandomilast"
+    ]
+  },
+  {
+    "name": "Nerandomilast (IPF; PPF) PED",
+    "indication": "PF-ILD",
+    "project_type": "PED",
+    "administration": "Oral",
+    "sod": "2020-02-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2027-09-01",
+    "rofd": "2026-01-01",
+    "submission": "2029-01-01",
+    "launch": "2030-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "Nerandomilast"
+    ]
+  },
+  {
+    "name": "Survodutide (MASH cF4)",
+    "indication": "MASH",
+    "project_type": "NI",
+    "administration": "Subcutaneous",
+    "sod": "2019-04-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2024-02-01",
+    "submission": "2029-01-01",
+    "launch": "2030-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "Survodutide"
+    ]
+  },
+  {
+    "name": "Survodutide (MASH F2/F3)",
+    "indication": "MASH",
+    "project_type": "NI",
+    "administration": "Subcutaneous",
+    "sod": "2019-04-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2024-02-01",
+    "submission": "2027-01-01",
+    "launch": "2028-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "Survodutide"
+    ]
+  },
+  {
+    "name": "Survodutide (Obesity)",
+    "indication": "Obesity",
+    "project_type": "NME",
+    "administration": "Subcutaneous",
+    "sod": "2016-11-01",
+    "dsmm3": "2024-01-01",
+    "dsmm4": "2024-01-01",
+    "dpmm3": null,
+    "dpmm4": "2026-04-01",
+    "rofd": "2023-03-01",
+    "submission": "2026-01-01",
+    "launch": "2027-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "Survodutide"
+    ]
+  },
+  {
+    "name": "Survodutide (T2D)",
+    "indication": "T2D",
+    "project_type": "NI",
+    "administration": "Subcutaneous",
+    "sod": "2025-10-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": "2028-01-01",
+    "launch": "2029-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "Survodutide"
+    ]
+  },
+  {
+    "name": "Survodutide PEN (Obesity)",
+    "indication": "Obesity",
+    "project_type": "NF",
+    "administration": "Subcutaneous",
+    "sod": "2024-01-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": "2027-01-01",
+    "rofd": null,
+    "submission": null,
+    "launch": "2028-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "Survodutide"
+    ]
+  },
+  {
+    "name": "HERNEXEOS® (2L NSCLC)",
+    "indication": "2L NSCLC",
+    "project_type": "NME",
+    "administration": "Oral",
+    "sod": "2020-03-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2023-07-01",
+    "submission": "2024-01-01",
+    "launch": "2025-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "Zongertinib"
+    ]
+  },
+  {
+    "name": "LCM_HERNEXEOS®",
+    "indication": "2L NSCLC",
+    "project_type": "PMO",
+    "administration": "Oral",
+    "sod": null,
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": null,
+    "submission": null,
+    "launch": null,
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "Zongertinib"
+    ]
+  },
+  {
+    "name": "Zongertinib (1L NSCLC)",
+    "indication": "1L NSCLC",
+    "project_type": "NI",
+    "administration": "Oral",
+    "sod": "2020-03-01",
+    "dsmm3": null,
+    "dsmm4": null,
+    "dpmm3": null,
+    "dpmm4": null,
+    "rofd": "2023-07-01",
+    "submission": "2025-01-01",
+    "launch": "2026-01-01",
+    "drug_substance_codes": [],
+    "drug_product_codes": [
+      "Zongertinib"
+    ]
+  }
+]
